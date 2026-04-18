@@ -1,0 +1,10 @@
+@import './styles/design-tokens.css';
+
+/* Global resets and utility classes */
+a {
+  color: var(--tc-primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}

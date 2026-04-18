@@ -1,0 +1,99 @@
+.tc-auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 100px);
+  padding: var(--tc-spacing-5);
+  background: linear-gradient(135deg, var(--tc-primary-light) 0%, var(--tc-bg-default) 100%);
+}
+
+.tc-auth-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: var(--tc-radius-lg);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tc-auth-header {
+  text-align: center;
+  margin-bottom: var(--tc-spacing-5);
+}
+
+.tc-auth-header h2 {
+  color: var(--tc-primary);
+  margin-bottom: var(--tc-spacing-1);
+}
+
+.tc-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-4);
+}
+
+.tc-auth-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: calc(-1 * var(--tc-spacing-2));
+}
+
+.tc-auth-link {
+  color: var(--tc-primary);
+  text-decoration: none;
+  font-size: var(--tc-font-size-sm);
+  transition: color 0.2s ease;
+}
+
+.tc-auth-link:hover {
+  color: var(--tc-primary-hover);
+  text-decoration: underline;
+}
+
+.tc-auth-link--bold {
+  font-weight: 600;
+}
+
+.tc-auth-submit-btn {
+  width: 100%;
+  margin-top: var(--tc-spacing-2);
+}
+
+.tc-auth-footer {
+  text-align: center;
+  margin-top: var(--tc-spacing-5);
+  font-size: var(--tc-font-size-sm);
+  padding-top: var(--tc-spacing-4);
+  border-top: 1px solid var(--tc-border);
+}
+
+.tc-auth-row {
+  display: flex;
+  gap: var(--tc-spacing-3);
+}
+
+.tc-auth-row > * {
+  flex: 1;
+}
+
+.tc-auth-error {
+  background-color: var(--tc-danger-bg);
+  color: var(--tc-danger);
+  padding: var(--tc-spacing-3);
+  border-radius: var(--tc-radius-sm);
+  margin-bottom: var(--tc-spacing-4);
+  font-size: var(--tc-font-size-sm);
+  text-align: center;
+  border: 1px solid rgba(212, 17, 30, 0.2);
+}
+
+.tc-auth-success {
+  background-color: var(--tc-success-bg);
+  color: var(--tc-success);
+  padding: var(--tc-spacing-3);
+  border-radius: var(--tc-radius-sm);
+  margin-bottom: var(--tc-spacing-4);
+  font-size: var(--tc-font-size-sm);
+  text-align: center;
+  border: 1px solid rgba(40, 167, 69, 0.2);
+}

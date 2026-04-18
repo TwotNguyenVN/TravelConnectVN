@@ -1,0 +1,54 @@
+auth.users 1---1 public.users
+public.users n---n roles                via user_roles
+
+public.users 1---1 guide_profiles
+guide_profiles n---n languages          via guide_languages
+guide_profiles n---n skills             via guide_skills
+
+tour_categories 1---n tours
+guide_profiles 1---n tours
+tours 1---n tour_images
+tours 1---n tour_locations
+tours 1---n tour_requests
+public.users 1---n tour_requests
+
+tours 1---n tour_reviews
+tour_requests 1---1 tour_reviews
+public.users 1---n tour_reviews
+
+guide_profiles 1---n guide_reviews
+tour_requests 1---1 guide_reviews
+public.users 1---n guide_reviews
+
+public.users 1---n companion_posts
+companion_posts 1---n companion_requests
+public.users 1---n companion_requests
+
+public.users n---n tours                via favorite_tours
+public.users n---n guide_profiles       via favorite_guides
+
+public.users 1---n reports
+reports 1---n report_processing_history
+
+public.users 1---n user_activity_logs
+public.users 1---1 user_preferences
+public.users n---n tour_categories      via user_preferred_categories
+
+public.users 1---n notifications
+
+guide_profiles 1---n guide_verification_requests
+guide_verification_requests 1---n guide_verification_documents
+guide_profiles 1---n guide_availabilities
+
+conversations 1---n conversation_participants
+public.users 1---n conversation_participants
+conversations 1---n messages
+public.users 1---n messages
+
+public.users 1---n ai_chat_sessions
+ai_chat_sessions 1---n ai_chat_messages
+
+partner_accommodations n---n tours      via tour_accommodations
+
+tour_requests 1---n payment_transactions
+public.users 1---n payment_transactions
