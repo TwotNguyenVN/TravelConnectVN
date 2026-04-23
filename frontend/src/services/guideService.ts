@@ -9,6 +9,12 @@ export interface GuideProfile {
   verificationStatus: string;
   guideLanguages: { language: { id: number; name: string } }[];
   guideSkills: { skill: { id: number; name: string } }[];
+  otherLanguages?: string;
+  otherSkills?: string;
+  homeProvinceId?: number;
+  homeProvince?: { id: number; name: string; region: string };
+  familiarProvinces?: string;
+  region?: string;
 }
 
 export interface MasterData {
@@ -27,6 +33,10 @@ export const guideService = {
 
   getMyProfile: async () => {
     return api.get('/guides/me/profile');
+  },
+
+  getProvinces: async () => {
+    return api.get('/guides/provinces');
   },
 
   createProfile: async (data: any) => {

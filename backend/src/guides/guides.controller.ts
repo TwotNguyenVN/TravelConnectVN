@@ -49,6 +49,11 @@ export class GuidesController {
     return this.guidesService.getSkills();
   }
 
+  @Get('provinces')
+  async getProvinces() {
+    return this.guidesService.getProvinces();
+  }
+
   @Get(':id')
   async getGuideDetail(@Param('id') id: string) {
     return this.guidesService.getPublicGuideDetail(id);

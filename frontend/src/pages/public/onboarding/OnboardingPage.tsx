@@ -40,6 +40,8 @@ export const OnboardingPage: React.FC = () => {
     workingArea: '',
     yearsOfExperience: 0,
     bio: '',
+    otherLanguages: '',
+    otherSkills: '',
   });
   const [languages, setLanguages] = useState<MasterData[]>([]);
   const [skills, setSkills] = useState<MasterData[]>([]);
@@ -267,6 +269,16 @@ export const OnboardingPage: React.FC = () => {
             </div>
           ))}
         </div>
+        <div style={{ marginTop: '10px' }}>
+          <input 
+            type="text"
+            className="tc-input-field"
+            placeholder="Ngôn ngữ khác (cách nhau bằng dấu phẩy)..."
+            value={guideInfo.otherLanguages}
+            onChange={e => setGuideInfo({...guideInfo, otherLanguages: e.target.value})}
+            style={{ width: '100%', height: '40px', borderRadius: '8px', padding: '0 12px', fontSize: '13px' }}
+          />
+        </div>
       </div>
 
       <div className="tc-form-group" style={{ marginTop: '20px' }}>
@@ -290,6 +302,16 @@ export const OnboardingPage: React.FC = () => {
               {skill.name}
             </div>
           ))}
+        </div>
+        <div style={{ marginTop: '10px' }}>
+          <input 
+            type="text"
+            className="tc-input-field"
+            placeholder="Kỹ năng khác (cách nhau bằng dấu phẩy)..."
+            value={guideInfo.otherSkills}
+            onChange={e => setGuideInfo({...guideInfo, otherSkills: e.target.value})}
+            style={{ width: '100%', height: '40px', borderRadius: '8px', padding: '0 12px', fontSize: '13px' }}
+          />
         </div>
       </div>
     </div>

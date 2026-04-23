@@ -123,6 +123,7 @@ export class GuidesService {
             skills: true,
           },
         },
+        home_province: true,
       },
     });
 
@@ -140,6 +141,8 @@ export class GuidesService {
       verificationStatus: guide.verification_status,
       visibilityStatus: guide.visibility_status,
       isAcceptingTours: guide.is_accepting_tours,
+      otherLanguages: guide.other_languages || '',
+      otherSkills: guide.other_skills || '',
       guideLanguages: guide.guide_languages.map((gl) => ({
         language: {
           id: Number(gl.languages.id),
@@ -152,6 +155,14 @@ export class GuidesService {
           name: gs.skills.name,
         },
       })),
+      homeProvinceId: guide.home_province_id ? Number(guide.home_province_id) : null,
+      homeProvince: guide.home_province ? {
+        id: Number(guide.home_province.id),
+        name: guide.home_province.name,
+        region: guide.home_province.region,
+      } : null,
+      familiarProvinces: guide.familiar_provinces || '',
+      region: guide.region || '',
     };
   }
 
@@ -176,6 +187,11 @@ export class GuidesService {
         avatar_url: data.avatarUrl,
         visibility_status: data.visibilityStatus || 'visible',
         is_accepting_tours: data.isAcceptingTours ?? true,
+        other_languages: data.otherLanguages,
+        other_skills: data.otherSkills,
+        home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
+        familiar_provinces: data.familiarProvinces,
+        region: data.region,
       },
     });
   }
@@ -201,6 +217,11 @@ export class GuidesService {
         avatar_url: data.avatarUrl,
         visibility_status: data.visibilityStatus,
         is_accepting_tours: data.isAcceptingTours,
+        other_languages: data.otherLanguages,
+        other_skills: data.otherSkills,
+        home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
+        familiar_provinces: data.familiarProvinces,
+        region: data.region,
       },
     });
   }
@@ -273,6 +294,19 @@ export class GuidesService {
     return skills.map((s) => ({ ...s, id: Number(s.id) }));
   }
 
+  /**
+   * Lấy danh sách tỉnh thành
+   */
+  async getProvinces() {
+    const provinces = await this.prisma.provinces.findMany({
+      orderBy: { id: 'asc' },
+    });
+    return provinces.map((p) => ({
+      ...p,
+      id: Number(p.id),
+    }));
+  }
+
   // Helpers
   private async getGuideAverageRating(guideId: string) {
     const aggregate = await this.prisma.guide_reviews.aggregate({
@@ -292,8 +326,14 @@ export class GuidesService {
       yearsOfExperience: g.years_of_experience || 0,
       rating: rating,
       verificationStatus: g.verification_status,
-      languages: g.guide_languages.map((gl: any) => gl.languages.name),
-      skills: g.guide_skills.map((gs: any) => gs.skills.name),
+      languages: [
+        ...g.guide_languages.map((gl: any) => gl.languages.name),
+        ...(g.other_languages ? g.other_languages.split(',').map((s: string) => s.trim()) : []),
+      ],
+      skills: [
+        ...g.guide_skills.map((gs: any) => gs.skills.name),
+        ...(g.other_skills ? g.other_skills.split(',').map((s: string) => s.trim()) : []),
+      ],
     };
   }
 

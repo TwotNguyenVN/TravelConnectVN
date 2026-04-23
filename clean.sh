@@ -1,3 +1,4 @@
+#./clean.sh
 #!/bin/bash
 
 echo "🚀 Bắt đầu dọn dẹp dự án TravelConnectVN..."

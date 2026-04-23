@@ -8,9 +8,12 @@ const GuideProfilePage: React.FC = () => {
     bio: '',
     yearsOfExperience: 0,
     workingArea: '',
+    otherLanguages: '',
+    otherSkills: '',
   });
   const [languages, setLanguages] = useState<MasterData[]>([]);
   const [skills, setSkills] = useState<MasterData[]>([]);
+  const [provinces, setProvinces] = useState<any[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<number[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<number[]>([]);
   
@@ -29,14 +32,16 @@ const GuideProfilePage: React.FC = () => {
       setLoading(true);
       setError(null);
       
-      const [langsRes, skillsRes, profileRes] = await Promise.all([
+      const [langsRes, skillsRes, provincesRes, profileRes] = await Promise.all([
         guideService.getLanguages(),
         guideService.getSkills(),
+        guideService.getProvinces(),
         guideService.getMyProfile(),
       ]);
 
       if (langsRes.success) setLanguages(langsRes.data);
       if (skillsRes.success) setSkills(skillsRes.data);
+      if (provincesRes.success) setProvinces(provincesRes.data);
       
       if (profileRes.success && profileRes.data) {
         setProfile(profileRes.data);
@@ -84,12 +89,22 @@ const GuideProfilePage: React.FC = () => {
           bio: profile.bio,
           yearsOfExperience: profile.yearsOfExperience,
           workingArea: profile.workingArea,
+          otherLanguages: profile.otherLanguages,
+          otherSkills: profile.otherSkills,
+          homeProvinceId: profile.homeProvinceId,
+          familiarProvinces: profile.familiarProvinces,
+          region: profile.region,
         });
       } else {
         profileUpdate = await guideService.updateProfile({
           bio: profile.bio,
           yearsOfExperience: profile.yearsOfExperience,
           workingArea: profile.workingArea,
+          otherLanguages: profile.otherLanguages,
+          otherSkills: profile.otherSkills,
+          homeProvinceId: profile.homeProvinceId,
+          familiarProvinces: profile.familiarProvinces,
+          region: profile.region,
         });
       }
 
@@ -142,15 +157,70 @@ const GuideProfilePage: React.FC = () => {
         <div className="form-section">
           <h3>Thông tin chung</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <Input
-              label="Khu vực hoạt động"
-              name="workingArea"
-              value={profile.workingArea}
-              onChange={handleProfileChange}
-              placeholder="Ví dụ: Hà Nội, Hội An, TP. Hồ Chí Minh..."
-              fullWidth
-              required
-            />
+            <div className="tc-input-container tc-input-container--full-width">
+              <label className="tc-input-label">Khu vực (Miền)</label>
+              <select
+                className="tc-input-field"
+                name="region"
+                value={profile.region || ''}
+                onChange={(e) => {
+                  const newRegion = e.target.value;
+                  setProfile(prev => ({ 
+                    ...prev, 
+                    region: newRegion,
+                    homeProvinceId: undefined, // Reset when region changes
+                    familiarProvinces: '' 
+                  }));
+                }}
+                style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-white)' }}
+                required
+              >
+                <option value="">Chọn miền</option>
+                <option value="Miền Bắc">Miền Bắc</option>
+                <option value="Miền Trung">Miền Trung</option>
+                <option value="Miền Nam">Miền Nam</option>
+              </select>
+            </div>
+
+            {profile.region && (
+              <div className="tc-input-container tc-input-container--full-width">
+                <label className="tc-input-label">Tỉnh thành hoạt động chính / Am hiểu nhất</label>
+                <select
+                  className="tc-input-field"
+                  name="homeProvinceId"
+                  value={profile.homeProvinceId || ''}
+                  onChange={(e) => {
+                    const id = parseInt(e.target.value);
+                    const prov = provinces.find(p => p.id === id);
+                    setProfile(prev => ({ 
+                      ...prev, 
+                      homeProvinceId: id,
+                      workingArea: prov ? prov.name : '' 
+                    }));
+                  }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-white)' }}
+                  required
+                >
+                  <option value="">Chọn tỉnh thành</option>
+                  {provinces.filter(p => p.region === profile.region).map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {profile.region && (
+              <Input
+                label="Các tỉnh thành lân cận am hiểu khác"
+                name="familiarProvinces"
+                value={profile.familiarProvinces || ''}
+                onChange={handleProfileChange}
+                placeholder="Ví dụ: Ninh Bình, Thanh Hóa..."
+                fullWidth
+                helperText={`Chỉ nhập các tỉnh thuộc ${profile.region}`}
+              />
+            )}
+
             <Input
               label="Số năm kinh nghiệm"
               name="yearsOfExperience"
@@ -161,6 +231,7 @@ const GuideProfilePage: React.FC = () => {
               required
               min={0}
             />
+            
             <div className="tc-input-container tc-input-container--full-width">
               <label className="tc-input-label">Giới thiệu bản thân</label>
               <textarea
@@ -189,11 +260,21 @@ const GuideProfilePage: React.FC = () => {
                 <input 
                   type="checkbox" 
                   checked={selectedLanguages.includes(lang.id)}
-                  onChange={() => {}} // Handled by div click
+                  readOnly
                 />
                 <span>{lang.name}</span>
               </div>
             ))}
+          </div>
+          <div style={{ marginTop: '15px' }}>
+            <Input
+              label="Ngôn ngữ khác"
+              name="otherLanguages"
+              value={profile.otherLanguages || ''}
+              onChange={handleProfileChange}
+              placeholder="Ví dụ: Tiếng Lào, Tiếng Khmer..."
+              fullWidth
+            />
           </div>
         </div>
 
@@ -209,11 +290,21 @@ const GuideProfilePage: React.FC = () => {
                 <input 
                   type="checkbox" 
                   checked={selectedSkills.includes(skill.id)}
-                  onChange={() => {}} // Handled by div click
+                  readOnly
                 />
                 <span>{skill.name}</span>
               </div>
             ))}
+          </div>
+          <div style={{ marginTop: '15px' }}>
+            <Input
+              label="Kỹ năng khác"
+              name="otherSkills"
+              value={profile.otherSkills || ''}
+              onChange={handleProfileChange}
+              placeholder="Ví dụ: Nhảy hiện đại, Quay phim flycam..."
+              fullWidth
+            />
           </div>
         </div>
 

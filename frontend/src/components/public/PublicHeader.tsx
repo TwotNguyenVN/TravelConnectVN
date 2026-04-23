@@ -10,11 +10,10 @@ import { useSocket } from '../../contexts/SocketContext';
 
 
 export const PublicHeader: React.FC = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, roles, signOut } = useAuth();
   const { socket } = useSocket();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
-
 
   useEffect(() => {
     if (user) {
@@ -46,9 +45,7 @@ export const PublicHeader: React.FC = () => {
     }
   }, [socket]);
 
-
   const handleLogout = async () => {
-
     await signOut();
     navigate('/login');
   };
@@ -56,6 +53,9 @@ export const PublicHeader: React.FC = () => {
   const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email || 'Người dùng';
   const displayAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url;
   const initial = displayName[0]?.toUpperCase() || 'N';
+
+  const isGuide = roles.includes('GUIDE');
+  const profileLink = isGuide ? '/guide' : '/user';
 
   return (
     <header style={{
@@ -89,7 +89,7 @@ export const PublicHeader: React.FC = () => {
         <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)', alignItems: 'center' }}>
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-3)' }}>
-              <Link to="/user" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-2)', color: 'inherit' }}>
+              <Link to={profileLink} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-2)', color: 'inherit' }}>
                 <div style={{
                   width: '32px',
                   height: '32px',

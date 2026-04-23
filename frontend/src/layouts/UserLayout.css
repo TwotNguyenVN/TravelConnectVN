@@ -1,0 +1,112 @@
+.user-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--tc-bg-subtle);
+}
+
+.user-sidebar {
+  width: 280px;
+  background-color: var(--tc-bg-default);
+  border-right: 1px solid var(--tc-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  padding: var(--tc-spacing-5) var(--tc-spacing-4);
+  z-index: 10;
+}
+
+.sidebar-logo {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tc-primary);
+  margin-bottom: var(--tc-spacing-6);
+  padding: 0 var(--tc-spacing-2);
+  display: flex;
+  align-items: center;
+  gap: var(--tc-spacing-2);
+}
+
+.nav-group {
+  margin-bottom: var(--tc-spacing-6);
+}
+
+.nav-group-title {
+  font-size: var(--tc-font-size-xs);
+  font-weight: 700;
+  color: var(--tc-text-disabled);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--tc-spacing-3);
+  padding: 0 var(--tc-spacing-2);
+}
+
+.nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-1);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--tc-spacing-3);
+  padding: var(--tc-spacing-3) var(--tc-spacing-4);
+  color: var(--tc-text-secondary);
+  text-decoration: none;
+  font-size: var(--tc-font-size-sm);
+  font-weight: 500;
+  border-radius: var(--tc-radius-md);
+  transition: all 0.2s ease;
+}
+
+.nav-item:hover {
+  background-color: var(--tc-bg-subtle);
+  color: var(--tc-primary);
+  text-decoration: none;
+}
+
+.nav-item.active {
+  background-color: var(--tc-primary-light);
+  color: var(--tc-primary);
+  font-weight: 600;
+}
+
+.nav-item-ai {
+  color: var(--tc-primary);
+  background-color: #f0f9ff;
+  border: 1px dashed #bae6fd;
+}
+
+.nav-item-ai:hover {
+  background-color: #e0f2fe;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: var(--tc-spacing-4);
+  border-top: 1px solid var(--tc-border);
+}
+
+.user-main {
+  flex: 1;
+  padding: var(--tc-spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.user-header {
+  margin-bottom: var(--tc-spacing-6);
+  padding-bottom: var(--tc-spacing-4);
+  border-bottom: 1px solid var(--tc-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.user-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+}
