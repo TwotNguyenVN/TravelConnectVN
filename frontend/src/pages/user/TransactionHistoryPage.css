@@ -1,0 +1,32 @@
+.transaction-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--tc-spacing-6);
+}
+
+.page-header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--tc-text-primary);
+  margin-bottom: var(--tc-spacing-2);
+}
+
+.page-header p {
+  color: var(--tc-text-secondary);
+}
+
+.text-mono {
+  font-family: monospace;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.amount {
+  font-weight: 600;
+  color: var(--tc-danger);
+}

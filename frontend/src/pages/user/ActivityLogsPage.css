@@ -1,0 +1,113 @@
+.activity-logs-page {
+  padding: var(--tc-spacing-6) 0;
+}
+
+.logs-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 var(--tc-spacing-4);
+}
+
+/* ── Filter Tabs ──────────────────────────────────────────── */
+.logs-filter-tabs button:hover {
+  border-color: var(--tc-primary) !important;
+  color: var(--tc-primary) !important;
+}
+
+/* ── Timeline ─────────────────────────────────────────────── */
+.logs-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Each row: icon-col + card */
+.log-item {
+  display: flex;
+  gap: var(--tc-spacing-4);
+  align-items: flex-start;
+}
+
+/* Left column: bubble + vertical line */
+.log-icon-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 44px;
+}
+
+.log-icon-bubble {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--tc-primary-light);
+  border: 2px solid var(--tc-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.log-connector {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background-color: var(--tc-border);
+  margin-top: 4px;
+}
+
+/* Hide connector on last item */
+.log-item:last-child .log-connector {
+  display: none;
+}
+
+/* Right column: card */
+.log-content {
+  flex: 1;
+  background-color: var(--tc-bg-default);
+  padding: var(--tc-spacing-3) var(--tc-spacing-4);
+  border-radius: var(--tc-radius-md);
+  border: 1px solid var(--tc-border);
+  box-shadow: var(--tc-shadow-sm);
+  margin-bottom: var(--tc-spacing-3);
+  transition: box-shadow 0.15s ease;
+}
+
+.log-content:hover {
+  box-shadow: var(--tc-shadow-md);
+}
+
+.log-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--tc-spacing-1);
+  gap: var(--tc-spacing-4);
+}
+
+.log-type {
+  font-weight: 600;
+  font-size: var(--tc-font-size-xs);
+  color: var(--tc-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.log-time {
+  font-size: var(--tc-font-size-xs);
+  color: var(--tc-text-disabled);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.log-description {
+  font-size: var(--tc-font-size-sm);
+  color: var(--tc-text-primary);
+  line-height: 1.5;
+}

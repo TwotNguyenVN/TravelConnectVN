@@ -9,7 +9,7 @@ export class HealthController {
   @Get()
   async check(): Promise<ApiResponse<any>> {
     const healthData = await this.healthService.checkHealth();
-    
+
     return {
       success: true,
       message: 'Service is healthy',

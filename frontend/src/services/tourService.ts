@@ -9,6 +9,11 @@ export interface Tour {
   location: string;
   duration?: string;
   category?: string;
+  startDate?: string;
+  endDate?: string;
+  businessStatus?: string;
+  visibilityStatus?: string;
+  province?: string;
 }
 
 export interface TourFilters {
@@ -24,37 +29,58 @@ export interface TourFilters {
 
 export const tourService = {
   getTours: async (filters: TourFilters) => {
-    const response = await api.get('/tours', { params: filters });
-    return response.data;
+    return api.get('/tours', { params: filters });
   },
 
   getTourReviews: async (id: string, page: number = 1, limit: number = 10) => {
-    const response = await api.get(`/tours/${id}/reviews`, { params: { page, limit } });
-    return response.data;
+    return api.get(`/tours/${id}/reviews`, { params: { page, limit } });
   },
 
   getTourDetail: async (id: string) => {
-    const response = await api.get(`/tours/${id}`);
-    return response.data;
+    return api.get(`/tours/${id}`);
   },
 
   getFeaturedTours: async () => {
-    const response = await api.get('/tours/home/featured-tours');
-    return response.data;
+    return api.get('/tours/home/featured-tours');
   },
 
   getFeaturedGuides: async () => {
-    const response = await api.get('/tours/home/featured-guides');
-    return response.data;
+    return api.get('/tours/home/featured-guides');
   },
 
   getLatestCompanions: async () => {
-    const response = await api.get('/tours/home/latest-companions');
-    return response.data;
+    return api.get('/tours/home/latest-companions');
   },
 
   getCategories: async () => {
-    const response = await api.get('/tours/categories');
-    return response.data;
+    return api.get('/tours/categories');
+  },
+  
+  getMyGuidedTours: async (params: { status?: string; keyword?: string; page?: number; limit?: number }) => {
+    return api.get('/tours/guide/me', { params });
+  },
+
+  createTour: async (data: any) => {
+    return api.post('/tours/guide/create', data);
+  },
+
+  updateTour: async (id: string, data: any) => {
+    return api.patch(`/tours/guide/${id}`, data);
+  },
+
+  getTourItinerary: async (id: string) => {
+    return api.get(`/tours/${id}/itinerary`);
+  },
+
+  updateTourItinerary: async (id: string, locations: any[]) => {
+    return api.post(`/tours/${id}/itinerary`, locations);
+  },
+
+  getTourImages: async (id: string) => {
+    return api.get(`/tours/${id}/images`);
+  },
+
+  updateTourImages: async (id: string, images: any[]) => {
+    return api.post(`/tours/${id}/images`, images);
   },
 };

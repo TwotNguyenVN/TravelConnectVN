@@ -5,9 +5,11 @@ import { supabase } from '../utils/supabase';
 interface AuthContextType {
   session: Session | null;
   user: User | null;
+  profile: any | null;
   roles: string[];
   isLoading: boolean;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -15,8 +17,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any | null>(null);
   const [roles, setRoles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle(); // Dùng maybeSingle để tránh lỗi nếu không tìm thấy
+        
+      if (error) {
+        console.warn('Profile fetch error (non-critical):', error.message);
+        return;
+      }
+      setProfile(data);
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+    }
+  };
 
   const fetchRoles = async (userId: string) => {
     try {
@@ -27,36 +48,52 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
       if (error) throw error;
       setRoles(data ? data.map(r => r.role_code) : []);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching roles:', err);
       setRoles([]);
     }
   };
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchRoles(session.user.id).finally(() => setIsLoading(false));
-      } else {
-        setRoles([]);
-        setIsLoading(false);
-      }
-    });
+  const refreshProfile = async () => {
+    if (user) {
+      await fetchProfile(user.id);
+    }
+  };
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        setIsLoading(true);
-        fetchRoles(session.user.id).finally(() => setIsLoading(false));
-      } else {
-        setRoles([]);
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setSession(session);
+          setUser(session.user);
+          // Gọi fetchRoles và fetchProfile nhưng không đợi (non-blocking) 
+          // để ứng dụng có thể hiển thị giao diện ngay
+          fetchRoles(session.user.id);
+          fetchProfile(session.user.id);
+        }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+      } finally {
         setIsLoading(false);
       }
+    };
+
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session) {
+        setSession(session);
+        setUser(session.user);
+        fetchRoles(session.user.id);
+        fetchProfile(session.user.id);
+      } else {
+        setSession(null);
+        setUser(null);
+        setProfile(null);
+        setRoles([]);
+      }
+      setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -67,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, roles, isLoading, signOut }}>
+    <AuthContext.Provider value={{ session, user, profile, roles, isLoading, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { GuideSidebar } from '../components/guide/GuideSidebar';
 import { GuideHeader } from '../components/guide/GuideHeader';

@@ -1,0 +1,148 @@
+.favorites-page {
+  padding-bottom: 60px;
+}
+
+.favorites-header {
+  margin-bottom: 32px;
+}
+
+.favorites-header h1 {
+  font-size: 2rem;
+  color: var(--tc-text-primary);
+  margin-bottom: 8px;
+}
+
+.favorites-header p {
+  color: var(--tc-text-secondary);
+}
+
+.favorites-tabs {
+  display: flex;
+  gap: 32px;
+  border-bottom: 1px solid var(--tc-border);
+  margin-bottom: 32px;
+}
+
+.favorites-tab {
+  padding: 12px 0;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--tc-text-secondary);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+
+.favorites-tab.active {
+  color: var(--tc-primary);
+}
+
+.favorites-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--tc-primary);
+}
+
+.favorites-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.favorite-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-card-image {
+  height: 180px;
+  width: 100%;
+  object-fit: cover;
+  border-radius: var(--tc-radius-lg) var(--tc-radius-lg) 0 0;
+}
+
+.favorite-card-content {
+  padding: 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.favorite-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tc-text-primary);
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.favorite-card-title:hover {
+  color: var(--tc-primary);
+}
+
+.favorite-card-meta {
+  font-size: 0.875rem;
+  color: var(--tc-text-secondary);
+  margin-bottom: 12px;
+}
+
+.favorite-card-price {
+  font-weight: 700;
+  color: var(--tc-danger);
+  font-size: 1.125rem;
+  margin-top: auto;
+}
+
+.favorite-card-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.guide-favorite-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+
+.guide-favorite-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.guide-favorite-info {
+  flex: 1;
+}
+
+.guide-favorite-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tc-text-primary);
+  margin-bottom: 4px;
+  text-decoration: none;
+}
+
+.guide-favorite-location {
+  font-size: 0.875rem;
+  color: var(--tc-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .favorites-grid {
+    grid-template-columns: 1fr;
+  }
+}

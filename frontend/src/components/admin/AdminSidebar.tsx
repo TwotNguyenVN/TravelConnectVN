@@ -43,9 +43,10 @@ export const AdminSidebar: React.FC = () => {
         <NavLink to="/admin" end style={navLinkStyle}>Dashboard</NavLink>
         <NavLink to="/admin/users" style={navLinkStyle}>Quản lý người dùng</NavLink>
         <NavLink to="/admin/tours" style={navLinkStyle}>Quản trị Tour</NavLink>
-        <NavLink to="/admin/guides" style={navLinkStyle}>Quản lý HDV</NavLink>
+        <NavLink to="/admin/guides" style={navLinkStyle}>Xác minh HDV</NavLink>
         <NavLink to="/admin/companion-posts" style={navLinkStyle}>Bài đồng hành</NavLink>
         <NavLink to="/admin/reports" style={navLinkStyle}>Xử lý báo cáo</NavLink>
+        <NavLink to="/admin/activity-logs" style={navLinkStyle}>Nhật ký hoạt động</NavLink>
         <NavLink to="/admin/statistics" style={navLinkStyle}>Thống kê</NavLink>
       </nav>
 

@@ -1,0 +1,19 @@
+.tc-loading-block {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-hover, #f5f5f5) 25%,
+    var(--color-border, #e0e0e0) 50%,
+    var(--color-surface-hover, #f5f5f5) 75%
+  );
+  background-size: 200% 100%;
+  animation: tc-skeleton-loading 1.5s infinite linear;
+}
+
+@keyframes tc-skeleton-loading {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}

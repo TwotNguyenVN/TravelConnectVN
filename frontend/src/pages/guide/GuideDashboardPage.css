@@ -1,0 +1,138 @@
+.guide-dashboard {
+  padding: 32px 0;
+}
+
+.guide-welcome-banner {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #3b82f6 100%);
+  border-radius: 24px;
+  padding: 40px;
+  color: white;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 10px 25px rgba(10, 106, 218, 0.2);
+}
+
+.guide-welcome-text h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.guide-welcome-text p {
+  font-size: 1.125rem;
+  opacity: 0.9;
+}
+
+.guide-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.guide-stat-card {
+  text-align: center;
+  padding: 24px;
+}
+
+.guide-stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  margin-bottom: 4px;
+}
+
+.guide-stat-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.guide-dashboard-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+.guide-dashboard-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.guide-quick-links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.guide-quick-link-card {
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.guide-quick-link-card:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+}
+
+.guide-quick-link-icon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-bg-soft);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  color: var(--color-primary);
+  font-size: 1.5rem;
+}
+
+.guide-profile-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.guide-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.guide-summary-item:last-child {
+  border-bottom: none;
+}
+
+.guide-summary-label {
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.guide-summary-value {
+  font-weight: 600;
+}
+
+@media (max-width: 992px) {
+  .guide-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .guide-welcome-banner {
+    flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+}

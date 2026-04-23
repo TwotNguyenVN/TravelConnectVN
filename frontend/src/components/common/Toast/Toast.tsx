@@ -1,0 +1,37 @@
+import React, { useEffect } from 'react';
+import './Toast.css';
+
+export type ToastType = 'success' | 'error' | 'info' | 'warning';
+
+interface ToastProps {
+  id: string;
+  message: string;
+  type: ToastType;
+  onClose: (id: string) => void;
+}
+
+export const Toast: React.FC<ToastProps> = ({ id, message, type, onClose }) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onClose(id);
+    }, 4000);
+    return () => clearTimeout(timer);
+  }, [id, onClose]);
+
+  const getIcon = () => {
+    switch (type) {
+      case 'success': return '✓';
+      case 'error': return '✕';
+      case 'warning': return '⚠';
+      default: return 'ℹ';
+    }
+  };
+
+  return (
+    <div className={`toast toast-${type}`} onClick={() => onClose(id)}>
+      <div className="toast-icon">{getIcon()}</div>
+      <div className="toast-message">{message}</div>
+      <button className="toast-close">×</button>
+    </div>
+  );
+};

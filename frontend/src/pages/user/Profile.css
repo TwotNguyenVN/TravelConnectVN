@@ -26,6 +26,11 @@
   gap: var(--tc-spacing-6);
 }
 
+.tc-profile-avatar-container {
+  position: relative;
+  z-index: 10;
+}
+
 .tc-profile-avatar {
   width: 120px;
   height: 120px;
@@ -39,6 +44,57 @@
   font-size: 3rem;
   font-weight: 700;
   color: var(--tc-primary);
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tc-profile-avatar:hover .tc-avatar-overlay {
+  opacity: 1;
+}
+
+.tc-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tc-avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tc-avatar-icon {
+  font-size: 1.5rem;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.tc-avatar-uploading {
+  cursor: wait;
+}
+
+.tc-avatar-spinner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .tc-profile-title h2 {

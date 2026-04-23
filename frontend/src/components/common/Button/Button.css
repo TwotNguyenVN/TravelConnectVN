@@ -64,6 +64,17 @@
   background-color: #b00d17;
 }
 
+.tc-btn--link {
+  background-color: transparent;
+  color: var(--tc-primary);
+  padding: 0;
+  border-radius: 0;
+}
+.tc-btn--link:hover:not(.tc-btn--disabled) {
+  color: var(--tc-primary-hover);
+  text-decoration: underline;
+}
+
 /* States */
 .tc-btn--disabled {
   opacity: 0.6;
@@ -85,3 +96,8 @@
     transform: rotate(360deg);
   }
 }
+
+.tc-btn--full-width {
+  width: 100%;
+}
+

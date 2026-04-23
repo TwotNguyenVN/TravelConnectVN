@@ -1,0 +1,22 @@
+.tc-page-container {
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--spacing-md, 16px);
+  box-sizing: border-box;
+}
+
+.tc-page-container--small {
+  max-width: 600px;
+}
+
+.tc-page-container--medium {
+  max-width: 900px;
+}
+
+.tc-page-container--large {
+  max-width: 1200px;
+}
+
+.tc-page-container--full {
+  max-width: 100%;
+}

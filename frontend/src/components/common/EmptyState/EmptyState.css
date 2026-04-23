@@ -1,0 +1,36 @@
+.tc-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl, 48px);
+  text-align: center;
+  background-color: var(--color-surface, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  border: 1px dashed var(--color-border, #d1d1d1);
+}
+
+.tc-empty-state-icon {
+  font-size: 48px;
+  color: var(--color-text-tertiary, #9e9e9e);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.tc-empty-state-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text-primary, #1a1a1a);
+  margin-bottom: var(--spacing-sm, 8px);
+}
+
+.tc-empty-state-description {
+  font-size: 16px;
+  color: var(--color-text-secondary, #6a6a6a);
+  max-width: 400px;
+  margin-bottom: var(--spacing-lg, 24px);
+}
+
+.tc-empty-state-action {
+  display: flex;
+  gap: var(--spacing-sm, 8px);
+}

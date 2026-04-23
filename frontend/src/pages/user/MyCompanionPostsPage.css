@@ -1,0 +1,75 @@
+.my-companion-posts {
+  padding: 24px 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.header-info h1 {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.header-info p {
+  color: var(--text-secondary);
+}
+
+.table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.post-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.post-title-link {
+  font-weight: 700;
+  color: var(--primary-color);
+  cursor: pointer;
+}
+
+.post-title-link:hover {
+  text-decoration: underline;
+}
+
+.post-dest {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.date-cell {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.request-count {
+  display: flex;
+  align-items: center;
+}
+
+.action-btns {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-delete:hover {
+  color: var(--danger-color);
+  background: var(--danger-light);
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+}

@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 export const GuideSidebar: React.FC = () => {
@@ -44,6 +43,8 @@ export const GuideSidebar: React.FC = () => {
         <NavLink to="/guide/profile" style={navLinkStyle}>Hồ sơ hướng dẫn viên</NavLink>
         <NavLink to="/guide/tours" style={navLinkStyle}>Tour của tôi</NavLink>
         <NavLink to="/guide/tour-requests" style={navLinkStyle}>Yêu cầu tham gia</NavLink>
+        <NavLink to="/user/messages" style={navLinkStyle}>Tin nhắn</NavLink>
+        <NavLink to="/guide/verification" style={navLinkStyle}>Xác minh tài khoản</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

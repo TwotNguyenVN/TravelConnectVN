@@ -1,0 +1,36 @@
+.my-requests-container {
+  padding: var(--tc-spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--tc-spacing-8);
+}
+
+.page-title {
+  font-size: var(--tc-font-size-2xl);
+  font-weight: 700;
+  color: var(--tc-text-primary);
+  margin: 0 0 var(--tc-spacing-2) 0;
+}
+
+.page-subtitle {
+  color: var(--tc-text-secondary);
+  font-size: var(--tc-font-size-md);
+}
+
+.requests-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .my-requests-container {
+    padding: var(--tc-spacing-4);
+  }
+  
+  .page-title {
+    font-size: var(--tc-font-size-xl);
+  }
+}

@@ -3,27 +3,41 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button/Button';
 import { Card } from '../../components/common/Card/Card';
 import { tourService } from '../../services/tourService';
+import { getRecommendedTours } from '../../services/recommendationService';
 import type { Tour } from '../../services/tourService';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
   const [featuredTours, setFeaturedTours] = useState<Tour[]>([]);
   const [featuredGuides, setFeaturedGuides] = useState<any[]>([]);
   const [latestPosts, setLatestPosts] = useState<any[]>([]);
+  const [recommendedTours, setRecommendedTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [toursData, guidesData, postsData] = await Promise.all([
+        const [toursRes, guidesRes, postsRes] = await Promise.all([
           tourService.getFeaturedTours(),
           tourService.getFeaturedGuides(),
           tourService.getLatestCompanions(),
         ]);
-        setFeaturedTours(toursData);
-        setFeaturedGuides(guidesData);
-        setLatestPosts(postsData);
+        
+        if (toursRes.success) setFeaturedTours(toursRes.data || []);
+        if (guidesRes.success) setFeaturedGuides(guidesRes.data || []);
+        if (postsRes.success) setLatestPosts(postsRes.data || []);
+
+        if (user) {
+          try {
+            const recRes = await getRecommendedTours();
+            if (recRes.success) setRecommendedTours(recRes.data || []);
+          } catch (e) {
+            console.error('Failed to load recommendations', e);
+          }
+        }
       } catch (error) {
         console.error('Error fetching home data:', error);
       } finally {
@@ -75,8 +89,45 @@ export const HomePage: React.FC = () => {
           <input type="text" placeholder="Bạn muốn đi đâu?" style={{ flex: 1, minWidth: '200px', padding: 'var(--tc-spacing-2) var(--tc-spacing-3)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)' }} />
           <input type="date" style={{ padding: 'var(--tc-spacing-2) var(--tc-spacing-3)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)' }} />
           <Button variant="primary">Tìm kiếm Tour</Button>
+          <Button variant="outline" onClick={() => navigate('/user/ai-assistant')} style={{ border: '1px solid var(--tc-primary)', color: 'var(--tc-primary)' }}>
+            ✨ Hỏi trợ lý AI
+          </Button>
         </div>
       </section>
+
+      {/* Recommended Tours Section (M12) */}
+      {user && recommendedTours.length > 0 && (
+        <section style={{ padding: 'var(--tc-spacing-8) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto', backgroundColor: '#f0f9ff', borderRadius: 'var(--tc-radius-lg)', marginTop: 'var(--tc-spacing-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
+            <div>
+              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ✨ Gợi Ý Dành Riêng Cho Bạn
+              </h2>
+              <p style={{ color: 'var(--tc-text-secondary)' }}>Dựa trên sở thích và ngân sách của {profile?.full_name}</p>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: 'var(--tc-spacing-5)', overflowX: 'auto', paddingBottom: 'var(--tc-spacing-4)' }}>
+            {recommendedTours.map((tour: any) => (
+              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ minWidth: '300px', flex: '0 0 auto', overflow: 'hidden', padding: 0, border: '2px solid var(--tc-primary-light)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-md)', transition: 'transform 0.2s', cursor: 'pointer' }}>
+                <img src={tour.tour_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} alt={tour.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+                <div style={{ padding: 'var(--tc-spacing-4)' }}>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    {tour.match_reasons?.map((r: string, idx: number) => (
+                      <span key={idx} style={{ fontSize: '11px', background: 'var(--tc-primary)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>{r}</span>
+                    ))}
+                  </div>
+                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tour.title}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--tc-text-secondary)', fontSize: '13px' }}>📍 {tour.province}</span>
+                    <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold' }}>{Number(tour.price).toLocaleString()}đ</span>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Featured Tours Section */}
       <section style={{ padding: 'var(--tc-spacing-8) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto' }}>

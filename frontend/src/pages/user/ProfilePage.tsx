@@ -1,43 +1,41 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/common/Card/Card';
 import { Input } from '../../components/common/Input/Input';
 import { Button } from '../../components/common/Button/Button';
 import { supabase } from '../../utils/supabase';
+import { userService } from '../../services/userService';
 import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
     dateOfBirth: '',
     gender: '',
+    avatarUrl: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
-    // Load existing data from public.users
     const fetchProfile = async () => {
       if (!user) return;
       try {
-        const { data, error } = await supabase
-          .from('users')
-          .select('full_name, phone, date_of_birth, gender')
-          .eq('id', user.id)
-          .single();
-          
-        if (error) throw error;
-        
-        if (data) {
+        const response = await userService.getProfile();
+        if (response.success && response.data) {
+          const data = response.data;
           setFormData({
             fullName: data.full_name || '',
             phone: data.phone || '',
             dateOfBirth: data.date_of_birth || '',
             gender: data.gender || '',
+            avatarUrl: data.avatar_url || '',
           });
         }
       } catch (err: any) {
@@ -54,6 +52,41 @@ export const ProfilePage: React.FC = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Kích thước ảnh không được vượt quá 2MB.' });
+      return;
+    }
+
+    setIsUploading(true);
+    setMessage(null);
+
+    try {
+      const response = await userService.updateAvatar(file);
+      if (response.success && response.data) {
+        setFormData(prev => ({ ...prev, avatarUrl: response.data.avatarUrl }));
+        await refreshProfile();
+        setMessage({ type: 'success', text: 'Cập nhật ảnh đại diện thành công!' });
+      } else {
+        setMessage({ type: 'error', text: response.message || 'Lỗi khi cập nhật ảnh đại diện.' });
+      }
+    } catch (err: any) {
+      console.error('DEBUG - Avatar upload error details:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Lỗi khi tải ảnh lên.';
+      setMessage({ type: 'error', text: `Lỗi: ${errorMsg}` });
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -62,18 +95,8 @@ export const ProfilePage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({
-          full_name: formData.fullName,
-          phone: formData.phone,
-          date_of_birth: formData.dateOfBirth || null,
-          gender: formData.gender || null,
-        })
-        .eq('id', user.id);
-        
-      if (error) throw error;
-      
+      await userService.updateProfile(formData);
+      await refreshProfile();
       setMessage({ type: 'success', text: 'Cập nhật hồ sơ cá nhân thành công!' });
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Lỗi khi cập nhật hồ sơ.' });
@@ -130,8 +153,31 @@ export const ProfilePage: React.FC = () => {
       <div className="tc-profile-header">
         <div className="tc-profile-cover"></div>
         <div className="tc-profile-avatar-wrapper">
-          <div className="tc-profile-avatar">
-            {formData.fullName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
+          <div className="tc-profile-avatar-container">
+            <div 
+              className={`tc-profile-avatar ${isUploading ? 'tc-avatar-uploading' : ''}`}
+              onClick={handleAvatarClick}
+              title="Nhấn để đổi ảnh đại diện"
+            >
+              {formData.avatarUrl ? (
+                <img src={formData.avatarUrl} alt="Avatar" className="tc-avatar-img" />
+              ) : (
+                <span className="tc-avatar-placeholder">
+                  {formData.fullName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
+                </span>
+              )}
+              <div className="tc-avatar-overlay">
+                <span className="tc-avatar-icon">📷</span>
+              </div>
+              {isUploading && <div className="tc-avatar-spinner"></div>}
+            </div>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleAvatarChange} 
+              accept="image/*" 
+              style={{ display: 'none' }} 
+            />
           </div>
           <div className="tc-profile-title">
             <h2>{formData.fullName || 'Người dùng mới'}</h2>

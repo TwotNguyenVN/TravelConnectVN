@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../enums/role.enum';
@@ -12,7 +17,7 @@ export class RoleGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    
+
     // Nếu API không gắn decorator @Roles, mặc định cho pass (chỉ cần vượt qua AuthGuard nếu có)
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
@@ -27,9 +32,9 @@ export class RoleGuard implements CanActivate {
     }
 
     const hasRole = requiredRoles.some((role) => user.roles.includes(role));
-    
+
     if (!hasRole) {
-        throw new ForbiddenException('Access denied. Insufficient permissions.');
+      throw new ForbiddenException('Access denied. Insufficient permissions.');
     }
 
     return true;

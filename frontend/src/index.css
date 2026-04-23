@@ -1,4 +1,6 @@
 @import './styles/design-tokens.css';
+@import 'leaflet/dist/leaflet.css';
+
 
 /* Global resets and utility classes */
 a {

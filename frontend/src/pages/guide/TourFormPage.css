@@ -1,0 +1,112 @@
+.tc-tour-form {
+  padding: var(--tc-spacing-6);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.tc-tour-form__header {
+  margin-bottom: var(--tc-spacing-8);
+}
+
+.tc-tour-form__header h1 {
+  font-size: var(--tc-font-size-3xl);
+  font-weight: 700;
+  color: var(--tc-text-primary);
+  margin-bottom: var(--tc-spacing-2);
+}
+
+.tc-tour-form__container {
+  background: var(--tc-bg-default);
+  padding: var(--tc-spacing-8);
+  border-radius: var(--tc-radius-xl);
+  box-shadow: var(--tc-shadow-lg);
+  border: 1px solid var(--tc-border);
+}
+
+.tc-tour-form__section {
+  margin-bottom: var(--tc-spacing-8);
+}
+
+.tc-tour-form__section-title {
+  font-size: var(--tc-font-size-xl);
+  font-weight: 700;
+  color: var(--tc-primary);
+  margin-bottom: var(--tc-spacing-4);
+  padding-bottom: var(--tc-spacing-2);
+  border-bottom: 2px solid var(--tc-primary-light);
+}
+
+.tc-tour-form__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--tc-spacing-6);
+}
+
+.tc-tour-form__grid--full {
+  grid-template-columns: 1fr;
+}
+
+.tc-form-group {
+  margin-bottom: var(--tc-spacing-4);
+}
+
+.tc-form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: var(--tc-font-size-sm);
+  color: var(--tc-text-primary);
+  margin-bottom: var(--tc-spacing-2);
+}
+
+.tc-form-group label span {
+  color: var(--tc-danger);
+  margin-left: 2px;
+}
+
+.tc-form-input,
+.tc-form-select,
+.tc-form-textarea {
+  width: 100%;
+  padding: var(--tc-spacing-3) var(--tc-spacing-4);
+  border: 1px solid var(--tc-border);
+  border-radius: var(--tc-radius-md);
+  font-family: inherit;
+  font-size: var(--tc-font-size-md);
+  transition: all 0.2s;
+}
+
+.tc-form-input:focus,
+.tc-form-select:focus,
+.tc-form-textarea:focus {
+  outline: none;
+  border-color: var(--tc-primary);
+  box-shadow: 0 0 0 3px var(--tc-primary-light);
+}
+
+.tc-form-textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.tc-tour-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--tc-spacing-4);
+  margin-top: var(--tc-spacing-10);
+  padding-top: var(--tc-spacing-6);
+  border-top: 1px solid var(--tc-border);
+}
+
+.tc-tour-form__status-box {
+  background: var(--tc-bg-paper);
+  padding: var(--tc-spacing-4);
+  border-radius: var(--tc-radius-lg);
+  border: 1px solid var(--tc-border);
+  margin-bottom: var(--tc-spacing-6);
+}
+
+@media (max-width: 640px) {
+  .tc-tour-form__grid {
+    grid-template-columns: 1fr;
+  }
+}

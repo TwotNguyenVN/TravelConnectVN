@@ -4,39 +4,67 @@ import { Card } from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
 import type { Tour } from '../../services/tourService';
+import { LoadingBlock, EmptyState } from '../../components/common';
 
 export const TourListPage: React.FC = () => {
   const navigate = useNavigate();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState({
+  const [error, setError] = useState<string | null>(null);
+  const [filters] = useState({
     page: 1,
     limit: 10,
     sortBy: 'newest',
   });
 
-  useEffect(() => {
-    const fetchTours = async () => {
-      try {
-        setLoading(true);
-        const response = await tourService.getTours(filters);
-        setTours(response.data);
-        setTotal(response.total);
-      } catch (error) {
-        console.error('Error fetching tours:', error);
-      } finally {
-        setLoading(false);
+  const fetchTours = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await tourService.getTours(filters);
+      if (response.success && response.data) {
+        // Tours are in response.data.data due to pagination structure
+        setTours(response.data.data || []);
+      } else {
+        setError('Không tìm thấy dữ liệu tour.');
       }
-    };
+    } catch (err) {
+      console.error('Error fetching tours:', err);
+      setError('Đã xảy ra lỗi khi tải danh sách tour. Vui lòng thử lại sau.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTours();
   }, [filters]);
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', color: 'var(--tc-primary)' }}>
-        Đang tải danh sách tour...
+      <div style={{ padding: 'var(--tc-spacing-6) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: 'var(--tc-spacing-8)' }}>
+          <LoadingBlock height={40} width="300px" />
+          <div style={{ marginTop: '10px' }}><LoadingBlock height={20} width="200px" /></div>
+        </div>
+        <div style={{ display: 'flex', gap: 'var(--tc-spacing-6)' }}>
+          <LoadingBlock width="280px" height={400} />
+          <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
+            {[1, 2, 3, 4, 5, 6].map(i => <LoadingBlock key={i} height={350} />)}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: 'var(--tc-spacing-10) 0' }}>
+        <EmptyState 
+          title="Có lỗi xảy ra" 
+          description={error}
+          action={<Button variant="primary" onClick={fetchTours}>Thử lại</Button>}
+        />
       </div>
     );
   }
@@ -101,25 +129,35 @@ export const TourListPage: React.FC = () => {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
-            {tours.map(tour => (
-              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
-                <img src={tour.cover} alt={tour.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
-                <div style={{ padding: 'var(--tc-spacing-4)', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                  <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-1)', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>📍 {tour.location}</span>
-                    <span>⏱ {tour.duration}</span>
+            {tours.length > 0 ? (
+              tours.map((tour: any) => (
+                <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
+                  <img src={tour.cover} alt={tour.title} style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+                  <div style={{ padding: 'var(--tc-spacing-4)', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                    <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-1)', display: 'flex', justifyContent: 'space-between' }}>
+                      <span>📍 {tour.location}</span>
+                      <span>⏱ {tour.duration}</span>
+                    </div>
+                    <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-3) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h3>
+                    <div style={{ display: 'flex', gap: 'var(--tc-spacing-2)', marginBottom: 'var(--tc-spacing-3)' }}>
+                      <span style={{ fontSize: 'var(--tc-font-size-xs)', backgroundColor: 'var(--tc-bg-subtle)', padding: 'var(--tc-spacing-1) var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-sm)', color: 'var(--tc-text-secondary)' }}>{tour.category}</span>
+                    </div>
+                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--tc-border)', paddingTop: 'var(--tc-spacing-3)' }}>
+                      <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating}</span>
+                      <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold', fontSize: 'var(--tc-font-size-lg)' }}>{tour.price.toLocaleString()}đ</span>
+                    </div>
                   </div>
-                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-3) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h3>
-                  <div style={{ display: 'flex', gap: 'var(--tc-spacing-2)', marginBottom: 'var(--tc-spacing-3)' }}>
-                    <span style={{ fontSize: 'var(--tc-font-size-xs)', backgroundColor: 'var(--tc-bg-subtle)', padding: 'var(--tc-spacing-1) var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-sm)', color: 'var(--tc-text-secondary)' }}>{tour.category}</span>
-                  </div>
-                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--tc-border)', paddingTop: 'var(--tc-spacing-3)' }}>
-                    <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating}</span>
-                    <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold', fontSize: 'var(--tc-font-size-lg)' }}>{tour.price.toLocaleString()}đ</span>
-                  </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))
+            ) : (
+              <div style={{ gridColumn: '1 / -1' }}>
+                <EmptyState 
+                  title="Không tìm thấy tour nào" 
+                  description="Hãy thử thay đổi bộ lọc hoặc tìm kiếm theo từ khóa khác nhé."
+                  action={<Button variant="primary" onClick={() => window.location.reload()}>Tải lại trang</Button>}
+                />
+              </div>
+            )}
           </div>
 
           {/* Pagination */}

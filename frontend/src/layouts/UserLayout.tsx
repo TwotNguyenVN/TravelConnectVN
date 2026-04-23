@@ -8,7 +8,15 @@ export function UserLayout() {
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Link to="/user">My Profile</Link>
           <Link to="/user/requests">My Requests</Link>
+          <Link to="/user/favorites">My Favorites</Link>
+          <Link to="/user/notifications">Notifications</Link>
+          <Link to="/user/activity-logs">Activity Logs</Link>
+          <Link to="/user/messages">Tin nhắn</Link>
+          <Link to="/user/ai-assistant" style={{ color: '#0284c7', fontWeight: 600 }}>✨ Trợ lý AI</Link>
+          <Link to="/user/payments">Lịch sử thanh toán</Link>
           <Link to="/">Back to Home</Link>
+
+
         </nav>
       </aside>
       <main style={{ flex: 1, padding: '2rem' }}>

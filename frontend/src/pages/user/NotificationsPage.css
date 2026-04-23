@@ -1,0 +1,125 @@
+.notifications-page {
+  padding: var(--tc-spacing-6) 0;
+  background-color: var(--tc-bg-subtle);
+  min-height: calc(100vh - 200px);
+}
+
+.notifications-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--tc-spacing-4);
+}
+
+.notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--tc-spacing-5);
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-3);
+}
+
+.notification-item {
+  display: flex;
+  gap: var(--tc-spacing-4);
+  padding: var(--tc-spacing-4);
+  background-color: var(--tc-bg-default);
+  border-radius: var(--tc-radius-lg);
+  border: 1px solid var(--tc-border);
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.notification-item:hover {
+  border-color: var(--tc-primary);
+  box-shadow: var(--tc-shadow-md);
+}
+
+.notification-item.unread {
+  background-color: var(--tc-primary-light);
+  border-left: 4px solid var(--tc-primary);
+}
+
+.notification-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-title {
+  font-weight: 600;
+  color: var(--tc-text-primary);
+  margin-bottom: var(--tc-spacing-1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-body {
+  font-size: var(--tc-font-size-sm);
+  color: var(--tc-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--tc-spacing-2);
+}
+
+.notification-time {
+  font-size: var(--tc-font-size-xs);
+  color: var(--tc-text-disabled);
+}
+
+.notification-actions {
+  display: flex;
+  gap: var(--tc-spacing-2);
+  margin-top: var(--tc-spacing-3);
+}
+
+.notification-badge {
+  padding: 2px 8px;
+  border-radius: var(--tc-radius-full);
+  font-size: 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.notification-delete-btn {
+  position: absolute;
+  top: var(--tc-spacing-2);
+  right: var(--tc-spacing-2);
+  background: none;
+  border: none;
+  color: var(--tc-text-disabled);
+  cursor: pointer;
+  padding: var(--tc-spacing-1);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.notification-item:hover .notification-delete-btn {
+  opacity: 1;
+}
+
+.notification-delete-btn:hover {
+  background-color: var(--tc-danger-bg);
+  color: var(--tc-danger);
+}
+
+.load-more-container {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--tc-spacing-6);
+}

@@ -1,20 +1,19 @@
 import React from 'react';
 import './Card.css';
 
-export interface CardProps {
+export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
   padding?: 'none' | 'small' | 'medium' | 'large';
   shadow?: 'small' | 'medium' | 'large';
-  onClick?: () => void;
 }
 
 export const Card: React.FC<CardProps> = ({
   children,
   className = '',
   padding = 'medium',
-  shadow = 'sm',
+  shadow = 'small',
   onClick,
+  ...props
 }) => {
   const baseClass = 'tc-card';
   const paddingClass = `${baseClass}--pad-${padding}`;
@@ -22,7 +21,11 @@ export const Card: React.FC<CardProps> = ({
   const clickableClass = onClick ? `${baseClass}--clickable` : '';
 
   return (
-    <div className={[baseClass, paddingClass, shadowClass, clickableClass, className].filter(Boolean).join(' ')} onClick={onClick}>
+    <div 
+      className={[baseClass, paddingClass, shadowClass, clickableClass, className].filter(Boolean).join(' ')} 
+      onClick={onClick}
+      {...props}
+    >
       {children}
     </div>
   );

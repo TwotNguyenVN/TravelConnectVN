@@ -6,7 +6,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["public", "auth"]
+  schemas  = ["auth", "public"]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -521,6 +521,10 @@ model admin_activity_logs {
   @@index([actor_user_id, created_at(sort: Desc)], map: "idx_admin_activity_logs_actor_created")
   @@index([entity_type, entity_pk, created_at(sort: Desc)], map: "idx_admin_activity_logs_entity")
   @@index([module_name, created_at(sort: Desc)], map: "idx_admin_activity_logs_module_created")
+  @@index([actor_user_id, module_name, created_at], map: "idx_admin_activity_logs_actor_module_created")
+  @@index([action_type], map: "idx_admin_logs_action_type")
+  @@index([actor_user_id], map: "idx_admin_logs_actor_user_id")
+  @@index([created_at(sort: Desc)], map: "idx_admin_logs_created_at")
   @@schema("public")
 }
 
@@ -583,6 +587,10 @@ model companion_posts {
   @@index([destination(ops: raw("gin_trgm_ops"))], map: "idx_companion_posts_destination_trgm", type: Gin)
   @@index([destination, start_date, estimated_cost, business_status, visibility_status], map: "idx_companion_posts_public_search")
   @@index([title(ops: raw("gin_trgm_ops"))], map: "idx_companion_posts_title_trgm", type: Gin)
+  @@index([start_date, end_date], map: "idx_companion_posts_dates")
+  @@index([business_status, visibility_status], map: "idx_companion_posts_status_visibility")
+  @@index([user_id], map: "idx_companion_posts_user_id")
+  @@index([visibility_status, destination, start_date], map: "idx_companion_posts_visibility_destination_start")
   @@schema("public")
 }
 
@@ -799,6 +807,7 @@ model guide_verification_requests {
   users                        public_users?                  @relation(fields: [processed_by_user_id], references: [id], onUpdate: NoAction)
 
   @@index([guide_profile_id, submitted_at(sort: Desc)], map: "idx_guide_verification_requests_guide")
+  @@index([status, submitted_at], map: "idx_guide_verification_requests_status_submitted")
   @@schema("public")
 }
 
@@ -949,6 +958,7 @@ model reports {
 
   @@index([assigned_to_user_id, status], map: "idx_reports_assigned_to")
   @@index([status, created_at(sort: Desc)], map: "idx_reports_status_created")
+  @@index([status, assigned_to_user_id, created_at], map: "idx_reports_status_assigned_created")
   @@schema("public")
 }
 
@@ -969,6 +979,7 @@ model roles {
 model skills {
   id           BigInt         @id @default(autoincrement())
   name         String         @unique
+  category     String?
   is_active    Boolean        @default(true)
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
   guide_skills guide_skills[]
@@ -1010,7 +1021,7 @@ model tour_categories {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model tour_images {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tour_id    String   @db.Uuid
+  tour_id    String   @unique(map: "uq_tour_cover_image", where: raw("(is_cover = true)")) @db.Uuid
   image_url  String
   caption    String?
   sort_order Int      @default(0)
@@ -1063,7 +1074,7 @@ model tour_requests {
   users_tour_requests_processed_by_user_idTousers public_users?          @relation("tour_requests_processed_by_user_idTousers", fields: [processed_by_user_id], references: [id], onUpdate: NoAction)
   tours                                           tours                  @relation(fields: [tour_id], references: [id], onUpdate: NoAction)
   users_tour_requests_user_idTousers              public_users           @relation("tour_requests_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction)
-  tour_reviews                                    tour_reviews?
+  tour_reviews                                    tour_reviews[]
 
   @@unique([tour_id, user_id], map: "uq_active_tour_request_per_user", where: raw("(status = ANY (ARRAY['pending'::text, 'approved'::text, 'payment_pending'::text, 'paid'::text]))"))
   @@index([tour_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_tour_status")
@@ -1135,6 +1146,8 @@ model tours {
   @@index([province(ops: raw("gin_trgm_ops"))], map: "idx_tours_province_trgm", type: Gin)
   @@index([province, start_date, price, business_status, visibility_status], map: "idx_tours_public_search")
   @@index([title(ops: raw("gin_trgm_ops"))], map: "idx_tours_title_trgm", type: Gin)
+  @@index([guide_profile_id], map: "idx_tours_guide_profile_id")
+  @@index([visibility_status, business_status, created_at], map: "idx_tours_visibility_business_created")
   @@schema("public")
 }
 
