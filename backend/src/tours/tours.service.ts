@@ -27,7 +27,10 @@ export class ToursService {
     }
 
     if (filter.categoryId) {
-      where.category_id = BigInt(filter.categoryId);
+      const categoryIds = filter.categoryId.split(',').filter(Boolean).map(id => BigInt(id.trim()));
+      if (categoryIds.length > 0) {
+        where.category_id = { in: categoryIds };
+      }
     }
 
     if (filter.minPrice || filter.maxPrice) {
@@ -296,6 +299,7 @@ export class ToursService {
       avatar: g.users?.avatar_url || '',
       coverUrl: g.cover_url || g.users?.avatar_url || '',
       location: g.working_area || 'Việt Nam',
+      yearsOfExperience: g.years_of_experience || 0,
       rating: 5.0,
     }));
   }
@@ -415,8 +419,8 @@ export class ToursService {
           start_date: data.startDate && !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null,
           end_date: data.endDate && !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null,
           duration: data.duration,
-          num_days: data.numDays ? Number(data.numDays) : null,
-          num_nights: data.numNights ? Number(data.numNights) : null,
+          num_days: (data.numDays !== undefined && data.numDays !== null) ? Number(data.numDays) : null,
+          num_nights: (data.numNights !== undefined && data.numNights !== null) ? Number(data.numNights) : null,
           price: data.price,
           max_participants: Number(data.maxParticipants),
           meet_point: data.meetPoint,
@@ -549,8 +553,8 @@ export class ToursService {
       if (data.startDate) updateData.start_date = !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null;
       if (data.endDate) updateData.end_date = !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null;
       if (data.duration !== undefined) updateData.duration = data.duration;
-      if (data.numDays !== undefined) updateData.num_days = data.numDays ? Number(data.numDays) : null;
-      if (data.numNights !== undefined) updateData.num_nights = data.numNights ? Number(data.numNights) : null;
+      if (data.numDays !== undefined) updateData.num_days = (data.numDays !== null) ? Number(data.numDays) : null;
+      if (data.numNights !== undefined) updateData.num_nights = (data.numNights !== null) ? Number(data.numNights) : null;
       if (data.price !== undefined) updateData.price = data.price;
       if (data.maxParticipants !== undefined) updateData.max_participants = Number(data.maxParticipants);
       if (data.meetPoint !== undefined) updateData.meet_point = data.meetPoint;
@@ -676,6 +680,13 @@ export class ToursService {
         tour_images: { orderBy: { sort_order: 'asc' } },
         tour_accommodations: { include: { partner_accommodations: true } },
         tour_categories: true,
+        _count: {
+          select: {
+            tour_requests: {
+              where: { status: 'paid' }
+            }
+          }
+        }
       },
     });
 

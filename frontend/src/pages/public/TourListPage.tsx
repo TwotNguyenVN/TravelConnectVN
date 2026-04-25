@@ -5,17 +5,108 @@ import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
 import type { Tour } from '../../services/tourService';
 import { LoadingBlock, EmptyState } from '../../components/common';
+import './TourListPage.css';
+
+const provinces = [
+  "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Cần Thơ", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hồ Chí Minh", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
+];
 
 export const TourListPage: React.FC = () => {
   const navigate = useNavigate();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [filters] = useState({
+  const [filters, setFilters] = useState({
     page: 1,
     limit: 10,
     sortBy: 'newest',
+    province: '',
+    categoryId: '',
+    minPrice: 0,
+    maxPrice: 10000000
   });
+
+  const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [locationSearch, setLocationSearch] = useState('');
+  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
+  const [sortBy, setSortBy] = useState('newest');
+
+  const filteredProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(locationSearch.toLowerCase())
+  );
+
+  const selectProvince = (p: string) => {
+    setLocationSearch(p);
+    setShowProvinceSuggestions(false);
+  };
+
+  const handleCategoryToggle = (id: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
+    );
+  };
+
+  const handleApplyFilters = () => {
+    setFilters({
+      ...filters,
+      province: locationSearch,
+      categoryId: selectedCategories.join(','),
+      minPrice,
+      maxPrice,
+      sortBy
+    });
+  };
+
+  const handleClearFilters = () => {
+    setLocationSearch('');
+    setSelectedCategories([]);
+    setMinPrice(0);
+    setMaxPrice(10000000);
+    setFilters({
+      page: 1,
+      limit: 10,
+      sortBy: sortBy,
+      province: '',
+      categoryId: '',
+      minPrice: 0,
+      maxPrice: 10000000
+    });
+  };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res: any = await tourService.getCategories();
+        if (res && res.data) {
+          setCategories(res.data);
+        }
+      } catch (err) {
+        console.error('Error fetching categories', err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+
+  // Price range state
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(10000000);
+  const minGap = 500000; // Minimum gap between min and max
+
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (maxPrice - value >= minGap) {
+      setMinPrice(value);
+    }
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (value - minPrice >= minGap) {
+      setMaxPrice(value);
+    }
+  };
 
   const fetchTours = async () => {
     try {
@@ -87,40 +178,108 @@ export const TourListPage: React.FC = () => {
           
           <div style={{ marginBottom: 'var(--tc-spacing-4)' }}>
             <h3 style={{ fontSize: 'var(--tc-font-size-sm)', marginBottom: 'var(--tc-spacing-2)' }}>Địa điểm</h3>
-            <select style={{ width: '100%', padding: 'var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)' }}>
-              <option value="">Tất cả địa điểm</option>
-              <option value="lam-dong">Lâm Đồng</option>
-              <option value="quang-ninh">Quảng Ninh</option>
-              <option value="kien-giang">Kiên Giang</option>
-            </select>
+            <div style={{ position: 'relative' }}>
+              <input 
+                type="text" 
+                placeholder="Tất cả địa điểm"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+                onFocus={() => setShowProvinceSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowProvinceSuggestions(false), 200)}
+                style={{ width: '100%', padding: 'var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)', outline: 'none' }}
+              />
+              {showProvinceSuggestions && filteredProvinces.length > 0 && (
+                <ul style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)', maxHeight: '200px', overflowY: 'auto', zIndex: 10, margin: '4px 0 0 0', padding: 0, listStyle: 'none', boxShadow: 'var(--tc-shadow-sm)' }}>
+                  {filteredProvinces.map(p => (
+                    <li 
+                      key={p} 
+                      onClick={() => selectProvince(p)}
+                      style={{ padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #f1f5f9' }}
+                      onMouseEnter={(e) => (e.target as HTMLLIElement).style.backgroundColor = '#f8fafc'}
+                      onMouseLeave={(e) => (e.target as HTMLLIElement).style.backgroundColor = 'transparent'}
+                    >
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
 
           <div style={{ marginBottom: 'var(--tc-spacing-4)' }}>
             <h3 style={{ fontSize: 'var(--tc-font-size-sm)', marginBottom: 'var(--tc-spacing-2)' }}>Loại Tour</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-1)' }}>
-              <label><input type="checkbox" /> Khám phá</label>
-              <label><input type="checkbox" /> Nghỉ dưỡng</label>
-              <label><input type="checkbox" /> Văn hóa</label>
-              <label><input type="checkbox" /> Thể thao mạo hiểm</label>
+              {categories.map(cat => (
+                <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={selectedCategories.includes(cat.id)}
+                    onChange={() => handleCategoryToggle(cat.id)}
+                  /> 
+                  {cat.name}
+                </label>
+              ))}
             </div>
           </div>
 
           <div style={{ marginBottom: 'var(--tc-spacing-5)' }}>
             <h3 style={{ fontSize: 'var(--tc-font-size-sm)', marginBottom: 'var(--tc-spacing-2)' }}>Khoảng giá</h3>
-            <input type="range" min="0" max="10000000" style={{ width: '100%' }} />
+            <div style={{ position: 'relative', height: '6px', marginBottom: 'var(--tc-spacing-4)' }}>
+              <div style={{ 
+                position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, 
+                backgroundColor: '#e2e8f0', borderRadius: '3px' 
+              }}></div>
+              <div style={{ 
+                position: 'absolute', top: 0, bottom: 0, 
+                backgroundColor: 'var(--tc-primary)', borderRadius: '3px',
+                left: `${(minPrice / 10000000) * 100}%`,
+                right: `${100 - (maxPrice / 10000000) * 100}%`
+              }}></div>
+              
+              <input 
+                type="range" 
+                min="0" 
+                max="10000000" 
+                step="100000"
+                value={minPrice} 
+                onChange={handleMinChange}
+                className="tc-range-slider"
+                style={{ zIndex: minPrice > 5000000 ? 5 : 3 }}
+              />
+              <input 
+                type="range" 
+                min="0" 
+                max="10000000" 
+                step="100000"
+                value={maxPrice} 
+                onChange={handleMaxChange}
+                className="tc-range-slider"
+                style={{ zIndex: 4 }}
+              />
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>
-              <span>0đ</span>
-              <span>10tr+</span>
+              <span>{minPrice === 0 ? '0đ' : `${(minPrice / 1000000).toFixed(1).replace('.0', '')}tr`}</span>
+              <span>{maxPrice >= 10000000 ? '10tr+' : `${(maxPrice / 1000000).toFixed(1).replace('.0', '')}tr`}</span>
             </div>
           </div>
 
-          <Button variant="primary" style={{ width: '100%' }}>Áp dụng bộ lọc</Button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-3)' }}>
+            <Button variant="primary" style={{ width: '100%' }} onClick={handleApplyFilters}>Áp dụng bộ lọc</Button>
+            <Button variant="outline" style={{ width: '100%' }} onClick={handleClearFilters}>Xóa bộ lọc</Button>
+          </div>
         </aside>
 
         {/* Main Content: List & Sort */}
         <main style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 'var(--tc-spacing-4)' }}>
-            <select style={{ padding: 'var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)' }}>
+            <select 
+              value={sortBy} 
+              onChange={(e) => {
+                setSortBy(e.target.value);
+                setFilters(prev => ({ ...prev, sortBy: e.target.value }));
+              }}
+              style={{ padding: 'var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)' }}
+            >
               <option value="newest">Mới nhất</option>
               <option value="price-asc">Giá: Thấp đến Cao</option>
               <option value="price-desc">Giá: Cao xuống Thấp</option>

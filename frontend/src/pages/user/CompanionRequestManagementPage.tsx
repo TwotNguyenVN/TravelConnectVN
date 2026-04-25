@@ -103,12 +103,14 @@ const CompanionRequestManagementPage: React.FC = () => {
 
       <div className="requests-list">
         {requests.length > 0 ? (
-          requests.map(req => (
+          requests.map(req => {
+            const user = req.users || req.users_companion_requests_user_idTousers;
+            return (
             <Card key={req.id} className={`request-card status-${req.status}`}>
               <div className="request-user">
-                <img src={req.users?.avatar_url || 'https://via.placeholder.com/50'} alt="Avatar" />
+                <img src={user?.avatar_url || 'https://via.placeholder.com/50'} alt="Avatar" />
                 <div className="user-info">
-                  <span className="user-name">{req.users?.full_name}</span>
+                  <span className="user-name">{user?.full_name}</span>
                   <span className="request-time">Gửi lúc {formatDate(req.requested_at)}</span>
                 </div>
               </div>
@@ -156,7 +158,7 @@ const CompanionRequestManagementPage: React.FC = () => {
                 )}
               </div>
             </Card>
-          ))
+          )})
         ) : (
           <Card className="empty-requests">
             <p>Chưa có yêu cầu nào cho bài đăng này.</p>
@@ -171,8 +173,8 @@ const CompanionRequestManagementPage: React.FC = () => {
       >
         <div className="process-form">
           <div className="user-preview">
-            <img src={selectedRequest?.users?.avatar_url || 'https://via.placeholder.com/40'} alt="" />
-            <span><strong>{selectedRequest?.users?.full_name}</strong></span>
+            <img src={(selectedRequest?.users || selectedRequest?.users_companion_requests_user_idTousers)?.avatar_url || 'https://via.placeholder.com/40'} alt="" />
+            <span><strong>{(selectedRequest?.users || selectedRequest?.users_companion_requests_user_idTousers)?.full_name}</strong></span>
           </div>
           
           <div className="input-group mb-4">

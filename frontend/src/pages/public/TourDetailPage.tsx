@@ -354,15 +354,28 @@ export const TourDetailPage: React.FC = () => {
               <div className="tc-review-list">
                 {tour.reviews?.length > 0 ? (
                   tour.reviews.map((review: any) => (
-                    <div key={review.id} className="tc-review-item">
-                      <div className="tc-review-header">
-                        <strong className="tc-review-author">{review.users?.full_name || 'Khách hàng'}</strong>
-                        <span className="tc-review-date">{formatDate(review.created_at)}</span>
+                    <div key={review.id} className="tc-review-item" style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #eee' }}>
+                      <div className="tc-review-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '12px' }}>
+                        <img 
+                          src={review.avatar || 'https://via.placeholder.com/40'} 
+                          alt="Avatar" 
+                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
+                        />
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <strong className="tc-review-author" style={{ fontSize: '15px', color: '#333' }}>
+                            {review.user || 'Khách hàng'}
+                          </strong>
+                          <span className="tc-review-date" style={{ fontSize: '12px', color: '#777' }}>
+                            {formatDate(review.date)}
+                          </span>
+                        </div>
                       </div>
-                      <div className="tc-review-stars">
+                      <div className="tc-review-stars" style={{ marginTop: '8px', color: '#f59e0b', fontSize: '14px' }}>
                         {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
                       </div>
-                      <p className="tc-review-comment">{review.comment}</p>
+                      <p className="tc-review-comment" style={{ marginTop: '8px', color: '#555', lineHeight: '1.5' }}>
+                        {review.comment}
+                      </p>
                     </div>
                   ))
                 ) : (

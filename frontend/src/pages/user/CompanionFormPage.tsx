@@ -195,7 +195,7 @@ const CompanionFormPage: React.FC = () => {
               <div className="form-section">
                 <h3>Mô tả chi tiết</h3>
                 <div className="input-group">
-                  <label className="input-label">Lịch trình dự kiến</label>
+                  <label className="input-label">🗺️ Lịch trình dự kiến</label>
                   <textarea
                     name="description"
                     className="form-control"
@@ -207,7 +207,7 @@ const CompanionFormPage: React.FC = () => {
                   ></textarea>
                 </div>
                 <div className="input-group mt-4">
-                  <label className="input-label">Yêu cầu (Không bắt buộc)</label>
+                  <label className="input-label">📝 Yêu cầu (Không bắt buộc)</label>
                   <textarea
                     name="requirements"
                     className="form-control"

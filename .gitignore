@@ -20,8 +20,6 @@ frontend/.env.local
 
 # Ignore files for Antigravity agent tasks
 .agents/
-*.md
-WORK.md
 
 # OS files
 .DS_Store

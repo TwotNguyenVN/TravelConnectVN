@@ -76,8 +76,9 @@ const MyToursPage: React.FC = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'draft': return 'Bản nháp';
-      case 'published': return 'Đã hoàn tất';
+      case 'published': return 'Đang mở';
       case 'closed': return 'Đã đóng';
+      case 'completed': return 'Đã hoàn tất';
       case 'cancelled': return 'Đã hủy';
       default: return status;
     }
@@ -113,7 +114,7 @@ const MyToursPage: React.FC = () => {
           />
         </div>
         <div className="tc-my-tours__status-filter">
-          {['all', 'draft', 'published', 'closed', 'cancelled'].map(status => (
+          {['all', 'draft', 'published', 'closed', 'completed', 'cancelled'].map(status => (
             <button
               key={status}
               className={`tc-my-tours__status-btn ${statusFilter === status ? 'tc-my-tours__status-btn--active' : ''}`}

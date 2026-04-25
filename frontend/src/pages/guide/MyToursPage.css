@@ -100,7 +100,8 @@
 
 .tc-tour-manage-card__image {
   position: relative;
-  height: 180px;
+  aspect-ratio: 16 / 9;
+  width: 100%;
 }
 
 .tc-tour-manage-card__image img {
@@ -130,6 +131,7 @@
 .tc-tour-manage-card__badge--draft { background: #64748b; }
 .tc-tour-manage-card__badge--published { background: var(--tc-success); }
 .tc-tour-manage-card__badge--closed { background: var(--tc-danger); }
+.tc-tour-manage-card__badge--completed { background: var(--tc-primary); }
 .tc-tour-manage-card__badge--cancelled { background: #1e293b; }
 
 .tc-tour-manage-card__badge--visible { background: var(--tc-primary); }

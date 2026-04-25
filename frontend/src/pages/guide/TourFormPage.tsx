@@ -170,6 +170,17 @@ const TourFormPage: React.FC = () => {
     images: [] as TourImage[],
     accommodations: [] as AccommodationItem[],
   });
+  const [participantCount, setParticipantCount] = useState(0);
+
+  const getStatusLabel = (business: string, visibility: string) => {
+    if (business === "draft") return { label: "Bản nháp", color: "var(--tc-text-secondary)", icon: "📝" };
+    if (business === "published") return { label: "Đang mở", color: "var(--tc-success)", icon: "🚀" };
+    if (business === "closed") return { label: "Đã đóng", color: "var(--tc-danger)", icon: "🔒" };
+    if (business === "completed") return { label: "Hoàn tất", color: "var(--tc-primary)", icon: "🏁" };
+    return { label: "Không rõ", color: "var(--tc-text-secondary)", icon: "❓" };
+  };
+
+  const statusInfo = getStatusLabel(formData.businessStatus, formData.visibilityStatus);
 
   const [provinceSearch, setProvinceSearch] = useState("");
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
@@ -253,10 +264,10 @@ const TourFormPage: React.FC = () => {
           googleMapsLink: d.google_maps_link || ''
         })) : [],
         routeMapLink: tour.route_map_link || "",
-        numDays: tour.num_days || tour.numDays,
-        numNights: tour.num_nights || tour.numNights,
-        meetLatitude: tour.meet_latitude || tour.meetLatitude,
-        meetLongitude: tour.meet_longitude || tour.meetLongitude,
+        numDays: tour.num_days ?? tour.numDays,
+        numNights: tour.num_nights ?? tour.numNights,
+        meetLatitude: tour.meet_latitude ?? tour.meetLatitude,
+        meetLongitude: tour.meet_longitude ?? tour.meetLongitude,
         images: tour.tour_images ? tour.tour_images.map((img: any) => ({
           imageUrl: img.image_url,
           caption: img.caption || "",
@@ -267,6 +278,10 @@ const TourFormPage: React.FC = () => {
         visibilityStatus: tour.visibility_status || tour.visibilityStatus || "visible",
         businessStatus: tour.business_status || tour.businessStatus || "draft",
       }));
+
+      if (tour._count) {
+        setParticipantCount(tour._count.tour_requests || 0);
+      }
     } catch (error) {
       console.error("Failed to fetch tour detail:", error);
       toast.error("Không tìm thấy thông tin tour");
@@ -288,6 +303,8 @@ const TourFormPage: React.FC = () => {
       [name]:
         name === "price" ||
         name === "maxParticipants" ||
+        name === "numDays" ||
+        name === "numNights" ||
         name.includes("Latitude") ||
         name.includes("Longitude")
           ? value === ""
@@ -614,7 +631,6 @@ const TourFormPage: React.FC = () => {
               { n: 3, t: "Mô tả lịch trình chi tiết", d: "Nội dung tour" },
               { n: 4, t: "Các địa điểm ghé thăm", d: "Danh sách điểm dừng" },
               { n: 5, t: "Hình ảnh & Truyền thông", d: "Album ảnh tour" },
-              { n: 6, t: "Hiển thị & Hoàn tất", d: "Chọn chế độ hiển thị" },
             ].map((s) => {
               const completed = isStepComplete(s.n);
               return (
@@ -807,7 +823,7 @@ const TourFormPage: React.FC = () => {
                         type="number"
                         name="numDays"
                         className="tc-form-input"
-                        value={formData.numDays}
+                        value={formData.numDays ?? ""}
                         onChange={handleBasicChange}
                         min="1"
                         required
@@ -821,7 +837,7 @@ const TourFormPage: React.FC = () => {
                         type="number"
                         name="numNights"
                         className="tc-form-input"
-                        value={formData.numNights}
+                        value={formData.numNights ?? ""}
                         onChange={handleBasicChange}
                         min="0"
                         required
@@ -1194,68 +1210,23 @@ const TourFormPage: React.FC = () => {
               </div>
             )}
 
-            {/* Step 6: Finalize */}
-            {currentStep === 6 && (
-              <div className="tc-step-content">
-                <h2>Hiển thị & Hoàn tất</h2>
-                <p>Chọn chế độ hiển thị tour và công bố tour của bạn.</p>
 
-                <div className="tc-visibility-options">
-                  <div 
-                    className={`tc-visibility-card ${formData.visibilityStatus === 'hidden' ? 'active' : ''}`}
-                    onClick={() => setFormData({ ...formData, visibilityStatus: 'hidden', businessStatus: 'draft' })}
-                  >
-                    <div className="tc-visibility-card__icon">
-                      {formData.visibilityStatus === 'hidden' ? '🔒' : '👁️‍🗨️'}
-                    </div>
-                    <div className="tc-visibility-card__info">
-                      <h4>Ẩn bài đăng</h4>
-                      <p>ẩn bài đăng này</p>
-                    </div>
-                  </div>
-                  
-                  <div 
-                    className={`tc-visibility-card ${formData.visibilityStatus === 'visible' ? 'active' : ''}`}
-                    onClick={() => setFormData({ ...formData, visibilityStatus: 'visible', businessStatus: 'published' })}
-                  >
-                    <div className="tc-visibility-card__icon">
-                      {formData.visibilityStatus === 'visible' ? '✅' : '🚀'}
-                    </div>
-                    <div className="tc-visibility-card__info">
-                      <h4>Hoàn tất</h4>
-                      <p>đăng bài và hiển thị với người dùng</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="tc-tour-form__footer">
-              <div style={{ display: 'flex', gap: '12px' }}>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={() =>
-                    currentStep > 1
-                      ? setCurrentStep(currentStep - 1)
-                      : navigate("/guide/tours")
-                  }
-                >
-                  {currentStep === 1 ? "Hủy bỏ" : "Quay lại"}
-                </Button>
-              </div>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() =>
+                  currentStep > 1
+                    ? setCurrentStep(currentStep - 1)
+                    : navigate("/guide/tours")
+                }
+              >
+                {currentStep === 1 ? "Hủy bỏ" : "Quay lại"}
+              </Button>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <Button
-                  className="tc-btn-draft"
-                  type="button"
-                  onClick={handleSaveDraft}
-                  isLoading={submitting}
-                >
-                  Lưu bản nháp
-                </Button>
-
-                {currentStep < 6 ? (
+                {currentStep < 5 && (
                   <Button
                     variant="primary"
                     type="button"
@@ -1267,15 +1238,95 @@ const TourFormPage: React.FC = () => {
                   >
                     Tiếp theo
                   </Button>
-                ) : (
-                  <Button variant="primary" type="submit" isLoading={submitting}>
-                    {isEditMode ? "Lưu thay đổi" : "Công bố Tour ngay"}
-                  </Button>
                 )}
               </div>
             </div>
           </form>
         </main>
+
+        <aside className="tc-tour-form__settings">
+          <div className="tc-settings-dashboard">
+            <div className="tc-dashboard-card tc-status-overview">
+              <div className="tc-dashboard-card__icon">{statusInfo.icon}</div>
+              <div className="tc-dashboard-card__info">
+                <span className="tc-dashboard-label">Trạng thái hiện tại</span>
+                <span className="tc-dashboard-value" style={{ color: statusInfo.color }}>
+                  {statusInfo.label}
+                </span>
+              </div>
+            </div>
+
+            <div className="tc-dashboard-card tc-participants-count">
+              <div className="tc-dashboard-card__icon">👥</div>
+              <div className="tc-dashboard-card__info">
+                <span className="tc-dashboard-label">Khách đã tham gia</span>
+                <span className="tc-dashboard-value">
+                  {participantCount} / {formData.maxParticipants || 0}
+                </span>
+              </div>
+              <div className="tc-progress-bar">
+                <div 
+                  className="tc-progress-fill" 
+                  style={{ width: `${Math.min(100, (participantCount / (formData.maxParticipants || 1)) * 100)}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="tc-settings-actions-grid">
+              <div 
+                className={`tc-action-card ${formData.businessStatus === 'draft' ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, businessStatus: 'draft', visibilityStatus: 'hidden' })}
+              >
+                <div className="tc-action-card__icon">💾</div>
+                <div className="tc-action-card__label">Lưu Nháp</div>
+              </div>
+
+              <div 
+                className={`tc-action-card ${formData.businessStatus === 'published' ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, businessStatus: 'published', visibilityStatus: 'visible' })}
+              >
+                <div className="tc-action-card__icon">🌐</div>
+                <div className="tc-action-card__label">Đăng Bài (Công Khai)</div>
+              </div>
+
+              <div 
+                className={`tc-action-card ${formData.businessStatus === 'closed' ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, businessStatus: 'closed', visibilityStatus: 'visible' })}
+              >
+                <div className="tc-action-card__icon">🚫</div>
+                <div className="tc-action-card__label">Đã đóng (Hết chỗ)</div>
+              </div>
+
+              <div 
+                className={`tc-action-card ${formData.businessStatus === 'completed' ? 'active' : ''}`}
+                onClick={() => setFormData({ ...formData, businessStatus: 'completed', visibilityStatus: 'visible' })}
+              >
+                <div className="tc-action-card__icon">🏆</div>
+                <div className="tc-action-card__label">Hoàn Tất Tour</div>
+              </div>
+            </div>
+
+            <div className="tc-final-actions">
+              <Button 
+                variant="primary" 
+                fullWidth 
+                type="button" 
+                onClick={handleSubmit}
+                isLoading={submitting}
+              >
+                {isEditMode ? "Lưu thay đổi" : "Tạo Tour ngay"}
+              </Button>
+              <Button 
+                variant="outline" 
+                fullWidth 
+                type="button" 
+                onClick={() => navigate("/guide/tours")}
+              >
+                Hủy bỏ
+              </Button>
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

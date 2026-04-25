@@ -16,6 +16,14 @@ export const HomePage: React.FC = () => {
   const [recommendedTours, setRecommendedTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const getDynamicBanner = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 10) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_sang.png";
+    if (hour >= 10 && hour < 14) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_trua.png";
+    if (hour >= 14 && hour < 18) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_chieu.png";
+    return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_toi.png";
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,36 +68,45 @@ export const HomePage: React.FC = () => {
     <div style={{ backgroundColor: 'var(--tc-bg-default)' }}>
       {/* Hero Section */}
       <section style={{ 
-        minHeight: '400px', 
-        backgroundColor: 'var(--tc-primary-light)', 
+        width: '100%',
+        aspectRatio: '16 / 12',
+        maxHeight: '700px',
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('${getDynamicBanner()}')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed',
         display: 'flex', 
         flexDirection: 'column',
         alignItems: 'center', 
         justifyContent: 'center',
-        padding: 'var(--tc-spacing-6) var(--tc-spacing-5)',
-        textAlign: 'center'
+        padding: 'var(--tc-spacing-10) var(--tc-spacing-5)',
+        textAlign: 'center',
+        position: 'relative'
       }}>
-        <h1 style={{ color: 'var(--tc-primary)', fontSize: 'var(--tc-font-size-2xl)', marginBottom: 'var(--tc-spacing-3)' }}>
+        <h1 style={{ color: '#ffffff', fontSize: '48px', fontWeight: 800, marginBottom: 'var(--tc-spacing-4)', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
           Trải nghiệm du lịch theo cách của bạn
         </h1>
-        <p style={{ fontSize: 'var(--tc-font-size-lg)', color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-5)', maxWidth: '600px' }}>
+        <p style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.9)', marginBottom: 'var(--tc-spacing-8)', maxWidth: '650px', lineHeight: 1.6, textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
           Khám phá những vùng đất mới cùng hướng dẫn viên địa phương nhiệt tình và những người bạn đồng hành chung đam mê.
         </p>
         <div style={{ 
           display: 'flex', 
           gap: 'var(--tc-spacing-3)', 
-          backgroundColor: 'var(--tc-bg-default)', 
-          padding: 'var(--tc-spacing-3)', 
+          backgroundColor: 'rgba(255, 255, 255, 0.15)', 
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          padding: 'var(--tc-spacing-4)', 
           borderRadius: 'var(--tc-radius-lg)',
-          boxShadow: 'var(--tc-shadow-md)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
           width: '100%',
-          maxWidth: '800px',
+          maxWidth: '850px',
           flexWrap: 'wrap'
         }}>
-          <input type="text" placeholder="Bạn muốn đi đâu?" style={{ flex: 1, minWidth: '200px', padding: 'var(--tc-spacing-2) var(--tc-spacing-3)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)' }} />
-          <input type="date" style={{ padding: 'var(--tc-spacing-2) var(--tc-spacing-3)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)' }} />
-          <Button variant="primary">Tìm kiếm Tour</Button>
-          <Button variant="outline" onClick={() => navigate('/user/ai-assistant')} style={{ border: '1px solid var(--tc-primary)', color: 'var(--tc-primary)' }}>
+          <input type="text" placeholder="Bạn muốn đi đâu?" style={{ flex: 1, minWidth: '200px', padding: 'var(--tc-spacing-3) var(--tc-spacing-4)', border: 'none', borderRadius: 'var(--tc-radius-md)', backgroundColor: '#ffffff', fontSize: 'var(--tc-font-size-md)', outline: 'none' }} />
+          <input type="date" style={{ padding: 'var(--tc-spacing-3) var(--tc-spacing-4)', border: 'none', borderRadius: 'var(--tc-radius-md)', backgroundColor: '#ffffff', fontSize: 'var(--tc-font-size-md)', outline: 'none' }} />
+          <Button variant="primary" style={{ padding: '0 var(--tc-spacing-6)', fontWeight: 600 }}>Tìm kiếm Tour</Button>
+          <Button variant="outline" onClick={() => navigate('/user/ai-assistant')} style={{ border: 'none', backgroundColor: 'rgba(255, 255, 255, 0.9)', color: 'var(--tc-primary)', fontWeight: 600, padding: '0 var(--tc-spacing-6)' }}>
             ✨ Hỏi trợ lý AI
           </Button>
         </div>
@@ -109,8 +126,8 @@ export const HomePage: React.FC = () => {
           
           <div style={{ display: 'flex', gap: 'var(--tc-spacing-5)', overflowX: 'auto', paddingBottom: 'var(--tc-spacing-4)' }}>
             {recommendedTours.map((tour: any) => (
-              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ minWidth: '300px', flex: '0 0 auto', overflow: 'hidden', padding: 0, border: '2px solid var(--tc-primary-light)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-md)', transition: 'transform 0.2s', cursor: 'pointer' }}>
-                <img src={tour.tour_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} alt={tour.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ width: '320px', minWidth: '320px', flex: '0 0 auto', overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer' }}>
+                <img src={tour.tour_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} alt={tour.title} style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }} />
                 <div style={{ padding: 'var(--tc-spacing-4)' }}>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
                     {tour.match_reasons?.map((r: string, idx: number) => (
@@ -130,34 +147,36 @@ export const HomePage: React.FC = () => {
       )}
 
       {/* Featured Tours Section */}
-      <section style={{ padding: 'var(--tc-spacing-8) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
-          <div>
-            <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Tour Nổi Bật</h2>
-            <p style={{ color: 'var(--tc-text-secondary)' }}>Những hành trình được yêu thích nhất trong tuần</p>
+      <section style={{ padding: 'var(--tc-spacing-8) 0', backgroundColor: 'var(--tc-bg-default)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 var(--tc-spacing-5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
+            <div>
+              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Tour Nổi Bật</h2>
+              <p style={{ color: 'var(--tc-text-secondary)' }}>Những hành trình được yêu thích nhất trong tuần</p>
+            </div>
+            <Link to="/tours" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
           </div>
-          <Link to="/tours" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
-          {featuredTours.map(tour => (
-            <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer' }}>
-              <img src={tour.cover} alt={tour.title} style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
-              <div style={{ padding: 'var(--tc-spacing-4)' }}>
-                <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h3>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating}</span>
-                  <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold' }}>{tour.price.toLocaleString()}đ</span>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 320px)', gap: 'var(--tc-spacing-5)' }}>
+            {featuredTours.map(tour => (
+              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer' }}>
+                <img src={tour.cover} alt={tour.title} style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }} />
+                <div style={{ padding: 'var(--tc-spacing-4)' }}>
+                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h3>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating}</span>
+                    <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold' }}>{tour.price.toLocaleString()}đ</span>
+                  </div>
                 </div>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* Featured Guides Section */}
-      <section style={{ padding: 'var(--tc-spacing-8) var(--tc-spacing-5)', backgroundColor: 'var(--tc-bg-subtle)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+      <section style={{ padding: 'var(--tc-spacing-8) 0', backgroundColor: 'var(--tc-bg-subtle)' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 var(--tc-spacing-5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
             <div>
               <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Hướng dẫn viên địa phương</h2>
@@ -166,19 +185,68 @@ export const HomePage: React.FC = () => {
             <Link to="/guides" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 320px)', gap: 'var(--tc-spacing-5)' }}>
             {featuredGuides.map(guide => (
-              <Card key={guide.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)', padding: 'var(--tc-spacing-4)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', backgroundColor: 'var(--tc-bg-default)', cursor: 'pointer' }} onClick={() => navigate(`/guides/${guide.id}`)}>
-                <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--tc-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {guide.avatar || guide.coverUrl ? (
-                    <img src={guide.avatar || guide.coverUrl} alt={guide.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold' }}>{guide.name.charAt(0)}</span>
-                  )}
+              <Card 
+                key={guide.id} 
+                style={{ 
+                  width: '320px', 
+                  overflow: 'hidden', 
+                  padding: 0, 
+                  border: '1px solid var(--tc-border)', 
+                  borderRadius: 'var(--tc-radius-lg)', 
+                  backgroundColor: 'var(--tc-bg-default)', 
+                  cursor: 'pointer',
+                  position: 'relative'
+                }} 
+                onClick={() => navigate(`/guides/${guide.id}`)}
+              >
+                {/* Image Cover */}
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9' }}>
+                  <img 
+                    src={guide.coverUrl || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
+                    alt={guide.name} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  />
+                  {/* Avatar Overlay */}
+                  <div style={{ 
+                    position: 'absolute', 
+                    bottom: '-25px', 
+                    left: '15px', 
+                    width: '60px', 
+                    height: '60px', 
+                    borderRadius: '50%', 
+                    border: '3px solid white', 
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--tc-primary-light)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: 'var(--tc-shadow-sm)',
+                    zIndex: 2
+                  }}>
+                    {guide.avatar ? (
+                      <img src={guide.avatar} alt={guide.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold', fontSize: '20px' }}>{guide.name.charAt(0)}</span>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-1) 0' }}>{guide.name}</h3>
-                  <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>{guide.location} • ⭐ {guide.rating}</div>
+
+                <div style={{ padding: 'var(--tc-spacing-4)', marginTop: '20px' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--tc-text-primary)' }}>{guide.name}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--tc-text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
+                    📍 {guide.location || 'Việt Nam'}
+                  </div>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--tc-border)' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--tc-text-secondary)', fontWeight: 500 }}>
+                      💼 {guide.yearsOfExperience || 0} năm kinh nghiệm
+                    </span>
+                    <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      ★ {guide.rating || 5}
+                    </span>
+                  </div>
                 </div>
               </Card>
             ))}
