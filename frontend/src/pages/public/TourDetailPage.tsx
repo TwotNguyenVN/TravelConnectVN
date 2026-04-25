@@ -8,6 +8,7 @@ import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { TourMap } from '../../components/tours/TourMap';
 import './TourDetailPage.css';
 
 export const TourDetailPage: React.FC = () => {
@@ -16,7 +17,7 @@ export const TourDetailPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'map' | 'reviews'>('overview');
   const [tour, setTour] = useState<any>(null);
   const [accommodations, setAccommodations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -235,6 +236,12 @@ export const TourDetailPage: React.FC = () => {
               Lịch trình
             </button>
             <button 
+              className={`tc-tab-btn ${activeTab === 'map' ? 'tc-tab-btn--active' : ''}`}
+              onClick={() => setActiveTab('map')}
+            >
+              Bản đồ
+            </button>
+            <button 
               className={`tc-tab-btn ${activeTab === 'reviews' ? 'tc-tab-btn--active' : ''}`}
               onClick={() => setActiveTab('reviews')}
             >
@@ -342,6 +349,60 @@ export const TourDetailPage: React.FC = () => {
                 ) : (
                   <p>Lịch trình chi tiết đang được cập nhật...</p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'map' && (
+            <div className="tc-tab-content">
+              <h2 className="tc-section-title">
+                <span>🗺️</span> Lộ trình trên bản đồ
+              </h2>
+              <TourMap points={tour.itinerary || []} />
+              
+              <div className="tc-map-itinerary-steps" style={{ marginTop: '32px' }}>
+                <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: 'var(--tc-primary)' }}>📍</span> Trình tự các điểm đến
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+                  {tour.itinerary?.map((item: any) => (
+                    <div key={item.day} className="tc-itinerary-card" style={{ 
+                      background: 'white', 
+                      padding: '20px', 
+                      borderRadius: '16px', 
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                      display: 'flex',
+                      alignItems: 'flex-start',
+                      gap: '16px',
+                      transition: 'all 0.3s ease'
+                    }}>
+                      <div style={{ 
+                        width: '36px', 
+                        height: '36px', 
+                        background: 'linear-gradient(135deg, var(--tc-primary) 0%, #0056b3 100%)', 
+                        color: 'white', 
+                        borderRadius: '10px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        fontSize: '16px',
+                        fontWeight: '800',
+                        flexShrink: 0,
+                        boxShadow: '0 4px 10px rgba(0, 108, 228, 0.2)'
+                      }}>{item.day}</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '15px' }}>{item.title}</div>
+                        <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{item.address}</div>
+                        {item.lat && (
+                          <div style={{ fontSize: '11px', color: 'var(--tc-primary)', marginTop: '4px', fontWeight: '600' }}>
+                            Tọa độ: {item.lat.toFixed(4)}, {item.lng.toFixed(4)}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}

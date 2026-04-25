@@ -33,6 +33,13 @@ const reviewService = {
   // User Reviews
   getMyReviews: () => 
     api.get('/reviews/me'),
+
+  // Admin Management
+  getAllReviewsAdmin: (page: number = 1, limit: number = 50) => 
+    api.get(`/reviews/admin/all?page=${page}&limit=${limit}`),
+
+  updateReviewVisibility: (type: 'TOUR' | 'GUIDE', id: string, status: string) => 
+    api.post('/reviews/admin/visibility', { type, id, status }),
 };
 
 export default reviewService;

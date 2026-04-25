@@ -64,4 +64,29 @@ export class ReviewsController {
   ) {
     return this.reviewsService.getGuideReviews(guideId, page, limit);
   }
+
+  // ==========================================
+  // ADMIN ENDPOINTS
+  // ==========================================
+
+  @Get('admin/all')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all reviews for admin' })
+  async getAllReviewsAdmin(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 50,
+  ) {
+    return this.reviewsService.getAllReviewsAdmin(page, limit);
+  }
+
+  @Post('admin/visibility')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update review visibility' })
+  async updateReviewVisibility(
+    @Body() body: { type: 'TOUR' | 'GUIDE', id: string, status: string }
+  ) {
+    return this.reviewsService.updateReviewVisibility(body.type, body.id, body.status);
+  }
 }

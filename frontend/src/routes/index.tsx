@@ -45,6 +45,7 @@ import { AdminVerificationPage } from '../pages/admin/AdminVerificationPage';
 import { AdminTourManagementPage } from '../pages/admin/AdminTourManagementPage';
 import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManagementPage';
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
+import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
@@ -135,6 +136,7 @@ export const router = createBrowserRouter([
       { path: 'reports', element: <AdminReportManagementPage /> },
       { path: 'guides', element: <AdminVerificationPage /> },
       { path: 'companion-posts', element: <AdminCompanionManagementPage /> },
+      { path: 'reviews', element: <AdminReviewManagementPage /> },
       { path: 'tours', element: <AdminTourManagementPage /> },
       { path: 'activity-logs', element: <AdminActivityLogPage /> },
       { path: 'statistics', element: <AdminDashboardPage /> },

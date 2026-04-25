@@ -270,4 +270,80 @@ export class ReviewsService {
       }))
     };
   }
+
+  // ==========================================
+  // ADMIN MANAGEMENT
+  // ==========================================
+
+  async getAllReviewsAdmin(page: number = 1, limit: number = 50) {
+    const skip = (page - 1) * limit;
+
+    const [tourReviews, guideReviews, totalTour, totalGuide] = await Promise.all([
+      this.prisma.tour_reviews.findMany({
+        include: { 
+          users: { select: { full_name: true, avatar_url: true } },
+          tours: { select: { title: true } }
+        },
+        orderBy: { created_at: 'desc' },
+        skip,
+        take: limit
+      }),
+      this.prisma.guide_reviews.findMany({
+        include: { 
+          users: { select: { full_name: true, avatar_url: true } },
+          guide_profiles: { include: { users: { select: { full_name: true } } } },
+          tours: { select: { title: true } }
+        },
+        orderBy: { created_at: 'desc' },
+        skip,
+        take: limit
+      }),
+      this.prisma.tour_reviews.count(),
+      this.prisma.guide_reviews.count()
+    ]);
+
+    const tourList = tourReviews.map(r => ({
+      id: r.id,
+      type: 'TOUR',
+      targetName: r.tours.title,
+      userName: r.users?.full_name || 'Người dùng ẩn danh',
+      userAvatar: r.users?.avatar_url || '',
+      rating: r.rating,
+      comment: r.comment,
+      visibilityStatus: r.visibility_status,
+      createdAt: r.created_at
+    }));
+
+    const guideList = guideReviews.map(r => ({
+      id: r.id,
+      type: 'GUIDE',
+      targetName: r.guide_profiles.users?.full_name || 'Hướng dẫn viên',
+      userName: r.users?.full_name || 'Người dùng ẩn danh',
+      userAvatar: r.users?.avatar_url || '',
+      rating: r.rating,
+      comment: r.comment,
+      visibilityStatus: r.visibility_status,
+      createdAt: r.created_at
+    }));
+
+    return {
+      tours: tourList,
+      guides: guideList,
+      total: totalTour + totalGuide
+    };
+  }
+
+  async updateReviewVisibility(type: 'TOUR' | 'GUIDE', id: string, status: string) {
+    if (type === 'TOUR') {
+      return this.prisma.tour_reviews.update({
+        where: { id },
+        data: { visibility_status: status }
+      });
+    } else {
+      return this.prisma.guide_reviews.update({
+        where: { id },
+        data: { visibility_status: status }
+      });
+    }
+  }
 }
