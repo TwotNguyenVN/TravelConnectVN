@@ -73,18 +73,46 @@ const CompanionFormPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.title.length < 10) {
+      toast.error('Tiêu đề phải có ít nhất 10 ký tự');
+      return;
+    }
+
     setSubmitting(true);
     try {
+      // Prepare data for backend DTO
+      const payload: any = {
+        title: formData.title,
+        destination: formData.destination,
+        startDate: new Date(formData.start_date).toISOString(),
+        endDate: new Date(formData.end_date).toISOString(),
+        estimatedCost: Number(formData.estimated_cost),
+        expectedMembers: Number(formData.expected_members),
+        currencyCode: formData.currency_code,
+        description: formData.description,
+        requirements: formData.requirements || undefined,
+      };
+
       if (isEdit) {
-        await companionService.updatePost(id!, formData);
+        // For updates, we can include status
+        payload.businessStatus = formData.business_status;
+        payload.visibilityStatus = formData.visibility_status;
+        await companionService.updatePost(id!, payload);
+        toast.success('Cập nhật bài đăng thành công!');
       } else {
-        await companionService.createPost(formData);
+        await companionService.createPost(payload);
         toast.success('Tạo bài đăng thành công!');
       }
       navigate('/user/companion-posts');
-      if (isEdit) toast.success('Cập nhật bài đăng thành công!');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi lưu bài đăng');
+      console.error('DEBUG - Post submission error:', error.response?.data);
+      const errorMsg = error.response?.data?.message;
+      if (Array.isArray(errorMsg)) {
+        toast.error(errorMsg[0]);
+      } else {
+        toast.error(errorMsg || 'Có lỗi xảy ra khi lưu bài đăng');
+      }
     } finally {
       setSubmitting(false);
     }

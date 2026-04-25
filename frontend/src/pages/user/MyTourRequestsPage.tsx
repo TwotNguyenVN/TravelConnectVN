@@ -10,6 +10,7 @@ const formatDate = (dateString: string) => new Date(dateString).toLocaleDateStri
 import { useToast } from '../../contexts/ToastContext';
 import { ReviewModal } from '../../components/common/Review/ReviewModal';
 import { paymentService } from '../../services/paymentService';
+import './MyTourRequestsPage.css';
 
 export const MyTourRequestsPage: React.FC = () => {
   const [requests, setRequests] = useState<TourRequest[]>([]);
@@ -17,6 +18,8 @@ export const MyTourRequestsPage: React.FC = () => {
   const [cancellingId, setCancellingId] = useState<string | null>(null);
   const [payingId, setPayingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const [activeTab, setActiveTab] = useState<'all' | 'approved' | 'cancelled' | 'completed'>('all');
 
   // Review modal state
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -68,7 +71,7 @@ export const MyTourRequestsPage: React.FC = () => {
       setPayingId(id);
       const response = await paymentService.createVnpayUrl(id);
       if (response.success && response.data.paymentUrl) {
-        window.location.href = response.data.paymentUrl; // Redirect to VNPAY
+        window.open(response.data.paymentUrl, '_blank'); // Open VNPAY in new tab
       } else {
         toast.error('Không thể tạo giao dịch thanh toán.');
       }
@@ -104,11 +107,42 @@ export const MyTourRequestsPage: React.FC = () => {
       title: 'Tour',
       key: 'tourTitle',
       render: (record: TourRequest) => (
-        <div>
-          <div style={{ fontWeight: 'bold', color: 'var(--tc-primary)' }}>{record.tourTitle}</div>
+        <div style={{ padding: 'var(--tc-spacing-2) 0' }}>
+          <div style={{ fontWeight: 'bold', color: 'var(--tc-primary)', marginBottom: '4px' }}>{record.tourTitle}</div>
           <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>
             HDV: {record.guideName}
           </div>
+          {record.responseNote && (
+            <div style={{ 
+              marginTop: 'var(--tc-spacing-3)', 
+              fontSize: 'var(--tc-font-size-sm)', 
+              color: 'var(--tc-text-primary)',
+              fontStyle: 'italic',
+              padding: '12px',
+              backgroundColor: 'rgba(52, 152, 219, 0.05)',
+              borderRadius: '12px',
+              borderLeft: '4px solid var(--tc-primary)',
+              maxWidth: '400px'
+            }}>
+              <strong style={{ display: 'block', marginBottom: '4px', fontStyle: 'normal', fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-primary)' }}>
+                💬 Phản hồi từ HDV:
+              </strong> 
+              "{record.responseNote}"
+            </div>
+          )}
+          {record.status === 'cancelled_by_user' && record.cancellationNote && (
+            <div style={{ 
+              marginTop: 'var(--tc-spacing-2)', 
+              fontSize: 'var(--tc-font-size-xs)', 
+              color: 'var(--tc-text-secondary)',
+              padding: '8px 12px',
+              backgroundColor: 'rgba(0, 0, 0, 0.02)',
+              borderRadius: '8px',
+              maxWidth: '400px'
+            }}>
+              <strong>Lý do hủy:</strong> {record.cancellationNote}
+            </div>
+          )}
         </div>
       ),
     },
@@ -142,7 +176,7 @@ export const MyTourRequestsPage: React.FC = () => {
             </Button>
           )}
 
-          {record.status === 'approved' && (
+          {(record.status === 'approved' || record.status === 'payment_pending') && (
             <Button 
               variant="primary" 
               size="small" 
@@ -183,6 +217,21 @@ export const MyTourRequestsPage: React.FC = () => {
     },
   ];
 
+  const filteredRequests = requests.filter(req => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'approved') return req.status === 'approved' || req.status === 'payment_pending';
+    if (activeTab === 'cancelled') return req.status === 'cancelled_by_user' || req.status === 'rejected';
+    if (activeTab === 'completed') return req.status === 'paid';
+    return true;
+  });
+
+  const tabs = [
+    { id: 'all', label: 'Tất cả' },
+    { id: 'approved', label: 'Được duyệt' },
+    { id: 'cancelled', label: 'Đã hủy' },
+    { id: 'completed', label: 'Hoàn tất' }
+  ];
+
   return (
     <div className="my-requests-container">
       <div className="page-header">
@@ -190,29 +239,28 @@ export const MyTourRequestsPage: React.FC = () => {
         <p className="page-subtitle">Theo dõi và quản lý các yêu cầu tham gia tour bạn đã gửi cho hướng dẫn viên.</p>
       </div>
 
+      <div className="requests-tabs-bar">
+        {tabs.map(tab => (
+          <button
+            key={tab.id}
+            className={`tab-item ${activeTab === tab.id ? 'active' : ''}`}
+            onClick={() => setActiveTab(tab.id as any)}
+          >
+            {tab.label}
+            {activeTab === tab.id && <div className="tab-indicator" />}
+          </button>
+        ))}
+      </div>
+
       <Card className="requests-card">
         <Table 
           columns={columns} 
-          data={requests} 
+          data={filteredRequests} 
           isLoading={loading}
-          emptyText="Bạn chưa gửi yêu cầu tham gia tour nào."
+          emptyText={`Không có yêu cầu nào trong mục ${tabs.find(t => t.id === activeTab)?.label}`}
           rowKey={(record) => record.id}
         />
       </Card>
-
-      {requests.some(r => r.responseNote) && (
-        <div className="notes-section" style={{ marginTop: 'var(--tc-spacing-6)' }}>
-          <h3 style={{ fontSize: 'var(--tc-font-size-md)', marginBottom: 'var(--tc-spacing-3)' }}>Phản hồi từ hướng dẫn viên</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-3)' }}>
-            {requests.filter(r => r.responseNote).map(req => (
-              <Card key={`note-${req.id}`} style={{ padding: 'var(--tc-spacing-3)', borderLeft: '4px solid var(--tc-primary)' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: 'var(--tc-spacing-1)' }}>{req.tourTitle}</div>
-                <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)' }}>"{req.responseNote}"</div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
 
       {selectedRequest && (
         <ReviewModal

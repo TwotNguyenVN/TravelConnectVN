@@ -24,6 +24,26 @@ export class GuidesController {
   // PUBLIC ENDPOINTS
   // ==========================================
 
+  @Get('languages')
+  async getLanguages() {
+    return this.guidesService.getLanguages();
+  }
+
+  @Get('skills')
+  async getSkills() {
+    return this.guidesService.getSkills();
+  }
+
+  @Get('default-covers')
+  async getDefaultCovers() {
+    return this.guidesService.getDefaultCovers();
+  }
+
+  @Get('provinces')
+  async getProvinces() {
+    return this.guidesService.getProvinces();
+  }
+
   @Get()
   async getGuides(
     @Query('page') page?: string,
@@ -37,21 +57,6 @@ export class GuidesController {
       workingArea,
       keyword,
     });
-  }
-
-  @Get('languages')
-  async getLanguages() {
-    return this.guidesService.getLanguages();
-  }
-
-  @Get('skills')
-  async getSkills() {
-    return this.guidesService.getSkills();
-  }
-
-  @Get('provinces')
-  async getProvinces() {
-    return this.guidesService.getProvinces();
   }
 
   @Get(':id')

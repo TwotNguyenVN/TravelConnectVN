@@ -31,14 +31,20 @@ const TourImagesPage: React.FC = () => {
   const fetchImages = async () => {
     try {
       setLoading(true);
-      const data = await tourService.getTourImages(id!);
-      const mappedData = data.map((img: any) => ({
-        id: img.id,
-        imageUrl: img.image_url,
-        caption: img.caption || '',
-        isCover: img.is_cover || false
-      }));
-      setImages(mappedData);
+      const response = await tourService.getTourImages(id!);
+      const data = response.data || response;
+      
+      if (Array.isArray(data)) {
+        const mappedData = data.map((img: any) => ({
+          id: img.id,
+          imageUrl: img.image_url,
+          caption: img.caption || '',
+          isCover: img.is_cover || false
+        }));
+        setImages(mappedData);
+      } else {
+        setImages([]);
+      }
     } catch (error) {
       console.error('Failed to fetch images:', error);
     } finally {

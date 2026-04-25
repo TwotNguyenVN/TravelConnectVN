@@ -14,6 +14,9 @@ export interface Tour {
   businessStatus?: string;
   visibilityStatus?: string;
   province?: string;
+  maxParticipants?: number;
+  numDays?: number;
+  numNights?: number;
 }
 
 export interface TourFilters {
@@ -38,6 +41,10 @@ export const tourService = {
 
   getTourDetail: async (id: string) => {
     return api.get(`/tours/${id}`);
+  },
+
+  getTourDetailForGuide: async (id: string) => {
+    return api.get(`/tours/guide/${id}`);
   },
 
   getFeaturedTours: async () => {
@@ -82,5 +89,9 @@ export const tourService = {
 
   updateTourImages: async (id: string, images: any[]) => {
     return api.post(`/tours/${id}/images`, images);
+  },
+
+  deleteTour: async (id: string) => {
+    return api.patch(`/tours/guide/${id}/delete`);
   },
 };

@@ -1,0 +1,13 @@
+---
+description: Behavioral guidelines for Backend. Use when writing, reviewing, or refactoring backend code.
+alwaysApply: true
+---
+
+# Karpathy behavioral guidelines (Backend)
+
+Refer to the root `.cursor/rules/karpathy-guidelines.mdc` for the full set of rules.
+
+## Core Focus:
+- **Surgical Changes**: Only modify the specific service/controller requested.
+- **Data Safety**: Never modify Supabase schema without confirmation.
+- **Simplicity**: Avoid complex NestJS abstractions for simple CRUD tasks.

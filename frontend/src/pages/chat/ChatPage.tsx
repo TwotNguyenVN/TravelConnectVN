@@ -28,11 +28,13 @@ const ChatPage: React.FC = () => {
   const navigate = useNavigate();
   
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [filteredConversations, setFilteredConversations] = useState<Conversation[]>([]);
   const [selectedConvId, setSelectedConvId] = useState<string | null>(location.state?.conversationId || null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingConv, setLoadingConv] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [inputText, setInputText] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -67,6 +69,20 @@ const ChatPage: React.FC = () => {
       setMessages([]);
     }
   }, [selectedConvId]);
+
+  useEffect(() => {
+    if (searchTerm.trim() === '') {
+      setFilteredConversations(conversations);
+    } else {
+      const lowerSearch = searchTerm.toLowerCase();
+      const filtered = conversations.filter(conv => {
+        const isGroup = conv.conversationType === 'group_companion';
+        const name = isGroup ? conv.title : conv.participants[0]?.fullName;
+        return name?.toLowerCase().includes(lowerSearch);
+      });
+      setFilteredConversations(filtered);
+    }
+  }, [searchTerm, conversations]);
 
   useEffect(() => {
     scrollToBottom();
@@ -174,11 +190,12 @@ const ChatPage: React.FC = () => {
     return (
       <div 
         key={conv.id} 
-        className={`conversation-item ${selectedConvId === conv.id ? 'active' : ''} ${conv.hasUnread ? 'unread' : ''}`}
+        className={`conversation-item ${selectedConvId === conv.id ? 'active' : ''}`}
         onClick={() => setSelectedConvId(conv.id)}
       >
         <div className="conversation-avatar">
           <img src={avatar} alt={displayName || 'Avatar'} onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }} />
+          {!isGroup && <span className={`status-indicator ${Math.random() > 0.3 ? 'status-online' : 'status-offline'}`}></span>}
           {isGroup && <span className="group-badge">Nhóm</span>}
         </div>
         <div className="conversation-info">
@@ -197,7 +214,7 @@ const ChatPage: React.FC = () => {
                 </>
               ) : 'Bắt đầu trò chuyện'}
             </p>
-            {conv.hasUnread && <div className="unread-dot"></div>}
+            {conv.hasUnread && <div className="unread-count">1</div>}
           </div>
         </div>
       </div>
@@ -216,18 +233,28 @@ const ChatPage: React.FC = () => {
       <div className="chat-sidebar">
         <div className="chat-sidebar-header">
           <h2>Tin nhắn</h2>
+          <div className="chat-search-wrapper">
+            <i className="bi bi-search"></i>
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm trò chuyện..." 
+              className="chat-search-input"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
         
         <div className="conversation-list">
           {loadingConv && conversations.length === 0 ? (
             <div className="chat-loading">Đang tải...</div>
-          ) : conversations.length === 0 ? (
+          ) : filteredConversations.length === 0 ? (
             <div className="chat-empty-state">
               <i className="bi bi-chat-dots empty-icon"></i>
-              <p>Bạn chưa có cuộc trò chuyện nào.</p>
+              <p>{searchTerm ? 'Không tìm thấy kết quả' : 'Bạn chưa có cuộc trò chuyện nào.'}</p>
             </div>
           ) : (
-            conversations.map(renderConversationItem)
+            filteredConversations.map(renderConversationItem)
           )}
         </div>
       </div>
@@ -236,27 +263,37 @@ const ChatPage: React.FC = () => {
       <div className="chat-main">
         {!selectedConvId || !selectedConv ? (
           <div className="chat-empty-main">
-            <img src="/images/chat-illustration.svg" alt="Chat" className="empty-chat-img" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-            <h3>Trò chuyện trực tiếp</h3>
-            <p>Chọn một cuộc trò chuyện để bắt đầu gửi tin nhắn</p>
+            <div className="empty-chat-icon-wrapper">
+              <i className="bi bi-chat-square-text-fill"></i>
+            </div>
+            <h3>Chọn một cuộc trò chuyện</h3>
+            <p>Kết nối với hướng dẫn viên hoặc bạn đồng hành của bạn để bắt đầu hành trình!</p>
           </div>
         ) : (
           <>
             <div className="chat-header">
-              <div className="chat-header-info">
-                {selectedConv.conversationType === 'group_companion' ? (
-                  <>
-                    <h3 className="chat-header-title">{selectedConv.title}</h3>
-                    <p className="chat-header-subtitle">
-                      Bài đồng hành: {selectedConv.companionPost?.title}
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    <h3 className="chat-header-title">{selectedConv.participants[0]?.fullName}</h3>
-                    <p className="chat-header-subtitle">Hướng dẫn viên / Người dùng</p>
-                  </>
-                )}
+              <div className="chat-header-left">
+                <img 
+                  src={selectedConv.conversationType === 'group_companion' ? '/images/default-group-avatar.png' : selectedConv.participants[0]?.avatarUrl || '/images/default-avatar.png'} 
+                  alt="Avatar" 
+                  className="chat-header-avatar"
+                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }}
+                />
+                <div className="chat-header-info">
+                  <h3 className="chat-header-title">
+                    {selectedConv.conversationType === 'group_companion' ? selectedConv.title : selectedConv.participants[0]?.fullName}
+                  </h3>
+                  <div className="chat-header-status">
+                    <span className="status-online" style={{ width: '8px', height: '8px', borderRadius: '50%' }}></span>
+                    <span>Đang hoạt động</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="chat-header-actions">
+                <button className="chat-action-btn" title="Cuộc gọi"><i className="bi bi-telephone-fill"></i></button>
+                <button className="chat-action-btn" title="Video call"><i className="bi bi-camera-video-fill"></i></button>
+                <button className="chat-action-btn" title="Thông tin"><i className="bi bi-info-circle-fill"></i></button>
               </div>
             </div>
 
@@ -303,13 +340,21 @@ const ChatPage: React.FC = () => {
 
             <div className="chat-input-area">
               <form onSubmit={handleSendMessage} className="chat-input-form">
-                <input
-                  type="text"
-                  placeholder="Nhập tin nhắn..."
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  className="chat-input-field"
-                />
+                <div className="chat-input-container">
+                  <input
+                    type="text"
+                    placeholder="Nhập tin nhắn của bạn..."
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    className="chat-input-field"
+                  />
+                  <button className="chat-action-btn" style={{ background: 'none' }} type="button">
+                    <i className="bi bi-emoji-smile"></i>
+                  </button>
+                  <button className="chat-action-btn" style={{ background: 'none' }} type="button">
+                    <i className="bi bi-paperclip"></i>
+                  </button>
+                </div>
                 <button 
                   type="submit" 
                   className="chat-send-btn"

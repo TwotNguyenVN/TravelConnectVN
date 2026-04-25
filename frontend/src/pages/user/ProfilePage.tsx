@@ -3,13 +3,18 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/common/Card/Card';
 import { Input } from '../../components/common/Input/Input';
 import { Button } from '../../components/common/Button/Button';
+import { LoadingBlock } from '../../components/common';
 import { supabase } from '../../utils/supabase';
 import { userService } from '../../services/userService';
+import { guideService } from '../../services/guideService'; 
+import { useToast } from '../../contexts/ToastContext';
 import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
+  const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState({
     fullName: '',
@@ -17,91 +22,196 @@ export const ProfilePage: React.FC = () => {
     dateOfBirth: '',
     gender: '',
     avatarUrl: '',
+    coverUrl: '',
+    region: '',
+    homeProvinceId: '' as string | number,
+    travelStyle: '',
+    preferredLanguageId: '' as string | number,
+    otherLanguages: '', // Stores other languages as comma-separated string
   });
+
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [languages, setLanguages] = useState<any[]>([]);
+  const [provinceSearch, setProvinceSearch] = useState('');
+  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
+
+  const styleSuggestions = ['Nghỉ dưỡng', 'Khám phá', 'Phượt', 'Chụp ảnh', 'Ăn uống', 'Tiết kiệm', 'Sang trọng', 'Văn hóa'];
+  const [customStyle, setCustomStyle] = useState('');
+
+  // Modal states
+  const [isCoverModalOpen, setIsCoverModalOpen] = useState(false);
+  const [defaultCovers, setDefaultCovers] = useState<string[]>([]);
+  const [isLoadingCovers, setIsLoadingCovers] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      if (!user) return;
-      try {
-        const response = await userService.getProfile();
-        if (response.success && response.data) {
-          const data = response.data;
-          setFormData({
-            fullName: data.full_name || '',
-            phone: data.phone || '',
-            dateOfBirth: data.date_of_birth || '',
-            gender: data.gender || '',
-            avatarUrl: data.avatar_url || '',
-          });
-        }
-      } catch (err: any) {
-        console.error('Error fetching profile:', err.message);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-    
-    fetchProfile();
+    fetchData();
   }, [user]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const fetchData = async () => {
+    if (!user) return;
+    try {
+      setIsFetching(true);
+      const [profileRes, provincesRes, languagesRes] = await Promise.all([
+        userService.getProfile(),
+        guideService.getProvinces(),
+        guideService.getLanguages()
+      ]);
+
+      if (provincesRes.success) setProvinces(provincesRes.data);
+      if (languagesRes.success) setLanguages(languagesRes.data);
+
+      if (profileRes.success && profileRes.data) {
+        const data = profileRes.data;
+        
+        // Map database gender back to display gender
+        const displayGender = data.gender === 'male' ? 'Nam' : 
+                             data.gender === 'female' ? 'Nữ' : 
+                             data.gender === 'other' ? 'Khác' : (data.gender || '');
+
+        setFormData({
+          fullName: data.full_name || '',
+          phone: data.phone || '',
+          dateOfBirth: data.date_of_birth ? data.date_of_birth.split('T')[0] : '',
+          gender: displayGender,
+          avatarUrl: data.avatar_url || '',
+          coverUrl: data.cover_url || '',
+          region: data.region || '',
+          homeProvinceId: data.home_province_id || '',
+          travelStyle: data.user_preferences?.preferred_trip_style || '',
+          preferredLanguageId: data.user_preferences?.preferred_language_id || '',
+          otherLanguages: data.user_preferences?.other_languages || '',
+        });
+
+        if (data.home_province_id && provincesRes.data) {
+          const prov = provincesRes.data.find((p: any) => p.id.toString() === data.home_province_id.toString());
+          if (prov) setProvinceSearch(prov.name);
+        }
+      }
+    } catch (err: any) {
+      console.error('Error fetching profile data:', err);
+    } finally {
+      setIsFetching(false);
+    }
   };
 
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleAvatarClick = () => fileInputRef.current?.click();
+
+  const fetchDefaultCovers = async () => {
+    try {
+      setIsLoadingCovers(true);
+      const res: any = await guideService.getDefaultCovers();
+      
+      if (res && res.success && res.data) {
+        const urls = res.data.map((item: any) => item.url);
+        setDefaultCovers(urls);
+      } else {
+        const baseUrl = 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/';
+        setDefaultCovers([
+          `${baseUrl}profile_cover_1.png`,
+          `${baseUrl}profile_cover_2.png`,
+          `${baseUrl}profile_cover_3.png`,
+          `${baseUrl}profile_cover_5.png`,
+          `${baseUrl}profile_cover_6.png`
+        ]);
+      }
+    } catch (err) {
+      console.error('Error fetching default covers:', err);
+      const baseUrl = 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/';
+      setDefaultCovers([
+        `${baseUrl}profile_cover_1.png`,
+        `${baseUrl}profile_cover_2.png`,
+        `${baseUrl}profile_cover_3.png`,
+        `${baseUrl}profile_cover_5.png`,
+        `${baseUrl}profile_cover_6.png`
+      ]);
+    } finally {
+      setIsLoadingCovers(false);
+    }
+  };
+
+  const handleCoverClick = () => {
+    setIsCoverModalOpen(true);
+    if (defaultCovers.length === 0) {
+      fetchDefaultCovers();
+    }
+  };
+
+  const handleSelectDefaultCover = (url: string) => {
+    setFormData(prev => ({ ...prev, coverUrl: url }));
+    setIsCoverModalOpen(false);
+    toast.success('Đã chọn ảnh bìa mặc định!');
+  };
+
+  const handleUploadNewCover = () => {
+    setIsCoverModalOpen(false);
+    coverInputRef.current?.click();
   };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Kích thước ảnh không được vượt quá 2MB.' });
+      toast.error('Kích thước ảnh không được vượt quá 2MB.');
       return;
     }
 
     setIsUploading(true);
-    setMessage(null);
-
     try {
       const response = await userService.updateAvatar(file);
       if (response.success && response.data) {
         setFormData(prev => ({ ...prev, avatarUrl: response.data.avatarUrl }));
         await refreshProfile();
-        setMessage({ type: 'success', text: 'Cập nhật ảnh đại diện thành công!' });
-      } else {
-        setMessage({ type: 'error', text: response.message || 'Lỗi khi cập nhật ảnh đại diện.' });
+        toast.success('Cập nhật ảnh đại diện thành công!');
       }
     } catch (err: any) {
-      console.error('DEBUG - Avatar upload error details:', err);
-      const errorMsg = err.response?.data?.message || err.message || 'Lỗi khi tải ảnh lên.';
-      setMessage({ type: 'error', text: `Lỗi: ${errorMsg}` });
+      toast.error('Lỗi khi tải ảnh lên.');
     } finally {
       setIsUploading(false);
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    
-    setMessage(null);
-    setIsLoading(true);
-    
+  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Kích thước ảnh không được vượt quá 2MB.');
+      return;
+    }
+
+    setIsUploadingCover(true);
     try {
-      await userService.updateProfile(formData);
-      await refreshProfile();
-      setMessage({ type: 'success', text: 'Cập nhật hồ sơ cá nhân thành công!' });
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/cover_${Date.now()}.${fileExt}`;
+      const filePath = `covers/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      setFormData(prev => ({ ...prev, coverUrl: data.publicUrl }));
+      toast.success('Cập nhật ảnh bìa thành công!');
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Lỗi khi cập nhật hồ sơ.' });
+      toast.error('Lỗi khi tải ảnh bìa.');
     } finally {
-      setIsLoading(false);
+      setIsUploadingCover(false);
     }
   };
 
@@ -110,186 +220,409 @@ export const ProfilePage: React.FC = () => {
     confirmPassword: '',
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordMessage(null);
+    if (e) e.preventDefault();
     
     if (passwordData.newPassword.length < 6) {
-      setPasswordMessage({ type: 'error', text: 'Mật khẩu phải có ít nhất 6 ký tự.' });
+      toast.error('Mật khẩu phải có ít nhất 6 ký tự.');
       return;
     }
     
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setPasswordMessage({ type: 'error', text: 'Mật khẩu xác nhận không khớp.' });
+      toast.error('Mật khẩu xác nhận không khớp.');
       return;
     }
     
     setPasswordLoading(true);
-    
     try {
       const { error } = await supabase.auth.updateUser({
         password: passwordData.newPassword
       });
-      
       if (error) throw error;
-      
-      setPasswordMessage({ type: 'success', text: 'Đổi mật khẩu thành công!' });
+      toast.success('Đổi mật khẩu thành công!');
       setPasswordData({ newPassword: '', confirmPassword: '' });
     } catch (err: any) {
-      setPasswordMessage({ type: 'error', text: err.message || 'Lỗi khi cập nhật mật khẩu.' });
+      toast.error(err.message || 'Lỗi khi cập nhật mật khẩu.');
     } finally {
       setPasswordLoading(false);
     }
   };
 
-  if (!user) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Vui lòng đăng nhập để xem hồ sơ.</div>;
+  const toggleTravelStyle = (style: string) => {
+    const currentStyles = formData.travelStyle ? formData.travelStyle.split(',').map(s => s.trim()).filter(Boolean) : [];
+    let newStyles;
+    if (currentStyles.includes(style)) {
+      newStyles = currentStyles.filter(s => s !== style);
+    } else {
+      newStyles = [...currentStyles, style];
+    }
+    setFormData(prev => ({ ...prev, travelStyle: newStyles.join(', ') }));
+  };
+
+  const toggleLanguage = (langId: string | number) => {
+    // If it's the primary language, we don't toggle it here unless we have a better UI
+    // For now, let's allow multiple selection for "Ngôn ngữ giao tiếp"
+    const currentLangs = formData.otherLanguages ? formData.otherLanguages.split(',').map(s => s.trim()).filter(Boolean) : [];
+    const idStr = langId.toString();
+    
+    let newLangs;
+    if (currentLangs.includes(idStr)) {
+      newLangs = currentLangs.filter(s => s !== idStr);
+    } else {
+      newLangs = [...currentLangs, idStr];
+    }
+    setFormData(prev => ({ ...prev, otherLanguages: newLangs.join(', ') }));
+  };
+
+  const handleAddCustomStyle = () => {
+    if (!customStyle.trim()) return;
+    toggleTravelStyle(customStyle.trim());
+    setCustomStyle('');
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!user) return;
+    
+    setIsLoading(true);
+    try {
+      await userService.updateProfile(formData);
+      await refreshProfile();
+      toast.success('Cập nhật hồ sơ cá nhân thành công!');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err: any) {
+      toast.error(err.message || 'Lỗi khi cập nhật hồ sơ.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isFetching) {
+    return (
+      <div className="tc-profile-container">
+        <LoadingBlock />
+      </div>
+    );
   }
+
+  const currentStyles = formData.travelStyle ? formData.travelStyle.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const currentOtherLangs = formData.otherLanguages ? formData.otherLanguages.split(',').map(s => s.trim()).filter(Boolean) : [];
 
   return (
     <div className="tc-profile-container">
-      <div className="tc-profile-header">
-        <div className="tc-profile-cover"></div>
-        <div className="tc-profile-avatar-wrapper">
-          <div className="tc-profile-avatar-container">
-            <div 
-              className={`tc-profile-avatar ${isUploading ? 'tc-avatar-uploading' : ''}`}
-              onClick={handleAvatarClick}
-              title="Nhấn để đổi ảnh đại diện"
-            >
-              {formData.avatarUrl ? (
-                <img src={formData.avatarUrl} alt="Avatar" className="tc-avatar-img" />
-              ) : (
-                <span className="tc-avatar-placeholder">
-                  {formData.fullName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase()}
-                </span>
-              )}
-              <div className="tc-avatar-overlay">
-                <span className="tc-avatar-icon">📷</span>
+      <div className="user-profile-premium-header">
+        <div className="profile-header-top">
+          <div className="profile-banner-container" onClick={handleCoverClick}>
+            {formData.coverUrl ? (
+              <img src={formData.coverUrl} alt="Cover" className="profile-banner-img" />
+            ) : (
+              <div className="profile-banner-placeholder">
+                <span className="banner-icon">🖼️</span>
+                <span>Thêm ảnh bìa để trang cá nhân đẹp hơn</span>
               </div>
-              {isUploading && <div className="tc-avatar-spinner"></div>}
+            )}
+            <div className="banner-overlay">
+              <span className="overlay-text">📸 Thay đổi ảnh bìa</span>
             </div>
-            <input 
-              type="file" 
-              ref={fileInputRef} 
-              onChange={handleAvatarChange} 
-              accept="image/*" 
-              style={{ display: 'none' }} 
-            />
+            {isUploadingCover && (
+              <div className="banner-loader">
+                <div className="spinner"></div>
+              </div>
+            )}
           </div>
-          <div className="tc-profile-title">
-            <h2>{formData.fullName || 'Người dùng mới'}</h2>
-            <p>{user.email}</p>
+
+          <div className="profile-avatar-overlap" onClick={handleAvatarClick}>
+            <div className="avatar-wrapper-inner">
+              {formData.avatarUrl ? (
+                <img src={formData.avatarUrl} alt="Avatar" className="overlap-avatar-img" />
+              ) : (
+                <div className="overlap-avatar-placeholder">
+                  {formData.fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
+                </div>
+              )}
+              <div className="avatar-overlay">
+                <span className="avatar-overlay-icon">📸</span>
+              </div>
+            </div>
+            <div className="avatar-status-dot"></div>
+            {isUploading && (
+              <div className="avatar-loader-overlay">
+                <div className="spinner-small"></div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="header-action-bar">
+          <div className="header-info">
+            <h2>{formData.fullName || 'Người dùng'}</h2>
+            <p className="header-subtitle">{user?.email}</p>
+          </div>
+          <div className="header-buttons">
+            <Button type="button" variant="primary" onClick={handleSave} isLoading={isLoading}>
+              Lưu thay đổi
+            </Button>
+            <input type="file" ref={fileInputRef} onChange={handleAvatarChange} accept="image/*" style={{ display: 'none' }} />
+            <input type="file" ref={coverInputRef} onChange={handleCoverChange} accept="image/*" style={{ display: 'none' }} />
           </div>
         </div>
       </div>
 
-      <div className="tc-profile-content">
-        <Card shadow="medium" className="tc-profile-card" style={{ marginBottom: '2rem' }}>
-          <h3 className="tc-profile-card-title">Thông tin cá nhân</h3>
-          
-          {message && (
-            <div className={`tc-profile-message tc-profile-message--${message.type}`}>
-              {message.text}
+      <form className="user-profile-form" onSubmit={handleSave}>
+        {/* Section 1: Basic Info */}
+        <div className="profile-form-section">
+          <h3><span className="section-icon">👤</span> Thông tin cơ bản</h3>
+          <div className="form-grid">
+            <Input
+              label="Họ và tên"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleChange}
+              placeholder="Nhập họ và tên của bạn"
+              fullWidth
+            />
+            <Input
+              label="Số điện thoại"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Nhập số điện thoại"
+              fullWidth
+            />
+            <div className="tc-input-container">
+              <label className="tc-input-label">Giới tính</label>
+              <select name="gender" value={formData.gender} onChange={handleChange} className="tc-input-field">
+                <option value="">Chọn giới tính</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
+              </select>
             </div>
-          )}
-          
-          {isFetching ? (
-            <p>Đang tải dữ liệu...</p>
-          ) : (
-            <form onSubmit={handleSave} className="tc-profile-form">
-              <div className="tc-profile-grid">
-                <Input
-                  label="Họ và tên"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  placeholder="Nhập họ và tên đầy đủ"
-                  fullWidth
-                />
-                <Input
-                  label="Số điện thoại"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder="Nhập số điện thoại"
-                  fullWidth
-                />
-                <Input
-                  label="Ngày sinh"
-                  name="dateOfBirth"
-                  type="date"
-                  value={formData.dateOfBirth}
-                  onChange={handleChange}
-                  fullWidth
-                />
-                <div className="tc-form-group tc-input-wrapper" style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <label className="tc-input-label" style={{ fontWeight: 500, color: 'var(--tc-text-primary)' }}>Giới tính</label>
-                  <select 
-                    name="gender" 
-                    value={formData.gender} 
-                    onChange={handleChange}
-                    className="tc-input-field"
-                    style={{ padding: '0.75rem', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-gray-300)' }}
-                  >
-                    <option value="">-- Chọn giới tính --</option>
-                    <option value="male">Nam</option>
-                    <option value="female">Nữ</option>
-                    <option value="other">Khác</option>
-                  </select>
-                </div>
-              </div>
-              
-              <div className="tc-profile-actions">
-                <Button type="submit" variant="primary" isLoading={isLoading}>
-                  Lưu thay đổi
-                </Button>
-              </div>
-            </form>
-          )}
-        </Card>
+            <Input
+              label="Ngày sinh"
+              name="dateOfBirth"
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              fullWidth
+            />
+          </div>
+        </div>
 
-        <Card shadow="medium" className="tc-profile-card">
-          <h3 className="tc-profile-card-title">Đổi mật khẩu</h3>
-          
-          {passwordMessage && (
-            <div className={`tc-profile-message tc-profile-message--${passwordMessage.type}`}>
-              {passwordMessage.text}
+        {/* Section 2: Location */}
+        <div className="profile-form-section">
+          <h3><span className="section-icon">📍</span> Khu vực sinh sống</h3>
+          <div className="form-grid">
+            <div className="tc-input-container">
+              <label className="tc-input-label">Miền</label>
+              <select 
+                name="region" 
+                value={formData.region} 
+                onChange={(e) => {
+                  handleChange(e);
+                  setProvinceSearch('');
+                  setFormData(prev => ({ ...prev, homeProvinceId: '' }));
+                }} 
+                className="tc-input-field"
+              >
+                <option value="">Chọn miền</option>
+                <option value="Miền Bắc">Miền Bắc</option>
+                <option value="Miền Trung">Miền Trung</option>
+                <option value="Miền Nam">Miền Nam</option>
+              </select>
+            </div>
+            <div className="tc-input-container" style={{ position: 'relative' }}>
+              <label className="tc-input-label">Tỉnh thành</label>
+              <input
+                type="text"
+                className="tc-input-field"
+                placeholder={formData.region ? "Tìm tỉnh thành..." : "Vui lòng chọn miền trước"}
+                value={provinceSearch}
+                onChange={(e) => {
+                  setProvinceSearch(e.target.value);
+                  setShowProvinceSuggestions(true);
+                }}
+                onFocus={() => setShowProvinceSuggestions(true)}
+                disabled={!formData.region}
+              />
+              {showProvinceSuggestions && formData.region && (
+                <div className="suggestions-dropdown">
+                  {provinces
+                    .filter(p => p.region === formData.region && p.name.toLowerCase().includes(provinceSearch.toLowerCase()))
+                    .map(p => (
+                      <div 
+                        key={p.id} 
+                        className="suggestion-item"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, homeProvinceId: p.id }));
+                          setProvinceSearch(p.name);
+                          setShowProvinceSuggestions(false);
+                        }}
+                      >
+                        {p.name}
+                      </div>
+                    ))
+                  }
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Section 3: Travel Style */}
+        <div className="profile-form-section">
+          <h3><span className="section-icon">✈️</span> Phong cách du lịch</h3>
+          <div className="style-tags-container">
+            {styleSuggestions.map(style => (
+              <div 
+                key={style} 
+                className={`style-tag ${currentStyles.includes(style) ? 'active' : ''}`}
+                onClick={() => toggleTravelStyle(style)}
+              >
+                {style}
+              </div>
+            ))}
+          </div>
+          <div className="custom-style-input">
+            <input 
+              type="text" 
+              placeholder="Nhập phong cách riêng của bạn..." 
+              value={customStyle}
+              onChange={(e) => setCustomStyle(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomStyle())}
+            />
+            <Button type="button" variant="outline" size="small" onClick={handleAddCustomStyle}>Thêm</Button>
+          </div>
+          {currentStyles.filter(s => !styleSuggestions.includes(s)).length > 0 && (
+            <div className="active-custom-tags">
+              {currentStyles.filter(s => !styleSuggestions.includes(s)).map(s => (
+                <div key={s} className="style-tag active custom">
+                  {s} <span onClick={() => toggleTravelStyle(s)}>✕</span>
+                </div>
+              ))}
             </div>
           )}
-          
-          <form onSubmit={handlePasswordChange} className="tc-profile-form">
-            <div className="tc-profile-grid">
-              <Input
-                label="Mật khẩu mới"
-                name="newPassword"
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                placeholder="Nhập mật khẩu mới"
-                fullWidth
-              />
-              <Input
-                label="Xác nhận mật khẩu"
-                name="confirmPassword"
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                placeholder="Nhập lại mật khẩu mới"
-                fullWidth
-              />
+        </div>
+
+        {/* Section 4: Languages */}
+        <div className="profile-form-section">
+          <h3><span className="section-icon">🌐</span> Ngôn ngữ & Hệ thống</h3>
+          <div className="form-grid-single">
+            <div className="tc-input-container">
+              <label className="tc-input-label">Ngôn ngữ giao tiếp (Chọn nhiều)</label>
+              <div className="style-tags-container">
+                {languages.map(lang => (
+                  <div 
+                    key={lang.id} 
+                    className={`style-tag ${formData.preferredLanguageId?.toString() === lang.id.toString() || currentOtherLangs.includes(lang.id.toString()) ? 'active' : ''}`}
+                    onClick={() => {
+                      if (formData.preferredLanguageId?.toString() === lang.id.toString()) {
+                        setFormData(prev => ({ ...prev, preferredLanguageId: '' }));
+                      } else if (!formData.preferredLanguageId) {
+                        setFormData(prev => ({ ...prev, preferredLanguageId: lang.id }));
+                      } else {
+                        toggleLanguage(lang.id);
+                      }
+                    }}
+                  >
+                    {lang.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="form-grid mt-4">
+            <div className="tc-input-container">
+              <label className="tc-input-label">Email tài khoản</label>
+              <input type="text" value={user?.email || ''} className="tc-input-field" disabled />
+              <small style={{ color: 'var(--tc-text-secondary)', marginTop: '4px', display: 'block' }}>Email không thể thay đổi</small>
+            </div>
+          </div>
+        </div>
+
+        <div className="form-actions">
+          <Button type="submit" variant="primary" size="large" isLoading={isLoading} fullWidth>
+            Lưu tất cả thay đổi
+          </Button>
+        </div>
+      </form>
+
+      {/* Section 5: Security - Separated as requested */}
+      <div className="profile-form-section security-section">
+        <h3><span className="section-icon">🔒</span> Bảo mật</h3>
+        <div className="form-grid">
+          <Input
+            label="Mật khẩu mới"
+            type="password"
+            placeholder="Nhập mật khẩu mới nếu muốn đổi"
+            value={passwordData.newPassword}
+            onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+            fullWidth
+          />
+          <Input
+            label="Xác nhận mật khẩu"
+            type="password"
+            placeholder="Nhập lại mật khẩu mới"
+            value={passwordData.confirmPassword}
+            onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+            fullWidth
+          />
+        </div>
+        <div className="security-action">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handlePasswordChange}
+            isLoading={passwordLoading}
+            disabled={!passwordData.newPassword}
+            fullWidth
+          >
+            {passwordData.newPassword ? 'Cập nhật mật khẩu' : 'Nhập mật khẩu mới để cập nhật'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Cover Selection Modal */}
+      {isCoverModalOpen && (
+        <div className="cover-modal-overlay" onClick={() => setIsCoverModalOpen(false)}>
+          <div className="cover-modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Chọn ảnh bìa</h3>
+              <button className="close-btn" onClick={() => setIsCoverModalOpen(false)}>✕</button>
             </div>
             
-            <div className="tc-profile-actions">
-              <Button type="submit" variant="outline" isLoading={passwordLoading}>
-                Đổi mật khẩu
+            <div className="covers-grid-container">
+              {isLoadingCovers ? (
+                <div className="modal-loading">
+                  <div className="spinner-small"></div>
+                  <span>Đang tải danh sách ảnh...</span>
+                </div>
+              ) : (
+                <div className="covers-grid">
+                  {defaultCovers.map((url, index) => (
+                    <div 
+                      key={index} 
+                      className={`cover-item ${formData.coverUrl === url ? 'selected' : ''}`}
+                      onClick={() => handleSelectDefaultCover(url)}
+                    >
+                      <img src={url} alt={`Default Cover ${index + 1}`} />
+                      {formData.coverUrl === url && <div className="selected-check">✓</div>}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="modal-footer">
+              <p className="modal-hint">Hoặc bạn có thể tự tải ảnh lên từ thiết bị</p>
+              <Button variant="primary" fullWidth onClick={handleUploadNewCover}>
+                📁 Tải ảnh mới lên
               </Button>
             </div>
-          </form>
-        </Card>
-      </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

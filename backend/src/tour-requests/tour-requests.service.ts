@@ -126,17 +126,7 @@ export class TourRequestsService {
       message: `Bạn có một yêu cầu tham gia tour mới cho "${tour.title}"`,
     });
 
-    // 8. Log activity
-    await this.activityLogsService.log(
-      userId,
-      'TOUR_REQUEST_CREATED',
-      'TOUR_REQUEST',
-      request.id,
-      { tourTitle: tour.title },
-    );
-
     return request;
-
   }
 
   async getUserRequests(userId: string, query: TourRequestQueryDto) {
@@ -181,6 +171,7 @@ export class TourRequestsService {
         requestedAt: req.requested_at,
         processedAt: req.processed_at,
         responseNote: req.response_note,
+        cancellationNote: req.cancellation_note,
         tourPrice: Number(req.tours.price),
         hasTourReview: !!req.tour_reviews,
         hasGuideReview: !!req.guide_reviews,
@@ -237,6 +228,8 @@ export class TourRequestsService {
         participantCount: req.participant_count,
         status: req.status,
         note: req.note,
+        responseNote: req.response_note,
+        cancellationNote: req.cancellation_note,
         requestedAt: req.requested_at,
         processedAt: req.processed_at,
       })),
@@ -276,7 +269,7 @@ export class TourRequestsService {
       data: {
         status: 'cancelled_by_user',
         cancelled_at: new Date(),
-        response_note: dto.reason || 'Người dùng đã hủy yêu cầu',
+        cancellation_note: dto.reason || 'Người dùng đã hủy yêu cầu',
       },
     });
 

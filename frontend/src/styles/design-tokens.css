@@ -40,6 +40,8 @@
   --tc-spacing-5: 24px;
   --tc-spacing-6: 32px;
   --tc-spacing-8: 48px;
+  --tc-spacing-10: 64px;
+  --tc-spacing-12: 80px;
 
   /* Border Radius */
   --tc-radius-sm: 4px;
@@ -63,6 +65,7 @@ body {
   background-color: var(--tc-bg-subtle);
   margin: 0;
   line-height: 1.5;
+  scrollbar-gutter: stable;
 }
 
 h1, h2, h3, h4, h5, h6 {

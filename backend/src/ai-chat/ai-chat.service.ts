@@ -92,8 +92,10 @@ export class AiChatService {
     });
 
     const toursContext = tours.map(t => {
-      const durationDays = Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-      return `- ${t.title} tại ${t.province}: ${durationDays} ngày, giá ${Number(t.price).toLocaleString()}đ. Mô tả: ${t.description?.substring(0, 100)}...`;
+      const durationDays = (t.start_date && t.end_date) 
+        ? Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24)) + 1 
+        : 'Chưa xác định';
+      return `- ${t.title} tại ${t.province}: ${durationDays === 'Chưa xác định' ? durationDays : durationDays + ' ngày'}, giá ${Number(t.price).toLocaleString()}đ. Mô tả: ${t.description?.substring(0, 100)}...`;
     }).join('\n');
 
     // 4. Lấy lịch sử hội thoại gần đây

@@ -62,20 +62,6 @@ export class ToursController {
     return this.toursService.getLatestCompanionPosts();
   }
 
-  @Get(':id')
-  async getTourDetail(@Param('id') id: string) {
-    return this.toursService.getPublicTourDetail(id);
-  }
-
-  @Get(':id/reviews')
-  async getTourReviews(
-    @Param('id') id: string,
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-  ) {
-    return this.toursService.getTourReviews(id, Number(page), Number(limit));
-  }
-
   // ==========================================
   // GUIDE MANAGEMENT ENDPOINTS
   // ==========================================
@@ -109,10 +95,32 @@ export class ToursController {
 
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
+  @Get('guide/:id')
+  async getTourDetailForGuide(@Request() req, @Param('id') id: string) {
+    const userId = req.user.id;
+    return this.toursService.getTourDetailForGuide(userId, id);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.GUIDE)
   @Patch('guide/:id')
   async updateTour(@Request() req, @Param('id') id: string, @Body() data: any) {
     const userId = req.user.id;
     return this.toursService.updateTour(userId, id, data);
+  }
+
+  @Get(':id')
+  async getTourDetail(@Param('id') id: string) {
+    return this.toursService.getPublicTourDetail(id);
+  }
+
+  @Get(':id/reviews')
+  async getTourReviews(
+    @Param('id') id: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    return this.toursService.getTourReviews(id, Number(page), Number(limit));
   }
 
   @Get(':id/itinerary')
@@ -147,5 +155,13 @@ export class ToursController {
   ) {
     const userId = req.user.id;
     return this.toursService.updateTourImages(userId, id, images);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.GUIDE)
+  @Patch('guide/:id/delete')
+  async deleteTour(@Request() req, @Param('id') id: string) {
+    const userId = req.user.id;
+    return this.toursService.deleteTour(userId, id);
   }
 }

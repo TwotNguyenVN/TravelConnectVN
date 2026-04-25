@@ -196,4 +196,28 @@ export class FavoritesService {
       favoritedAt: f.created_at,
     }));
   }
+
+  async isTourFavorited(userId: string, tourId: string) {
+    const favorite = await this.prisma.favorite_tours.findUnique({
+      where: {
+        user_id_tour_id: {
+          user_id: userId,
+          tour_id: tourId,
+        },
+      },
+    });
+    return !!favorite;
+  }
+
+  async isGuideFavorited(userId: string, guideId: string) {
+    const favorite = await this.prisma.favorite_guides.findUnique({
+      where: {
+        user_id_guide_profile_id: {
+          user_id: userId,
+          guide_profile_id: guideId,
+        },
+      },
+    });
+    return !!favorite;
+  }
 }

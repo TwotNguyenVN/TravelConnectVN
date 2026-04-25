@@ -31,10 +31,7 @@ export class RecommendationsService {
         },
         include: {
           tour_categories: true,
-          tour_images: {
-            take: 1,
-            orderBy: { sort_order: 'asc' },
-          },
+          tour_images: true,
           guide_profiles: {
             include: {
               users: {

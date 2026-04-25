@@ -15,6 +15,8 @@ export interface GuideProfile {
   homeProvince?: { id: number; name: string; region: string };
   familiarProvinces?: string;
   region?: string;
+  coverUrl?: string;
+  avatarUrl?: string;
 }
 
 export interface MasterData {
@@ -29,6 +31,10 @@ export const guideService = {
 
   getSkills: async () => {
     return api.get('/guides/skills');
+  },
+
+  getDefaultCovers: async () => {
+    return api.get('/guides/default-covers');
   },
 
   getMyProfile: async () => {

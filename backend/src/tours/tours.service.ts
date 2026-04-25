@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -84,9 +84,12 @@ export class ToursService {
       price: Number(t.price),
       rating: 5.0, // Tạm thời để 5.0, cần query avg rating sau
       location: t.province,
-      duration: `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`,
+      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
       category: t.tour_categories?.name || 'Chưa phân loại',
       categoryId: t.category_id?.toString(),
+      maxParticipants: t.max_participants,
+      numDays: t.num_days,
+      numNights: t.num_nights,
     }));
 
     return {
@@ -114,7 +117,6 @@ export class ToursService {
           select: { tour_reviews: true },
         },
         tour_images: {
-          take: 1,
           select: { image_url: true },
         },
         tour_categories: {
@@ -128,7 +130,10 @@ export class ToursService {
     }
 
     // Lấy ảnh bìa và gallery
-    const images = (tour.tour_images || []).map((img) => img.image_url);
+    const images = Array.isArray(tour.tour_images) 
+      ? tour.tour_images.map(img => img.image_url) 
+      : [];
+    
     if (images.length === 0) {
       images.push('https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image');
     }
@@ -144,24 +149,31 @@ export class ToursService {
       title: tour.title,
       cover: images[0],
       price: Number(tour.price),
-      rating: aggregate._avg.rating || 5.0, // Mặc định 5.0 nếu chưa có review
+      rating: aggregate._avg.rating || 5.0,
       location: tour.province,
-      duration: `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`,
+      duration: tour.duration || (tour.start_date && tour.end_date ? `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+      numDays: tour.num_days,
+      numNights: tour.num_nights,
+      startDate: tour.start_date,
+      endDate: tour.end_date,
       category: tour.tour_categories?.name || 'Chưa phân loại',
       categoryId: tour.category_id?.toString(),
-      reviewsCount: tour._count.tour_reviews,
+      reviewsCount: (tour as any)._count?.tour_reviews || 0,
       maxParticipants: tour.max_participants,
-      meetPoint: tour.meet_point || `Trung tâm ${tour.province}`,
+      meetPoint: tour.meet_point || tour.province,
+      meetAddress: tour.meet_address,
+      meetTime: tour.meet_time,
       description: tour.description || 'Chưa có mô tả chi tiết.',
+      participantRequirements: tour.participant_requirements,
       images: images,
-      guideId: tour.guide_profiles.user_id,
+      guideId: (tour as any).guide_profiles?.user_id,
       guide: {
-        name: tour.guide_profiles.users?.full_name || 'Hướng dẫn viên',
-        avatar: tour.guide_profiles.avatar_url || '',
-        exp: `${tour.guide_profiles.years_of_experience || 0} năm`,
-        bio: tour.guide_profiles.bio || 'Chưa có giới thiệu.',
+        name: (tour as any).guide_profiles?.users?.full_name || 'Hướng dẫn viên',
+        avatar: (tour as any).guide_profiles?.avatar_url || '',
+        exp: `${(tour as any).guide_profiles?.years_of_experience || 0} năm`,
+        bio: (tour as any).guide_profiles?.bio || 'Chưa có giới thiệu.',
       },
-      itinerary: tour.tour_locations.map((loc) => ({
+      itinerary: ((tour as any).tour_locations || []).map((loc: any) => ({
         day: loc.sequence_no,
         title: loc.location_name,
         address: loc.address,
@@ -171,7 +183,6 @@ export class ToursService {
           loc.notes ||
           `Tham quan ${loc.location_name} tại ${loc.address || tour.province}.`,
       })),
-
     };
   }
 
@@ -252,7 +263,7 @@ export class ToursService {
       price: Number(t.price),
       rating: 5.0,
       location: t.province,
-      duration: `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`,
+      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
       category: t.tour_categories?.name || 'Chưa phân loại',
       categoryId: t.category_id?.toString(),
     }));
@@ -262,7 +273,16 @@ export class ToursService {
     const guides = await this.prisma.guide_profiles.findMany({
       where: {
         visibility_status: 'visible',
-        verification_status: 'approved',
+        verification_status: { in: ['approved', 'verified'] },
+        bio: { not: null, notIn: [''] },
+        years_of_experience: { not: null },
+        home_province_id: { not: null },
+        guide_languages: { some: {} },
+        users: {
+          full_name: { not: null, notIn: [''] },
+          avatar_url: { not: null, notIn: [''] },
+          phone: { not: null, notIn: [''] },
+        },
       },
       include: {
         users: true,
@@ -273,7 +293,8 @@ export class ToursService {
     return guides.map((g) => ({
       id: g.id,
       name: g.users?.full_name || 'Hướng dẫn viên',
-      avatar: g.avatar_url || '',
+      avatar: g.users?.avatar_url || '',
+      coverUrl: g.cover_url || g.users?.avatar_url || '',
       location: g.working_area || 'Việt Nam',
       rating: 5.0,
     }));
@@ -381,28 +402,116 @@ export class ToursService {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
-    // 2. Chuẩn bị dữ liệu
-    const tourData: any = {
-      guide_profile_id: guideProfile.id,
-      title: data.title,
-      category_id: data.categoryId ? BigInt(data.categoryId) : null,
-      province: data.province,
-      district: data.district,
-      start_date: new Date(data.startDate),
-      end_date: new Date(data.endDate),
-      price: data.price,
-      max_participants: Number(data.maxParticipants),
-      meet_point: data.meetPoint,
-      description: data.description,
-      participant_requirements: data.participantRequirements,
-      business_status: data.businessStatus || 'draft',
-      visibility_status: data.visibilityStatus || 'visible',
-      published_at: data.businessStatus === 'published' ? new Date() : null,
-    };
+    // 2. Thực hiện tạo tour và các dữ liệu liên quan trong một transaction
+    return this.prisma.$transaction(async (tx) => {
+      // 2.1 Tạo tour cơ bản
+      const tour = await tx.tours.create({
+        data: {
+          guide_profile_id: guideProfile.id,
+          title: data.title,
+          category_id: data.categoryId ? BigInt(data.categoryId) : null,
+          province: data.province,
+          district: data.district,
+          start_date: data.startDate && !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null,
+          end_date: data.endDate && !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null,
+          duration: data.duration,
+          num_days: data.numDays ? Number(data.numDays) : null,
+          num_nights: data.numNights ? Number(data.numNights) : null,
+          price: data.price,
+          max_participants: Number(data.maxParticipants),
+          meet_point: data.meetPoint,
+          meet_address: data.meetAddress,
+          meet_time: data.meetTime,
+          meet_latitude: data.meetLatitude,
+          meet_longitude: data.meetLongitude,
+          google_maps_link: data.googleMapsLink,
+          route_map_link: data.routeMapLink,
+          description: data.description,
+          participant_requirements: data.participantRequirements,
+          business_status: data.businessStatus || 'draft',
+          visibility_status: data.visibilityStatus || 'visible',
+          published_at: data.businessStatus === 'published' ? new Date() : null,
+        },
+      });
 
-    // 3. Tạo tour
-    return this.prisma.tours.create({
-      data: tourData,
+      // 2.2 Tạo lịch trình (Itinerary)
+      if (data.itinerary && Array.isArray(data.itinerary)) {
+        const itineraryData = data.itinerary.map((item, idx) => ({
+          tour_id: tour.id,
+          sequence_no: idx + 1,
+          location_name: item.locationName,
+          address: item.address || '',
+          notes: item.notes,
+          has_breakfast: !!item.hasBreakfast,
+          has_lunch: !!item.hasLunch,
+          has_dinner: !!item.hasDinner,
+          accommodation_info: item.accommodation || '',
+          highlight_note: item.note || '',
+          latitude: item.latitude,
+          longitude: item.longitude,
+          visit_time: item.visitTime ? new Date(item.visitTime) : null,
+        }));
+
+        if (itineraryData.length > 0) {
+          await tx.tour_locations.createMany({
+            data: itineraryData,
+          });
+        }
+      }
+
+      // 2.3 Tạo điểm ghé thăm (Destinations)
+      if (data.destinations && Array.isArray(data.destinations)) {
+        const destinationData = data.destinations.map((dest, index) => ({
+          tour_id: tour.id,
+          sequence_no: index + 1,
+          name: dest.name,
+          address: dest.address,
+          google_maps_link: dest.googleMapsLink,
+        }));
+
+        if (destinationData.length > 0) {
+          await tx.tour_destinations.createMany({
+            data: destinationData,
+          });
+        }
+      }
+
+      // 2.3 Tạo thư viện ảnh (Media)
+      if (data.images && Array.isArray(data.images)) {
+        const imagesData = data.images.map((img, index) => ({
+          tour_id: tour.id,
+          image_url: img.imageUrl,
+          caption: img.caption || '',
+          sort_order: index,
+          is_cover: img.isCover || false,
+        }));
+
+        if (imagesData.length > 0) {
+          await tx.tour_images.createMany({
+            data: imagesData,
+          });
+        }
+      }
+
+      // 2.4 Gắn nơi lưu trú (Accommodations)
+      if (data.accommodations && Array.isArray(data.accommodations)) {
+        const accData = data.accommodations.map((acc, index) => ({
+          tour_id: tour.id,
+          accommodation_id: acc.accommodationId,
+          check_in_date: acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime()) ? new Date(acc.checkInDate) : null,
+          check_out_date: acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime()) ? new Date(acc.checkOutDate) : null,
+          notes: acc.notes,
+          sort_order: index,
+        }));
+
+        if (accData.length > 0) {
+          await tx.tour_accommodations.createMany({
+            data: accData,
+          });
+        }
+      }
+
+      return tour;
     });
   }
 
@@ -429,41 +538,156 @@ export class ToursService {
       throw new NotFoundException('Bạn không có quyền chỉnh sửa tour này');
     }
 
-    // 3. Chuẩn bị dữ liệu cập nhật
-    const updateData: any = {};
-    if (data.title) updateData.title = data.title;
-    if (data.categoryId) updateData.category_id = BigInt(data.categoryId);
-    if (data.province) updateData.province = data.province;
-    if (data.district) updateData.district = data.district;
-    if (data.startDate) updateData.start_date = new Date(data.startDate);
-    if (data.endDate) updateData.end_date = new Date(data.endDate);
-    if (data.price !== undefined) updateData.price = data.price;
-    if (data.maxParticipants !== undefined)
-      updateData.max_participants = Number(data.maxParticipants);
-    if (data.meetPoint !== undefined) updateData.meet_point = data.meetPoint;
-    if (data.description !== undefined)
-      updateData.description = data.description;
-    if (data.participantRequirements !== undefined)
-      updateData.participant_requirements = data.participantRequirements;
-    if (data.businessStatus) updateData.business_status = data.businessStatus;
-    if (data.visibilityStatus)
-      updateData.visibility_status = data.visibilityStatus;
+    // 3. Thực hiện cập nhật trong một transaction
+    return this.prisma.$transaction(async (tx) => {
+      // 3.1 Cập nhật thông tin cơ bản của tour
+      const updateData: any = {};
+      if (data.title) updateData.title = data.title;
+      if (data.categoryId) updateData.category_id = BigInt(data.categoryId);
+      if (data.province) updateData.province = data.province;
+      if (data.district !== undefined) updateData.district = data.district;
+      if (data.startDate) updateData.start_date = !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null;
+      if (data.endDate) updateData.end_date = !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null;
+      if (data.duration !== undefined) updateData.duration = data.duration;
+      if (data.numDays !== undefined) updateData.num_days = data.numDays ? Number(data.numDays) : null;
+      if (data.numNights !== undefined) updateData.num_nights = data.numNights ? Number(data.numNights) : null;
+      if (data.price !== undefined) updateData.price = data.price;
+      if (data.maxParticipants !== undefined) updateData.max_participants = Number(data.maxParticipants);
+      if (data.meetPoint !== undefined) updateData.meet_point = data.meetPoint;
+      if (data.meetAddress !== undefined) updateData.meet_address = data.meetAddress;
+      if (data.meetTime !== undefined) updateData.meet_time = data.meetTime;
+      if (data.meetLatitude !== undefined) updateData.meet_latitude = data.meetLatitude;
+      if (data.meetLongitude !== undefined) updateData.meet_longitude = data.meetLongitude;
+      if (data.googleMapsLink !== undefined) updateData.google_maps_link = data.googleMapsLink;
+      if (data.routeMapLink !== undefined) updateData.route_map_link = data.routeMapLink;
+      if (data.description !== undefined) updateData.description = data.description;
+      if (data.participantRequirements !== undefined) updateData.participant_requirements = data.participantRequirements;
+      if (data.businessStatus) updateData.business_status = data.businessStatus;
+      if (data.visibilityStatus) updateData.visibility_status = data.visibilityStatus;
 
-    // Nếu chuyển sang published lần đầu, set published_at
-    if (
-      data.businessStatus === 'published' &&
-      tour.business_status !== 'published'
-    ) {
-      updateData.published_at = new Date();
+      if (data.businessStatus === 'published' && tour.business_status !== 'published') {
+        updateData.published_at = new Date();
+      }
+
+      updateData.updated_at = new Date();
+
+      const updatedTour = await tx.tours.update({
+        where: { id: tourId },
+        data: updateData,
+      });
+
+      // 3.2 Cập nhật Lịch trình (Itinerary) nếu có
+      if (data.itinerary && Array.isArray(data.itinerary)) {
+        await tx.tour_locations.deleteMany({ where: { tour_id: tourId } });
+        const itineraryData = data.itinerary.map((item, idx) => ({
+          tour_id: tourId,
+          sequence_no: idx + 1,
+          location_name: item.locationName,
+          address: item.address || '',
+          notes: item.notes,
+          has_breakfast: !!item.hasBreakfast,
+          has_lunch: !!item.hasLunch,
+          has_dinner: !!item.hasDinner,
+          accommodation_info: item.accommodation || '',
+          highlight_note: item.note || '',
+          latitude: item.latitude,
+          longitude: item.longitude,
+          visit_time: item.visitTime ? new Date(item.visitTime) : null,
+        }));
+        if (itineraryData.length > 0) {
+          await tx.tour_locations.createMany({ data: itineraryData });
+        }
+      }
+
+      // 3.3 Cập nhật Điểm ghé thăm (Destinations) nếu có
+      if (data.destinations && Array.isArray(data.destinations)) {
+        await tx.tour_destinations.deleteMany({ where: { tour_id: tourId } });
+        const destinationData = data.destinations.map((dest, index) => ({
+          tour_id: tourId,
+          sequence_no: index + 1,
+          name: dest.name,
+          address: dest.address,
+          google_maps_link: dest.googleMapsLink,
+        }));
+        if (destinationData.length > 0) {
+          await tx.tour_destinations.createMany({ data: destinationData });
+        }
+      }
+
+      // 3.4 Cập nhật Thư viện ảnh (Images) nếu có
+      if (data.images && Array.isArray(data.images)) {
+        await tx.tour_images.deleteMany({ where: { tour_id: tourId } });
+        const imagesData = data.images.map((img, index) => ({
+          tour_id: tourId,
+          image_url: img.imageUrl,
+          caption: img.caption || '',
+          sort_order: index,
+          is_cover: img.isCover || false,
+        }));
+        if (imagesData.length > 0) {
+          await tx.tour_images.createMany({ data: imagesData });
+        }
+      }
+
+      // 3.5 Cập nhật Nơi lưu trú (Accommodations) nếu có
+      if (data.accommodations && Array.isArray(data.accommodations)) {
+        await tx.tour_accommodations.deleteMany({ where: { tour_id: tourId } });
+        const accData = data.accommodations.map((acc, index) => ({
+          tour_id: tourId,
+          accommodation_id: acc.accommodationId,
+          check_in_date: acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime()) ? new Date(acc.checkInDate) : null,
+          check_out_date: acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime()) ? new Date(acc.checkOutDate) : null,
+          notes: acc.notes,
+          sort_order: index,
+        }));
+        if (accData.length > 0) {
+          await tx.tour_accommodations.createMany({ data: accData });
+        }
+      }
+
+      return updatedTour;
+    }).catch(error => {
+      if (error.code === 'P2002' || error.message?.includes('violates check constraint')) {
+        if (error.message?.includes('tours_check')) {
+          throw new BadRequestException('Ngày kết thúc không thể trước ngày bắt đầu');
+        }
+        throw new BadRequestException('Dữ liệu không hợp lệ: ' + error.message);
+      }
+      throw error;
+    });
+  }
+
+  async getTourDetailForGuide(userId: string, tourId: string) {
+    // 1. Tìm guide profile
+    const guideProfile = await this.prisma.guide_profiles.findUnique({
+      where: { user_id: userId },
+    });
+
+    if (!guideProfile) {
+      throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
-    updateData.updated_at = new Date();
-
-    // 4. Cập nhật
-    return this.prisma.tours.update({
+    // 2. Lấy chi tiết tour và tất cả các bảng liên quan
+    const tour = await this.prisma.tours.findUnique({
       where: { id: tourId },
-      data: updateData,
+      include: {
+        tour_locations: { orderBy: { sequence_no: 'asc' } },
+        tour_destinations: { orderBy: { sequence_no: 'asc' } },
+        tour_images: { orderBy: { sort_order: 'asc' } },
+        tour_accommodations: { include: { partner_accommodations: true } },
+        tour_categories: true,
+      },
     });
+
+    if (!tour) {
+      throw new NotFoundException('Tour không tồn tại');
+    }
+
+    if (tour.guide_profile_id !== guideProfile.id) {
+      throw new NotFoundException('Bạn không có quyền xem tour này');
+    }
+
+    return tour;
   }
 
   async getTourItinerary(tourId: string) {
@@ -577,5 +801,31 @@ export class ToursService {
 
       return this.getTourImages(tourId);
     });
+  }
+  async deleteTour(userId: string, tourId: string) {
+    // 1. Kiểm tra quyền sở hữu
+    const tour = await this.prisma.tours.findFirst({
+      where: {
+        id: tourId,
+        guide_profiles: {
+          user_id: userId,
+        },
+      },
+    });
+
+    if (!tour) {
+      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+    }
+
+    // 2. Soft delete
+    await this.prisma.tours.update({
+      where: { id: tourId },
+      data: {
+        deleted_at: new Date(),
+        visibility_status: 'hidden',
+      },
+    });
+
+    return { success: true, message: 'Xóa tour thành công' };
   }
 }

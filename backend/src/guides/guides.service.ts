@@ -21,6 +21,22 @@ export class GuidesService {
     const where: any = {
       visibility_status: 'visible',
       deleted_at: null,
+      // 1. Phải được phê duyệt/xác minh
+      verification_status: { in: ['approved', 'verified'] },
+      // 2. Phải có giới thiệu (Bio)
+      bio: { not: null, notIn: [''] },
+      // 3. Phải có số năm kinh nghiệm
+      years_of_experience: { not: null },
+      // 4. Phải có tỉnh thành hoạt động
+      home_province_id: { not: null },
+      // 5. Phải có ít nhất 1 ngôn ngữ
+      guide_languages: { some: {} },
+      // 6. Thông tin cá nhân (tên, avt, sđt)
+      users: {
+        full_name: { not: null, notIn: [''] },
+        avatar_url: { not: null, notIn: [''] },
+        phone: { not: null, notIn: [''] },
+      },
     };
 
     if (query.workingArea) {
@@ -75,8 +91,15 @@ export class GuidesService {
    * Lấy chi tiết hướng dẫn viên công khai
    */
   async getPublicGuideDetail(id: string) {
-    const guide = await this.prisma.guide_profiles.findUnique({
-      where: { id },
+    // Thử tìm theo id (profile id) hoặc user_id
+    let guide = await this.prisma.guide_profiles.findFirst({
+      where: {
+        OR: [
+          { id: id },
+          { user_id: id }
+        ],
+        deleted_at: null
+      },
       include: {
         users: {
           select: {
@@ -96,6 +119,22 @@ export class GuidesService {
           take: 5,
           orderBy: { created_at: 'desc' },
         },
+        home_province: true,
+        tours: {
+          where: { 
+            visibility_status: 'visible',
+            business_status: 'published'
+          },
+          include: {
+            tour_images: {
+              select: { image_url: true }
+            },
+            tour_categories: {
+              select: { name: true }
+            }
+          },
+          orderBy: { created_at: 'desc' }
+        }
       },
     });
 
@@ -143,6 +182,10 @@ export class GuidesService {
       isAcceptingTours: guide.is_accepting_tours,
       otherLanguages: guide.other_languages || '',
       otherSkills: guide.other_skills || '',
+      familiarProvinces: guide.familiar_provinces || '',
+      region: guide.region || '',
+      coverUrl: guide.cover_url || '',
+      avatarUrl: guide.avatar_url || '',
       guideLanguages: guide.guide_languages.map((gl) => ({
         language: {
           id: Number(gl.languages.id),
@@ -155,14 +198,12 @@ export class GuidesService {
           name: gs.skills.name,
         },
       })),
-      homeProvinceId: guide.home_province_id ? Number(guide.home_province_id) : null,
       homeProvince: guide.home_province ? {
         id: Number(guide.home_province.id),
         name: guide.home_province.name,
         region: guide.home_province.region,
       } : null,
-      familiarProvinces: guide.familiar_provinces || '',
-      region: guide.region || '',
+      homeProvinceId: guide.home_province_id ? Number(guide.home_province_id) : null,
     };
   }
 
@@ -192,6 +233,7 @@ export class GuidesService {
         home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
         familiar_provinces: data.familiarProvinces,
         region: data.region,
+        cover_url: data.coverUrl,
       },
     });
   }
@@ -222,6 +264,7 @@ export class GuidesService {
         home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
         familiar_provinces: data.familiarProvinces,
         region: data.region,
+        cover_url: data.coverUrl,
       },
     });
   }
@@ -307,6 +350,16 @@ export class GuidesService {
     }));
   }
 
+  /**
+   * Lấy danh sách ảnh bìa mặc định
+   */
+  async getDefaultCovers() {
+    return this.prisma.default_covers.findMany({
+      where: { is_active: true },
+      orderBy: { created_at: 'asc' },
+    });
+  }
+
   // Helpers
   private async getGuideAverageRating(guideId: string) {
     const aggregate = await this.prisma.guide_reviews.aggregate({
@@ -321,7 +374,9 @@ export class GuidesService {
     return {
       id: g.id,
       name: g.users?.full_name || 'Hướng dẫn viên',
-      avatar: g.avatar_url || g.users?.avatar_url || '',
+      avatar: g.users?.avatar_url || '', // Account avatar
+      avatarUrl: g.avatar_url || g.users?.avatar_url || '', // Profile avatar (fallback to account)
+      coverUrl: g.cover_url || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/profile_cover_1.png',
       workingArea: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
       rating: rating,
@@ -350,6 +405,21 @@ export class GuidesService {
         rating: r.rating,
         comment: r.comment,
         date: r.created_at,
+      })),
+      homeProvince: g.home_province ? {
+        id: Number(g.home_province.id),
+        name: g.home_province.name,
+      } : null,
+      familiarProvinces: g.familiar_provinces || '',
+      region: g.region || '',
+      tours: (g.tours || []).map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        price: Number(t.price),
+        province: t.province,
+        image: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+        category: t.tour_categories?.name || 'Chưa phân loại',
+        duration: `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`,
       })),
     };
   }

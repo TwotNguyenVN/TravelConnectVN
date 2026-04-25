@@ -59,8 +59,17 @@ const CompanionListPage: React.FC = () => {
   return (
     <PageContainer className="companion-list-page">
       <div className="companion-header">
-        <h1>Tìm bạn đồng hành</h1>
-        <p>Kết nối với những người cùng đam mê xê dịch, cùng nhau khám phá những vùng đất mới.</p>
+        <div className="header-main-content">
+          <h1>Tìm bạn đồng hành</h1>
+          <p>Kết nối với những người cùng đam mê xê dịch, cùng nhau khám phá những vùng đất mới.</p>
+        </div>
+        <Button 
+          variant="primary" 
+          onClick={() => navigate('/user/companion-posts/create')}
+          className="create-post-btn"
+        >
+          ➕ Đăng bài ngay
+        </Button>
       </div>
 
       <div className="filter-section">

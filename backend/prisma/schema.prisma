@@ -729,11 +729,12 @@ model guide_profiles {
   home_province_id            BigInt?
   familiar_provinces          String?
   region                      String?
+  cover_url                   String?
   favorite_guides             favorite_guides[]
   guide_availabilities        guide_availabilities[]
   guide_languages             guide_languages[]
-  users                       public_users                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   home_province               provinces?                    @relation(fields: [home_province_id], references: [id], onUpdate: NoAction)
+  users                       public_users                  @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   guide_reviews               guide_reviews[]
   guide_skills                guide_skills[]
   guide_verification_requests guide_verification_requests[]
@@ -837,6 +838,7 @@ model provinces {
   region         String
   created_at     DateTime         @default(now()) @db.Timestamptz(6)
   guide_profiles guide_profiles[]
+  users          public_users[]
 
   @@schema("public")
 }
@@ -997,9 +999,9 @@ model roles {
 model skills {
   id           BigInt         @id @default(autoincrement())
   name         String         @unique
-  category     String?
   is_active    Boolean        @default(true)
   created_at   DateTime       @default(now()) @db.Timestamptz(6)
+  category     String?
   guide_skills guide_skills[]
 
   @@schema("public")
@@ -1054,17 +1056,22 @@ model tour_images {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model tour_locations {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tour_id       String    @db.Uuid
-  sequence_no   Int
-  location_name String
-  address       String?
-  latitude      Decimal?  @db.Decimal(9, 6)
-  longitude     Decimal?  @db.Decimal(9, 6)
-  visit_time    DateTime? @db.Timestamptz(6)
-  notes         String?
-  created_at    DateTime  @default(now()) @db.Timestamptz(6)
-  tours         tours     @relation(fields: [tour_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id                 String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tour_id            String    @db.Uuid
+  sequence_no        Int
+  location_name      String
+  address            String?
+  latitude           Decimal?  @db.Decimal(9, 6)
+  longitude          Decimal?  @db.Decimal(9, 6)
+  visit_time         DateTime? @db.Timestamptz(6)
+  notes              String?
+  created_at         DateTime  @default(now()) @db.Timestamptz(6)
+  has_breakfast      Boolean?  @default(false)
+  has_lunch          Boolean?  @default(false)
+  has_dinner         Boolean?  @default(false)
+  accommodation_info String?
+  highlight_note     String?
+  tours              tours     @relation(fields: [tour_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@unique([tour_id, sequence_no])
   @@index([tour_id, sequence_no], map: "idx_tour_locations_tour_id")
@@ -1087,12 +1094,13 @@ model tour_requests {
   cancelled_at                                    DateTime?              @db.Timestamptz(6)
   created_at                                      DateTime               @default(now()) @db.Timestamptz(6)
   updated_at                                      DateTime               @default(now()) @db.Timestamptz(6)
+  cancellation_note                               String?
   guide_reviews                                   guide_reviews?
   payment_transactions                            payment_transactions[]
   users_tour_requests_processed_by_user_idTousers public_users?          @relation("tour_requests_processed_by_user_idTousers", fields: [processed_by_user_id], references: [id], onUpdate: NoAction)
   tours                                           tours                  @relation(fields: [tour_id], references: [id], onUpdate: NoAction)
   users_tour_requests_user_idTousers              public_users           @relation("tour_requests_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction)
-  tour_reviews                                    tour_reviews[]
+  tour_reviews                                    tour_reviews?
 
   @@unique([tour_id, user_id], map: "uq_active_tour_request_per_user", where: raw("(status = ANY (ARRAY['pending'::text, 'approved'::text, 'payment_pending'::text, 'paid'::text]))"))
   @@index([tour_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_tour_status")
@@ -1130,8 +1138,8 @@ model tours {
   title                    String
   province                 String
   district                 String?
-  start_date               DateTime              @db.Date
-  end_date                 DateTime              @db.Date
+  start_date               DateTime?             @db.Date
+  end_date                 DateTime?             @db.Date
   price                    Decimal               @db.Decimal(12, 2)
   currency_code            String                @default("VND") @db.Char(3)
   max_participants         Int
@@ -1146,12 +1154,20 @@ model tours {
   created_at               DateTime              @default(now()) @db.Timestamptz(6)
   updated_at               DateTime              @default(now()) @db.Timestamptz(6)
   deleted_at               DateTime?             @db.Timestamptz(6)
+  duration                 String?
+  meet_address             String?
+  meet_time                String?
+  google_maps_link         String?
+  num_days                 Int?
+  num_nights               Int?
+  route_map_link           String?
   conversations            conversations[]
   favorite_tours           favorite_tours[]
   guide_reviews            guide_reviews[]
   reports                  reports[]
   tour_accommodations      tour_accommodations[]
-  tour_images              tour_images[]
+  tour_destinations        tour_destinations[]
+  tour_images              tour_images?
   tour_locations           tour_locations[]
   tour_requests            tour_requests[]
   tour_reviews             tour_reviews[]
@@ -1194,6 +1210,7 @@ model user_preferences {
   preferred_language_id BigInt?
   extra_preferences     Json         @default("{}")
   updated_at            DateTime     @default(now()) @db.Timestamptz(6)
+  other_languages       String?
   languages             languages?   @relation(fields: [preferred_language_id], references: [id], onUpdate: NoAction)
   users                 public_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -1264,6 +1281,9 @@ model public_users {
   created_at                                                            DateTime                      @default(now()) @db.Timestamptz(6)
   updated_at                                                            DateTime                      @default(now()) @db.Timestamptz(6)
   last_seen_at                                                          DateTime?                     @db.Timestamptz(6)
+  cover_url                                                             String?
+  region                                                                String?
+  home_province_id                                                      BigInt?
   admin_activity_logs                                                   admin_activity_logs[]
   ai_chat_sessions                                                      ai_chat_sessions[]
   companion_posts                                                       companion_posts[]
@@ -1294,9 +1314,34 @@ model public_users {
   user_role_change_logs_user_role_change_logs_target_user_idTousers     user_role_change_logs[]       @relation("user_role_change_logs_target_user_idTousers")
   user_roles_user_roles_assigned_byTousers                              user_roles[]                  @relation("user_roles_assigned_byTousers")
   user_roles_user_roles_user_idTousers                                  user_roles[]                  @relation("user_roles_user_idTousers")
+  provinces                                                             provinces?                    @relation(fields: [home_province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_home_province")
   users                                                                 auth_users                    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@map("users")
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model default_covers {
+  id         Int      @id @default(autoincrement())
+  url        String   @unique
+  is_active  Boolean? @default(true)
+  created_at DateTime @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model tour_destinations {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tour_id          String    @db.Uuid
+  sequence_no      Int
+  name             String
+  address          String?
+  google_maps_link String?
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  tours            tours     @relation(fields: [tour_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([tour_id, sequence_no])
   @@schema("public")
 }
 

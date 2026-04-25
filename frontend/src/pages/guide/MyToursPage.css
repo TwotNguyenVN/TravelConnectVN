@@ -184,8 +184,19 @@
   padding: var(--tc-spacing-4);
   border-top: 1px solid var(--tc-border);
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: var(--tc-spacing-2);
+}
+
+.tc-tour-manage-card__delete-btn {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.tc-tour-manage-card__delete-btn:hover {
+  background-color: #fef2f2 !important;
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
 }
 
 .tc-my-tours__empty {

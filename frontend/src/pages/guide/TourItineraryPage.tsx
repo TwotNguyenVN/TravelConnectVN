@@ -28,16 +28,22 @@ const TourItineraryPage: React.FC = () => {
   const fetchItinerary = async () => {
     try {
       setLoading(true);
-      const data = await tourService.getTourItinerary(id!);
+      const response = await tourService.getTourItinerary(id!);
+      const data = response.data || response;
+      
       // Map backend naming to frontend naming
-      const mappedData = data.map((loc: any) => ({
-        id: loc.id,
-        locationName: loc.location_name,
-        address: loc.address || '',
-        notes: loc.notes || '',
-        visitTime: loc.visit_time ? new Date(loc.visit_time).toISOString().slice(0, 16) : ''
-      }));
-      setLocations(mappedData);
+      if (Array.isArray(data)) {
+        const mappedData = data.map((loc: any) => ({
+          id: loc.id,
+          locationName: loc.location_name,
+          address: loc.address || '',
+          notes: loc.notes || '',
+          visitTime: loc.visit_time ? new Date(loc.visit_time).toISOString().slice(0, 16) : ''
+        }));
+        setLocations(mappedData);
+      } else {
+        setLocations([]);
+      }
     } catch (error) {
       console.error('Failed to fetch itinerary:', error);
     } finally {

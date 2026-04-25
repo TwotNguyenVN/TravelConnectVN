@@ -1,29 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button/Button';
-import { Card } from '../../components/common/Card/Card';
 import { tourService } from '../../services/tourService';
+import tourRequestService from '../../services/tourRequestService';
 import { getTourAccommodations } from '../../services/accommodationService';
+import favoriteService from '../../services/favoriteService';
+import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-
+import './TourDetailPage.css';
 
 export const TourDetailPage: React.FC = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast: _toast } = useToast();
+  const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'reviews'>('overview');
   const [tour, setTour] = useState<any>(null);
   const [accommodations, setAccommodations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [participantCount, setParticipantCount] = useState(1);
+  const [bookingNote, setBookingNote] = useState('');
+  const [isBooking, setIsBooking] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  
+  // Gallery Carousel State
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   useEffect(() => {
     const fetchTourData = async () => {
       if (!id) return;
       try {
         setLoading(true);
-        // Fetch tour details and reviews
         const [detailRes, reviewsRes]: [any, any] = await Promise.all([
           tourService.getTourDetail(id),
           tourService.getTourReviews(id),
@@ -35,22 +45,14 @@ export const TourDetailPage: React.FC = () => {
             reviews: reviewsRes?.data?.data || [],
           });
 
-          // Fetch accommodations
-          try {
-            const accRes = await getTourAccommodations(id);
-            if (accRes.success) {
-              setAccommodations(accRes.data || []);
-            }
-          } catch (e) {
-            console.error('Error fetching accommodations:', e);
+          const accRes = await getTourAccommodations(id);
+          if (accRes.success) {
+            setAccommodations(accRes.data || []);
           }
 
-          // If user logged in, fetch their requests for this tour
           if (user) {
-            try {
-              // This is a placeholder, adjust based on actual service if needed
-              // Assuming tourService or tourRequestService has getMyRequests
-            } catch (e) {}
+            const favRes = await favoriteService.checkIsFavorite(id);
+            setIsFavorited(favRes.data || false);
           }
         }
       } catch (error) {
@@ -61,93 +63,249 @@ export const TourDetailPage: React.FC = () => {
     };
 
     fetchTourData();
+    window.scrollTo(0, 0);
   }, [id, user]);
 
+  // Auto-slide effect for gallery
+  useEffect(() => {
+    if (tour && tour.images && tour.images.length > 1) {
+      const interval = setInterval(() => {
+        setActiveImageIndex((prev) => (prev + 1) % tour.images.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [tour]);
 
+  const handleBooking = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để đặt tour");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsBooking(true);
+      await tourRequestService.createRequest({
+        tourId: tour.id,
+        participantCount: participantCount,
+        note: bookingNote || `Yêu cầu tham gia tour ${tour.title}`
+      });
+      toast.success("Yêu cầu của bạn đã được gửi thành công. Hướng dẫn viên sẽ sớm phản hồi!");
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi gửi yêu cầu.";
+      toast.error(errorMessage);
+    } finally {
+      setIsBooking(false);
+    }
+  };
+  
+  const handleChat = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để trò chuyện");
+      navigate('/login');
+      return;
+    }
+    
+    try {
+      toast.info("Đang kết nối với hướng dẫn viên...");
+      const res = await chatService.createDirect(tour.guideId, tour.id);
+      if (res.success && res.data) {
+        navigate('/user/messages', { state: { conversationId: res.data.id } });
+      } else {
+        toast.error("Không thể tạo cuộc trò chuyện");
+      }
+    } catch (error) {
+      console.error("Chat error:", error);
+      toast.error("Có lỗi xảy ra khi kết nối");
+    }
+  };
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      toast.info("Vui lòng đăng nhập để lưu vào yêu thích");
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setIsTogglingFavorite(true);
+      if (isFavorited) {
+        await favoriteService.removeTourFavorite(tour.id);
+        setIsFavorited(false);
+        toast.success("Đã xóa khỏi danh sách yêu thích");
+      } else {
+        await favoriteService.addTourFavorite(tour.id);
+        setIsFavorited(true);
+        toast.success("Đã thêm vào danh sách yêu thích");
+      }
+    } catch (error: any) {
+      console.error("Favorite error:", error);
+      toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', color: 'var(--tc-primary)' }}>
-        Đang tải thông tin chi tiết tour...
+      <div className="tc-loading-container">
+        <div className="tc-loader"></div>
+        <p>Đang chuẩn bị hành trình cho bạn...</p>
       </div>
     );
   }
 
   if (!tour) {
     return (
-      <div style={{ padding: 'var(--tc-spacing-10) var(--tc-spacing-5)', textAlign: 'center' }}>
-        <h2>Không tìm thấy tour này</h2>
-        <Link to="/tours" style={{ color: 'var(--tc-primary)' }}>Quay lại danh sách</Link>
+      <div className="tc-not-found">
+        <h2>Hành trình không tồn tại</h2>
+        <p>Có vẻ như đường dẫn này đã cũ hoặc tour đã bị gỡ bỏ.</p>
+        <Link to="/tours" className="tc-btn-back">Khám phá các tour khác</Link>
       </div>
     );
   }
 
+  const formatDate = (date: any) => {
+    if (!date) return 'Linh hoạt';
+    return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
   return (
-    <div style={{ padding: 'var(--tc-spacing-6) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto', width: '100%' }}>
+    <div className="tc-tour-detail">
       {/* Breadcrumb */}
-      <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-4)' }}>
-        <Link to="/" style={{ color: 'var(--tc-primary)', textDecoration: 'none' }}>Trang chủ</Link> / 
-        <Link to="/tours" style={{ color: 'var(--tc-primary)', textDecoration: 'none' }}> Danh sách Tour</Link> / Chi tiết
-      </div>
+      <nav className="tc-breadcrumb">
+        <Link to="/">Trang chủ</Link>
+        <span>/</span>
+        <Link to="/tours">Danh sách Tour</Link>
+        <span>/</span>
+        <span>Chi tiết</span>
+      </nav>
 
-      {/* Header Info */}
-      <div style={{ marginBottom: 'var(--tc-spacing-5)' }}>
-        <h1 style={{ fontSize: 'var(--tc-font-size-2xl)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h1>
-        <div style={{ display: 'flex', gap: 'var(--tc-spacing-4)', fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', alignItems: 'center' }}>
-          <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating || 5.0} ({tour.reviewsCount || 0} đánh giá)</span>
-          <span>📍 {tour.location || tour.province}</span>
-          <span>🏷 {tour.category?.name || tour.category}</span>
-        </div>
-      </div>
-
-      {/* Gallery */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 'var(--tc-spacing-3)', marginBottom: 'var(--tc-spacing-6)', borderRadius: 'var(--tc-radius-lg)', overflow: 'hidden', height: '400px' }}>
-        <img src={tour.images?.[0] || 'https://images.unsplash.com/photo-1528127269322-539801943592'} alt="Cover" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-3)' }}>
-          <img src={tour.images?.[1] || 'https://images.unsplash.com/photo-1552733407-5d5c46c3bb3b'} alt="Gallery 1" style={{ width: '100%', height: 'calc(50% - 6px)', objectFit: 'cover' }} />
-          <img src={tour.images?.[2] || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4'} alt="Gallery 2" style={{ width: '100%', height: 'calc(50% - 6px)', objectFit: 'cover' }} />
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 'var(--tc-spacing-6)', alignItems: 'flex-start' }}>
-        {/* Main Content */}
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', gap: 'var(--tc-spacing-4)', borderBottom: '1px solid var(--tc-border)', marginBottom: 'var(--tc-spacing-5)' }}>
-            <button onClick={() => setActiveTab('overview')} style={{ padding: 'var(--tc-spacing-3) 0', border: 'none', background: 'none', fontSize: 'var(--tc-font-size-md)', fontWeight: activeTab === 'overview' ? 'bold' : 'normal', color: activeTab === 'overview' ? 'var(--tc-primary)' : 'var(--tc-text-secondary)', borderBottom: activeTab === 'overview' ? '2px solid var(--tc-primary)' : '2px solid transparent', cursor: 'pointer' }}>Tổng quan</button>
-            <button onClick={() => setActiveTab('itinerary')} style={{ padding: 'var(--tc-spacing-3) 0', border: 'none', background: 'none', fontSize: 'var(--tc-font-size-md)', fontWeight: activeTab === 'itinerary' ? 'bold' : 'normal', color: activeTab === 'itinerary' ? 'var(--tc-primary)' : 'var(--tc-text-secondary)', borderBottom: activeTab === 'itinerary' ? '2px solid var(--tc-primary)' : '2px solid transparent', cursor: 'pointer' }}>Lịch trình</button>
-            <button onClick={() => setActiveTab('reviews')} style={{ padding: 'var(--tc-spacing-3) 0', border: 'none', background: 'none', fontSize: 'var(--tc-font-size-md)', fontWeight: activeTab === 'reviews' ? 'bold' : 'normal', color: activeTab === 'reviews' ? 'var(--tc-primary)' : 'var(--tc-text-secondary)', borderBottom: activeTab === 'reviews' ? '2px solid var(--tc-primary)' : '2px solid transparent', cursor: 'pointer' }}>Đánh giá</button>
+      {/* Header */}
+      <header className="tc-tour-header">
+        <h1 className="tc-tour-title">{tour.title}</h1>
+        <div className="tc-tour-meta">
+          <div className="tc-rating-badge">
+            <span style={{ color: '#f59e0b' }}>★</span>
+            <span className="tc-rating-value">{Number(tour.rating).toFixed(1)}</span>
+            <span className="tc-review-count">({tour.reviewsCount || 0} đánh giá)</span>
           </div>
+          <div className="tc-meta-item">
+            <span>📍 {tour.location}</span>
+          </div>
+          <div className="tc-meta-item">
+            <span>🏷 {tour.category}</span>
+          </div>
+        </div>
+      </header>
+
+      {/* Gallery Carousel - Re-ordered to top */}
+      <section className="tc-tour-gallery-container">
+        <div className="tc-gallery-main-frame">
+          <img src={tour.images[activeImageIndex]} alt={tour.title} key={activeImageIndex} />
+        </div>
+        <div className="tc-gallery-thumbnails">
+          {tour.images.map((img: string, idx: number) => (
+            <div 
+              key={idx} 
+              className={`tc-thumbnail-item ${activeImageIndex === idx ? 'tc-thumbnail-item--active' : ''}`}
+              onClick={() => setActiveImageIndex(idx)}
+            >
+              <img src={img} alt={`${tour.title} thumbnail ${idx + 1}`} />
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="tc-tour-layout">
+        {/* Main Content */}
+        <div className="tc-tour-main">
+          <nav className="tc-tour-tabs">
+            <button 
+              className={`tc-tab-btn ${activeTab === 'overview' ? 'tc-tab-btn--active' : ''}`}
+              onClick={() => setActiveTab('overview')}
+            >
+              Tổng quan
+            </button>
+            <button 
+              className={`tc-tab-btn ${activeTab === 'itinerary' ? 'tc-tab-btn--active' : ''}`}
+              onClick={() => setActiveTab('itinerary')}
+            >
+              Lịch trình
+            </button>
+            <button 
+              className={`tc-tab-btn ${activeTab === 'reviews' ? 'tc-tab-btn--active' : ''}`}
+              onClick={() => setActiveTab('reviews')}
+            >
+              Đánh giá
+            </button>
+          </nav>
 
           {activeTab === 'overview' && (
-            <div>
-              <h2 style={{ fontSize: 'var(--tc-font-size-lg)', marginBottom: 'var(--tc-spacing-3)' }}>Điểm nhấn hành trình</h2>
-              <p style={{ lineHeight: 1.6, color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-6)' }}>{tour.description}</p>
-              
-              <h2 style={{ fontSize: 'var(--tc-font-size-lg)', marginBottom: 'var(--tc-spacing-3)' }}>Thông tin quan trọng</h2>
-              <ul style={{ color: 'var(--tc-text-secondary)', lineHeight: 1.6, marginBottom: 'var(--tc-spacing-6)' }}>
-                <li><strong>Thời gian:</strong> {tour.duration || 'Nhiều ngày'}</li>
-                <li><strong>Điểm hẹn:</strong> {tour.meetPoint || tour.province}</li>
-                <li><strong>Số lượng tối đa:</strong> {tour.maxParticipants || 10} người</li>
-              </ul>
+            <div className="tc-tab-content">
+              <div className="tc-detail-section">
+                <h2 className="tc-section-title">
+                  <span>✨</span> Điểm nhấn hành trình
+                </h2>
+                <div className="tc-description">{tour.description}</div>
+              </div>
 
-              {/* M14 - Accommodations List */}
-              {accommodations.length > 0 && (
-                <div style={{ marginTop: 'var(--tc-spacing-6)', padding: 'var(--tc-spacing-5)', background: '#f8fafc', borderRadius: 'var(--tc-radius-lg)', border: '1px solid #e2e8f0' }}>
-                  <h2 style={{ fontSize: 'var(--tc-font-size-lg)', marginBottom: 'var(--tc-spacing-4)', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <i className="bi bi-building"></i> Nơi lưu trú dự kiến
+              <div className="tc-detail-section">
+                <h2 className="tc-section-title">
+                  <span>📋</span> Thông tin chi tiết
+                </h2>
+                <div className="tc-feature-grid">
+                  <div className="tc-feature-card">
+                    <span className="tc-feature-label">Thời gian</span>
+                    <span className="tc-feature-value">{tour.duration}</span>
+                  </div>
+                  <div className="tc-feature-card">
+                    <span className="tc-feature-label">Khởi hành</span>
+                    <span className="tc-feature-value">{formatDate(tour.startDate)}</span>
+                  </div>
+                  <div className="tc-feature-card">
+                    <span className="tc-feature-label">Tối đa</span>
+                    <span className="tc-feature-value">{tour.maxParticipants} khách</span>
+                  </div>
+                  <div className="tc-feature-card">
+                    <span className="tc-feature-label">Điểm hẹn</span>
+                    <span className="tc-feature-value">{tour.meetPoint}</span>
+                  </div>
+                </div>
+
+                {tour.meetAddress && (
+                  <div className="tc-meet-info">
+                    <strong>Địa chỉ tập trung:</strong> {tour.meetAddress}
+                    {tour.meetTime && <p style={{ marginTop: '4px', marginBottom: 0 }}><strong>Giờ tập trung:</strong> {tour.meetTime}</p>}
+                  </div>
+                )}
+              </div>
+
+              {tour.participantRequirements && (
+                <div className="tc-detail-section">
+                  <h2 className="tc-section-title">
+                    <span>⚠️</span> Lưu ý quan trọng
                   </h2>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-4)' }}>
-                    {accommodations.map((acc, index) => (
-                      <Card key={acc.id || index} style={{ padding: 'var(--tc-spacing-3)', border: '1px solid #e2e8f0', transition: 'transform 0.2s', cursor: 'default' }}>
-                        <div style={{ fontWeight: 'bold', color: 'var(--tc-primary)', marginBottom: '4px' }}>{acc.name}</div>
-                        <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', marginBottom: '8px' }}>
-                          <i className="bi bi-geo-alt"></i> {acc.address}, {acc.province}
+                  <div className="tc-description">{tour.participantRequirements}</div>
+                </div>
+              )}
+
+              {accommodations.length > 0 && (
+                <div className="tc-detail-section">
+                  <h2 className="tc-section-title">
+                    <span>🏨</span> Nơi lưu trú dự kiến
+                  </h2>
+                  <div className="tc-accommodation-list">
+                    {accommodations.map((acc: any) => (
+                      <div key={acc.id} className="tc-accommodation-item">
+                        <div className="tc-accommodation-name">{acc.name}</div>
+                        <div className="tc-accommodation-address">{acc.address}</div>
+                        <div className="tc-accommodation-tags">
+                          <span className="tc-accommodation-type">{acc.type}</span>
+                          {acc.stars && <span className="tc-accommodation-stars">{'★'.repeat(acc.stars)}</span>}
                         </div>
-                        <div style={{ display: 'flex', gap: '10px', fontSize: 'var(--tc-font-size-xs)' }}>
-                          <span style={{ padding: '2px 8px', background: '#ecfdf5', color: '#059669', borderRadius: '10px' }}>{acc.type}</span>
-                          {acc.stars && <span style={{ color: '#f59e0b' }}>{'★'.repeat(acc.stars)}</span>}
-                        </div>
-                      </Card>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -156,77 +314,126 @@ export const TourDetailPage: React.FC = () => {
           )}
 
           {activeTab === 'itinerary' && (
-            <div>
-              <h2 style={{ fontSize: 'var(--tc-font-size-lg)', marginBottom: 'var(--tc-spacing-4)' }}>Lịch trình chi tiết</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-4)' }}>
-                {tour.itinerary?.map((day: any) => (
-                  <div key={day.day} style={{ borderLeft: '2px solid var(--tc-border)', paddingLeft: 'var(--tc-spacing-4)', position: 'relative' }}>
-                    <div style={{ position: 'absolute', left: '-9px', top: 0, width: '16px', height: '16px', borderRadius: '50%', backgroundColor: 'var(--tc-primary)' }}></div>
-                    <h3 style={{ margin: '0 0 var(--tc-spacing-2) 0', fontSize: 'var(--tc-font-size-md)' }}>Ngày {day.day}: {day.title}</h3>
-                    <p style={{ margin: 0, color: 'var(--tc-text-secondary)', lineHeight: 1.6 }}>{day.detail}</p>
-                  </div>
-                )) || <p>Chưa cập nhật lịch trình.</p>}
+            <div className="tc-tab-content">
+              <h2 className="tc-section-title">
+                <span>📍</span> Lịch trình chi tiết
+              </h2>
+              <div className="tc-itinerary-timeline">
+                {tour.itinerary?.length > 0 ? (
+                  tour.itinerary.map((item: any) => (
+                    <div key={item.day} className="tc-itinerary-item">
+                      <div className="tc-itinerary-content">
+                        <div className="tc-itinerary-header">
+                          <div className="tc-day-badge">
+                            <span className="tc-day-label">Ngày</span>
+                            <span className="tc-day-number">{item.day}</span>
+                          </div>
+                          <h3 className="tc-itinerary-title">{item.title}</h3>
+                        </div>
+                        <p className="tc-itinerary-detail">{item.detail}</p>
+                        {item.address && (
+                          <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-primary)', marginTop: 'var(--tc-spacing-2)', fontWeight: '600' }}>
+                            📍 {item.address}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>Lịch trình chi tiết đang được cập nhật...</p>
+                )}
               </div>
             </div>
           )}
 
           {activeTab === 'reviews' && (
-            <div>
-              <h2 style={{ fontSize: 'var(--tc-font-size-lg)', marginBottom: 'var(--tc-spacing-4)' }}>Đánh giá từ khách hàng ({tour.reviewsCount || 0})</h2>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-4)' }}>
-                {tour.reviews?.map((review: any) => (
-                  <Card key={review.id} style={{ padding: 'var(--tc-spacing-4)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--tc-spacing-2)' }}>
-                      <strong style={{ color: 'var(--tc-text-primary)' }}>{review.user?.full_name || 'Người dùng'}</strong>
-                      <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>{new Date(review.createdAt).toLocaleDateString()}</span>
+            <div className="tc-tab-content">
+              <h2 className="tc-section-title">
+                <span>💬</span> Đánh giá từ cộng đồng ({tour.reviewsCount || 0})
+              </h2>
+              <div className="tc-review-list">
+                {tour.reviews?.length > 0 ? (
+                  tour.reviews.map((review: any) => (
+                    <div key={review.id} className="tc-review-item">
+                      <div className="tc-review-header">
+                        <strong className="tc-review-author">{review.users?.full_name || 'Khách hàng'}</strong>
+                        <span className="tc-review-date">{formatDate(review.created_at)}</span>
+                      </div>
+                      <div className="tc-review-stars">
+                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      </div>
+                      <p className="tc-review-comment">{review.comment}</p>
                     </div>
-                    <div style={{ color: 'var(--tc-warning)', marginBottom: 'var(--tc-spacing-2)' }}>{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</div>
-                    <p style={{ margin: 0, color: 'var(--tc-text-secondary)' }}>{review.comment}</p>
-                  </Card>
-                )) || <p>Chưa có đánh giá nào.</p>}
+                  ))
+                ) : (
+                  <p>Chưa có đánh giá nào cho hành trình này.</p>
+                )}
               </div>
             </div>
           )}
         </div>
 
         {/* Sidebar */}
-        <aside style={{ width: '320px', flexShrink: 0, position: 'sticky', top: '100px' }}>
-          <Card style={{ padding: 'var(--tc-spacing-5)', border: '1px solid var(--tc-border)' }}>
-            <div style={{ fontSize: 'var(--tc-font-size-2xl)', fontWeight: 'bold', color: 'var(--tc-danger)', marginBottom: 'var(--tc-spacing-2)' }}>
-              {Number(tour.price || 0).toLocaleString()}đ <span style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', fontWeight: 'normal' }}>/ khách</span>
-            </div>
-            <div style={{ marginBottom: 'var(--tc-spacing-4)', color: 'var(--tc-text-secondary)', fontSize: 'var(--tc-font-size-sm)' }}>
-              Không bao gồm VAT. Nhận hủy miễn phí trước 2 ngày.
-            </div>
-            
-            <div style={{ marginBottom: 'var(--tc-spacing-4)' }}>
-              <label style={{ display: 'block', fontSize: 'var(--tc-font-size-sm)', fontWeight: 'bold', marginBottom: 'var(--tc-spacing-2)' }}>Chọn ngày đi</label>
-              <input type="date" style={{ width: '100%', padding: 'var(--tc-spacing-2)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-md)' }} />
-            </div>
-
-            <Button variant="primary" style={{ width: '100%', marginBottom: 'var(--tc-spacing-3)', padding: 'var(--tc-spacing-3)' }}>
-              Gửi yêu cầu tham gia
-            </Button>
-            <Button variant="outline" style={{ width: '100%', padding: 'var(--tc-spacing-2)' }}>
-              Lưu vào danh sách yêu thích
-            </Button>
-          </Card>
-
-          <Card style={{ padding: 'var(--tc-spacing-5)', border: '1px solid var(--tc-border)', marginTop: 'var(--tc-spacing-5)' }}>
-            <h3 style={{ fontSize: 'var(--tc-font-size-md)', marginTop: 0, marginBottom: 'var(--tc-spacing-3)' }}>Hướng dẫn viên</h3>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-3)', marginBottom: 'var(--tc-spacing-3)' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tc-primary)', fontSize: 'var(--tc-font-size-lg)', fontWeight: 'bold' }}>
-                {tour.guide?.full_name?.charAt(0) || 'G'}
+        <aside className="tc-tour-sidebar">
+          <div className="tc-booking-card">
+            <div className="tc-price-section">
+              <span className="tc-price-label">Giá từ</span>
+              <div className="tc-price-amount">
+                {tour.price.toLocaleString()}đ
+                <span className="tc-price-unit">/ khách</span>
               </div>
+            </div>
+
+            <div className="tc-booking-form">
+              <div className="tc-form-field">
+                <label>Số lượng người</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max={tour.maxParticipants} 
+                  value={participantCount}
+                  onChange={(e) => setParticipantCount(parseInt(e.target.value) || 1)}
+                />
+              </div>
+              <button 
+                className="tc-btn-book" 
+                onClick={handleBooking}
+                disabled={isBooking}
+              >
+                {isBooking ? 'Đang gửi...' : 'Đăng ký ngay'}
+              </button>
+              <button className="tc-btn-chat" onClick={handleChat}>
+                <span>💬</span> Chat với HDV
+              </button>
+              <button 
+                className={`tc-btn-favorite ${isFavorited ? 'active' : ''}`} 
+                onClick={handleToggleFavorite}
+                disabled={isTogglingFavorite}
+              >
+                <span>{isFavorited ? '❤️' : '🤍'}</span> {isFavorited ? 'Đã lưu' : 'Lưu vào yêu thích'}
+              </button>
+            </div>
+          </div>
+
+          <Link to={`/guides/${tour.guideId}`} className="tc-guide-card">
+            <div className="tc-guide-header">
+              {tour.guide?.avatar ? (
+                <img src={tour.guide.avatar} alt={tour.guide.name} className="tc-guide-avatar" />
+              ) : (
+                <div className="tc-guide-avatar-placeholder">
+                  {tour.guide?.name?.charAt(0) || 'G'}
+                </div>
+              )}
               <div>
-                <strong style={{ display: 'block' }}>{tour.guide?.full_name || 'Đang cập nhật'}</strong>
-                <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>HDV Địa phương</span>
+                <div className="tc-guide-name">{tour.guide?.name}</div>
+                <div className="tc-guide-tag">Hướng dẫn viên địa phương</div>
               </div>
             </div>
-            <p style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', margin: 0, fontStyle: 'italic' }}>
-              "{tour.guide?.bio || 'Sẵn sàng đồng hành cùng bạn trên mọi nẻo đường.'}"
-            </p>
-          </Card>
+            <div className="tc-guide-bio">"{tour.guide?.bio}"</div>
+            <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--tc-primary)', fontWeight: '700' }}>
+              🎖 {tour.guide?.exp} kinh nghiệm
+            </div>
+          </Link>
         </aside>
       </div>
     </div>

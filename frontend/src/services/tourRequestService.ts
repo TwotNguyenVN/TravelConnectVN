@@ -11,6 +11,7 @@ export interface TourRequest {
   status: 'pending' | 'approved' | 'rejected' | 'cancelled_by_user' | 'cancelled_by_guide' | 'payment_pending' | 'paid';
   note?: string;
   responseNote?: string;
+  cancellationNote?: string;
   requestedAt: string;
   processedAt?: string;
   tourPrice?: number;

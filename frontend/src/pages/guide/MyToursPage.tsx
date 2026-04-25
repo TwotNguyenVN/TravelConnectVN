@@ -5,6 +5,7 @@ import type { Tour } from '../../services/tourService';
 import { Button } from '../../components/common/Button/Button';
 import { EmptyState } from '../../components/common';
 import { LoadingBlock } from '../../components/common';
+import { useToast } from '../../contexts/ToastContext';
 import './MyToursPage.css';
 
 const MyToursPage: React.FC = () => {
@@ -12,6 +13,7 @@ const MyToursPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [searchKeyword, setSearchKeyword] = useState('');
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,10 +41,42 @@ const MyToursPage: React.FC = () => {
     }
   };
 
+  const handleTourDelete = async (tourId: string, tourTitle: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tour "${tourTitle}"?`)) {
+      try {
+        const response = await tourService.deleteTour(tourId);
+        if (response.success) {
+          toast.success('Xóa tour thành công');
+          fetchTours(); // Tải lại danh sách
+        } else {
+          toast.error(response.message || 'Xóa tour thất bại');
+        }
+      } catch (error: any) {
+        console.error('Delete tour error:', error);
+        toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour');
+      }
+    }
+  };
+
+  const handleToggleVisibility = async (tourId: string, currentStatus: string) => {
+    try {
+      const newStatus = currentStatus === 'hidden' ? 'visible' : 'hidden';
+      const response = await tourService.updateTour(tourId, { visibilityStatus: newStatus });
+      
+      if (response.success || response.id) {
+        toast.success(newStatus === 'visible' ? 'Đã hiện bài đăng' : 'Đã ẩn bài đăng');
+        fetchTours();
+      }
+    } catch (error: any) {
+      console.error('Toggle visibility error:', error);
+      toast.error('Không thể thay đổi trạng thái hiển thị');
+    }
+  };
+
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'draft': return 'Bản nháp';
-      case 'published': return 'Đang công khai';
+      case 'published': return 'Đã hoàn tất';
       case 'closed': return 'Đã đóng';
       case 'cancelled': return 'Đã hủy';
       default: return status;
@@ -127,28 +161,29 @@ const MyToursPage: React.FC = () => {
               </div>
               <div className="tc-tour-manage-card__footer">
                 <Button 
+                  variant={tour.visibilityStatus === 'hidden' ? 'primary' : 'outline'}
+                  size="small" 
+                  fullWidth 
+                  onClick={() => handleToggleVisibility(tour.id, tour.visibilityStatus || 'visible')}
+                >
+                  {tour.visibilityStatus === 'hidden' ? 'Hiện bài' : 'Ẩn bài'}
+                </Button>
+                <Button 
                   variant="outline" 
                   size="small" 
                   fullWidth 
-                  onClick={() => navigate(`/guide/tours/${tour.id}/edit`)}
+                  onClick={() => navigate(`/guide/tours/edit/${tour.id}`)}
                 >
                   Sửa tour
                 </Button>
                 <Button 
-                  variant="secondary" 
-                  size="small" 
-                  fullWidth 
-                  onClick={() => navigate(`/guide/tours/${tour.id}/itinerary`)}
-                >
-                  Lịch trình
-                </Button>
-                <Button 
                   variant="outline" 
                   size="small" 
                   fullWidth 
-                  onClick={() => navigate(`/guide/tours/${tour.id}/images`)}
+                  className="tc-tour-manage-card__delete-btn"
+                  onClick={() => handleTourDelete(tour.id, tour.title)}
                 >
-                  Ảnh tour
+                  Xóa tour
                 </Button>
               </div>
             </div>

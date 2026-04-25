@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageContainer, Button, LoadingBlock, EmptyState, Card } from '../../components/common';
+import { PageContainer, Button, LoadingBlock, EmptyState, Card, Badge } from '../../components/common';
 import { guideService } from '../../services/guideService';
 import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
@@ -18,8 +18,11 @@ interface GuideDetail {
   verificationStatus: string;
   languages: string[];
   skills: string[];
+  coverUrl?: string;
   bio: string;
   isAcceptingTours: boolean;
+  homeProvince?: { name: string };
+  familiarProvinces?: string;
   reviews: {
     id: string;
     user: string;
@@ -27,6 +30,15 @@ interface GuideDetail {
     rating: number;
     comment: string;
     date: string;
+  }[];
+  tours?: {
+    id: string;
+    title: string;
+    price: number;
+    province: string;
+    image: string;
+    category: string;
+    duration: string;
   }[];
 }
 
@@ -44,14 +56,20 @@ const GuideDetailPage: React.FC = () => {
   const fetchGuideDetail = async () => {
     try {
       setLoading(true);
-      const data: any = await guideService.getPublicGuideDetail(id!);
-      setGuide(data);
+      const res: any = await guideService.getPublicGuideDetail(id!);
+      if (res.success) {
+        const guideData = res.data;
+        setGuide(guideData);
 
-      if (user && id) {
-        const favRes: any = await favoriteService.getMyFavoriteGuides();
-        if (favRes.success) {
-          setIsFavorited(favRes.data.some((f: any) => f.id === id));
+        // Fetch favorite status using the ACTUAL guide profile ID
+        if (user && guideData.id) {
+          const favRes: any = await favoriteService.getMyFavoriteGuides();
+          if (favRes.success) {
+            setIsFavorited(favRes.data.some((f: any) => f.id === guideData.id));
+          }
         }
+      } else {
+        toast.error(res.message || 'Không thể tải thông tin hướng dẫn viên');
       }
     } catch (error) {
       console.error('Error fetching guide detail:', error);
@@ -91,7 +109,6 @@ const GuideDetailPage: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error toggling favorite:', err);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setFavoriteLoading(false);
     }
@@ -103,19 +120,17 @@ const GuideDetailPage: React.FC = () => {
       return;
     }
 
-    if (!id) return;
+    if (!guide) return;
 
     try {
       setMessageLoading(true);
-      const res = await chatService.createDirect(id);
-      if (res.success && res.data) {
-        navigate('/user/messages', { state: { conversationId: res.data.id } });
-      } else {
-        toast.error('Không thể tạo cuộc trò chuyện');
+      const res: any = await chatService.getOrCreateConversation(guide.id);
+      if (res.success) {
+        navigate(`/chat?id=${res.data.id}`);
       }
-    } catch (err: any) {
-      console.error('Error starting chat:', err);
-      toast.error('Có lỗi xảy ra. Vui lòng thử lại.');
+    } catch (error) {
+      console.error('Error starting conversation:', error);
+      toast.error('Không thể bắt đầu trò chuyện');
     } finally {
       setMessageLoading(false);
     }
@@ -147,55 +162,78 @@ const GuideDetailPage: React.FC = () => {
 
   return (
     <div className="guide-detail-page">
-      <div className="guide-detail-header">
+      <div className="guide-detail-profile-header">
         <PageContainer>
-          <div className="guide-detail-header-content">
-            <img 
-              src={guide.avatar || 'https://via.placeholder.com/160?text=Guide'} 
-              alt={guide.name} 
-              className="guide-detail-avatar"
-            />
-            <div className="guide-detail-main-info">
-              <h1 className="guide-detail-name">
-                {guide.name}
-                {guide.verificationStatus === 'approved' && (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <title>Đã xác minh</title>
-
-                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="var(--color-success)"/>
-                  </svg>
+          <div className="profile-header-wrapper">
+            <div className="profile-cover-container">
+              <div className="profile-cover-wrapper">
+                {guide.coverUrl ? (
+                  <img src={guide.coverUrl} alt="Cover" className="profile-cover-img" />
+                ) : (
+                  <div className="profile-cover-placeholder"></div>
                 )}
-              </h1>
-              <div className="guide-detail-meta">
-                <div className="guide-detail-meta-item">
-                  <span style={{ color: '#fbbf24', fontWeight: 'bold' }}>★ {guide.rating?.toFixed(1) || '0.0'}</span>
-                </div>
-                <div className="guide-detail-meta-item">
-                  📍 {guide.workingArea}
-                </div>
-                <div className="guide-detail-meta-item">
-                  💼 {guide.yearsOfExperience} năm kinh nghiệm
+              </div>
+              
+              <div className="profile-avatar-absolute-section">
+                <div className="profile-avatar-container">
+                  <img 
+                    src={guide.avatar || 'https://via.placeholder.com/168?text=Guide'} 
+                    alt={guide.name} 
+                    className="profile-avatar-img"
+                  />
+                  <div className={`profile-status-dot ${guide.isAcceptingTours ? 'online' : 'busy'}`}></div>
                 </div>
               </div>
             </div>
-            <div className="guide-detail-actions" style={{ display: 'flex', gap: '12px' }}>
-              <Button 
-                variant="outline"
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  gap: '8px',
-                  borderColor: isFavorited ? 'var(--color-danger)' : 'var(--color-border)',
-                  color: isFavorited ? 'var(--color-danger)' : 'var(--color-text-primary)'
-                }}
-                onClick={handleToggleFavorite}
-                isLoading={favoriteLoading}
-              >
-                {isFavorited ? '❤️ Đã lưu' : '🤍 Lưu'}
-              </Button>
-              <Button size="large" disabled={!guide.isAcceptingTours}>
-                {guide.isAcceptingTours ? 'Liên hệ đặt Tour' : 'Tạm ngưng nhận Tour'}
-              </Button>
+
+            <div className="profile-header-main">
+              <div className="profile-avatar-spacer"></div>
+
+              <div className="profile-info-section">
+                <div className="profile-info-content">
+                  <h1 className="profile-display-name">
+                    {guide.name}
+                    {(guide.verificationStatus === 'approved' || guide.verificationStatus === 'verified') && (
+                      <span className="verified-badge-icon" title="Đã xác minh">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="#1877F2"/>
+                        </svg>
+                      </span>
+                    )}
+                  </h1>
+                  <div className="profile-quick-stats">
+                    <div className="tc-rating-badge">
+                      <span className="rating-value">{guide.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="rating-star">★</span>
+                    </div>
+                    <span className="stat-separator">•</span>
+                    <span className="stat-item">📍 {guide.workingArea}</span>
+                    <span className="stat-separator">•</span>
+                    <span className="stat-item">💼 {guide.yearsOfExperience} năm kinh nghiệm</span>
+                  </div>
+                </div>
+
+                <div className="profile-actions-section">
+                  <Button 
+                    variant="primary" 
+                    size="medium" 
+                    disabled={!guide.isAcceptingTours} 
+                    className="contact-btn"
+                    onClick={handleMessageGuide}
+                    isLoading={messageLoading}
+                  >
+                    {guide.isAcceptingTours ? '💬 Nhắn tin ngay' : 'Tạm ngưng'}
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className={`fav-btn ${isFavorited ? 'is-favorited' : ''}`}
+                    onClick={handleToggleFavorite}
+                    isLoading={favoriteLoading}
+                  >
+                    {isFavorited ? '❤️ Đã lưu' : '🤍 Lưu'}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
         </PageContainer>
@@ -204,96 +242,183 @@ const GuideDetailPage: React.FC = () => {
       <PageContainer>
         <div className="guide-detail-layout">
           <div className="guide-detail-content">
-            <section className="guide-detail-section">
-              <h2>Giới thiệu bản thân</h2>
+            {/* Bio Section */}
+            <section className="guide-detail-section animate-up">
+              <div className="section-header">
+                <span className="section-icon">📝</span>
+                <h2>Giới thiệu bản thân</h2>
+              </div>
               <div className="guide-detail-bio">{guide.bio}</div>
             </section>
 
-            <section className="guide-detail-section">
-              <h2>Ngôn ngữ thông thạo</h2>
-              <div className="guide-detail-tags">
-                {guide.languages?.map((lang, index) => (
-                  <span key={index} className="guide-detail-tag">{lang}</span>
-                ))}
-              </div>
-            </section>
+            {/* Languages & Skills Grid */}
+            <div className="guide-detail-grid-info">
+              <section className="guide-detail-section animate-up" style={{ animationDelay: '0.1s' }}>
+                <div className="section-header">
+                  <span className="section-icon">🗣️</span>
+                  <h2>Ngôn ngữ</h2>
+                </div>
+                <div className="guide-detail-tags">
+                  {guide.languages?.map((lang, index) => (
+                    <span key={index} className="guide-detail-tag">{lang}</span>
+                  ))}
+                </div>
+              </section>
 
-            <section className="guide-detail-section">
-              <h2>Kỹ năng chuyên môn</h2>
-              <div className="guide-detail-tags">
-                {guide.skills?.map((skill, index) => (
-                  <span key={index} className="guide-detail-tag">{skill}</span>
-                ))}
-              </div>
-            </section>
+              <section className="guide-detail-section animate-up" style={{ animationDelay: '0.2s' }}>
+                <div className="section-header">
+                  <span className="section-icon">🚀</span>
+                  <h2>Kỹ năng</h2>
+                </div>
+                <div className="guide-detail-tags">
+                  {guide.skills?.map((skill, index) => (
+                    <span key={index} className="guide-detail-tag">{skill}</span>
+                  ))}
+                </div>
+              </section>
+            </div>
 
-            <section className="guide-detail-section">
-              <h2>Đánh giá từ khách du lịch ({guide.reviews?.length || 0})</h2>
-              <div className="guide-detail-reviews-list">
-                {guide.reviews && guide.reviews.length > 0 ? (
-                  guide.reviews.map(review => (
-                    <div key={review.id} className="guide-review-item">
-                      <div className="guide-review-header">
-                        <div className="guide-review-user">
-                          <div className="guide-review-avatar">
-                            {review.avatar ? (
-                              <img src={review.avatar} alt={review.user} />
-                            ) : (
-                              review.user?.charAt(0)
-                            )}
-                          </div>
-                          <div>
-                            <div className="guide-review-name">{review.user}</div>
-                            <div className="guide-review-date">
-                              {review.date ? new Date(review.date).toLocaleDateString('vi-VN') : 'N/A'}
-                            </div>
-                          </div>
-                        </div>
-                        <div style={{ color: '#fbbf24' }}>
-                          {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                        </div>
-                      </div>
-                      <div style={{ color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
-                        {review.comment}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ color: 'var(--tc-text-muted)', textAlign: 'center', padding: '20px 0' }}>
-                    Chưa có đánh giá nào.
-                  </div>
-                )}
+            {/* Familiar Provinces Section */}
+            <section className="guide-detail-section animate-up" style={{ animationDelay: '0.3s' }}>
+              <div className="section-header">
+                <span className="section-icon">🗺️</span>
+                <h2>Khu vực quen thuộc khác</h2>
+              </div>
+              <div className="guide-detail-bio">
+                {guide.familiarProvinces || 'Chưa cập nhật thông tin khu vực lân cận.'}
               </div>
             </section>
           </div>
 
           <aside className="guide-detail-sidebar">
-            <Card className="guide-detail-sidebar-card">
-              <h3 style={{ fontSize: '1.125rem', marginBottom: '16px' }}>Trạng thái hoạt động</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px' }}>
-                <div style={{ 
-                  width: '12px', 
-                  height: '12px', 
-                  borderRadius: '50%', 
-                  backgroundColor: guide.isAcceptingTours ? 'var(--color-success)' : 'var(--color-error)' 
-                }}></div>
-                <span style={{ fontWeight: 600 }}>
-                  {guide.isAcceptingTours ? 'Đang nhận Tour' : 'Đang bận'}
-                </span>
+            <Card className="guide-detail-sidebar-card sticky-sidebar animate-up" style={{ animationDelay: '0.2s' }}>
+              <h3 className="sidebar-title">Thông tin tóm tắt</h3>
+              
+              <div className="summary-info-list">
+                <div className="summary-item">
+                  <div className="summary-label">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Khu vực hoạt động:
+                  </div>
+                  <div className="summary-value">{guide.workingArea}</div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+                    Kinh nghiệm:
+                  </div>
+                  <div className="summary-value">{guide.yearsOfExperience} năm</div>
+                </div>
+                <div className="summary-item">
+                  <div className="summary-label">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    Đánh giá:
+                  </div>
+                  <div className="summary-value">
+                    <div className="tc-rating-badge small">
+                      <span className="rating-value">{guide.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="rating-star">★</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '24px' }}>
-                Hướng dẫn viên này có thể hỗ trợ bạn thiết kế lịch trình riêng và dẫn tour tại khu vực {guide.workingArea}.
+
+              <p className="sidebar-note">
+                Sẵn sàng đồng hành cùng bạn trên mọi nẻo đường tại {guide.workingArea}.
               </p>
-              
-              <Button fullWidth variant="outline" style={{ marginBottom: '12px' }} onClick={handleMessageGuide} isLoading={messageLoading}>
-                Gửi tin nhắn
-              </Button>
-              <Button fullWidth>
-                Xem các Tour đang dẫn
-              </Button>
+
+              <div className="sidebar-actions">
+                <Button variant="primary" fullWidth onClick={handleMessageGuide} isLoading={messageLoading} size="large">
+                  Nhắn tin ngay
+                </Button>
+                <Button 
+                  variant="outline" 
+                  fullWidth 
+                  size="large"
+                  onClick={() => {
+                    const el = document.getElementById('guide-tours-section');
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Xem Tour của Guide
+                </Button>
+              </div>
             </Card>
           </aside>
+        </div>
+
+        {/* Full Width Sections */}
+        <div className="full-width-sections">
+          {/* Tours Section */}
+          <section id="guide-tours-section" className="tours-section animate-up" style={{ animationDelay: '0.4s' }}>
+            <div className="section-header">
+              <span className="section-icon">🎒</span>
+              <h2>Tất cả Tour của {guide.name}</h2>
+            </div>
+
+            {guide.tours && guide.tours.length > 0 ? (
+              <div className="tours-grid">
+                {guide.tours.map(tour => (
+                  <div key={tour.id} className="tour-card" onClick={() => navigate(`/tours/${tour.id}`)}>
+                    <div className="tour-image-container">
+                      <img src={tour.image} alt={tour.title} className="tour-image" />
+                      <div className="tour-category-tag">{tour.category}</div>
+                    </div>
+                    <div className="tour-card-body">
+                      <h3 className="tour-title">{tour.title}</h3>
+                      <div className="tour-meta">
+                        <span>📍 {tour.province}</span>
+                        <span>⏱️ {tour.duration}</span>
+                      </div>
+                      <div className="tour-price-row">
+                        <div className="tour-price">{tour.price.toLocaleString('vi-VN')} VNĐ</div>
+                        <Button variant="ghost" size="small">Chi tiết →</Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="guide-detail-section" style={{ textAlign: 'center', padding: '40px', background: '#f8fafc' }}>
+                <p style={{ color: '#64748b' }}>Hiện chưa có tour nào được đăng tải bởi hướng dẫn viên này.</p>
+              </div>
+            )}
+          </section>
+
+          {/* Reviews Section */}
+          <section className="guide-detail-section animate-up" style={{ animationDelay: '0.5s' }}>
+            <div className="section-header">
+              <span className="section-icon">💬</span>
+              <h2>Đánh giá từ du khách ({guide.reviews?.length || 0})</h2>
+            </div>
+            <div className="guide-detail-reviews-list">
+              {guide.reviews && guide.reviews.length > 0 ? (
+                guide.reviews.map(review => (
+                  <div key={review.id} className="guide-review-item">
+                    <div className="guide-review-header">
+                      <div className="guide-review-user">
+                        <div className="guide-review-avatar">
+                          <img src={review.avatar || 'https://via.placeholder.com/40'} alt={review.user} />
+                        </div>
+                        <div>
+                          <div className="guide-review-name">{review.user}</div>
+                          <div className="guide-review-date">{new Date(review.date).toLocaleDateString('vi-VN')}</div>
+                        </div>
+                      </div>
+                      <div className="guide-review-rating">
+                        {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                      </div>
+                    </div>
+                    <div className="guide-review-comment">{review.comment}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-reviews">
+                  Chưa có đánh giá nào cho hướng dẫn viên này.
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </PageContainer>
     </div>

@@ -1,0 +1,13 @@
+---
+description: Behavioral guidelines for Frontend. Use when writing, reviewing, or refactoring UI components.
+alwaysApply: true
+---
+
+# Karpathy behavioral guidelines (Frontend)
+
+Refer to the root `.cursor/rules/karpathy-guidelines.mdc` for the full set of rules.
+
+## Core Focus:
+- **Style Guide**: Follow the TravelConnectVN UI Style Guide.
+- **Surgical Changes**: Don't refactor adjacent components or styles.
+- **Goal-Driven**: Ensure the UI works as intended before adding polish.

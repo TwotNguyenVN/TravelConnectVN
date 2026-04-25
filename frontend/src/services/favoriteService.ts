@@ -39,6 +39,12 @@ const favoriteService = {
   
   getMyFavoriteGuides: () => 
     api.get<FavoriteGuide[]>('/favorites/me/guides'),
+
+  checkIsFavorite: (tourId: string) =>
+    api.get<boolean>(`/favorites/check/tour/${tourId}`),
+
+  checkGuideIsFavorite: (guideId: string) =>
+    api.get<boolean>(`/favorites/check/guide/${guideId}`),
 };
 
 export default favoriteService;

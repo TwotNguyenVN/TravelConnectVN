@@ -168,9 +168,13 @@ export const HomePage: React.FC = () => {
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
             {featuredGuides.map(guide => (
-              <Card key={guide.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)', padding: 'var(--tc-spacing-4)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', backgroundColor: 'var(--tc-bg-default)' }}>
-                <div style={{ width: '60px', height: '60px', borderRadius: '50%', backgroundColor: 'var(--tc-success-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tc-success)', fontSize: 'var(--tc-font-size-lg)', fontWeight: 'bold' }}>
-                  {guide.name.charAt(0)}
+              <Card key={guide.id} style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)', padding: 'var(--tc-spacing-4)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', backgroundColor: 'var(--tc-bg-default)', cursor: 'pointer' }} onClick={() => navigate(`/guides/${guide.id}`)}>
+                <div style={{ width: '60px', height: '60px', borderRadius: '50%', overflow: 'hidden', backgroundColor: 'var(--tc-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {guide.avatar || guide.coverUrl ? (
+                    <img src={guide.avatar || guide.coverUrl} alt={guide.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold' }}>{guide.name.charAt(0)}</span>
+                  )}
                 </div>
                 <div>
                   <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-1) 0' }}>{guide.name}</h3>

@@ -47,6 +47,15 @@ export class FavoritesController {
     return this.favoritesService.getMyFavoriteTours(userId);
   }
 
+  @Get('check/tour/:tourId')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if a tour is favorited' })
+  async checkTourFavorite(@Request() req, @Param('tourId') tourId: string) {
+    const userId = req.user.id;
+    return this.favoritesService.isTourFavorited(userId, tourId);
+  }
+
   // ==========================================
   // GUIDE FAVORITES
   // ==========================================
@@ -76,5 +85,14 @@ export class FavoritesController {
   async getMyFavoriteGuides(@Request() req) {
     const userId = req.user.id;
     return this.favoritesService.getMyFavoriteGuides(userId);
+  }
+
+  @Get('check/guide/:guideId')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Check if a guide is favorited' })
+  async checkGuideFavorite(@Request() req, @Param('guideId') guideId: string) {
+    const userId = req.user.id;
+    return this.favoritesService.isGuideFavorited(userId, guideId);
   }
 }

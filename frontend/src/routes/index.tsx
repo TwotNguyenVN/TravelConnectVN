@@ -116,7 +116,7 @@ export const router = createBrowserRouter([
       { path: 'verification', element: <GuideVerificationPage /> },
       { path: 'tours', element: <MyToursPage /> },
       { path: 'tours/create', element: <TourFormPage /> },
-      { path: 'tours/:id/edit', element: <TourFormPage /> },
+      { path: 'tours/edit/:id', element: <TourFormPage /> },
       { path: 'tours/:id/itinerary', element: <TourItineraryPage /> },
       { path: 'tours/:id/images', element: <TourImagesPage /> },
       { path: 'tour-requests', element: <GuideRequestsPage /> },

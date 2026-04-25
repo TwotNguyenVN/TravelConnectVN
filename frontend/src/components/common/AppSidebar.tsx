@@ -28,6 +28,9 @@ export const AppSidebar: React.FC = () => {
           <NavLink to="/user/requests" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             📅 Yêu cầu của tôi
           </NavLink>
+          <NavLink to="/user/companion-posts" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            🤝 Bài đăng đồng hành
+          </NavLink>
           <NavLink to="/user/favorites" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             ❤️ Yêu thích
           </NavLink>

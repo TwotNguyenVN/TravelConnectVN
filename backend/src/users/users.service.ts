@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
@@ -17,6 +17,10 @@ export class UsersService {
     try {
       const user = await this.prisma.public_users.findUnique({
         where: { id },
+        include: {
+          user_preferences: true,
+          user_roles_user_roles_user_idTousers: true,
+        },
       });
       if (!user) throw new NotFoundException('User profile not found');
       return user;
@@ -27,44 +31,152 @@ export class UsersService {
   }
 
   async update(id: string, data: any) {
-    const updatedUser = await this.prisma.public_users.update({
-      where: { id },
-      data: {
-        full_name: data.fullName,
-        phone: data.phone,
-        avatar_url: data.avatarUrl,
-        date_of_birth: data.dateOfBirth
-          ? new Date(data.dateOfBirth)
-          : undefined,
-        gender: data.gender === '' ? null : data.gender,
-        updated_at: new Date(),
-      },
-    });
-
-    // Đồng bộ sang Supabase Auth Metadata
     try {
-      await this.supabaseService.getAdminClient().auth.admin.updateUserById(id, {
-        user_metadata: {
-          full_name: data.fullName,
-          avatar_url: data.avatarUrl,
-        },
+      // 1. Kiểm tra sự tồn tại của người dùng và lấy dữ liệu hiện tại
+      const currentUser = await this.prisma.public_users.findUnique({
+        where: { id },
+        include: { user_preferences: true }
       });
-    } catch (authError) {
-      console.error('Failed to sync metadata to Supabase Auth:', authError);
-      // Không ném lỗi ở đây để tránh làm hỏng quá trình update DB chính
+      
+      if (!currentUser) {
+        throw new NotFoundException('Không tìm thấy người dùng');
+      }
+
+      // 2. Validate và chuẩn hóa dữ liệu
+      const updateData: any = {
+        updated_at: new Date(),
+      };
+
+      // Full Name
+      if (data.fullName !== undefined) {
+        updateData.full_name = data.fullName;
+      }
+
+      // Gender mapping & validation
+      if (data.gender !== undefined) {
+        if (!data.gender || data.gender === '') {
+          updateData.gender = null;
+        } else {
+          const genderLower = data.gender.toLowerCase();
+          if (genderLower === 'nam' || genderLower === 'male') updateData.gender = 'male';
+          else if (genderLower === 'nữ' || genderLower === 'female') updateData.gender = 'female';
+          else if (genderLower === 'khác' || genderLower === 'other') updateData.gender = 'other';
+          else updateData.gender = 'other'; // Mặc định nếu không khớp
+        }
+      }
+
+      // Date of birth validation
+      if (data.dateOfBirth) {
+        const dob = new Date(data.dateOfBirth);
+        if (!isNaN(dob.getTime())) {
+          updateData.date_of_birth = dob;
+        }
+      }
+
+      // Phone handling with proactive conflict check
+      if (data.phone !== undefined) {
+        const newPhone = data.phone === '' ? null : data.phone;
+        
+        // Chỉ xử lý nếu phone thay đổi
+        if (newPhone !== currentUser.phone) {
+          if (newPhone !== null) {
+            // Kiểm tra xem số điện thoại này đã được người khác sử dụng chưa
+            const existingUser = await this.prisma.public_users.findFirst({
+              where: {
+                phone: newPhone,
+                id: { not: id }
+              }
+            });
+            
+            if (existingUser) {
+              throw new BadRequestException('Số điện thoại này đã được sử dụng bởi một tài khoản khác');
+            }
+          }
+          updateData.phone = newPhone;
+        }
+      }
+
+      // Location fields
+      if (data.region !== undefined) updateData.region = data.region;
+      if (data.homeProvinceId !== undefined) {
+        updateData.home_province_id = data.homeProvinceId && data.homeProvinceId !== '' 
+          ? BigInt(data.homeProvinceId) 
+          : null;
+      }
+
+      // Media URLs
+      if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
+      if (data.coverUrl !== undefined) updateData.cover_url = data.coverUrl;
+
+      // 3. Thực hiện cập nhật DB
+      const updatedUser = await this.prisma.public_users.update({
+        where: { id },
+        data: updateData,
+      });
+
+      // 4. Cập nhật User Preferences (travel style, language)
+      if (data.travelStyle !== undefined || data.preferredLanguageId !== undefined || data.otherLanguages !== undefined) {
+        await this.prisma.user_preferences.upsert({
+          where: { user_id: id },
+          update: {
+            preferred_trip_style: data.travelStyle ?? currentUser.user_preferences?.preferred_trip_style,
+            preferred_language_id: data.preferredLanguageId && data.preferredLanguageId !== '' 
+              ? BigInt(data.preferredLanguageId) 
+              : (data.preferredLanguageId === '' ? null : currentUser.user_preferences?.preferred_language_id),
+            other_languages: data.otherLanguages !== undefined ? data.otherLanguages : currentUser.user_preferences?.other_languages,
+          },
+          create: {
+            user_id: id,
+            preferred_trip_style: data.travelStyle || '',
+            preferred_language_id: data.preferredLanguageId && data.preferredLanguageId !== '' 
+              ? BigInt(data.preferredLanguageId) 
+              : null,
+            other_languages: data.otherLanguages || '',
+          },
+        });
+      }
+
+      // 5. Đồng bộ Metadata & Logging (Chạy background để không làm chậm response)
+      this.syncAndLog(id, data);
+
+      return updatedUser;
+    } catch (error) {
+      console.error('ERROR - UsersService.update:', error);
+      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+        throw error;
+      }
+      // Xử lý lỗi Unique constraint từ Prisma nếu lọt qua bước validate
+      if (error.code === 'P2002') {
+        throw new BadRequestException('Dữ liệu (số điện thoại hoặc email) đã tồn tại trong hệ thống');
+      }
+      throw new InternalServerErrorException('Đã có lỗi xảy ra khi cập nhật hồ sơ');
     }
+  }
 
-    // Ghi log hoạt động
-    await this.activityLogsService.log(
-      id,
-      'profile.updated',
-      'PROFILE',
-      id,
-      { updated_fields: Object.keys(data) },
-    );
+  // Phương thức phụ để đồng bộ metadata và ghi log
+  private async syncAndLog(id: string, data: any) {
+    try {
+      // Sync to Supabase Auth
+      if (data.fullName || data.avatarUrl) {
+        await this.supabaseService.getAdminClient().auth.admin.updateUserById(id, {
+          user_metadata: {
+            full_name: data.fullName,
+            avatar_url: data.avatarUrl,
+          },
+        });
+      }
 
-    return updatedUser;
-
+      // Log activity
+      await this.activityLogsService.log(
+        id,
+        'profile.updated',
+        'PROFILE',
+        id,
+        { updated_fields: Object.keys(data).filter(k => data[k] !== undefined) },
+      );
+    } catch (err) {
+      console.error('Failed to sync/log profile update:', err);
+    }
   }
 
   async getRoles(id: string) {

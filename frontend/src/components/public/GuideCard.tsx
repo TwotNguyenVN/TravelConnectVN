@@ -12,6 +12,7 @@ export interface GuideListItem {
   verificationStatus: string;
   languages: string[];
   skills: string[];
+  coverUrl?: string;
 }
 
 interface GuideCardProps {
@@ -22,13 +23,22 @@ interface GuideCardProps {
 const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
   return (
     <Card className="guide-card" padding="none" onClick={onClick}>
-      <div className="guide-card-image-wrapper">
-        <img 
-          src={guide.avatar || 'https://via.placeholder.com/300?text=Guide'} 
-          alt={guide.name} 
-          className="guide-card-image"
-        />
-        {guide.verificationStatus === 'verified' && (
+      <div className="guide-card-header">
+        <div className="guide-card-cover-wrapper">
+          <img 
+            src={guide.coverUrl || 'https://via.placeholder.com/600x240?text=TravelConnectVN'} 
+            alt="Cover" 
+            className="guide-card-cover"
+          />
+        </div>
+        <div className="guide-card-avatar-wrapper">
+          <img 
+            src={guide.avatar || 'https://via.placeholder.com/100?text=Avatar'} 
+            alt={guide.name} 
+            className="guide-card-avatar"
+          />
+        </div>
+        {(guide.verificationStatus === 'verified' || guide.verificationStatus === 'approved') && (
           <div className="guide-card-status">
             <Badge variant="success">Đã xác minh</Badge>
           </div>
@@ -38,7 +48,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
       <div className="guide-card-content">
         <h3 className="guide-card-name">
           {guide.name}
-          {guide.verificationStatus === 'verified' && (
+          {(guide.verificationStatus === 'verified' || guide.verificationStatus === 'approved') && (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM10 17L5 12L6.41 10.59L10 14.17L17.59 6.58L19 8L10 17Z" fill="var(--color-success)"/>
             </svg>
