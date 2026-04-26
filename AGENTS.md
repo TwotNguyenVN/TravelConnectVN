@@ -1,18 +1,33 @@
-# AGENTS.md for TravelConnectVN
+# QUY TRÌNH LÀM VIỆC CỦA AGENT
 
-Behavioral guidelines to reduce common LLM coding mistakes, merged with TravelConnectVN project rules.
-
-## 1. Think Before Coding
+Sau khi nhận yêu cầu, quy trình của tôi sẽ như sau:
+## Think Before Coding
 
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
+- **Đọc và tuân thủ nghiêm ngặt** các quy tắc, tiêu chuẩn và quy ước trong thư mục `.agent/rules`.
+- **Đọc file `WORK.md`** để nắm bắt tiến độ, ngữ cảnh và các yêu cầu cụ thể hiện tại của dự án.
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.
 - If a simpler approach exists, say so. Push back when warranted.
 - If something is unclear, stop. Name what's confusing. Ask.
 
-## 2. Simplicity First
+### Bước 1: Nhập vai & Chọn kỹ năng (Persona & Skills)
+Tôi sẽ chủ động xác định mình cần đóng vai "chuyên gia" nào:
+- **Persona (từ agents/):** database-reviewer, typescript-reviewer, code-architect...
+- **Skills (từ .agent/skills/):** supabase, api-design, frontend-patterns...
+
+### Bước 2: Báo cáo trước khi thực hiện (Pre-reporting) — QUAN TRỌNG NHẤT
+Tôi sẽ gửi cho bạn một bản kế hoạch tóm tắt. Bản báo cáo này giúp bạn biết:
+- Tôi đang làm task nhỏ (subtask) nào.
+- Tôi định sửa những file nào.
+- Tôi sẽ dùng kỹ năng/vai diễn nào.
+- Kết quả dự kiến là gì.
+
+### Bước 3: Thực thi (Execution)
+Tôi tiến hành làm việc dựa trên kế hoạch đã báo cáo. Trong bước này, tôi tuân thủ nguyên tắc:
+## Simplicity First
 
 **Minimum code that solves the problem. Nothing speculative.**
 
@@ -24,7 +39,7 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## 3. Surgical Changes
+## Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -40,7 +55,9 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 4. Goal-Driven Execution
+## Bước 4: Kiểm tra & Xác minh (Verification)
+Sau khi thực hiện, tôi sẽ:
+# Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
@@ -58,27 +75,9 @@ For multi-step tasks, state a brief plan:
 
 Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
 
----
+- Chạy test hoặc tự review lại code theo tiêu chí của các Persona.
+- Kiểm tra dữ liệu thực tế trong database (qua MCP Supabase) để đảm bảo không có sai sót.
 
-## 5. TravelConnectVN Project Rules
-
-- **Work within Scope**: Stick to the current Sprint and priority. Do not expand features or jump Sprints without confirmation.
-- **Data Integrity (MCP Supabase)**: 
-  - ALWAYS prioritize real data in Supabase.
-  - DO NOT create, delete, or modify real data/schema without explicit user confirmation.
-  - Report data inconsistencies or missing seed data before acting.
-- **Style Guide**: Follow the `ui_style_guide_for_ai_agent_TravelConnectVN.md` for all UI tasks (Travel/OTA style).
-- **Core Files**: Always check `PROJECT_STATUS.md`, `PROJECT_TASK.md`, and the current `SPRINT_XX.md`.
-
-## 6. Mandatory Workflow
-
-Before every task, you MUST report:
-1. Current Project/Phase/Sprint.
-2. Best next SINGLE subtask.
-3. Skills from `.agents/skills` to be used.
-4. Expected output and verification method.
-
-Refer to `WORK.md` for the full detailed workflow and reporting formats.
 
 ---
 

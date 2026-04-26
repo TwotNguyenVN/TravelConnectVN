@@ -581,7 +581,7 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 
 ## 18. One-Line Truth
 
-**Sprint 13 đã hoàn thành. Đang thực hiện Sprint 14 (Final QA & Polish). Tiến độ dự án: 95%.**
+**Sprint 14 đang triển khai (Final QA & Polish). Đã chuẩn hóa quy trình Agent và bộ quy tắc dự án. Tiến độ dự án: 96%.**
 ---
 
 ### 23. Session Update (2026-04-22) - Sprint 13 Finalized & Sprint 14 UI Polish

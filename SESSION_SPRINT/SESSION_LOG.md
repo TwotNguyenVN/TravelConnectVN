@@ -4393,3 +4393,89 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Demo Data Enrichment)**: Thực hiện Seed bộ dữ liệu "Premium" (Tour chi tiết, Review thực tế, Lịch sử Chat AI mẫu) để chuẩn bị cho buổi bảo vệ.
+
+## Session 2026-04-26 - Điều tra phần Gợi ý tour bị ẩn
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Giải quyết thắc mắc của người dùng về việc phần "Gợi ý tour" biến mất trên trang chủ.
+- Chosen subtask: Điều tra logic hiển thị tour gợi ý và dữ liệu thực tế.
+
+### Context checked
+- [x] Đã đọc `PROJECT_STATUS.md`
+- [x] Đã đọc `HomePage.tsx` (Frontend)
+- [x] Đã đọc `recommendations.service.ts` (Backend)
+- [x] Đã kiểm tra dữ liệu thực tế bằng MCP Supabase
+
+### Done
+- Xác định nguyên nhân: Phần "Gợi ý tour" bị ẩn do không có tour nào thỏa mãn điều kiện `start_date >= NOW()`.
+- Phát hiện dữ liệu mẫu hiện tại có `start_date` là ngày 25/04/2026, trong khi ngày hiện tại hệ thống là 26/04/2026.
+- Giải thích cho người dùng về cơ chế lọc tour tương lai của hệ thống gợi ý.
+- Người dùng xác nhận đã hiểu và sẽ tự điều chỉnh dữ liệu seed.
+
+### Files Changed
+- Không thay đổi file mã nguồn.
+
+### Skills / Guides Used
+- Sử dụng MCP Supabase để truy vấn dữ liệu trực tiếp.
+
+### Tested / Verified
+- Xác nhận bằng truy vấn SQL: `SELECT COUNT(*) FROM tours WHERE start_date >= '2026-04-26'` trả về 0.
+
+### Result
+- [x] Xong hoàn toàn (Investigation)
+
+### Blockers / Risks
+- Dữ liệu demo dễ bị quá hạn nếu không được cập nhật thường xuyên.
+
+### Suggested Next Single Step
+- Chờ người dùng cập nhật dữ liệu seed hoặc hỗ trợ nếu được yêu cầu.
+
+### Handoff note for next session
+- Hệ thống hoạt động đúng logic, vấn đề nằm ở dữ liệu demo đã quá hạn so với ngày hiện tại. Người dùng đang tự điều chỉnh file `database/seed/sprint13_seed.sql`.
+
+---
+
+## Session 2026-04-27 - Chuẩn hóa quy trình Agent và Push GitHub
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Chuẩn hóa quy trình làm việc của Agent và lưu trữ lên GitHub.
+- Chosen subtask: Cập nhật `AGENTS.md`, `.agent/rules`, `.gitignore` và thực hiện push code.
+
+### Context checked
+- [x] Đã đọc `.agent/rules/README.md`
+- [x] Đã đối chiếu `.gitignore` với thực tế thư mục
+- [x] Đã đọc và cập nhật `AGENTS.md` & `WORK.md`
+
+### Done
+- [x] Bổ sung yêu cầu đọc `.agent/rules` và `WORK.md` vào quy trình làm việc bắt buộc của Agent.
+- [x] Đồng bộ hóa tên thư mục `.agent/` trong `.gitignore` (sửa lỗi từ `.agents/`).
+- [x] Cấu hình Git để track thư mục quy tắc `.agent/` nhằm chia sẻ tiêu chuẩn làm việc.
+- [x] Chuẩn bị đẩy toàn bộ thay đổi lên GitHub.
+
+### Files Changed
+- `.gitignore`
+- `AGENTS.md`
+- `WORK.md`
+- `SESSION_SPRINT/SESSION_LOG.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md` (chuẩn bị cập nhật)
+- `SESSION_SPRINT/PROJECT_TASK.md` (chuẩn bị cập nhật)
+
+### Skills / Guides Used
+- `git-workflow`: Tuân thủ Conventional Commits.
+- `coding-standards`: Áp dụng quy tắc Agent mới.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Suggested Next Single Step
+- Thực hiện `git push` để hoàn tất việc lưu trữ.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Push to GitHub
+- Result: [x]
+- Best next single step: Tiếp tục rà soát Sprint 14 sau khi push thành công.

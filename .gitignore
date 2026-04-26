@@ -20,7 +20,8 @@ frontend/.env.local
 
 # Ignore files for Antigravity agent tasks
 .agents/
-
+CLAUDE.md
+WORK.md
 # OS files
 .DS_Store
 Thumbs.db
