@@ -4479,3 +4479,45 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Current subtask: Push to GitHub
 - Result: [x]
 - Best next single step: Tiếp tục rà soát Sprint 14 sau khi push thành công.
+
+---
+
+## Session 2026-04-27 - Khởi tạo README chuyên nghiệp và Cập nhật tiến độ
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Xây dựng bộ mặt dự án thông qua README.md chuyên nghiệp.
+- Chosen subtask: Tổng hợp tài liệu và khởi tạo `README.md`.
+
+### Context checked
+- [x] Đã đọc `Bao_cao4-7.md` để lấy mô tả chức năng.
+- [x] Đã đọc `Note.md` để lấy Tech Stack và quy trình cài đặt.
+- [x] Đã đối chiếu `PROJECT_STATUS.md` để cập nhật Roadmap.
+
+### Done
+- [x] Khởi tạo file `README.md` tại thư mục gốc với đầy đủ các mục: Overview, Key Features, Tech Stack, Architecture, Getting Started, Roadmap.
+- [x] Chuẩn hóa các lệnh cài đặt và khởi chạy cho cả Frontend và Backend.
+- [x] Tích hợp thông tin về AI Agent Workflow vào tài liệu dự án.
+- [x] Chuẩn bị đẩy thay đổi lên GitHub.
+
+### Files Changed
+- `README.md`
+- `SESSION_SPRINT/SESSION_LOG.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md` (chuẩn bị cập nhật)
+
+### Skills / Guides Used
+- `frontend-design`: Áp dụng cho cấu trúc trình bày README.
+- `documentation-lookup`: Tra cứu thông tin từ báo cáo và ghi chú.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Suggested Next Single Step
+- Thực hiện `git push` để cập nhật README lên repository.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Professional README Initialization
+- Result: [x]
+- Best next single step: Tiếp tục rà soát các tài liệu docs/ khác để đảm bảo tính đồng bộ trước khi bảo vệ.
