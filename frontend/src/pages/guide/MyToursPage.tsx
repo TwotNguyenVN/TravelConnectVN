@@ -58,6 +58,19 @@ const MyToursPage: React.FC = () => {
     }
   };
 
+  const handleStatusUpdate = async (tourId: string, newStatus: string, successMsg: string) => {
+    try {
+      const response = await tourService.updateTour(tourId, { businessStatus: newStatus });
+      if (response.success || response.id) {
+        toast.success(successMsg);
+        fetchTours();
+      }
+    } catch (error: any) {
+      console.error('Update status error:', error);
+      toast.error('Không thể cập nhật trạng thái tour');
+    }
+  };
+
   const handleToggleVisibility = async (tourId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'hidden' ? 'visible' : 'hidden';
@@ -73,15 +86,32 @@ const MyToursPage: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'draft': return 'Bản nháp';
-      case 'published': return 'Đang mở';
-      case 'closed': return 'Đã đóng';
-      case 'completed': return 'Đã hoàn tất';
-      case 'cancelled': return 'Đã hủy';
-      default: return status;
+  const handleStatusUpdateComplex = async (tourId: string, newStatus: string, newVisibility: string, successMsg: string) => {
+    try {
+      const response = await tourService.updateTour(tourId, { 
+        businessStatus: newStatus,
+        visibilityStatus: newVisibility
+      });
+      if (response.success || response.id) {
+        toast.success(successMsg);
+        fetchTours();
+      }
+    } catch (error: any) {
+      console.error('Update status complex error:', error);
+      toast.error('Không thể cập nhật trạng thái tour');
     }
+  };
+
+  const getStatusLabel = (business: string, visibility: string = 'visible') => {
+    if (business === 'draft') return 'Bản nháp';
+    if (business === 'published') return 'Đang mở';
+    if (business === 'closed') {
+      if (visibility === 'hidden') return 'Đang tạm ngưng';
+      return 'Đã đóng ĐK';
+    }
+    if (business === 'cancelled') return 'Đã hủy';
+    if (business === 'completed') return 'Đã hoàn tất';
+    return 'Không rõ';
   };
 
   const formatPrice = (price: number) => {
@@ -118,9 +148,9 @@ const MyToursPage: React.FC = () => {
             <button
               key={status}
               className={`tc-my-tours__status-btn ${statusFilter === status ? 'tc-my-tours__status-btn--active' : ''}`}
-              onClick={() => setStatusFilter(status)}
+               onClick={() => setStatusFilter(status)}
             >
-              {status === 'all' ? 'Tất cả' : getStatusLabel(status)}
+              {status === 'all' ? 'Tất cả' : getStatusLabel(status, 'visible')}
             </button>
           ))}
         </div>
@@ -131,14 +161,19 @@ const MyToursPage: React.FC = () => {
       ) : tours.length > 0 ? (
         <div className="tc-my-tours__grid">
           {tours.map(tour => (
-            <div key={tour.id} className="tc-tour-manage-card">
+            <div 
+              key={tour.id} 
+              className="tc-tour-manage-card"
+              onClick={() => navigate(`/guide/tours/edit/${tour.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <div className="tc-tour-manage-card__image">
                 <img src={tour.cover} alt={tour.title} />
                 <div className="tc-tour-manage-card__badges">
-                  <span className={`tc-tour-manage-card__badge tc-tour-manage-card__badge--${tour.businessStatus}`}>
-                    {getStatusLabel(tour.businessStatus || '')}
+                   <span className={`tc-tour-manage-card__badge tc-tour-manage-card__badge--${tour.businessStatus}`}>
+                    {getStatusLabel(tour.businessStatus || '', tour.visibilityStatus || '')}
                   </span>
-                  {tour.visibilityStatus === 'hidden' && (
+                  {tour.visibilityStatus === 'hidden' && tour.businessStatus !== 'closed' && (
                     <span className="tc-tour-manage-card__badge tc-tour-manage-card__badge--hidden">
                       Bị ẩn
                     </span>
@@ -160,32 +195,115 @@ const MyToursPage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <div className="tc-tour-manage-card__footer">
-                <Button 
-                  variant={tour.visibilityStatus === 'hidden' ? 'primary' : 'outline'}
-                  size="small" 
-                  fullWidth 
-                  onClick={() => handleToggleVisibility(tour.id, tour.visibilityStatus || 'visible')}
-                >
-                  {tour.visibilityStatus === 'hidden' ? 'Hiện bài' : 'Ẩn bài'}
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="small" 
-                  fullWidth 
-                  onClick={() => navigate(`/guide/tours/edit/${tour.id}`)}
-                >
-                  Sửa tour
-                </Button>
-                <Button 
-                  variant="outline" 
-                  size="small" 
-                  fullWidth 
-                  className="tc-tour-manage-card__delete-btn"
-                  onClick={() => handleTourDelete(tour.id, tour.title)}
-                >
-                  Xóa tour
-                </Button>
+              <div className="tc-tour-manage-card__footer" onClick={(e) => e.stopPropagation()}>
+                {tour.businessStatus === 'draft' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      onClick={() => navigate(`/guide/tours/edit/${tour.id}`)}
+                    >
+                      Chỉnh sửa
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      className="tc-tour-manage-card__delete-btn"
+                      onClick={() => handleStatusUpdate(tour.id, 'cancelled', 'Tour đã được chuyển vào mục Đã hủy')}
+                    >
+                      Xóa tour
+                    </Button>
+                  </>
+                )}
+
+                {(tour.businessStatus === 'published' || (tour.businessStatus === 'closed' && tour.visibilityStatus === 'hidden')) && (
+                  <>
+                    <Button variant="outline" size="small" fullWidth onClick={() => toast.info('Tính năng Thêm TV đang phát triển')}>
+                      Thêm tv
+                    </Button>
+                    {tour.businessStatus === 'closed' && tour.visibilityStatus === 'hidden' ? (
+                      <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'published', 'visible', 'Đã mở lại đăng ký')}>
+                        Mở ĐK
+                      </Button>
+                    ) : (
+                      <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'closed', 'hidden', 'Đã tạm ngưng đăng ký')}>
+                        Tạm Ngưng ĐK
+                      </Button>
+                    )}
+                    <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'closed', 'visible', 'Đã đóng đăng ký')}>
+                      Đóng ĐK
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      className="tc-tour-manage-card__delete-btn"
+                      onClick={() => handleStatusUpdate(tour.id, 'cancelled', 'Đã hủy tour')}
+                    >
+                      Hủy tour
+                    </Button>
+                  </>
+                )}
+
+                {tour.businessStatus === 'closed' && tour.visibilityStatus === 'visible' && (
+                  <Button 
+                    variant="primary" 
+                    size="small" 
+                    fullWidth 
+                    onClick={() => handleStatusUpdate(tour.id, 'completed', 'Chúc mừng bạn đã hoàn thành tour!')}
+                  >
+                    Hoàn thành
+                  </Button>
+                )}
+
+                {tour.businessStatus === 'completed' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      onClick={async () => {
+                        await handleStatusUpdate(tour.id, 'draft', 'Tour đã được đưa về bản nháp để chỉnh sửa');
+                        navigate(`/guide/tours/edit/${tour.id}`);
+                      }}
+                    >
+                      Mở Lại
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      className="tc-tour-manage-card__delete-btn"
+                      onClick={() => handleStatusUpdate(tour.id, 'cancelled', 'Tour đã được chuyển vào mục Đã hủy')}
+                    >
+                      Xóa tour
+                    </Button>
+                  </>
+                )}
+
+                {tour.businessStatus === 'cancelled' && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      onClick={() => handleStatusUpdate(tour.id, 'draft', 'Đã chuyển tour về bản nháp')}
+                    >
+                      Bản Nháp
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="small" 
+                      fullWidth 
+                      className="tc-tour-manage-card__delete-btn"
+                      onClick={() => handleTourDelete(tour.id, tour.title)}
+                    >
+                      Xóa tour
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           ))}

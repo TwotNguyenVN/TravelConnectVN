@@ -130,9 +130,9 @@
 
 .tc-settings-actions-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
-  margin: 16px 0;
+  margin-top: 16px;
 }
 
 .tc-action-card {
@@ -164,6 +164,15 @@
 
 .tc-action-card__icon {
   font-size: 1.25rem;
+}
+
+.tc-action-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  filter: grayscale(0.8);
+  pointer-events: none;
 }
 
 .tc-action-card__label {
@@ -330,7 +339,10 @@
   border-radius: 16px;
   padding: 24px;
   border: 1.5px solid #e2e8f0;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  cursor: default;
+  user-select: none;
 }
 
 .tc-itinerary-card__header {
@@ -340,6 +352,11 @@
   margin-bottom: 20px;
 }
 
+.tc-itinerary-card__actions {
+  display: flex;
+  align-items: center;
+}
+
 .tc-itinerary-card__index {
   background: var(--tc-primary);
   color: white;
@@ -347,6 +364,47 @@
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 700;
+  display: flex;
+  align-items: center;
+  user-select: none;
+}
+
+.tc-drag-handle {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  cursor: grab;
+  color: #94a3b8;
+  font-size: 1.2rem;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.tc-drag-handle:hover {
+  border-color: var(--tc-primary);
+  color: var(--tc-primary);
+  background: var(--tc-primary-light);
+}
+
+.tc-drag-handle:active {
+  cursor: grabbing;
+}
+
+
+
+.tc-itinerary-card--ghost {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
+.tc-itinerary-card[draggable="true"]:hover:not(.tc-itinerary-card--ghost) {
+  border-color: var(--tc-primary);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 /* Image Upload */

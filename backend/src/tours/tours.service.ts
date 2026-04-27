@@ -1,5 +1,101 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+
+// Helper to extract coordinates from Google Maps URL
+function extractLatLngFromUrl(url: string): { lat: number, lng: number } | null {
+  if (!url) return null;
+  
+  try {
+    // Format 1: @10.762622,106.660172
+    const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (atMatch) {
+      return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+    }
+
+    // Format 2: q=10.762622,106.660172
+    const qMatch = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) {
+      return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+    }
+
+    // Format 3: !3d10.762622!4d106.660172
+    const d3Match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (d3Match) {
+      return { lat: parseFloat(d3Match[1]), lng: parseFloat(d3Match[2]) };
+    }
+
+    // Format 4: ll=10.762622,106.660172
+    const llMatch = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (llMatch) {
+      return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
+    }
+
+    // Format 5: place/.../10.762622,106.660172
+    const placeMatch = url.match(/place\/[^/]+\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (placeMatch) {
+      return { lat: parseFloat(placeMatch[1]), lng: parseFloat(placeMatch[2]) };
+    }
+
+    // Format 7: Coordinates in JSON-like arrays [10.774431,106.7027581]
+    // Common in Google's internal initialization state
+    const arrayMatch = url.match(/\[(\d+\.\d+),(\d+\.\d+)\]/);
+    if (arrayMatch) {
+      const lat = parseFloat(arrayMatch[1]);
+      const lng = parseFloat(arrayMatch[2]);
+      if (lat > 8 && lat < 24 && lng > 102 && lng < 110) {
+        return { lat, lng };
+      }
+    }
+  } catch (e) {
+    // Ignore parsing errors
+  }
+  
+  return null;
+}
+
+// Helper to resolve short Google Maps link
+async function resolveShortLink(url: string): Promise<{ lat: number, lng: number } | null> {
+  if (!url) return null;
+  
+  // If it's already a long link with coordinates, just extract them
+  const direct = extractLatLngFromUrl(url);
+  if (direct) return direct;
+
+  // If it's a short link, we need to resolve it
+  if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps') || url.includes('goo.gl')) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+      const response = await fetch(url, { 
+        method: 'GET', 
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+        },
+        redirect: 'follow',
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      // Try to extract from final URL
+      const fromUrl = extractLatLngFromUrl(response.url);
+      if (fromUrl) return fromUrl;
+
+      // If not in URL, maybe it's in the body (meta tags or script)
+      const body = await response.text();
+      return extractLatLngFromUrl(body);
+    } catch (e) {
+      console.error('Error resolving short link:', url, e.message);
+      return null;
+    }
+  }
+  
+  return null;
+}
 
 @Injectable()
 export class ToursService {
@@ -20,6 +116,14 @@ export class ToursService {
       business_status: 'published',
       visibility_status: 'visible',
       deleted_at: null,
+      AND: [
+        {
+          OR: [
+            { start_date: { gte: new Date() } },
+            { start_date: null }
+          ]
+        }
+      ]
     };
 
     if (filter.province) {
@@ -40,10 +144,12 @@ export class ToursService {
     }
 
     if (filter.keyword) {
-      where.OR = [
-        { title: { contains: filter.keyword, mode: 'insensitive' } },
-        { province: { contains: filter.keyword, mode: 'insensitive' } },
-      ];
+      where.AND.push({
+        OR: [
+          { title: { contains: filter.keyword, mode: 'insensitive' } },
+          { province: { contains: filter.keyword, mode: 'insensitive' } },
+        ]
+      });
     }
 
     let orderBy: any = { created_at: 'desc' };
@@ -125,6 +231,9 @@ export class ToursService {
         tour_categories: {
           select: { name: true },
         },
+        tour_destinations: {
+          orderBy: { sequence_no: 'asc' },
+        },
       },
     });
 
@@ -166,6 +275,8 @@ export class ToursService {
       meetPoint: tour.meet_point || tour.province,
       meetAddress: tour.meet_address,
       meetTime: tour.meet_time,
+      googleMapsLink: tour.google_maps_link,
+      routeMapLink: tour.route_map_link,
       description: tour.description || 'Chưa có mô tả chi tiết.',
       participantRequirements: tour.participant_requirements,
       images: images,
@@ -176,10 +287,47 @@ export class ToursService {
         exp: `${(tour as any).guide_profiles?.years_of_experience || 0} năm`,
         bio: (tour as any).guide_profiles?.bio || 'Chưa có giới thiệu.',
       },
+      destinations: await Promise.all(((tour as any).tour_destinations || []).map(async (dest: any) => {
+        // Log the first one to verify data presence (invisible to user but helps debug)
+        if (dest.sequence_no === 1) {
+          console.log('DEBUG - Destination 1:', { 
+            name: dest.name, 
+            lat: dest.latitude, 
+            lng: dest.longitude,
+            hasLat: 'latitude' in dest
+          });
+        }
+
+        let lat = dest.latitude ? Number(dest.latitude.toString()) : null;
+        let lng = dest.longitude ? Number(dest.longitude.toString()) : null;
+
+        // Fallback: If no coordinates in DB, try to resolve from link
+        if ((lat === null || isNaN(lat)) && dest.google_maps_link) {
+          const coords = await resolveShortLink(dest.google_maps_link);
+          lat = coords?.lat || null;
+          lng = coords?.lng || null;
+        }
+
+        return {
+          id: dest.id,
+          name: dest.name,
+          address: dest.address,
+          googleMapsLink: dest.google_maps_link,
+          sequenceNo: dest.sequence_no,
+          lat: (lat !== null && !isNaN(lat)) ? lat : null,
+          lng: (lng !== null && !isNaN(lng)) ? lng : null,
+        };
+      })),
       itinerary: ((tour as any).tour_locations || []).map((loc: any) => ({
         day: loc.sequence_no,
         title: loc.location_name,
         address: loc.address,
+        notes: loc.notes,
+        hasBreakfast: !!loc.has_breakfast,
+        hasLunch: !!loc.has_lunch,
+        hasDinner: !!loc.has_dinner,
+        accommodation: loc.accommodation_info,
+        highlight: loc.highlight_note,
         lat: loc.latitude ? Number(loc.latitude) : null,
         lng: loc.longitude ? Number(loc.longitude) : null,
         detail:
@@ -246,30 +394,51 @@ export class ToursService {
         business_status: 'published',
         visibility_status: 'visible',
         deleted_at: null,
+        OR: [
+          { start_date: { gte: new Date() } },
+          { start_date: null }
+        ],
       },
       include: {
         tour_categories: true,
         tour_images: {
           where: { is_cover: true },
         },
+        tour_requests: {
+          where: {
+            status: { in: ['approved', 'paid'] }
+          }
+        }
       },
       orderBy: { created_at: 'desc' },
       take: 4,
     });
 
-    return tours.map((t) => ({
-      id: t.id,
-      title: t.title,
-      cover:
-        (t as any).tour_images?.[0]?.image_url ||
-        'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
-      price: Number(t.price),
-      rating: 5.0,
-      location: t.province,
-      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
-      category: t.tour_categories?.name || 'Chưa phân loại',
-      categoryId: t.category_id?.toString(),
-    }));
+    return tours.map((t) => {
+      const currentParticipants = t.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+      const remainingSlots = Math.max(0, t.max_participants - currentParticipants);
+
+      return {
+        id: t.id,
+        title: t.title,
+        cover:
+          (t as any).tour_images?.[0]?.image_url ||
+          'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+        price: Number(t.price),
+        rating: 5.0,
+        location: t.province,
+        province: t.province,
+        startDate: t.start_date,
+        endDate: t.end_date,
+        numDays: t.num_days,
+        numNights: t.num_nights,
+        maxParticipants: t.max_participants,
+        remainingSlots: remainingSlots,
+        duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+        category: t.tour_categories?.name || 'Chưa phân loại',
+        categoryId: t.category_id?.toString(),
+      };
+    });
   }
 
   async getFeaturedGuides() {
@@ -289,6 +458,11 @@ export class ToursService {
       },
       include: {
         users: true,
+        guide_languages: {
+          include: {
+            languages: true
+          }
+        }
       },
       take: 4,
     });
@@ -301,6 +475,8 @@ export class ToursService {
       location: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
       rating: 5.0,
+      languages: g.guide_languages.map(gl => gl.languages.name).join(', '),
+      bio: g.bio
     }));
   }
 
@@ -318,13 +494,24 @@ export class ToursService {
       take: 4,
     });
 
-    return posts.map((p) => ({
-      id: p.id,
-      title: p.title,
-      author: p.users?.full_name || 'Người dùng',
-      date: p.created_at,
-      destination: p.destination,
-    }));
+    return posts.map((p) => {
+      // images is a Json field, cast it to any[]
+      const images = (p.images as any[]) || [];
+      const coverImg = images.find((img: any) => img.isCover) || images[0];
+      
+      return {
+        id: p.id,
+        title: p.title,
+        authorName: p.users?.full_name || 'Người dùng',
+        authorAvatar: p.users?.avatar_url || '',
+        date: p.created_at,
+        destination: p.destination,
+        coverUrl: coverImg?.imageUrl || `https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80`,
+        estimatedCost: p.estimated_cost,
+        expectedMembers: p.expected_members,
+        requirements: p.requirements
+      };
+    });
   }
 
   // ==========================================
@@ -419,15 +606,15 @@ export class ToursService {
           start_date: data.startDate && !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null,
           end_date: data.endDate && !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null,
           duration: data.duration,
-          num_days: (data.numDays !== undefined && data.numDays !== null) ? Number(data.numDays) : null,
-          num_nights: (data.numNights !== undefined && data.numNights !== null) ? Number(data.numNights) : null,
-          price: data.price,
-          max_participants: Number(data.maxParticipants),
+          num_days: (data.numDays !== undefined && data.numDays !== null && data.numDays !== "") ? Number(data.numDays) : null,
+          num_nights: (data.numNights !== undefined && data.numNights !== null && data.numNights !== "") ? Number(data.numNights) : null,
+          price: (data.price !== undefined && data.price !== null && data.price !== "") ? Number(data.price) : 0,
+          max_participants: (data.maxParticipants !== undefined && data.maxParticipants !== null && data.maxParticipants !== "") ? Number(data.maxParticipants) : 0,
           meet_point: data.meetPoint,
           meet_address: data.meetAddress,
           meet_time: data.meetTime,
-          meet_latitude: data.meetLatitude,
-          meet_longitude: data.meetLongitude,
+          meet_latitude: (data.meetLatitude !== undefined && data.meetLatitude !== null && data.meetLatitude !== "") ? data.meetLatitude : null,
+          meet_longitude: (data.meetLongitude !== undefined && data.meetLongitude !== null && data.meetLongitude !== "") ? data.meetLongitude : null,
           google_maps_link: data.googleMapsLink,
           route_map_link: data.routeMapLink,
           description: data.description,
@@ -435,6 +622,7 @@ export class ToursService {
           business_status: data.businessStatus || 'draft',
           visibility_status: data.visibilityStatus || 'visible',
           published_at: data.businessStatus === 'published' ? new Date() : null,
+          other_provinces: data.otherProvinces || [],
         },
       });
 
@@ -471,6 +659,8 @@ export class ToursService {
           name: dest.name,
           address: dest.address,
           google_maps_link: dest.googleMapsLink,
+          latitude: dest.lat !== undefined && dest.lat !== null && dest.lat !== "" ? new Prisma.Decimal(dest.lat) : null,
+          longitude: dest.lng !== undefined && dest.lng !== null && dest.lng !== "" ? new Prisma.Decimal(dest.lng) : null,
         }));
 
         if (destinationData.length > 0) {
@@ -553,21 +743,22 @@ export class ToursService {
       if (data.startDate) updateData.start_date = !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null;
       if (data.endDate) updateData.end_date = !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null;
       if (data.duration !== undefined) updateData.duration = data.duration;
-      if (data.numDays !== undefined) updateData.num_days = (data.numDays !== null) ? Number(data.numDays) : null;
-      if (data.numNights !== undefined) updateData.num_nights = (data.numNights !== null) ? Number(data.numNights) : null;
-      if (data.price !== undefined) updateData.price = data.price;
-      if (data.maxParticipants !== undefined) updateData.max_participants = Number(data.maxParticipants);
+      if (data.numDays !== undefined) updateData.num_days = (data.numDays !== null && data.numDays !== "") ? Number(data.numDays) : null;
+      if (data.numNights !== undefined) updateData.num_nights = (data.numNights !== null && data.numNights !== "") ? Number(data.numNights) : null;
+      if (data.price !== undefined) updateData.price = (data.price !== null && data.price !== "") ? Number(data.price) : 0;
+      if (data.maxParticipants !== undefined) updateData.max_participants = (data.maxParticipants !== null && data.maxParticipants !== "") ? Number(data.maxParticipants) : 0;
       if (data.meetPoint !== undefined) updateData.meet_point = data.meetPoint;
       if (data.meetAddress !== undefined) updateData.meet_address = data.meetAddress;
       if (data.meetTime !== undefined) updateData.meet_time = data.meetTime;
-      if (data.meetLatitude !== undefined) updateData.meet_latitude = data.meetLatitude;
-      if (data.meetLongitude !== undefined) updateData.meet_longitude = data.meetLongitude;
+      if (data.meetLatitude !== undefined) updateData.meet_latitude = (data.meetLatitude !== null && data.meetLatitude !== "") ? data.meetLatitude : null;
+      if (data.meetLongitude !== undefined) updateData.meet_longitude = (data.meetLongitude !== null && data.meetLongitude !== "") ? data.meetLongitude : null;
       if (data.googleMapsLink !== undefined) updateData.google_maps_link = data.googleMapsLink;
       if (data.routeMapLink !== undefined) updateData.route_map_link = data.routeMapLink;
       if (data.description !== undefined) updateData.description = data.description;
       if (data.participantRequirements !== undefined) updateData.participant_requirements = data.participantRequirements;
       if (data.businessStatus) updateData.business_status = data.businessStatus;
       if (data.visibilityStatus) updateData.visibility_status = data.visibilityStatus;
+      if (data.otherProvinces !== undefined) updateData.other_provinces = data.otherProvinces;
 
       if (data.businessStatus === 'published' && tour.business_status !== 'published') {
         updateData.published_at = new Date();
@@ -612,6 +803,8 @@ export class ToursService {
           name: dest.name,
           address: dest.address,
           google_maps_link: dest.googleMapsLink,
+          latitude: dest.lat !== undefined && dest.lat !== null && dest.lat !== "" ? new Prisma.Decimal(dest.lat) : null,
+          longitude: dest.lng !== undefined && dest.lng !== null && dest.lng !== "" ? new Prisma.Decimal(dest.lng) : null,
         }));
         if (destinationData.length > 0) {
           await tx.tour_destinations.createMany({ data: destinationData });

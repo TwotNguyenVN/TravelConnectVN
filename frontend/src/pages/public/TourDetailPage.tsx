@@ -338,9 +338,24 @@ export const TourDetailPage: React.FC = () => {
                           <h3 className="tc-itinerary-title">{item.title}</h3>
                         </div>
                         <p className="tc-itinerary-detail">{item.detail}</p>
-                        {item.address && (
-                          <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-primary)', marginTop: 'var(--tc-spacing-2)', fontWeight: '600' }}>
-                            📍 {item.address}
+                        
+                        {(item.hasBreakfast || item.hasLunch || item.hasDinner) && (
+                          <div className="tc-itinerary-meals" style={{ display: 'flex', gap: '12px', marginTop: '12px', fontSize: '13px' }}>
+                            {item.hasBreakfast && <span>🍳 Sáng</span>}
+                            {item.hasLunch && <span>🍲 Trưa</span>}
+                            {item.hasDinner && <span>🍱 Tối</span>}
+                          </div>
+                        )}
+
+                        {item.accommodation && (
+                          <div className="tc-itinerary-extra" style={{ marginTop: '12px', fontSize: '14px', color: 'var(--tc-text-secondary)' }}>
+                            <strong>🏨 Nghỉ đêm:</strong> {item.accommodation}
+                          </div>
+                        )}
+
+                        {item.highlight && (
+                          <div className="tc-itinerary-extra" style={{ marginTop: '8px', fontSize: '14px', color: 'var(--tc-primary)', fontWeight: '500' }}>
+                            <strong>⭐ Highlight:</strong> {item.highlight}
                           </div>
                         )}
                       </div>
@@ -355,53 +370,86 @@ export const TourDetailPage: React.FC = () => {
 
           {activeTab === 'map' && (
             <div className="tc-tab-content">
-              <h2 className="tc-section-title">
-                <span>🗺️</span> Lộ trình trên bản đồ
-              </h2>
-              <TourMap points={tour.itinerary || []} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 className="tc-section-title" style={{ margin: 0 }}>
+                  <span>🗺️</span> Lộ trình trên bản đồ
+                </h2>
+                {tour.routeMapLink && (
+                  <a 
+                    href={tour.routeMapLink} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="tc-btn tc-btn-outline"
+                    style={{ 
+                      padding: '8px 16px', 
+                      fontSize: '14px', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '8px',
+                      borderRadius: '12px',
+                      textDecoration: 'none',
+                      color: 'var(--tc-primary)',
+                      border: '1px solid var(--tc-primary)',
+                      fontWeight: '600'
+                    }}
+                  >
+                    <span>🧭</span> Xem toàn bộ hành trình trên Google Maps
+                  </a>
+                )}
+              </div>
+              <TourMap points={tour.destinations || []} fallbackPoints={tour.itinerary || []} />
               
               <div className="tc-map-itinerary-steps" style={{ marginTop: '32px' }}>
                 <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ color: 'var(--tc-primary)' }}>📍</span> Trình tự các điểm đến
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-                  {tour.itinerary?.map((item: any) => (
-                    <div key={item.day} className="tc-itinerary-card" style={{ 
-                      background: 'white', 
-                      padding: '20px', 
-                      borderRadius: '16px', 
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: '16px',
-                      transition: 'all 0.3s ease'
-                    }}>
-                      <div style={{ 
-                        width: '36px', 
-                        height: '36px', 
-                        background: 'linear-gradient(135deg, var(--tc-primary) 0%, #0056b3 100%)', 
-                        color: 'white', 
-                        borderRadius: '10px', 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'center',
-                        fontSize: '16px',
-                        fontWeight: '800',
-                        flexShrink: 0,
-                        boxShadow: '0 4px 10px rgba(0, 108, 228, 0.2)'
-                      }}>{item.day}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '15px' }}>{item.title}</div>
-                        <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{item.address}</div>
-                        {item.lat && (
-                          <div style={{ fontSize: '11px', color: 'var(--tc-primary)', marginTop: '4px', fontWeight: '600' }}>
-                            Tọa độ: {item.lat.toFixed(4)}, {item.lng.toFixed(4)}
-                          </div>
-                        )}
+                  {tour.destinations?.length > 0 ? (
+                    tour.destinations.map((item: any) => (
+                      <div key={item.id} className="tc-itinerary-card" style={{ 
+                        background: 'white', 
+                        padding: '20px', 
+                        borderRadius: '16px', 
+                        border: '1px solid #e2e8f0',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: '16px',
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <div style={{ 
+                          width: '36px', 
+                          height: '36px', 
+                          background: 'linear-gradient(135deg, var(--tc-primary) 0%, #0056b3 100%)', 
+                          color: 'white', 
+                          borderRadius: '10px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          fontSize: '16px',
+                          fontWeight: '800',
+                          flexShrink: 0,
+                          boxShadow: '0 4px 10px rgba(0, 108, 228, 0.2)'
+                        }}>{item.sequenceNo}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                          <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '15px' }}>{item.name}</div>
+                          <div style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.4' }}>{item.address}</div>
+                          {item.googleMapsLink && (
+                            <a 
+                              href={item.googleMapsLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              style={{ fontSize: '12px', color: 'var(--tc-primary)', marginTop: '4px', textDecoration: 'none', fontWeight: '500' }}
+                            >
+                              📍 Xem trên Google Maps
+                            </a>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <p style={{ color: '#64748b', fontSize: '14px' }}>Thông tin các điểm đến đang được cập nhật...</p>
+                  )}
                 </div>
               </div>
             </div>

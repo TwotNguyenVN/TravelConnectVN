@@ -186,7 +186,7 @@
   padding: var(--tc-spacing-4);
   border-top: 1px solid var(--tc-border);
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--tc-spacing-2);
 }
 

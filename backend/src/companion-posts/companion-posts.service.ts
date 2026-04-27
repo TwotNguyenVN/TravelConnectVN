@@ -148,6 +148,7 @@ export class CompanionPostsService {
         requirements: data.requirements,
         business_status: 'open',
         visibility_status: 'visible',
+        images: data.images || [],
       },
     });
 
@@ -195,6 +196,7 @@ export class CompanionPostsService {
         requirements: data.requirements,
         business_status: data.businessStatus,
         visibility_status: data.visibilityStatus,
+        images: data.images,
         updated_at: new Date(),
       } as any,
     });

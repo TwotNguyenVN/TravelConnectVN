@@ -16,6 +16,221 @@ export const HomePage: React.FC = () => {
   const [recommendedTours, setRecommendedTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // TourCard Sub-component (M14)
+  const TourCard = ({ tour, onClick }: { tour: any, onClick: () => void }) => {
+    const tourCode = `TC-${tour.id.substring(0, 8).toUpperCase()}`;
+    const remainingSlots = tour.remainingSlots !== undefined ? tour.remainingSlots : (tour.maxParticipants ? Math.floor(tour.maxParticipants * 0.4) : Math.floor(Math.random() * 5) + 3);
+    
+    // Timer Logic - Actual countdown to startDate
+    const [timeLeft, setTimeLeft] = useState({ d: 0, h: 0, m: 0, s: 0 });
+    
+    useEffect(() => {
+      const calculateTimeLeft = () => {
+        const targetDate = tour.startDate ? new Date(tour.startDate) : (tour.start_date ? new Date(tour.start_date) : null);
+        if (!targetDate) return { d: 0, h: 0, m: 0, s: 0 };
+        
+        const now = new Date();
+        const difference = targetDate.getTime() - now.getTime();
+        
+        if (difference <= 0) return { d: 0, h: 0, m: 0, s: 0 };
+        
+        return {
+          d: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          h: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          m: Math.floor((difference / 1000 / 60) % 60),
+          s: Math.floor((difference / 1000) % 60)
+        };
+      };
+
+      setTimeLeft(calculateTimeLeft());
+      
+      const timer = setInterval(() => {
+        setTimeLeft(calculateTimeLeft());
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }, [tour.startDate, tour.start_date]);
+
+    const formatTime = (n: number) => n.toString().padStart(2, '0');
+    const isOver = timeLeft.d === 0 && timeLeft.h === 0 && timeLeft.m === 0 && timeLeft.s === 0;
+
+    return (
+      <Card 
+        onClick={onClick}
+        style={{ 
+          width: '100%',
+          minWidth: '280px',
+          maxWidth: '310px',
+          overflow: 'hidden', 
+          padding: 0, 
+          border: '1px solid #e2e8f0', 
+          borderRadius: '12px', 
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', 
+          transition: 'all 0.3s ease', 
+          cursor: 'pointer',
+          backgroundColor: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}
+      >
+        {/* Image Section */}
+        <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+          <img 
+            src={tour.tour_images?.[0]?.image_url || tour.cover || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
+            alt={tour.title} 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+          
+          {/* Wishlist Icon */}
+          <div style={{ position: 'absolute', top: '10px', left: '10px', zIndex: 2 }}>
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+
+          {/* Bottom Overlays */}
+          <div style={{ 
+            position: 'absolute', 
+            bottom: '10px', 
+            left: '10px', 
+            right: '10px', 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            zIndex: 2
+          }}>
+            <div style={{ 
+              backgroundColor: 'white', 
+              color: '#006ce4', 
+              padding: '4px 10px', 
+              borderRadius: '6px', 
+              fontSize: '13px', 
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+            }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Đếm ngược
+            </div>
+            <div style={{ 
+              backgroundColor: 'white', 
+              color: '#e42b1f', 
+              padding: '4px 10px', 
+              borderRadius: '6px', 
+              fontSize: '14px', 
+              fontWeight: 800,
+              boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
+              minWidth: '80px',
+              textAlign: 'center'
+            }}>
+              {timeLeft.d > 0 ? `${timeLeft.d}d ` : ''}{formatTime(timeLeft.h)}:{formatTime(timeLeft.m)}:{formatTime(timeLeft.s)}
+            </div>
+          </div>
+        </div>
+
+        {/* Content Section */}
+        <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <h3 style={{ 
+            fontSize: '16px', 
+            fontWeight: 800, 
+            margin: '0 0 12px 0', 
+            color: '#1a1a1a', 
+            lineHeight: '1.4',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            minHeight: '44px'
+          }}>
+            {tour.title}
+          </h3>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+            {/* Tour Code */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M2 9V5.2a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2V9M2 15v3.8a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V15M2 9c1.66 0 3 1.34 3 3s-1.34 3-3 3M22 9c-1.66 0-3 1.34-3 3s1.34 3 3 3M12 5v2M12 17v2M12 11v2"/>
+              </svg>
+              <span style={{ fontWeight: 600 }}>{tourCode}</span>
+            </div>
+            
+            {/* Departure */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              Khởi hành: <span style={{ color: '#006ce4', fontWeight: 800, marginLeft: '2px' }}>{tour.province || tour.location}</span>
+            </div>
+
+            {/* Departure Date */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              Ngày khởi hành: <span style={{ fontWeight: 600, marginLeft: '2px' }}>{tour.startDate ? new Date(tour.startDate).toLocaleDateString('vi-VN') : (tour.start_date ? new Date(tour.start_date).toLocaleDateString('vi-VN') : '12/05/2026')}</span>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              {/* Duration */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+                </svg>
+                <span style={{ fontWeight: 600 }}>{tour.numDays || 5}N{tour.numNights || 4}Đ</span>
+              </div>
+              
+              {/* Slots */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', color: '#333' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M17 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M9 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Số chỗ còn: <span style={{ color: '#e42b1f', fontWeight: 900, fontSize: '16px', marginLeft: '2px' }}>{remainingSlots}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Price and Action Section */}
+          <div style={{ 
+            marginTop: 'auto', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'flex-end',
+            paddingTop: '16px',
+            borderTop: '1.2px solid #f1f5f9'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ color: '#e42b1f', fontSize: '24px', fontWeight: 900, lineHeight: 1 }}>
+                {Number(tour.price).toLocaleString()} <span style={{ textDecoration: 'underline', fontSize: '18px', marginLeft: '-2px' }}>đ</span>
+              </div>
+            </div>
+            <Button 
+              variant="outline" 
+              style={{ 
+                borderColor: '#e42b1f', 
+                color: '#e42b1f', 
+                borderRadius: '8px', 
+                fontWeight: 800,
+                padding: '8px 18px',
+                fontSize: '14px',
+                backgroundColor: 'transparent',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              Đặt ngay
+            </Button>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   const getDynamicBanner = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 10) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_sang.png";
@@ -126,21 +341,11 @@ export const HomePage: React.FC = () => {
           
           <div style={{ display: 'flex', gap: 'var(--tc-spacing-5)', overflowX: 'auto', paddingBottom: 'var(--tc-spacing-4)' }}>
             {recommendedTours.map((tour: any) => (
-              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ width: '320px', minWidth: '320px', flex: '0 0 auto', overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer' }}>
-                <img src={tour.tour_images?.[0]?.image_url || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} alt={tour.title} style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }} />
-                <div style={{ padding: 'var(--tc-spacing-4)' }}>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                    {tour.match_reasons?.map((r: string, idx: number) => (
-                      <span key={idx} style={{ fontSize: '11px', background: 'var(--tc-primary)', color: 'white', padding: '2px 8px', borderRadius: '12px', fontWeight: 600 }}>{r}</span>
-                    ))}
-                  </div>
-                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{tour.title}</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--tc-text-secondary)', fontSize: '13px' }}>📍 {tour.province}</span>
-                    <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold' }}>{Number(tour.price).toLocaleString()}đ</span>
-                  </div>
-                </div>
-              </Card>
+              <TourCard 
+                key={tour.id} 
+                tour={tour} 
+                onClick={() => navigate(`/tours/${tour.id}`)} 
+              />
             ))}
           </div>
         </section>
@@ -157,18 +362,18 @@ export const HomePage: React.FC = () => {
             <Link to="/tours" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 320px)', gap: 'var(--tc-spacing-5)' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+            gap: 'var(--tc-spacing-5)',
+            justifyItems: 'center'
+          }}>
             {featuredTours.map(tour => (
-              <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer' }}>
-                <img src={tour.cover} alt={tour.title} style={{ width: '100%', aspectRatio: '16 / 9', objectFit: 'cover' }} />
-                <div style={{ padding: 'var(--tc-spacing-4)' }}>
-                  <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)' }}>{tour.title}</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold' }}>★ {tour.rating}</span>
-                    <span style={{ color: 'var(--tc-danger)', fontWeight: 'bold' }}>{tour.price.toLocaleString()}đ</span>
-                  </div>
-                </div>
-              </Card>
+              <TourCard 
+                key={tour.id} 
+                tour={tour} 
+                onClick={() => navigate(`/tours/${tour.id}`)} 
+              />
             ))}
           </div>
         </div>
@@ -185,24 +390,35 @@ export const HomePage: React.FC = () => {
             <Link to="/guides" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
           </div>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 320px)', gap: 'var(--tc-spacing-5)' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+            gap: 'var(--tc-spacing-5)',
+            justifyItems: 'center'
+          }}>
             {featuredGuides.map(guide => (
               <Card 
                 key={guide.id} 
                 style={{ 
-                  width: '320px', 
+                  width: '100%',
+                  minWidth: '280px',
+                  maxWidth: '310px',
+                  height: '450px',
+                  display: 'flex',
+                  flexDirection: 'column',
                   overflow: 'hidden', 
                   padding: 0, 
                   border: '1px solid var(--tc-border)', 
                   borderRadius: 'var(--tc-radius-lg)', 
                   backgroundColor: 'var(--tc-bg-default)', 
                   cursor: 'pointer',
-                  position: 'relative'
+                  position: 'relative',
+                  transition: 'all 0.3s ease'
                 }} 
                 onClick={() => navigate(`/guides/${guide.id}`)}
               >
                 {/* Image Cover */}
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '16 / 9' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
                   <img 
                     src={guide.coverUrl || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
                     alt={guide.name} 
@@ -233,18 +449,29 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ padding: 'var(--tc-spacing-4)', marginTop: '20px' }}>
-                  <h3 style={{ fontSize: '18px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--tc-text-primary)' }}>{guide.name}</h3>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--tc-text-secondary)', fontSize: '14px', marginBottom: '12px' }}>
-                    📍 {guide.location || 'Việt Nam'}
+                <div style={{ padding: 'var(--tc-spacing-5)', marginTop: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <h3 style={{ fontSize: '19px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--tc-text-primary)' }}>{guide.name}</h3>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                      <span style={{ color: '#006ce4' }}>🌐</span>
+                      Ngôn ngữ: <span style={{ fontWeight: 600 }}>{guide.languages || 'Tiếng Việt'}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                      <span style={{ color: '#006ce4' }}>🎯</span>
+                      Khu vực: <span style={{ fontWeight: 600 }}>{guide.location}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                      <span style={{ color: '#006ce4' }}>📜</span>
+                      Kinh nghiệm: <span style={{ fontWeight: 600 }}>{guide.yearsOfExperience} năm</span>
+                    </div>
                   </div>
                   
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--tc-border)' }}>
-                    <span style={{ fontSize: '13px', color: 'var(--tc-text-secondary)', fontWeight: 500 }}>
-                      💼 {guide.yearsOfExperience || 0} năm kinh nghiệm
+                  <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--tc-border)' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--tc-text-primary)', fontWeight: 600 }}>
+                      💼 {guide.yearsOfExperience || 0} năm KN
                     </span>
                     <span style={{ color: 'var(--tc-warning)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      ★ {guide.rating || 5}
+                      ★ {guide.rating || 5.0}
                     </span>
                   </div>
                 </div>
@@ -264,14 +491,103 @@ export const HomePage: React.FC = () => {
           <Link to="/companions" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
         </div>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+          gap: 'var(--tc-spacing-5)',
+          justifyItems: 'center'
+        }}>
           {latestPosts.map(post => (
-            <Card key={post.id} style={{ padding: 'var(--tc-spacing-4)', border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0' }}>{post.title}</h3>
-                <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)', backgroundColor: 'var(--tc-bg-subtle)', padding: 'var(--tc-spacing-1) var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-sm)' }}>📍 {post.destination} • 📅 {post.date}</span>
+            <Card 
+              key={post.id} 
+              style={{ 
+                width: '100%',
+                minWidth: '280px',
+                maxWidth: '310px',
+                height: '450px',
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden', 
+                padding: 0, 
+                border: '1px solid var(--tc-border)', 
+                borderRadius: 'var(--tc-radius-lg)', 
+                backgroundColor: 'var(--tc-bg-default)', 
+                cursor: 'pointer',
+                position: 'relative',
+                transition: 'all 0.3s ease'
+              }} 
+              onClick={() => navigate(`/companions/${post.id}`)}
+            >
+              {/* Image Cover */}
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+                <img 
+                  src={post.coverUrl || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
+                  alt={post.title} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                />
+                {/* Avatar Overlay */}
+                <div style={{ 
+                  position: 'absolute', 
+                  bottom: '-25px', 
+                  left: '15px', 
+                  width: '60px', 
+                  height: '60px', 
+                  borderRadius: '50%', 
+                  border: '3px solid white', 
+                  overflow: 'hidden',
+                  backgroundColor: 'var(--tc-primary-light)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'var(--tc-shadow-sm)',
+                  zIndex: 2
+                }}>
+                  {post.authorAvatar ? (
+                    <img src={post.authorAvatar} alt={post.authorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold', fontSize: '20px' }}>{post.authorName?.charAt(0) || 'U'}</span>
+                  )}
+                </div>
               </div>
-              <Button variant="outline" size="small">Tham gia</Button>
+
+              <div style={{ padding: 'var(--tc-spacing-5)', marginTop: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <h3 style={{ 
+                  fontSize: '17px', 
+                  fontWeight: 700, 
+                  margin: '0 0 10px 0', 
+                  color: 'var(--tc-text-primary)',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  height: '44px',
+                  lineHeight: '1.3'
+                }}>
+                  {post.title}
+                </h3>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                    <span style={{ color: '#e42b1f' }}>💰</span>
+                    Chi phí: <span style={{ fontWeight: 700, color: '#e42b1f' }}>{Number(post.estimatedCost).toLocaleString()}đ</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                    <span style={{ color: '#006ce4' }}>👥</span>
+                    Cần tìm: <span style={{ fontWeight: 700 }}>{post.expectedMembers} người</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
+                    <span style={{ color: '#006ce4' }}>📍</span>
+                    Điểm đến: <span style={{ fontWeight: 600 }}>{post.destination}</span>
+                  </div>
+                </div>
+                
+                <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--tc-border)' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--tc-primary)', fontWeight: 700 }}>
+                    {post.authorName}
+                  </span>
+                  <Button variant="outline" size="small" style={{ borderRadius: '20px', padding: '4px 16px' }}>Tham gia</Button>
+                </div>
+              </div>
             </Card>
           ))}
         </div>

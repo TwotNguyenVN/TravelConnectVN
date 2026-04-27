@@ -56,7 +56,7 @@ export class ConversationService {
           },
         },
         companion_posts: {
-          select: { id: true, title: true, destination: true },
+          select: { id: true, title: true, destination: true, images: true },
         },
       },
     });
@@ -87,11 +87,16 @@ export class ConversationService {
         relatedCompanionPostId: conv.related_companion_post_id,
         relatedTourId: conv.related_tour_id,
         companionPost: conv.companion_posts
-          ? {
-              id: conv.companion_posts.id,
-              title: conv.companion_posts.title,
-              destination: conv.companion_posts.destination,
-            }
+          ? (() => {
+              const images = (conv.companion_posts.images as any[]) || [];
+              const coverImg = images.find((img: any) => img.isCover) || images[0];
+              return {
+                id: conv.companion_posts.id,
+                title: conv.companion_posts.title,
+                destination: conv.companion_posts.destination,
+                coverUrl: coverImg?.imageUrl || null,
+              };
+            })()
           : null,
         participants: otherParticipants,
         lastMessage: lastMessage
@@ -319,7 +324,7 @@ export class ConversationService {
           },
         },
         companion_posts: {
-          select: { id: true, title: true, destination: true },
+          select: { id: true, title: true, destination: true, images: true },
         },
         messages: {
           orderBy: { sent_at: 'desc' },
@@ -336,7 +341,18 @@ export class ConversationService {
       title: conv.title,
       relatedCompanionPostId: conv.related_companion_post_id,
       relatedTourId: conv.related_tour_id,
-      companionPost: conv.companion_posts ?? null,
+      companionPost: conv.companion_posts 
+        ? (() => {
+            const images = (conv.companion_posts.images as any[]) || [];
+            const coverImg = images.find((img: any) => img.isCover) || images[0];
+            return {
+              id: conv.companion_posts.id,
+              title: conv.companion_posts.title,
+              destination: conv.companion_posts.destination,
+              coverUrl: coverImg?.imageUrl || null,
+            };
+          })()
+        : null,
       participants: conv.conversation_participants.map((p) => ({
         userId: p.users.id,
         fullName: p.users.full_name,

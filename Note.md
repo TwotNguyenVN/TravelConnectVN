@@ -2,6 +2,11 @@ killall node
 lsof -i :3000
 lsof -i :5173
 
+cho tôi biết quy trình làm việc của bạn
+các file mà bạn sẽ đọc khi bắt đầu quy trình làm việc
+
+ý nghĩa của 2 file workflows-w-agent.md rules-w-agent.md 
+
 cd backend
 npm run start:dev
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -16,47 +16,195 @@ let DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+// Helper to extract coordinates from Google Maps URL
+const extractLatLngFromUrl = (url: string): { lat: number, lng: number } | null => {
+  if (!url) return null;
+  
+  try {
+    // Format 1: @10.762622,106.660172
+    const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (atMatch) {
+      return { lat: parseFloat(atMatch[1]), lng: parseFloat(atMatch[2]) };
+    }
+
+    // Format 2: q=10.762622,106.660172
+    const qMatch = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (qMatch) {
+      return { lat: parseFloat(qMatch[1]), lng: parseFloat(qMatch[2]) };
+    }
+
+    // Format 3: !3d10.762622!4d106.660172
+    const d3Match = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (d3Match) {
+      return { lat: parseFloat(d3Match[1]), lng: parseFloat(d3Match[2]) };
+    }
+
+    // Format 4: ll=10.762622,106.660172
+    const llMatch = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (llMatch) {
+      return { lat: parseFloat(llMatch[1]), lng: parseFloat(llMatch[2]) };
+    }
+
+    // Format 5: place/.../10.762622,106.660172
+    const placeMatch = url.match(/place\/[^/]+\/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (placeMatch) {
+      return { lat: parseFloat(placeMatch[1]), lng: parseFloat(placeMatch[2]) };
+    }
+    // Format 6: Generic lat,lng match anywhere in URL (more aggressive)
+    const genericMatch = url.match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (genericMatch) {
+      const lat = parseFloat(genericMatch[1]);
+      const lng = parseFloat(genericMatch[2]);
+      // Basic validation for Vietnam coordinates
+      if (lat > 8 && lat < 24 && lng > 102 && lng < 110) {
+        return { lat, lng };
+      }
+    }
+  } catch (e) {
+    console.error('Error parsing coordinates from URL:', e);
+  }
+  
+  return null;
+};
+
 interface MapPoint {
-  day: number;
-  title: string;
-  address: string;
-  lat: number | null;
-  lng: number | null;
+  day?: number;
+  sequenceNo?: number;
+  title?: string;
+  name?: string;
+  address?: string;
+  lat?: number | null;
+  lng?: number | null;
+  googleMapsLink?: string;
 }
 
 interface TourMapProps {
   points: MapPoint[];
+  fallbackPoints?: MapPoint[];
 }
 
-// Component to auto-fit map bounds to markers
-const ChangeView = ({ bounds }: { bounds: L.LatLngBoundsExpression }) => {
+// Component to handle map view changes
+const MapController = ({ bounds, shouldFit }: { bounds: L.LatLngBounds | null, shouldFit: boolean }) => {
   const map = useMap();
+  
   useEffect(() => {
-    if (bounds) {
-      map.fitBounds(bounds, { padding: [50, 50] });
+    if (bounds && shouldFit) {
+      map.fitBounds(bounds, { padding: [50, 50], animate: true });
     }
-  }, [bounds, map]);
+  }, [bounds, shouldFit, map]);
+  
   return null;
 };
 
-// Create a custom numbered icon
-const createNumberedIcon = (number: number) => {
-  return L.divIcon({
-    className: 'tc-map-marker-custom',
-    html: `<div class="marker-pin"></div><span class="marker-number">${number}</span>`,
-    iconSize: [30, 42],
-    iconAnchor: [15, 42],
-    popupAnchor: [0, -40]
-  });
+// Custom Reset Control
+const ResetViewControl = ({ onReset }: { onReset: () => void }) => {
+  return (
+    <div className="leaflet-top leaflet-right" style={{ marginTop: '10px', marginRight: '10px' }}>
+      <div className="leaflet-control leaflet-bar">
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            onReset();
+          }}
+          title="Căn giữa bản đồ"
+          style={{
+            backgroundColor: 'white',
+            border: 'none',
+            width: '34px',
+            height: '34px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '18px',
+            borderRadius: '4px',
+            boxShadow: '0 1px 5px rgba(0,0,0,0.4)'
+          }}
+        >
+          🎯
+        </button>
+      </div>
+    </div>
+  );
 };
 
-export const TourMap: React.FC<TourMapProps> = ({ points }) => {
-  // Filter points that have valid coordinates
-  const validPoints = useMemo(() => 
-    points.filter(p => p.lat !== null && p.lng !== null) as (MapPoint & { lat: number, lng: number })[],
-  [points]);
+export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] }) => {
+  const [shouldFit, setShouldFit] = useState(true);
 
-  if (validPoints.length === 0) {
+  // Helper to process a list of points
+  const processPointList = useCallback((list: MapPoint[]) => {
+    return list.map(p => {
+      let lat = p.lat !== null && p.lat !== undefined ? Number(p.lat) : null;
+      let lng = p.lng !== null && p.lng !== undefined ? Number(p.lng) : null;
+      
+      if ((lat === null || isNaN(lat)) && p.googleMapsLink) {
+        const extracted = extractLatLngFromUrl(p.googleMapsLink);
+        if (extracted) {
+          lat = extracted.lat;
+          lng = extracted.lng;
+        }
+      }
+      
+      return {
+        ...p,
+        lat,
+        lng,
+        displayTitle: p.title || p.name || 'Điểm đến',
+        displayNumber: p.sequenceNo || p.day || 0
+      };
+    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as any[];
+  }, []);
+
+  // Process points and extract coordinates
+  const processedPoints = useMemo(() => {
+    const mainList = processPointList(points);
+    const fallbackList = processPointList(fallbackPoints);
+    
+    // If we have very few points in mainList compared to points.length, 
+    // it means coordinate extraction failed for many points.
+    // In this case, we merge with fallback list to show as many points as possible.
+    if (mainList.length < points.length && fallbackList.length > 0) {
+      // Use a Map to keep unique coordinates to avoid exact overlapping markers
+      const uniquePoints = new Map();
+      
+      // Add fallback points first (they are usually accurate)
+      fallbackList.forEach(p => {
+        const key = `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+        uniquePoints.set(key, p);
+      });
+      
+      // Add main points (they might override fallback if they match coordinates)
+      mainList.forEach(p => {
+        const key = `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
+        uniquePoints.set(key, p);
+      });
+      
+      return Array.from(uniquePoints.values()).sort((a, b) => a.displayNumber - b.displayNumber);
+    }
+    
+    return mainList;
+  }, [points, fallbackPoints, processPointList]);
+
+  const bounds = useMemo(() => {
+    if (processedPoints.length === 0) return null;
+    return L.latLngBounds(processedPoints.map(p => [p.lat, p.lng]));
+  }, [processedPoints]);
+
+  const handleReset = useCallback(() => {
+    setShouldFit(true);
+    setTimeout(() => setShouldFit(false), 500);
+  }, []);
+
+  // Initial fit
+  useEffect(() => {
+    if (processedPoints.length > 0) {
+      setShouldFit(true);
+      const timer = setTimeout(() => setShouldFit(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [processedPoints.length]);
+
+  if (processedPoints.length === 0) {
     return (
       <div className="tc-map-placeholder">
         <div className="tc-map-empty-state">
@@ -67,47 +215,58 @@ export const TourMap: React.FC<TourMapProps> = ({ points }) => {
     );
   }
 
-  // Calculate bounds
-  const bounds = L.latLngBounds(validPoints.map(p => [p.lat, p.lng]));
-  
-  // Coordinates for the polyline
-  const polylinePositions = validPoints.map(p => [p.lat, p.lng] as [number, number]);
+  const createNumberedIcon = (number: number) => {
+    return L.divIcon({
+      className: 'tc-map-marker-custom',
+      html: `<div class="marker-pin"></div><span class="marker-number">${number}</span>`,
+      iconSize: [30, 42],
+      iconAnchor: [15, 42],
+      popupAnchor: [0, -40]
+    });
+  };
 
   return (
     <div className="tc-tour-map-wrapper">
       <MapContainer 
-        center={[validPoints[0].lat, validPoints[0].lng]} 
+        center={[processedPoints[0].lat, processedPoints[0].lng]} 
         zoom={13} 
         style={{ height: '500px', width: '100%', borderRadius: '16px', zIndex: 1 }}
+        scrollWheelZoom={true}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        <ChangeView bounds={bounds} />
+        <MapController bounds={bounds} shouldFit={shouldFit} />
+        <ResetViewControl onReset={handleReset} />
 
-        {validPoints.map((point, index) => (
+        {processedPoints.map((point, index) => (
           <Marker 
-            key={index} 
+            key={`${point.displayNumber}-${index}`} 
             position={[point.lat, point.lng]} 
-            icon={createNumberedIcon(point.day)}
+            icon={createNumberedIcon(point.displayNumber)}
           >
             <Popup>
               <div className="tc-map-popup">
-                <strong>Ngày {point.day}: {point.title}</strong>
+                <strong>Điểm {point.displayNumber}: {point.displayTitle}</strong>
                 <p>{point.address}</p>
+                {point.googleMapsLink && (
+                  <a href={point.googleMapsLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--tc-primary)', fontSize: '11px', fontWeight: 'bold' }}>
+                    Mở Google Maps
+                  </a>
+                )}
               </div>
             </Popup>
           </Marker>
         ))}
 
-        {validPoints.length > 1 && (
+        {processedPoints.length > 1 && (
           <Polyline 
-            positions={polylinePositions} 
-            color="var(--tc-primary)" 
-            weight={4} 
-            opacity={0.6}
+            positions={processedPoints.map(p => [p.lat, p.lng])} 
+            color="#004a99" 
+            weight={5} 
+            opacity={0.8}
             dashArray="10, 10"
           />
         )}
@@ -120,6 +279,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points }) => {
           border-radius: 16px;
           overflow: hidden;
           border: 1px solid var(--tc-border);
+          position: relative;
         }
         
         .tc-map-placeholder {
@@ -142,7 +302,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points }) => {
           display: block;
           margin-bottom: 10px;
         }
-
+        
         .tc-map-marker-custom {
           background: none;
           border: none;
@@ -192,6 +352,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points }) => {
           margin: 0;
           font-size: 12px;
           color: #666;
+          margin-bottom: 8px;
         }
       `}</style>
     </div>

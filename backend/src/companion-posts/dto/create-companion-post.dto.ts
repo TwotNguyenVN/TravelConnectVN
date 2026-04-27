@@ -51,4 +51,8 @@ export class CreateCompanionPostDto {
   @IsString()
   @IsOptional()
   requirements?: string;
+
+  @ApiProperty({ example: [], required: false })
+  @IsOptional()
+  images?: any[];
 }

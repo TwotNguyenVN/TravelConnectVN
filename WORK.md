@@ -6,7 +6,7 @@ Sau khi nhận yêu cầu, quy trình của tôi sẽ như sau:
 **Don't assume. Don't hide confusion. Surface tradeoffs.**
 
 Before implementing:
-- **Đọc và tuân thủ nghiêm ngặt** các quy tắc, tiêu chuẩn và quy ước trong thư mục `.agent/rules`.
+- **Đọc và tuân thủ nghiêm ngặt** các quy tắc, tiêu chuẩn và quy ước trong thư mục `.agents/rules`.
 - **Đọc file `WORK.md`** để nắm bắt tiến độ, ngữ cảnh và các yêu cầu cụ thể hiện tại của dự án.
 - State your assumptions explicitly. If uncertain, ask.
 - If multiple interpretations exist, present them - don't pick silently.

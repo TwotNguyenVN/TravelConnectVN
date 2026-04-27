@@ -25,13 +25,19 @@ export class RecommendationsService {
           visibility_status: 'visible',
           business_status: 'published',
           deleted_at: null,
-          start_date: {
-            gte: new Date(), // Tour chưa diễn ra
-          },
+          OR: [
+            { start_date: { gte: new Date() } },
+            { start_date: null }
+          ],
         },
         include: {
           tour_categories: true,
           tour_images: true,
+          tour_requests: {
+            where: {
+              status: { in: ['approved', 'paid'] }
+            }
+          },
           guide_profiles: {
             include: {
               users: {
@@ -45,11 +51,17 @@ export class RecommendationsService {
 
       // Nếu user chưa cài đặt sở thích, trả về ngẫu nhiên / mới nhất
       if (!userPrefs && categoryIds.length === 0) {
-        return tours.map((tour) => ({
-          ...tour,
-          match_score: 0,
-          match_reasons: ['Gợi ý thịnh hành'],
-        })).slice(0, 10); // Lấy 10 tour
+        return tours.map((tour) => {
+          const currentParticipants = (tour as any).tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+          const remainingSlots = Math.max(0, tour.max_participants - currentParticipants);
+          
+          return {
+            ...tour,
+            remainingSlots,
+            match_score: 0,
+            match_reasons: ['Gợi ý thịnh hành'],
+          };
+        }).slice(0, 10); // Lấy 10 tour
       }
 
       // 3. Chấm điểm (Rule-based)
@@ -89,9 +101,13 @@ export class RecommendationsService {
           }
         }
 
+        const currentParticipants = (tour as any).tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+        const remainingSlots = Math.max(0, tour.max_participants - currentParticipants);
+
         // Đảm bảo kiểu bigInt trả về API được serialize
         return {
           ...tour,
+          remainingSlots,
           category_id: tour.category_id ? tour.category_id.toString() : null,
           match_score: score,
           match_reasons: reasons.length > 0 ? reasons : ['Có thể bạn sẽ thích'],

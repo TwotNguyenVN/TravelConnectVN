@@ -108,19 +108,11 @@ Dự án hiện đang ở **Sprint 14 (Giai đoạn Final)**:
 
 ---
 
-## 🤖 AI Agent Workflow
-
-Dự án này được tối ưu hóa để làm việc cùng AI Agent (Antigravity). Các quy tắc làm việc được định nghĩa nghiêm ngặt tại:
-*   [AGENTS.md](./AGENTS.md): Quy trình tư duy và thực thi.
-*   [.agent/rules/](./.agent/rules/): Bộ tiêu chuẩn coding và Git.
-
----
-
 ## ✍️ Tác giả & Liên hệ
 
 *   **Dự án:** Đồ án Cơ sở - TravelConnectVN
 *   **Phiên bản:** 1.0.0 (Build 2026)
-*   **Người thực hiện:** [Tên của bạn/Nhóm]
+*   **Người thực hiện:** [zTwotz]
 
 ---
 *© 2026 TravelConnectVN. All rights reserved.*

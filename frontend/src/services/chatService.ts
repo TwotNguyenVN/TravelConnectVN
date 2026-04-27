@@ -15,6 +15,7 @@ export interface CompanionPostCompact {
   id: string;
   title: string;
   destination: string;
+  coverUrl: string | null;
 }
 
 export interface LastMessage {

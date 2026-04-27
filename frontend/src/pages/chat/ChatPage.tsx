@@ -65,10 +65,34 @@ const ChatPage: React.FC = () => {
         fetchMessages(selectedConvId, false);
       }, 5000);
       return () => clearInterval(interval);
-    } else {
       setMessages([]);
     }
   }, [selectedConvId]);
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+
+  const commonEmojis = [
+    '😊', '😂', '🥰', '😍', '😒', '😭', '😘', '😩', '😔', '🙏',
+    '👍', '🙌', '👏', '🤝', '🔥', '✨', '❤️', '📍', '🚗', '✈️',
+    '🌟', '🎉', '👋', '🤝', '💯', '🤔', '😎', '😅', '🙄', '😮'
+  ];
+
+  const handleEmojiClick = (emoji: string) => {
+    setInputText(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (searchTerm.trim() === '') {
@@ -185,6 +209,8 @@ const ChatPage: React.FC = () => {
       const otherUser = conv.participants[0];
       displayName = otherUser?.fullName || 'Người dùng';
       avatar = otherUser?.avatarUrl || '/images/default-avatar.png';
+    } else {
+      avatar = conv.companionPost?.coverUrl || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png';
     }
 
     return (
@@ -264,7 +290,7 @@ const ChatPage: React.FC = () => {
         {!selectedConvId || !selectedConv ? (
           <div className="chat-empty-main">
             <div className="empty-chat-icon-wrapper">
-              <i className="bi bi-chat-square-text-fill"></i>
+              <i className="fa-solid fa-comments"></i>
             </div>
             <h3>Chọn một cuộc trò chuyện</h3>
             <p>Kết nối với hướng dẫn viên hoặc bạn đồng hành của bạn để bắt đầu hành trình!</p>
@@ -274,10 +300,12 @@ const ChatPage: React.FC = () => {
             <div className="chat-header">
               <div className="chat-header-left">
                 <img 
-                  src={selectedConv.conversationType === 'group_companion' ? '/images/default-group-avatar.png' : selectedConv.participants[0]?.avatarUrl || '/images/default-avatar.png'} 
+                  src={selectedConv.conversationType === 'group_companion' 
+                    ? selectedConv.companionPost?.coverUrl || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png'
+                    : selectedConv.participants[0]?.avatarUrl || '/images/default-avatar.png'} 
                   alt="Avatar" 
                   className="chat-header-avatar"
-                  onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = selectedConv.conversationType === 'group_companion' ? 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png' : '/images/default-avatar.png'; }}
                 />
                 <div className="chat-header-info">
                   <h3 className="chat-header-title">
@@ -291,9 +319,9 @@ const ChatPage: React.FC = () => {
               </div>
               
               <div className="chat-header-actions">
-                <button className="chat-action-btn" title="Cuộc gọi"><i className="bi bi-telephone-fill"></i></button>
-                <button className="chat-action-btn" title="Video call"><i className="bi bi-camera-video-fill"></i></button>
-                <button className="chat-action-btn" title="Thông tin"><i className="bi bi-info-circle-fill"></i></button>
+                <button className="chat-action-btn" title="Cuộc gọi"><i className="fa-solid fa-phone"></i></button>
+                <button className="chat-action-btn" title="Video call"><i className="fa-solid fa-video"></i></button>
+                <button className="chat-action-btn" title="Thông tin"><i className="fa-solid fa-circle-info"></i></button>
               </div>
             </div>
 
@@ -348,11 +376,33 @@ const ChatPage: React.FC = () => {
                     onChange={(e) => setInputText(e.target.value)}
                     className="chat-input-field"
                   />
-                  <button className="chat-action-btn" style={{ background: 'none' }} type="button">
-                    <i className="bi bi-emoji-smile"></i>
-                  </button>
-                  <button className="chat-action-btn" style={{ background: 'none' }} type="button">
-                    <i className="bi bi-paperclip"></i>
+                  <div className="emoji-picker-wrapper" ref={emojiPickerRef}>
+                    <button 
+                      className="chat-action-btn" 
+                      style={{ background: 'none', border: 'none' }} 
+                      type="button"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    >
+                      <i className="fa-regular fa-face-smile"></i>
+                    </button>
+                    {showEmojiPicker && (
+                      <div className="emoji-picker-popover">
+                        <div className="emoji-grid">
+                          {commonEmojis.map(emoji => (
+                            <span 
+                              key={emoji} 
+                              className="emoji-item"
+                              onClick={() => handleEmojiClick(emoji)}
+                            >
+                              {emoji}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <button className="chat-action-btn" style={{ background: 'none', border: 'none' }} type="button">
+                    <i className="fa-solid fa-paperclip"></i>
                   </button>
                 </div>
                 <button 
@@ -360,7 +410,7 @@ const ChatPage: React.FC = () => {
                   className="chat-send-btn"
                   disabled={!inputText.trim()}
                 >
-                  <i className="bi bi-send-fill"></i>
+                  <i className="fa-solid fa-paper-plane"></i>
                 </button>
               </form>
             </div>

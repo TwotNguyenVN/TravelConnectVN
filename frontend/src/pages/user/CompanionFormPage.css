@@ -121,3 +121,106 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Image Upload Styles */
+.empty-images {
+  border: 2px dashed var(--tc-border);
+  border-radius: 12px;
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--tc-bg-subtle);
+  transition: all 0.2s ease;
+}
+
+.empty-images:hover {
+  border-color: var(--tc-primary);
+  background-color: rgba(var(--tc-primary-rgb), 0.05);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.empty-images p {
+  color: var(--tc-text-secondary);
+  font-weight: 500;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.image-item {
+  position: relative;
+  aspect-ratio: 16/9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1.5px solid var(--tc-border);
+  box-shadow: var(--tc-shadow-sm);
+  transition: all 0.2s ease;
+}
+
+.image-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-item.is-cover {
+  border: 3.5px solid var(--tc-primary);
+  box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.2);
+}
+
+.image-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 8px;
+  opacity: 1; /* Always visible for clarity */
+  z-index: 2;
+}
+
+.image-actions button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.image-actions button:hover {
+  background-color: #ffffff;
+  transform: scale(1.15);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+}
+
+.btn-remove:hover {
+  color: var(--tc-danger);
+}
+
+.cover-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background-color: var(--tc-primary);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  z-index: 1;
+}

@@ -26,8 +26,11 @@ const CompanionFormPage: React.FC = () => {
     description: '',
     requirements: '',
     business_status: 'open',
-    visibility_status: 'visible'
+    visibility_status: 'visible',
+    images: [] as { imageUrl: string, caption: string, isCover: boolean }[]
   });
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (isEdit) {
@@ -51,7 +54,8 @@ const CompanionFormPage: React.FC = () => {
           description: data.description,
           requirements: data.requirements || '',
           business_status: data.business_status,
-          visibility_status: data.visibility_status
+          visibility_status: data.visibility_status,
+          images: data.images || []
         });
       }
     } catch (error) {
@@ -68,6 +72,77 @@ const CompanionFormPage: React.FC = () => {
     setFormData(prev => ({
       ...prev,
       [name]: name === 'estimated_cost' || name === 'expected_members' ? Number(value) : value
+    }));
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    try {
+      setUploading(true);
+      const newImages = [...formData.images];
+
+      // Note: We are using 'supabase' from utils. 
+      // If not imported, we need to import it.
+      const { supabase } = await import('../../utils/supabase');
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
+        const filePath = fileName;
+
+        const { error: uploadError } = await supabase.storage
+          .from('companions')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          // If companions bucket doesn't exist, try 'public' or 'tours' as fallback
+          // For now we assume 'companions' exists.
+          throw uploadError;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('companions')
+          .getPublicUrl(filePath);
+
+        newImages.push({
+          imageUrl: publicUrl,
+          caption: '',
+          isCover: newImages.length === 0
+        });
+      }
+
+      setFormData(prev => ({ ...prev, images: newImages }));
+      toast.success('Tải ảnh lên thành công');
+    } catch (error: any) {
+      console.error('Error uploading images:', error);
+      toast.error('Có lỗi xảy ra khi tải ảnh lên');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      // If we removed the cover image, set the first one as cover
+      if (prev.images[index].isCover && newImages.length > 0) {
+        newImages[0].isCover = true;
+      }
+      return { ...prev, images: newImages };
+    });
+  };
+
+  const setCoverImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.map((img, i) => ({
+        ...img,
+        isCover: i === index
+      }))
     }));
   };
 
@@ -92,6 +167,7 @@ const CompanionFormPage: React.FC = () => {
         currencyCode: formData.currency_code,
         description: formData.description,
         requirements: formData.requirements || undefined,
+        images: formData.images
       };
 
       if (isEdit) {
@@ -217,6 +293,63 @@ const CompanionFormPage: React.FC = () => {
                     onChange={handleChange}
                   ></textarea>
                 </div>
+              </div>
+
+              <div className="form-section">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h3>Hình ảnh chuyến đi</h3>
+                  <Button 
+                    variant="outline" 
+                    size="small" 
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    isLoading={uploading}
+                  >
+                    {uploading ? 'Đang tải...' : '📸 Thêm hình ảnh'}
+                  </Button>
+                </div>
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/*" 
+                  ref={fileInputRef} 
+                  hidden 
+                  onChange={handleFileUpload}
+                />
+                
+                {formData.images.length === 0 ? (
+                  <div className="empty-images" onClick={() => fileInputRef.current?.click()}>
+                    <div className="empty-icon">📸</div>
+                    <p>Chưa có hình ảnh nào. Nhấn để tải lên.</p>
+                  </div>
+                ) : (
+                  <div className="image-grid">
+                    {formData.images.map((img, index) => (
+                      <div key={index} className={`image-item ${img.isCover ? 'is-cover' : ''}`}>
+                        <img src={img.imageUrl} alt={`Preview ${index}`} />
+                        <div className="image-actions">
+                          <button 
+                            type="button" 
+                            className="btn-set-cover" 
+                            onClick={() => setCoverImage(index)}
+                            title="Làm ảnh bìa"
+                          >
+                            {img.isCover ? '⭐' : '☆'}
+                          </button>
+                          <button 
+                            type="button" 
+                            className="btn-remove" 
+                            onClick={() => removeImage(index)}
+                            title="Xóa ảnh"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                        {img.isCover && <span className="cover-badge">Ảnh bìa</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </Card>
           </div>
