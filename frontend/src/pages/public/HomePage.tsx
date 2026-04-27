@@ -58,9 +58,9 @@ export const HomePage: React.FC = () => {
       <Card 
         onClick={onClick}
         style={{ 
-          width: '100%',
-          minWidth: '280px',
-          maxWidth: '310px',
+          width: '300px',
+          height: '500px',
+          flexShrink: 0,
           overflow: 'hidden', 
           padding: 0, 
           border: '1px solid #e2e8f0', 
