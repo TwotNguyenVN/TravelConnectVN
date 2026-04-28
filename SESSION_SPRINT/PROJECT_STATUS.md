@@ -665,4 +665,33 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 - [x] Hoàn thành subtask sửa lỗi.
 
 #### Suggested Next Single Step
-- **Lane 18.1 (UI Polish)**: Tiếp tục rà soát các trang Chi tiết (TourDetailPage, CompanionDetailPage) để đảm bảo dữ liệu hiển thị mượt mà ngay sau khi Auth xong.
+- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất cho buổi trình bày.
+
+---
+
+### 25. Session Update (2026-04-28) - QA Role Testing & Access Control
+
+#### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Kiểm thử phân quyền và sửa lỗi logic Router.
+
+#### Done
+- [x] Sửa lỗi Role code `ADMIN` -> `SYSTEM_ADMIN` trong `index.tsx`.
+- [x] Kiểm thử vai trò Khách (Guest): Redirect về Login thành công.
+- [x] Kiểm thử vai trò Người dùng (User): Truy cập Profile OK, bị chặn vào Admin/Guide.
+- [x] Kiểm thử vai trò Hướng dẫn viên (Guide): Truy cập Guide area OK, bị chặn vào Admin.
+- [x] Kiểm thử vai trò Quản trị viên (Admin/Staff): Truy cập các vùng quản trị và guide area thành công.
+- [x] Xác nhận trang 403 (Forbidden) hoạt động đúng thiết kế.
+
+#### Files Changed
+- `frontend/src/routes/index.tsx`
+- `SESSION_SPRINT/SESSION_LOG.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/PROJECT_TASK.md`
+
+#### Result
+- [x] Lane 18.1 (QA) hoàn tất 100%.
+
+#### Suggested Next Single Step
+- **Lane 18.2 (Demo Data)**: Nâng cấp dữ liệu demo Premium.

@@ -106,7 +106,7 @@ export const router = createBrowserRouter([
   {
     path: '/guide',
     element: (
-      <RoleGuard allowedRoles={['GUIDE', 'ADMIN']}>
+      <RoleGuard allowedRoles={['GUIDE', 'SYSTEM_ADMIN']}>
         <GuideLayout />
       </RoleGuard>
     ),

@@ -753,14 +753,14 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 - [x] Xác nhận 3 Home API endpoints hoạt động (tours, guides, companions)
 
 ## 18.1. Lane QA
-- [ ] Test Guest
-- [ ] Test User
-- [ ] Test Guide
-- [ ] Test SYSTEM_ADMIN
-- [ ] Test CONTENT_MODERATOR
-- [ ] Test SUPPORT_STAFF
-- [ ] Test multi-role
-- [ ] Test route protection
+- [x] Test Guest
+- [x] Test User
+- [x] Test Guide
+- [x] Test SYSTEM_ADMIN
+- [x] Test CONTENT_MODERATOR
+- [x] Test SUPPORT_STAFF
+- [x] Test multi-role
+- [x] Test route protection
 - [x] Test empty/loading/error states (Initial Polish DONE)
 - [x] Fix recommendation loading sync with Auth state (HomePage)
 

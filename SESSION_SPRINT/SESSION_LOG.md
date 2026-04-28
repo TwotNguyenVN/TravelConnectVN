@@ -4581,3 +4581,68 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Result: [x] Hoàn thành
 - Best next single step: Rà soát UI/UX các trang Detail (Tour, Companion).
 - Must read first next session: PROJECT_STATUS.md.
+
+=============================================================================================
+
+## Session 2026-04-28 - QA Role Testing & Access Control Verification
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Kiểm thử toàn bộ hệ thống phân quyền (QA Role Testing) và xác minh các luồng truy cập.
+- Chosen subtask: Thực hiện QA cho Lane 18.1 (Test Guest, User, Guide, Admin, Staff).
+
+### Context checked
+- [x] Đã đọc `3.2_Seed_demo_accounts.sql` để lấy thông tin tài khoản demo.
+- [x] Đã đọc `frontend/src/routes/index.tsx` và `RoleGuard.tsx` để hiểu logic phân quyền.
+
+### Done
+- **Sửa lỗi Role Code**: Phát hiện và sửa lỗi `ADMIN` thành `SYSTEM_ADMIN` trong `index.tsx` để Admin có thể vào khu vực Hướng dẫn viên.
+- **QA Testing**:
+    - **Guest**: Xác minh tự động redirect về `/login` khi truy cập vùng cấm.
+    - **User**: Xác minh truy cập được `/user`, bị chặn 403 khi vào `/admin` hoặc `/guide`.
+    - **Guide**: Xác minh truy cập được `/guide`, bị chặn 403 khi vào `/admin`.
+    - **Admin (SYSTEM_ADMIN)**: Xác minh truy cập được cả `/admin` và `/guide` (Multi-role test).
+    - **Staff (Moderator/Support)**: Xác minh truy cập được `/admin`.
+- **Cập nhật tài liệu**: Đánh dấu hoàn tất toàn bộ Lane 18.1 trong `PROJECT_TASK.md`.
+
+### Files Changed
+- `frontend/src/routes/index.tsx`
+- `SESSION_SPRINT/PROJECT_TASK.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/SESSION_LOG.md`
+
+### Skills / Guides Used
+- `browser-qa`: Tự động hóa việc kiểm thử giao diện và phân quyền.
+- `frontend-patterns`: Kiểm tra logic Router và Guard.
+
+### UI Style Rules Applied
+- Đã xác minh trang 403 hiển thị đúng style guide (màu danger, nút quay lại trang chủ).
+
+### Schema / Migration / Seed Notes
+- Sử dụng dữ liệu demo sẵn có từ Sprint 02/03.
+
+### Tested / Verified
+- Đã chạy 3 phiên browser subagent để xác minh 6 loại vai trò và các trường hợp truy cập sai trái. Tất cả đều hoạt động đúng thiết kế.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Demo Data Enrichment)**: Rà soát lại dữ liệu Seed "Premium" để đảm bảo các trang Dashboard trông thật sự chuyên nghiệp khi demo.
+
+### PROJECT_STATUS.md update needed
+- Cập nhật Session Update ngày 2026-04-28 (QA Verification).
+
+### PROJECT_TASK.md update needed
+- Đánh dấu [x] cho toàn bộ Lane 18.1.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: QA Role Testing (DONE)
+- Result: [x] Hoàn thành
+- Best next single step: Chuẩn hóa dữ liệu demo Premium.
+- Must read first next session: PROJECT_STATUS.md.
