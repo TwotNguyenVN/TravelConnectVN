@@ -639,5 +639,30 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 
 ---
 
-### Suggested Next Single Step
-- **BẢO VỆ ĐỒ ÁN**: Sử dụng `FINAL_REPORT_AND_SLIDES.md` và các tài khoản demo đã chốt để thực hiện buổi trình bày.
+
+---
+
+### 24. Session Update (2026-04-28) - Fix Recommendation Loading Bug
+
+#### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Sửa lỗi hiển thị tour gợi ý không xuất hiện ngay sau khi login/reload.
+- Chosen subtask: Refactor `useEffect` dependencies trong `HomePage.tsx`.
+
+#### Done
+- [x] Sửa lỗi logic `useEffect` trong `HomePage.tsx` (tách fetch public data và user data).
+- [x] Giải thích cơ chế Session Persistence của dự án (Supabase LocalStorage).
+- [x] Xác nhận mục "Gợi ý dành riêng cho bạn" sẽ tải tự động ngay khi Auth session phục hồi.
+
+#### Files Changed
+- `frontend/src/pages/public/HomePage.tsx`
+- `SESSION_SPRINT/SESSION_LOG.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/PROJECT_TASK.md`
+
+#### Result
+- [x] Hoàn thành subtask sửa lỗi.
+
+#### Suggested Next Single Step
+- **Lane 18.1 (UI Polish)**: Tiếp tục rà soát các trang Chi tiết (TourDetailPage, CompanionDetailPage) để đảm bảo dữ liệu hiển thị mượt mà ngay sau khi Auth xong.

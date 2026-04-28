@@ -4521,3 +4521,63 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Current subtask: Professional README Initialization
 - Result: [x]
 - Best next single step: Tiếp tục rà soát các tài liệu docs/ khác để đảm bảo tính đồng bộ trước khi bảo vệ.
+
+=============================================================================================
+
+## Session 2026-04-28 - Sửa lỗi tải Tour gợi ý (HomePage)
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Khắc phục lỗi hiển thị tour gợi ý không đồng bộ với Auth state.
+- Chosen subtask: Refactor useEffect trong HomePage.tsx để phản hồi sự thay đổi của 'user'.
+
+### Context checked
+- [x] Đã đọc `CLAUDE.md` và `WORK.md` (Workflow của Agent)
+- [x] Đã đọc `PROJECT_STATUS.md` và `PROJECT_TASK.md`
+- [x] Đã phân tích `AuthContext.tsx` và `HomePage.tsx`
+
+### Done
+- Tách biệt logic tải dữ liệu công khai (Featured Tours, Guides, Companions) và dữ liệu cá nhân (Recommendations).
+- Chỉnh sửa `useEffect` tải khuyến nghị để phụ thuộc vào `user`.
+- Thêm điều kiện kiểm tra `recommendedTours.length === 0` để tránh tải lại không cần thiết khi component re-render.
+- Giải thích cho người dùng về cơ chế Session Persistence của Supabase.
+
+### Files Changed
+- `frontend/src/pages/public/HomePage.tsx`
+
+### Skills / Guides Used
+- `frontend-patterns`: React Hooks best practices (useEffect dependencies).
+- `supabase`: Hiểu về cơ chế `getSession` và `onAuthStateChange`.
+
+### UI Style Rules Applied
+- Giữ nguyên UI hiện có, chỉ thay đổi logic React.
+
+### Schema / Migration / Seed Notes
+- Không áp dụng.
+
+### Tested / Verified
+- Đã xác nhận code biên dịch thành công.
+- Logic mới đảm bảo: (1) Tải public data ngay khi mount. (2) Tải recommendations ngay khi `user` khả dụng.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- Tiếp tục rà soát các trang khác (TourDetailPage, CompanionDetailPage) để đảm bảo tính nhất quán về dữ liệu sau khi Auth xong.
+
+### PROJECT_STATUS.md update needed
+- Cập nhật Session Update ngày 2026-04-28.
+
+### PROJECT_TASK.md update needed
+- Đánh dấu các hạng mục liên quan đến Polish UI/UX trang chủ là hoàn tất.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Fix recommendation loading delay (DONE)
+- Result: [x] Hoàn thành
+- Best next single step: Rà soát UI/UX các trang Detail (Tour, Companion).
+- Must read first next session: PROJECT_STATUS.md.

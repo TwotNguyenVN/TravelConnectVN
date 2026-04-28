@@ -240,7 +240,7 @@ export const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchPublicData = async () => {
       try {
         setLoading(true);
         const [toursRes, guidesRes, postsRes] = await Promise.all([
@@ -252,24 +252,30 @@ export const HomePage: React.FC = () => {
         if (toursRes.success) setFeaturedTours(toursRes.data || []);
         if (guidesRes.success) setFeaturedGuides(guidesRes.data || []);
         if (postsRes.success) setLatestPosts(postsRes.data || []);
-
-        if (user) {
-          try {
-            const recRes = await getRecommendedTours();
-            if (recRes.success) setRecommendedTours(recRes.data || []);
-          } catch (e) {
-            console.error('Failed to load recommendations', e);
-          }
-        }
       } catch (error) {
-        console.error('Error fetching home data:', error);
+        console.error('Error fetching public home data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchPublicData();
   }, []);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (user && recommendedTours.length === 0) {
+        try {
+          const recRes = await getRecommendedTours();
+          if (recRes.success) setRecommendedTours(recRes.data || []);
+        } catch (e) {
+          console.error('Failed to load recommendations', e);
+        }
+      }
+    };
+
+    fetchRecommendations();
+  }, [user]);
 
   if (loading) {
     return (

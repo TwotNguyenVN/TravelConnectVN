@@ -762,6 +762,7 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 - [ ] Test multi-role
 - [ ] Test route protection
 - [x] Test empty/loading/error states (Initial Polish DONE)
+- [x] Fix recommendation loading sync with Auth state (HomePage)
 
 ## 18.2. Lane demo
 - [x] Chốt flow tour
