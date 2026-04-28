@@ -6,6 +6,7 @@ export interface Participant {
   fullName: string;
   avatarUrl: string | null;
   lastSeenAt?: string | null;
+  guideProfileId?: string | null;
   joinedAt?: string;
   lastReadAt?: string | null;
   isMuted?: boolean;

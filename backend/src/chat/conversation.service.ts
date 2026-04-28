@@ -41,6 +41,9 @@ export class ConversationService {
                 full_name: true,
                 avatar_url: true,
                 last_seen_at: true,
+                guide_profiles: {
+                  select: { id: true },
+                },
               },
             },
           },
@@ -80,6 +83,7 @@ export class ConversationService {
           fullName: p.users.full_name,
           avatarUrl: p.users.avatar_url,
           lastSeenAt: p.users.last_seen_at,
+          guideProfileId: p.users.guide_profiles?.id || null,
         }));
 
       return {
@@ -248,6 +252,9 @@ export class ConversationService {
             avatar_url: true,
             email: true,
             last_seen_at: true,
+            guide_profiles: {
+              select: { id: true },
+            },
           },
         },
       },
@@ -265,6 +272,7 @@ export class ConversationService {
       avatarUrl: p.users.avatar_url,
       email: p.users.email,
       lastSeenAt: p.users.last_seen_at,
+      guideProfileId: p.users.guide_profiles?.id || null,
       joinedAt: p.joined_at,
       lastReadAt: p.last_read_at,
       isMuted: p.is_muted,
@@ -323,7 +331,13 @@ export class ConversationService {
           where: { left_at: null },
           include: {
             users: {
-              select: { id: true, full_name: true, avatar_url: true, last_seen_at: true },
+              select: { 
+                id: true, 
+                full_name: true, 
+                avatar_url: true, 
+                last_seen_at: true,
+                guide_profiles: { select: { id: true } }
+              },
             },
           },
         },
@@ -362,6 +376,7 @@ export class ConversationService {
         fullName: p.users.full_name,
         avatarUrl: p.users.avatar_url,
         lastSeenAt: p.users.last_seen_at,
+        guideProfileId: (p.users as any).guide_profiles?.id || null,
         joinedAt: p.joined_at,
       })),
       lastMessage: conv.messages[0] ?? null,

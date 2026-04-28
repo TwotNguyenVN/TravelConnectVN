@@ -331,7 +331,15 @@ const ChatPage: React.FC = () => {
                   onError={(e) => { (e.target as HTMLImageElement).src = selectedConv.conversationType === 'group_companion' ? 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png' : '/images/default-avatar.png'; }}
                 />
                 <div className="chat-header-info">
-                  <h3 className="chat-header-title">
+                  <h3 
+                    className={`chat-header-title ${selectedConv.conversationType !== 'group_companion' && selectedConv.participants[0]?.guideProfileId ? 'clickable' : ''}`}
+                    onClick={() => {
+                      const guideId = selectedConv.participants[0]?.guideProfileId;
+                      if (selectedConv.conversationType !== 'group_companion' && guideId) {
+                        navigate(`/guides/${guideId}`);
+                      }
+                    }}
+                  >
                     {selectedConv.conversationType === 'group_companion' ? selectedConv.title : selectedConv.participants[0]?.fullName}
                   </h3>
                   <div className={`chat-header-status ${selectedConv.conversationType !== 'group_companion' && !isUserOnline(selectedConv.participants[0]?.lastSeenAt) ? 'offline' : ''}`}>

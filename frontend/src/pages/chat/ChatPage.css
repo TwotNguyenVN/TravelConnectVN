@@ -283,6 +283,16 @@
   letter-spacing: -0.2px;
 }
 
+.chat-header-title.clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.chat-header-title.clickable:hover {
+  color: var(--tc-primary);
+  text-decoration: underline;
+}
+
 .chat-header-status {
   font-size: 0.8rem;
   color: #10b981; /* Online color */

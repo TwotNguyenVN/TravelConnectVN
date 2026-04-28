@@ -4697,3 +4697,50 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Result: [x] Hoàn thành
 - Best next single step: Cập nhật hình ảnh và dữ liệu Seed Premium.
 - Must read first next session: PROJECT_STATUS.md.
+
+=============================================================================================
+
+## Session 2026-04-28 - Implementing Real-time Chat Status
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Cập nhật trạng thái hoạt động (online/offline) chính xác trong hệ thống tin nhắn.
+- Chosen subtask: Fix chat user status display (Lane 18.2).
+
+### Context checked
+- [x] Đã kiểm tra `frontend/src/pages/chat/ChatPage.tsx` phát hiện logic status đang dùng `Math.random()`.
+- [x] Đã xác nhận bảng `public_users` có cột `last_seen_at`.
+
+### Done
+- **Backend (AuthGuard)**: Thêm logic tự động cập nhật `last_seen_at` cho user mỗi khi có request (có throttle 2 phút để tối ưu hiệu năng).
+- **Backend (ConversationService)**: Trả thêm field `last_seen_at` của các participant trong API conversation.
+- **Frontend (ChatPage)**:
+    - Implement hàm `isUserOnline` (active trong 5 phút gần nhất) và `getLastSeenText`.
+    - Thay thế logic random status bằng dữ liệu thực tế từ API.
+    - Cập nhật Header Chat để hiển thị chi tiết: "Đang hoạt động", "Hoạt động X phút trước", hoặc "Ngoại tuyến".
+- **CSS**: Chuẩn hóa màu sắc indicator cho online/offline trong cả sidebar và header.
+
+### Files Changed
+- `backend/src/common/guards/auth.guard.ts`
+- `backend/src/chat/conversation.service.ts`
+- `frontend/src/services/chatService.ts`
+- `frontend/src/pages/chat/ChatPage.tsx`
+- `frontend/src/pages/chat/ChatPage.css`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/SESSION_LOG.md`
+
+### Tested / Verified
+- Đã xác nhận: (1) Cột `last_seen_at` được cập nhật khi user thao tác. (2) Giao diện chat hiển thị đúng "Đang hoạt động" khi đối phương online và thời gian ngoại tuyến tương ứng khi offline.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Suggested Next Single Step
+- **Lane 18.2**: Tiếp tục rà soát các tính năng real-time khác (như thông báo nảy số unread count) để chuẩn bị cho demo.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Real-time Chat Status (DONE)
+- Result: [x] Hoàn thành
+- Best next single step: Rà soát Notification system.
