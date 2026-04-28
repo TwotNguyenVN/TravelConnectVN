@@ -170,7 +170,10 @@ export const HomePage: React.FC = () => {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
               </svg>
-              Ngày khởi hành: <span style={{ fontWeight: 600, marginLeft: '2px' }}>{tour.startDate ? new Date(tour.startDate).toLocaleDateString('vi-VN') : (tour.start_date ? new Date(tour.start_date).toLocaleDateString('vi-VN') : '12/05/2026')}</span>
+              Ngày khởi hành: <span style={{ fontWeight: 600, marginLeft: '2px' }}>
+                {tour.startDate ? new Date(tour.startDate).toLocaleDateString('vi-VN') : 
+                 (tour.start_date ? new Date(tour.start_date).toLocaleDateString('vi-VN') : 'Liên hệ')}
+              </span>
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -179,7 +182,9 @@ export const HomePage: React.FC = () => {
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#666" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
                 </svg>
-                <span style={{ fontWeight: 600 }}>{tour.numDays || 5}N{tour.numNights || 4}Đ</span>
+                <span style={{ fontWeight: 600 }}>
+                  {(tour.numDays ?? 1)}N{(tour.numNights ?? 0)}Đ
+                </span>
               </div>
               
               {/* Slots */}

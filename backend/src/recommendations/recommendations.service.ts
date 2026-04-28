@@ -104,11 +104,27 @@ export class RecommendationsService {
         const currentParticipants = (tour as any).tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
         const remainingSlots = Math.max(0, tour.max_participants - currentParticipants);
 
-        // Đảm bảo kiểu bigInt trả về API được serialize
+        const coverImg = tour.tour_images?.find(img => img.is_cover)?.image_url || 
+                        tour.tour_images?.[0]?.image_url || 
+                        'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image';
+
+        // Đảm bảo kiểu bigInt trả về API được serialize và đồng bộ với ToursService
         return {
-          ...tour,
+          id: tour.id,
+          title: tour.title,
+          cover: coverImg,
+          price: Number(tour.price),
+          rating: 5.0, // Tạm thời
+          location: tour.province,
+          province: tour.province,
+          startDate: tour.start_date,
+          endDate: tour.end_date,
+          numDays: tour.num_days,
+          numNights: tour.num_nights,
+          maxParticipants: tour.max_participants,
           remainingSlots,
-          category_id: tour.category_id ? tour.category_id.toString() : null,
+          category: tour.tour_categories?.name || 'Chưa phân loại',
+          categoryId: tour.category_id ? tour.category_id.toString() : null,
           match_score: score,
           match_reasons: reasons.length > 0 ? reasons : ['Có thể bạn sẽ thích'],
         };
