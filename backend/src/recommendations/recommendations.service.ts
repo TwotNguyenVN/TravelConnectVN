@@ -114,7 +114,7 @@ export class RecommendationsService {
           title: tour.title,
           cover: coverImg,
           price: Number(tour.price),
-          rating: 5.0, // Tạm thời
+          rating: 0.0, // Tạm thời
           location: tour.province,
           province: tour.province,
           startDate: tour.start_date,

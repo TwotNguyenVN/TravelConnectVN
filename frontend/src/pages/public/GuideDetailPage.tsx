@@ -203,7 +203,7 @@ const GuideDetailPage: React.FC = () => {
                   </h1>
                   <div className="profile-quick-stats">
                     <div className="tc-rating-badge">
-                      <span className="rating-value">{guide.rating?.toFixed(1) || '0.0'}</span>
+                      <span className="rating-value">{guide.rating && guide.rating > 0 ? guide.rating.toFixed(1) : '0'}</span>
                       <span className="rating-star">★</span>
                     </div>
                     <span className="stat-separator">•</span>

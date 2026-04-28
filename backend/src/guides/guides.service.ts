@@ -366,7 +366,7 @@ export class GuidesService {
       where: { guide_profile_id: guideId, visibility_status: 'visible' },
       _avg: { rating: true },
     });
-    return aggregate._avg.rating || 5.0;
+    return aggregate._avg.rating || 0.0;
   }
 
   private async formatGuidePublic(g: any) {

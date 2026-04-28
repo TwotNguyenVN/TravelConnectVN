@@ -191,7 +191,7 @@ export class ToursService {
         (t as any).tour_images?.[0]?.image_url ||
         'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
       price: Number(t.price),
-      rating: 5.0, // Tạm thời để 5.0, cần query avg rating sau
+      rating: 0.0,
       location: t.province,
       duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
       category: t.tour_categories?.name || 'Chưa phân loại',
@@ -261,7 +261,7 @@ export class ToursService {
       title: tour.title,
       cover: images[0],
       price: Number(tour.price),
-      rating: aggregate._avg.rating || 5.0,
+      rating: aggregate._avg.rating || 0.0,
       location: tour.province,
       duration: tour.duration || (tour.start_date && tour.end_date ? `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
       numDays: tour.num_days,
@@ -425,7 +425,7 @@ export class ToursService {
           (t as any).tour_images?.[0]?.image_url ||
           'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
         price: Number(t.price),
-        rating: 5.0,
+        rating: 0.0,
         location: t.province,
         province: t.province,
         startDate: t.start_date,
@@ -474,7 +474,7 @@ export class ToursService {
       coverUrl: g.cover_url || g.users?.avatar_url || '',
       location: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
-      rating: 5.0,
+      rating: 0.0,
       languages: g.guide_languages.map(gl => gl.languages.name).join(', '),
       bio: g.bio
     }));

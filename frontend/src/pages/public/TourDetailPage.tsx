@@ -189,7 +189,7 @@ export const TourDetailPage: React.FC = () => {
         <div className="tc-tour-meta">
           <div className="tc-rating-badge">
             <span style={{ color: '#f59e0b' }}>★</span>
-            <span className="tc-rating-value">{Number(tour.rating).toFixed(1)}</span>
+            <span className="tc-rating-value">{(tour.rating && Number(tour.rating) > 0) ? Number(tour.rating).toFixed(1) : '0'}</span>
             <span className="tc-review-count">({tour.reviewsCount || 0} đánh giá)</span>
           </div>
           <div className="tc-meta-item">

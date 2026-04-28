@@ -4744,3 +4744,40 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Current subtask: Real-time Chat Status (DONE)
 - Result: [x] Hoàn thành
 - Best next single step: Rà soát Notification system.
+
+=============================================================================================
+
+## Session 2026-04-28 - Enhancing Chat UI Navigation
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Cải thiện khả năng điều hướng từ khung chat sang hồ sơ hướng dẫn viên.
+- Chosen subtask: Make guide name clickable in chat header.
+
+### Context checked
+- [x] Đã kiểm tra `GuideDetailPage.tsx` sử dụng `guide_profile.id` để fetch dữ liệu.
+- [x] Xác nhận cần bổ sung `guideProfileId` vào API chat.
+
+### Done
+- **Backend (ConversationService)**: Bổ sung `guideProfileId` vào danh sách participant trả về từ API.
+- **Frontend (ChatPage)**:
+    - Cập nhật interface `Participant` để nhận `guideProfileId`.
+    - Cho phép nhấn vào tên người nhắn tin trong Header để chuyển hướng đến trang `guides/:id` nếu đó là Hướng dẫn viên.
+    - Thêm hiệu ứng hover và con trỏ chuột (`pointer`) để báo hiệu tên có thể click được.
+
+### Files Changed
+- `backend/src/chat/conversation.service.ts`
+- `frontend/src/services/chatService.ts`
+- `frontend/src/pages/chat/ChatPage.tsx`
+- `frontend/src/pages/chat/ChatPage.css`
+- `SESSION_SPRINT/SESSION_LOG.md`
+
+### Tested / Verified
+- Đã xác nhận: Khi click vào tên HDV trong khung chat, hệ thống điều hướng chính xác về trang hồ sơ tương ứng.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Quick Handoff
+- Link từ chat sang profile đã hoạt động mượt mà.

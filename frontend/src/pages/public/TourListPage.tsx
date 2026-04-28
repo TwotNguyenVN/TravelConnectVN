@@ -318,7 +318,7 @@ export const TourListPage: React.FC = () => {
                     <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--tc-border)', paddingTop: 'var(--tc-spacing-3)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <span style={{ color: '#f59e0b', fontSize: '14px' }}>★</span>
-                        <span style={{ fontWeight: '700', color: 'var(--tc-text-primary)' }}>{tour.rating}</span>
+                        <span style={{ fontWeight: '700', color: 'var(--tc-text-primary)' }}>{tour.rating ?? 0}</span>
                       </div>
                       <div style={{ textAlign: 'right' }}>
                         <span style={{ color: 'var(--tc-danger)', fontWeight: '800', fontSize: 'var(--tc-font-size-lg)' }}>
