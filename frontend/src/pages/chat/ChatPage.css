@@ -285,7 +285,7 @@
 
 .chat-header-status {
   font-size: 0.8rem;
-  color: #10b981; /* Emerald 500 */
+  color: #10b981; /* Online color */
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -293,14 +293,18 @@
   margin-top: 2px;
 }
 
-.chat-header-status::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background-color: currentColor;
-  border-radius: 50%;
-  display: inline-block;
+.chat-header-status.offline {
+  color: #94a3b8; /* Offline color */
+}
+
+.chat-header-status .status-online {
+  background-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.chat-header-status .status-offline {
+  background-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.2);
 }
 
 .chat-header-actions {

@@ -138,8 +138,8 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 ### Current Sprint Goal
 Rà soát toàn bộ hệ thống, chuẩn hóa dữ liệu demo và hoàn thiện tài liệu cuối cùng để bảo vệ đồ án.
 - [x] Sprint 13 hoàn tất — AI, Payment, Accommodation, Recommendation
-- [~] Lane 18.1: Rà soát UI/UX & Nhãn (Polish)
-- [ ] Lane 18.2: Chuẩn hóa bộ dữ liệu Seed "Premium"
+- [x] Lane 18.1: Rà soát UI/UX & Nhãn (Polish) - (100% DONE)
+- [~] Lane 18.2: Chuẩn hóa bộ dữ liệu Seed "Premium" & Fix Bug Data (In Progress)
 - [ ] Lane 18.3: Đồng bộ UML và Báo cáo cuối cùng
 
 

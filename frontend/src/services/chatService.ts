@@ -5,6 +5,7 @@ export interface Participant {
   userId: string;
   fullName: string;
   avatarUrl: string | null;
+  lastSeenAt?: string | null;
   joinedAt?: string;
   lastReadAt?: string | null;
   isMuted?: boolean;

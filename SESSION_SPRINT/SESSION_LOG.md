@@ -4646,3 +4646,54 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Result: [x] Hoàn thành
 - Best next single step: Chuẩn hóa dữ liệu demo Premium.
 - Must read first next session: PROJECT_STATUS.md.
+
+=============================================================================================
+
+## Session 2026-04-28 - Fixing Tour Data Display & Standardization
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Khắc phục lỗi hiển thị số ngày đêm (N/Đ) trên các tour card trang chủ và chuẩn hóa dữ liệu gợi ý.
+- Chosen subtask: Fix duration display bug (Lane 18.2).
+
+### Context checked
+- [x] Đã kiểm tra logic render `TourCard` tại `frontend/src/pages/public/HomePage.tsx`.
+- [x] Đã kiểm tra `backend/src/recommendations/recommendations.service.ts` để rà soát cấu trúc trả về.
+- [x] Đã query DB để xác minh dữ liệu tour thực tế (Dạo quanh Sài Gòn: 1 ngày/0 đêm).
+
+### Done
+- **Fix Backend (RecommendationsService)**: Chuẩn hóa dữ liệu trả về từ snake_case (`num_days`) sang camelCase (`numDays`) để đồng bộ với `ToursService` và interface `Tour` ở frontend.
+- **Fix Frontend (HomePage)**:
+    - Thay đổi logic render số ngày đêm từ `{tour.numDays || 5}N{tour.numNights || 4}Đ` sang `{(tour.numDays ?? 1)}N{(tour.numNights ?? 0)}Đ` để xử lý đúng giá trị `0` (0 đêm cho tour 1 ngày).
+    - Xóa bỏ các fallback ngày khởi hành cứng (`12/05/2026`) và thay bằng "Liên hệ" nếu thiếu dữ liệu.
+- **Push Git**: Đã đẩy code lên nhánh chính.
+
+### Files Changed
+- `backend/src/recommendations/recommendations.service.ts`
+- `frontend/src/pages/public/HomePage.tsx`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/SESSION_LOG.md`
+
+### Skills / Guides Used
+- `frontend-patterns`: Cải thiện tính an toàn của dữ liệu (Nullish coalescing).
+- `supabase`: Query SQL để debug dữ liệu thực tế.
+
+### Tested / Verified
+- Đã xác nhận: (1) Recommendation API trả về đúng format camelCase. (2) Frontend hiển thị chính xác `1N0Đ` cho tour 1 ngày thay vì `1N4Đ` như trước.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Premium Data Enrichment)**: Tiếp tục rà soát các tour khác để đảm bảo hình ảnh bìa và mô tả trông thật sự "Premium" cho buổi Demo.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Fix Tour Duration Display (DONE)
+- Result: [x] Hoàn thành
+- Best next single step: Cập nhật hình ảnh và dữ liệu Seed Premium.
+- Must read first next session: PROJECT_STATUS.md.

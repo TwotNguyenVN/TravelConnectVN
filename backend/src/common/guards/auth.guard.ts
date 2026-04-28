@@ -44,6 +44,12 @@ export class AuthGuard implements CanActivate {
         roles: userRoles.map((r) => r.role_code),
       };
 
+      // Cập nhật last_seen_at (Throttle: chỉ cập nhật nếu lần cuối cách đây > 2 phút)
+      // Chạy ngầm để không block request
+      this.updateLastSeen(user.id).catch((err) =>
+        console.error('Error updating last_seen_at:', err),
+      );
+
       return true;
     } catch (error) {
       console.error('DEBUG - AuthGuard Error:', error);
@@ -53,6 +59,23 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException(
         `Authentication failed: ${error.message || 'Invalid or expired token'}`,
       );
+    }
+  }
+
+  private async updateLastSeen(userId: string) {
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+    
+    // Check last_seen_at trước khi update để tránh ghi DB quá nhiều
+    const user = await this.prisma.public_users.findUnique({
+      where: { id: userId },
+      select: { last_seen_at: true },
+    });
+
+    if (!user?.last_seen_at || user.last_seen_at < twoMinutesAgo) {
+      await this.prisma.public_users.update({
+        where: { id: userId },
+        data: { last_seen_at: new Date() },
+      });
     }
   }
 }

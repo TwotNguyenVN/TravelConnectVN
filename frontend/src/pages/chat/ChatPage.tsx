@@ -21,6 +21,29 @@ const formatTime = (dateString: string) => {
   }
 };
 
+const isUserOnline = (lastSeenAt?: string | null) => {
+  if (!lastSeenAt) return false;
+  const lastSeen = new Date(lastSeenAt);
+  const now = new Date();
+  const diffInMinutes = (now.getTime() - lastSeen.getTime()) / (1000 * 60);
+  return diffInMinutes < 5; // Online if active in last 5 minutes
+};
+
+const getLastSeenText = (lastSeenAt?: string | null) => {
+  if (!lastSeenAt) return 'Ngoại tuyến';
+  if (isUserOnline(lastSeenAt)) return 'Đang hoạt động';
+  
+  const lastSeen = new Date(lastSeenAt);
+  const now = new Date();
+  const diffInMinutes = Math.floor((now.getTime() - lastSeen.getTime()) / (1000 * 60));
+  
+  if (diffInMinutes < 60) return `Hoạt động ${diffInMinutes} phút trước`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `Hoạt động ${diffInHours} giờ trước`;
+  
+  return `Hoạt động ${Math.floor(diffInHours / 24)} ngày trước`;
+};
+
 const ChatPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -221,7 +244,7 @@ const ChatPage: React.FC = () => {
       >
         <div className="conversation-avatar">
           <img src={avatar} alt={displayName || 'Avatar'} onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }} />
-          {!isGroup && <span className={`status-indicator ${Math.random() > 0.3 ? 'status-online' : 'status-offline'}`}></span>}
+          {!isGroup && <span className={`status-indicator ${isUserOnline(conv.participants[0]?.lastSeenAt) ? 'status-online' : 'status-offline'}`}></span>}
           {isGroup && <span className="group-badge">Nhóm</span>}
         </div>
         <div className="conversation-info">
@@ -311,9 +334,9 @@ const ChatPage: React.FC = () => {
                   <h3 className="chat-header-title">
                     {selectedConv.conversationType === 'group_companion' ? selectedConv.title : selectedConv.participants[0]?.fullName}
                   </h3>
-                  <div className="chat-header-status">
-                    <span className="status-online" style={{ width: '8px', height: '8px', borderRadius: '50%' }}></span>
-                    <span>Đang hoạt động</span>
+                  <div className={`chat-header-status ${selectedConv.conversationType !== 'group_companion' && !isUserOnline(selectedConv.participants[0]?.lastSeenAt) ? 'offline' : ''}`}>
+                    <span className={selectedConv.conversationType === 'group_companion' || isUserOnline(selectedConv.participants[0]?.lastSeenAt) ? 'status-online' : 'status-offline'} style={{ width: '8px', height: '8px', borderRadius: '50%' }}></span>
+                    <span>{selectedConv.conversationType === 'group_companion' ? `${selectedConv.participants.length + 1} thành viên` : getLastSeenText(selectedConv.participants[0]?.lastSeenAt)}</span>
                   </div>
                 </div>
               </div>
