@@ -157,16 +157,15 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 - [~] Giai đoạn E — Đóng gói và chuẩn bị bảo vệ
 
 ### Current Sprint
-- [~] Sprint 12 — Chat trực tiếp và chat nhóm bài đồng hành
+- [x] Sprint 12 — Chat trực tiếp và chat nhóm bài đồng hành
+- [~] Sprint 14 — Final QA, demo data, tài liệu, bảo vệ
 
 ### Current Single Focus
-- [x] Fix Database Connection (IPv6 → IPv4 Pooler)
-- [x] Fix NestJS DI errors (TourRequestsModule, CompanionPostsModule)
-- [x] Hoàn tất Sprint 11 (Map, Activity Log, Notification, Statistics)
-- [~] Tạo ChatModule backend — ConversationController, endpoint GET /conversations
+- [x] Hoàn tất Sprint 12 (Chat module UI & Logic)
+- [~] Sprint 14: Polish UI/UX & Performance Optimization (Tour Detail DONE)
 
 ### Current Best Next Step
-- [ ] `nest g module chat` + tạo ConversationController với endpoint `GET /conversations`
+- [ ] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
 
 
 
@@ -675,7 +674,7 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 # 16. Sprint 12 — Chat trực tiếp và chat nhóm bài đồng hành
 
-> **Trạng thái sprint:** `[~]` Đang tiến hành
+> **Trạng thái sprint:** `[x]` DONE
 
 ## 16.1. Lane database
 - [x] Kiểm tra `conversations` (tồn tại trong Prisma + DB)
@@ -816,26 +815,29 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 ## 20. Mẫu cập nhật sau mỗi phiên
 
 ```md
-## 20. Session Update (2026-04-22) - Sprint 10 Final Polish
+### 21. Session Update (2026-04-29) - Tour Detail Performance & UI Modernization
 
 ### Sprint
-- Sprint hiện tại: Sprint 10
-- Session focus: Final Polish & Synchronization
-- Chosen subtask: Chuẩn hóa dữ liệu và giao diện Sprint 10
+- Sprint hiện tại: Sprint 14
+- Session focus: Modernizing Tour Detail & Perceived Performance.
+- Chosen subtask: Nâng cấp trải nghiệm người dùng và tốc độ tải trang Chi tiết Tour.
 
 ### Done
-- Hoàn thiện huy hiệu xác minh Guide (`approved` state).
-- Tích hợp Review CTA vào trang chi tiết Tour.
-- Rà soát tính Idempotent cho module Favorites.
-- Gỡ bỏ log debug và chuẩn hóa trạng thái điều phối.
+- [x] Triển khai **Skeleton Loading** thay cho spinner.
+- [x] Áp dụng **Lazy Loading** cho TourMap và TourCalendar.
+- [x] Tối ưu **Parallel Data Fetching** (`Promise.all`).
+- [x] Refactor Lịch trình thành dạng **Accordion** trong tab Tổng quan.
+- [x] Auto-select ngày khởi hành gần nhất.
+- [x] Thêm nút "Xem vị trí" (Google Maps link).
 
 ### Files Changed
-- `frontend/src/pages/guide/GuideVerificationPage.tsx`
-- `frontend/src/pages/public/GuideDetailPage.tsx`
 - `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.css`
+- `frontend/src/components/tour/TourCalendar/TourCalendar.css`
+- `frontend/src/pages/guide/tabs/GuideTourCalendar.css`
 
 ### Result
-- [x] Xong hoàn toàn Sprint 10
+- [x] Xong hoàn toàn subtask.
 
 ### Suggested Next Single Step
-- Bắt đầu Sprint 11: Thiết kế schema bảng `notifications`.
+- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất.

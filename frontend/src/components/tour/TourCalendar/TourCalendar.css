@@ -12,9 +12,9 @@
 
 /* Sidebar Chọn Tháng */
 .tc-calendar-sidebar {
-  width: 160px;
+  width: 110px;
   background: #ffffff;
-  padding: 40px 15px;
+  padding: 40px 5px;
   border-right: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;

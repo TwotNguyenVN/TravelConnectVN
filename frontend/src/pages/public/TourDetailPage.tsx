@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
@@ -8,9 +8,11 @@ import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
-import { TourMap } from '../../components/tours/TourMap';
-import { TourCalendar } from '../../components/tour/TourCalendar/TourCalendar';
 import './TourDetailPage.css';
+
+// Lazy load heavy components
+const TourMap = lazy(() => import('../../components/tours/TourMap').then(module => ({ default: module.TourMap })));
+const TourCalendar = lazy(() => import('../../components/tour/TourCalendar/TourCalendar').then(module => ({ default: module.TourCalendar })));
 
 export const TourDetailPage: React.FC = () => {
   const { id } = useParams();
@@ -31,6 +33,14 @@ export const TourDetailPage: React.FC = () => {
   // Gallery Carousel State
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
+  const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
+
+  const toggleDay = (day: number) => {
+    setExpandedDays(prev => ({
+      ...prev,
+      [day]: !prev[day]
+    }));
+  };
 
   useEffect(() => {
     const fetchTourData = async () => {
@@ -47,10 +57,19 @@ export const TourDetailPage: React.FC = () => {
         ]);
         
         if (detailRes.success && detailRes.data) {
+          const tourData = detailRes.data;
           setTour({
-            ...detailRes.data,
+            ...tourData,
             reviews: reviewsRes?.data?.data || [],
           });
+
+          // Auto-select the nearest upcoming schedule
+          if (tourData.schedules && tourData.schedules.length > 0) {
+            const sortedSchedules = [...tourData.schedules].sort((a, b) => 
+              new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+            );
+            setSelectedSchedule(sortedSchedules[0]);
+          }
 
           if (accRes.success) {
             setAccommodations(accRes.data || []);
@@ -164,9 +183,15 @@ export const TourDetailPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="tc-loading-container">
-        <div className="tc-loader"></div>
-        <p>Đang chuẩn bị hành trình cho bạn...</p>
+      <div className="tc-tour-detail">
+        <div className="tc-skeleton-breadcrumb"></div>
+        <div className="tc-skeleton-title"></div>
+        <div className="tc-skeleton-meta"></div>
+        <div className="tc-skeleton-gallery"></div>
+        <div className="tc-tour-layout">
+          <div className="tc-skeleton-main"></div>
+          <div className="tc-skeleton-sidebar"></div>
+        </div>
       </div>
     );
   }
@@ -218,7 +243,7 @@ export const TourDetailPage: React.FC = () => {
       {/* Gallery Carousel - Re-ordered to top */}
       <section className="tc-tour-gallery-container">
         <div className="tc-gallery-main-frame">
-          <img src={tour.images[activeImageIndex]} alt={tour.title} key={activeImageIndex} />
+          <img src={tour.images[activeImageIndex]} alt={tour.title} key={activeImageIndex} loading="lazy" />
         </div>
         <div className="tc-gallery-thumbnails">
           {tour.images.map((img: string, idx: number) => (
@@ -227,7 +252,7 @@ export const TourDetailPage: React.FC = () => {
               className={`tc-thumbnail-item ${activeImageIndex === idx ? 'tc-thumbnail-item--active' : ''}`}
               onClick={() => setActiveImageIndex(idx)}
             >
-              <img src={img} alt={`${tour.title} thumbnail ${idx + 1}`} />
+              <img src={img} alt={`${tour.title} thumbnail ${idx + 1}`} loading="lazy" />
             </div>
           ))}
         </div>
@@ -242,12 +267,6 @@ export const TourDetailPage: React.FC = () => {
               onClick={() => setActiveTab('overview')}
             >
               Tổng quan
-            </button>
-            <button 
-              className={`tc-tab-btn ${activeTab === 'itinerary' ? 'tc-tab-btn--active' : ''}`}
-              onClick={() => setActiveTab('itinerary')}
-            >
-              Lịch trình
             </button>
             <button 
               className={`tc-tab-btn ${activeTab === 'map' ? 'tc-tab-btn--active' : ''}`}
@@ -277,10 +296,12 @@ export const TourDetailPage: React.FC = () => {
                   <h2 className="tc-section-title">
                     <span>📅</span> Lịch khởi hành
                   </h2>
-                  <TourCalendar 
-                    schedules={tour.schedules} 
-                    onDateSelect={(s) => setSelectedSchedule(s)} 
-                  />
+                  <Suspense fallback={<div className="tc-loader" style={{margin: '40px auto'}}></div>}>
+                    <TourCalendar 
+                      schedules={tour.schedules} 
+                      onDateSelect={(s) => setSelectedSchedule(s)} 
+                    />
+                  </Suspense>
                   {selectedSchedule && (
                     <div style={{ marginTop: '16px', padding: '12px', background: '#f0f7ff', borderRadius: '8px', border: '1px solid #006ce4' }}>
                       <strong>Bạn đã chọn ngày:</strong> {formatDate(selectedSchedule.startDate)} 
@@ -292,24 +313,38 @@ export const TourDetailPage: React.FC = () => {
 
               <div className="tc-detail-section">
                 <h2 className="tc-section-title">
-                  <span>📋</span> Thông tin chi tiết
+                  <span>📍</span> Điểm Tập trung
                 </h2>
                 <div className="tc-feature-grid">
-                  <div className="tc-feature-card">
-                    <span className="tc-feature-label">Thời gian</span>
-                    <span className="tc-feature-value">{tour.duration}</span>
-                  </div>
-                  <div className="tc-feature-card">
-                    <span className="tc-feature-label">Khởi hành</span>
-                    <span className="tc-feature-value">{formatDate(tour.startDate)}</span>
-                  </div>
-                  <div className="tc-feature-card">
-                    <span className="tc-feature-label">Tối đa</span>
-                    <span className="tc-feature-value">{tour.maxParticipants} khách</span>
-                  </div>
-                  <div className="tc-feature-card">
-                    <span className="tc-feature-label">Điểm hẹn</span>
-                    <span className="tc-feature-value">{tour.meetPoint}</span>
+                  <div className="tc-feature-card" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gridColumn: 'span 1', maxWidth: '500px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span className="tc-feature-label">Tên điểm tập trung</span>
+                      <span className="tc-feature-value" style={{ fontSize: '1.2rem', fontWeight: '800' }}>{tour.meetPoint}</span>
+                    </div>
+                    {tour.googleMapsLink && (
+                      <a 
+                        href={tour.googleMapsLink} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="tc-btn-view-location"
+                        style={{
+                          padding: '10px 20px',
+                          backgroundColor: '#006ce4',
+                          color: 'white',
+                          borderRadius: '12px',
+                          textDecoration: 'none',
+                          fontSize: '14px',
+                          fontWeight: '700',
+                          transition: 'all 0.2s',
+                          boxShadow: '0 4px 12px rgba(0, 108, 228, 0.2)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px'
+                        }}
+                      >
+                        📍 Xem vị trí
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -319,6 +354,102 @@ export const TourDetailPage: React.FC = () => {
                     {tour.meetTime && <p style={{ marginTop: '4px', marginBottom: 0 }}><strong>Giờ tập trung:</strong> {tour.meetTime}</p>}
                   </div>
                 )}
+              </div>
+
+              {/* Accordion Itinerary moved here */}
+              <div className="tc-detail-section">
+                <h2 className="tc-section-title">
+                  <span>📍</span> Lịch trình chi tiết
+                </h2>
+                <div className="tc-itinerary-accordion" style={{ marginTop: '20px' }}>
+                  {tour.itinerary?.length > 0 ? (
+                    tour.itinerary.map((item: any) => (
+                      <div key={item.day} className="tc-accordion-item" style={{ marginBottom: '12px' }}>
+                        <div 
+                          className="tc-accordion-header" 
+                          onClick={() => toggleDay(item.day)}
+                          style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            padding: '16px 20px', 
+                            background: expandedDays[item.day] ? '#fff' : '#f8fafc', 
+                            borderRadius: expandedDays[item.day] ? '12px 12px 0 0' : '12px',
+                            cursor: 'pointer',
+                            border: expandedDays[item.day] ? '2px solid var(--tc-primary)' : '1px solid #e2e8f0',
+                            transition: 'all 0.2s',
+                            boxShadow: expandedDays[item.day] ? '0 4px 12px rgba(0,0,0,0.05)' : 'none'
+                          }}
+                        >
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontWeight: '700', fontSize: '16px', color: expandedDays[item.day] ? 'var(--tc-primary)' : '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ 
+                                background: expandedDays[item.day] ? 'var(--tc-primary)' : '#cbd5e1', 
+                                color: 'white', 
+                                width: '24px', 
+                                height: '24px', 
+                                borderRadius: '50%', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center', 
+                                fontSize: '12px' 
+                              }}>
+                                {item.day}
+                              </span>
+                              Ngày {item.day}: {item.title}
+                            </div>
+                            <div style={{ display: 'flex', gap: '12px', marginTop: '6px', fontSize: '13px', color: '#64748b', paddingLeft: '32px' }}>
+                              {(item.hasBreakfast || item.hasLunch || item.hasDinner) && (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                  🍴 {[item.hasBreakfast && 'Sáng', item.hasLunch && 'Trưa', item.hasDinner && 'Tối'].filter(Boolean).join(', ')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <span style={{ 
+                            fontSize: '20px', 
+                            transition: 'transform 0.3s', 
+                            transform: expandedDays[item.day] ? 'rotate(180deg)' : 'rotate(0deg)',
+                            color: expandedDays[item.day] ? 'var(--tc-primary)' : '#64748b'
+                          }}>
+                            ▼
+                          </span>
+                        </div>
+                        
+                        {expandedDays[item.day] && (
+                          <div className="tc-accordion-content" style={{ 
+                            padding: '24px', 
+                            background: 'white', 
+                            border: '2px solid var(--tc-primary)', 
+                            borderTop: 'none',
+                            borderRadius: '0 0 12px 12px',
+                            animation: 'slideDown 0.3s ease-out'
+                          }}>
+                            <p className="tc-itinerary-detail" style={{ margin: 0, color: '#334155', lineHeight: '1.7', whiteSpace: 'pre-line' }}>{item.detail}</p>
+                            
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f1f5f9' }}>
+                              {item.accommodation && (
+                                <div style={{ fontSize: '14px', color: '#475569', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontSize: '18px' }}>🏨</span> <strong>Nghỉ đêm:</strong> {item.accommodation}
+                                </div>
+                              )}
+                              
+                              {item.highlight && (
+                                <div style={{ fontSize: '14px', color: 'var(--tc-primary)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                  <span style={{ fontSize: '18px' }}>⭐</span> <strong>Chú Ý:</strong> {item.highlight}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ textAlign: 'center', padding: '40px', color: '#64748b', background: '#f8fafc', borderRadius: '12px' }}>
+                      Lịch trình chi tiết đang được cập nhật...
+                    </p>
+                  )}
+                </div>
               </div>
 
               {tour.participantRequirements && (
@@ -352,53 +483,6 @@ export const TourDetailPage: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'itinerary' && (
-            <div className="tc-tab-content">
-              <h2 className="tc-section-title">
-                <span>📍</span> Lịch trình chi tiết
-              </h2>
-              <div className="tc-itinerary-timeline">
-                {tour.itinerary?.length > 0 ? (
-                  tour.itinerary.map((item: any) => (
-                    <div key={item.day} className="tc-itinerary-item">
-                      <div className="tc-itinerary-content">
-                        <div className="tc-itinerary-header">
-                          <div className="tc-day-badge">
-                            <span className="tc-day-label">Ngày</span>
-                            <span className="tc-day-number">{item.day}</span>
-                          </div>
-                          <h3 className="tc-itinerary-title">{item.title}</h3>
-                        </div>
-                        <p className="tc-itinerary-detail">{item.detail}</p>
-                        
-                        {(item.hasBreakfast || item.hasLunch || item.hasDinner) && (
-                          <div className="tc-itinerary-meals" style={{ display: 'flex', gap: '12px', marginTop: '12px', fontSize: '13px' }}>
-                            {item.hasBreakfast && <span>🍳 Sáng</span>}
-                            {item.hasLunch && <span>🍲 Trưa</span>}
-                            {item.hasDinner && <span>🍱 Tối</span>}
-                          </div>
-                        )}
-
-                        {item.accommodation && (
-                          <div className="tc-itinerary-extra" style={{ marginTop: '12px', fontSize: '14px', color: 'var(--tc-text-secondary)' }}>
-                            <strong>🏨 Nghỉ đêm:</strong> {item.accommodation}
-                          </div>
-                        )}
-
-                        {item.highlight && (
-                          <div className="tc-itinerary-extra" style={{ marginTop: '8px', fontSize: '14px', color: 'var(--tc-primary)', fontWeight: '500' }}>
-                            <strong>⭐ Highlight:</strong> {item.highlight}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p>Lịch trình chi tiết đang được cập nhật...</p>
-                )}
-              </div>
-            </div>
-          )}
 
           {activeTab === 'map' && (
             <div className="tc-tab-content">
@@ -429,7 +513,9 @@ export const TourDetailPage: React.FC = () => {
                   </a>
                 )}
               </div>
-              <TourMap points={tour.destinations || []} fallbackPoints={tour.itinerary || []} />
+              <Suspense fallback={<div className="tc-loader" style={{margin: '40px auto'}}></div>}>
+                <TourMap points={tour.destinations || []} fallbackPoints={tour.itinerary || []} />
+              </Suspense>
               
               <div className="tc-map-itinerary-steps" style={{ marginTop: '32px' }}>
                 <h3 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '20px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -500,6 +586,7 @@ export const TourDetailPage: React.FC = () => {
                         <img 
                           src={review.avatar || 'https://via.placeholder.com/40'} 
                           alt="Avatar" 
+                          loading="lazy"
                           style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
                         />
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -601,7 +688,7 @@ export const TourDetailPage: React.FC = () => {
           <Link to={`/guides/${tour.guideId}`} className="tc-guide-card">
             <div className="tc-guide-header">
               {tour.guide?.avatar ? (
-                <img src={tour.guide.avatar} alt={tour.guide.name} className="tc-guide-avatar" />
+                <img src={tour.guide.avatar} alt={tour.guide.name} className="tc-guide-avatar" loading="lazy" />
               ) : (
                 <div className="tc-guide-avatar-placeholder">
                   {tour.guide?.name?.charAt(0) || 'G'}

@@ -4822,3 +4822,63 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ### Quick Handoff
 - Hệ thống đánh giá và kích thước card đã được chuẩn hóa.
+
+=============================================================================================
+
+## Session 2026-04-29 - Modernizing Tour Detail & Performance Optimization
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Tour Detail Page Modernization & Perceived Performance.
+- Chosen subtask: Nâng cấp trải nghiệm người dùng và tốc độ tải trang Chi tiết Tour.
+
+### Context checked
+- [x] Đã đọc `PROJECT_STATUS.md`
+- [x] Đã đọc `PROJECT_TASK.md`
+- [x] Đã đọc `TourDetailPage.tsx` và styles liên quan.
+
+### Done
+- **Performance (Combo Frontend)**:
+    - Triển khai **Skeleton Loading** cao cấp thay thế cho spinner truyền thống, giảm giật lag thị giác.
+    - Áp dụng **Component Lazy Loading** (`React.lazy` + `Suspense`) cho `TourMap` và `TourCalendar` để giảm kích thước bundle ban đầu.
+    - Tích hợp **Image Lazy Loading** cho toàn bộ gallery và avatar.
+    - Tối ưu hóa **Parallel Data Fetching** bằng `Promise.all` giúp tải dữ liệu tour, lịch trình, reviews và accommodations cùng lúc.
+- **UX Refinements**:
+    - Tự động chọn ngày khởi hành gần nhất (**Auto-date selection**) khi vào trang.
+    - Tái cấu trúc mục **"Điểm Tập trung"**: Gỡ bỏ các thẻ thông tin thừa, thêm nút **"Xem vị trí"** liên kết trực tiếp tới Google Maps.
+    - Tái cấu trúc **Lịch trình (Itinerary)**: Chuyển từ dạng tab sang dạng **Accordion** nằm trong tab Tổng quan, giúp trang gọn gàng và dễ theo dõi hơn.
+- **UI Consistency**:
+    - Đồng bộ và thu hẹp sidebar của Calendar xuống **110px** trên cả giao diện Public và Guide để tối ưu không gian cho lưới lịch.
+    - Cập nhật hiệu ứng hover và animation trượt cho các thành phần tương tác.
+
+### Files Changed
+- `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.css`
+- `frontend/src/components/tour/TourCalendar/TourCalendar.css`
+- `frontend/src/pages/guide/tabs/GuideTourCalendar.css`
+
+### Skills / Guides Used
+- `frontend-design`, `frontend-patterns`: Áp dụng Skeleton loading và Lazy load pattern.
+- `ux-best-practices`: Cải thiện luồng chọn ngày và hiển thị lịch trình.
+
+### UI Style Rules Applied
+- Sử dụng màu OTA chuẩn (`#006ce4`), bo góc `12px` và hiệu ứng đổ bóng `0 4px 12px rgba(0,0,0,0.05)`.
+
+### Tested / Verified
+- [x] Xác nhận trang Chi tiết Tour tải nhanh hơn đáng kể về mặt cảm nhận (Perceived Performance).
+- [x] Xác nhận các ngày lịch trình đóng/mở mượt mà.
+- [x] Nút "Xem vị trí" mở đúng tab bản đồ mới.
+
+### Result
+- [x] Xong hoàn toàn
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Premium Demo Data)**: Tiếp tục chuẩn hóa nội dung mô tả cho 10 tour "Premium" để demo buổi bảo vệ đạt hiệu quả cao nhất.
+
+### Quick Handoff
+- Tour Detail đã đạt chuẩn Premium cả về Performance và UI.
+- Next: Tập trung vào dữ liệu demo chất lượng cao.

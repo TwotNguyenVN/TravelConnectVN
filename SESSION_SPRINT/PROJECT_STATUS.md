@@ -431,9 +431,9 @@ Thứ tự nên là:
 | C | Sprint 09 | 🟢 Done | 100% DONE (Regression, Polish, Sync, Demo) |
 | C | Sprint 10 | 🟢 Done | 100% DONE | Hoàn tất Favorite, Review & Verification (Guide & Admin) |
 | C | Sprint 11 | 🟢 Done | Map tọa độ thực, Activity Log filter 10 loại, Notifications badge, Admin Stats |
-| D | Sprint 12 | 🟡 In Progress | Chat module bắt đầu — schema DB sẵn sàng |
+| D | Sprint 12 | 🟢 Done | Chat module hoàn tất — UI & Backend Logic Stable |
 | D | Sprint 13 | ⏭️ Skipped | Chuyển thẳng sang Sprint 14 |
-| E | Sprint 14 | ⏳ Pending | Chờ Sprint 12 hoàn thành |
+| E | Sprint 14 | 🟡 In Progress | Polish UI & Performance (Tour Detail DONE) |
 
 ---
 
@@ -501,11 +501,10 @@ Trong phiên kế tiếp, AI agent phải:
 
 1. Xác nhận:
    - Dự án đã được đẩy lên GitHub thành công.
-   - Luồng Public Tour (HomePage, List, Detail) đã đổ dữ liệu thật.
+   - Luồng Public Tour (HomePage, List, Detail) đã đạt chuẩn Premium về UI/Performance.
 
 2. Chuyển hướng:
-   - Nếu người dùng yêu cầu, bắt đầu quay lại hoàn thiện sâu hơn các chức năng Auth (Login/Register/Profile) ở Frontend kết nối với Backend thực.
-   - Hoặc tiếp tục Sprint 04: Guide Profile.
+   - Tập trung vào Lane 18.2: Chuẩn hóa dữ liệu Seed "Premium" (Tour chi tiết, Review thực tế, Lịch sử Chat AI mẫu).
 
 3. Duy trì:
    - Luôn chạy dọn dẹp bằng `./clean.sh` trước khi đóng phiên nếu cần.
@@ -581,7 +580,7 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 
 ## 18. One-Line Truth
 
-**Sprint 14 đang triển khai (Final QA & Polish). Đã chuẩn hóa quy trình Agent và bộ quy tắc dự án. Tiến độ dự án: 96%.**
+**Sprint 14 đang triển khai (Final QA & Polish). Đã tối ưu hóa Performance & UI cho Tour Detail. Tiến độ dự án: 97%.**
 ---
 
 ### 23. Session Update (2026-04-22) - Sprint 13 Finalized & Sprint 14 UI Polish
@@ -695,3 +694,31 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 
 #### Suggested Next Single Step
 - **Lane 18.2 (Demo Data)**: Nâng cấp dữ liệu demo Premium.
+
+---
+
+### 26. Session Update (2026-04-29) - Modernizing Tour Detail & Performance Optimization
+
+#### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Tour Detail Modernization & Perceived Performance.
+
+#### Done
+- [x] Triển khai Skeleton Loading & Lazy Load (Combo Frontend Performance).
+- [x] Refactor Lịch trình sang dạng Accordion và đưa vào tab Tổng quan.
+- [x] Tối ưu hóa Parallel Data Fetching (`Promise.all`).
+- [x] Thêm nút "Xem vị trí" và Auto-date selection.
+- [x] Đồng bộ kích thước Calendar sidebar (110px).
+
+#### Files Changed
+- `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.css`
+- `frontend/src/components/tour/TourCalendar/TourCalendar.css`
+- `frontend/src/pages/guide/tabs/GuideTourCalendar.css`
+
+#### Result
+- [x] Xong hoàn toàn subtask tối ưu Tour Detail.
+
+#### Suggested Next Single Step
+- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất.
