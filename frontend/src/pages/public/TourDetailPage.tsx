@@ -100,38 +100,25 @@ export const TourDetailPage: React.FC = () => {
     }
   }, [tour]);
 
-  const handleBooking = async () => {
+  const handleBooking = () => {
     if (!user) {
       toast.info("Vui lòng đăng nhập để đặt tour");
       navigate('/login');
       return;
     }
 
-    try {
-      setIsBooking(true);
-      
-      if (tour.schedules?.length > 0 && !selectedSchedule) {
-        toast.warning("Vui lòng chọn ngày khởi hành trên lịch");
-        // Scroll to calendar section
-        const calendarEl = document.getElementById('tour-calendar-section');
-        if (calendarEl) calendarEl.scrollIntoView({ behavior: 'smooth' });
-        return;
-      }
-
-      await tourRequestService.createRequest({
-        tourId: tour.id,
-        scheduleId: selectedSchedule?.id,
-        participantCount: participantCount,
-        note: bookingNote || `Yêu cầu tham gia tour ${tour.title}${selectedSchedule ? ` ngày ${formatDate(selectedSchedule.startDate)}` : ''}`
-      });
-      toast.success("Yêu cầu của bạn đã được gửi thành công. Hướng dẫn viên sẽ sớm phản hồi!");
-    } catch (error: any) {
-      console.error("Booking error:", error);
-      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra khi gửi yêu cầu.";
-      toast.error(errorMessage);
-    } finally {
-      setIsBooking(false);
+    if (tour.schedules?.length > 0 && !selectedSchedule) {
+      toast.warning("Vui lòng chọn ngày khởi hành trên lịch");
+      const calendarEl = document.getElementById('tour-calendar-section');
+      if (calendarEl) calendarEl.scrollIntoView({ behavior: 'smooth' });
+      return;
     }
+
+    let url = `/tours/${tour.id}/booking?participants=${participantCount}`;
+    if (selectedSchedule) {
+      url += `&scheduleId=${selectedSchedule.id}`;
+    }
+    navigate(url);
   };
   
   const handleChat = async () => {

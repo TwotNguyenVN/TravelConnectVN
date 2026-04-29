@@ -32,13 +32,26 @@ export const VnpayReturnPage: React.FC = () => {
         // Note: Gọi IPN giả lập nếu webhook chưa expose ngoài internet, nhưng ở local ta đã setup endpoint IPN
         // Để demo local mượt, ta có thể chủ động trigger IPN endpoint
         try {
-          await api.get(`/payments/vnpay-ipn?${searchParams.toString()}`);
+          // Use window.location.search to preserve exact encoding for checksum validation
+          await api.get(`/payments/vnpay-ipn${window.location.search}`);
         } catch(e) {
            console.error("IPN Trigger failed", e);
+        }
+        
+        if (window.opener) {
+          window.opener.postMessage({ type: 'VNPAY_RETURN', status: 'success' }, window.location.origin);
+          window.close(); // Close immediately to avoid showing middle page
+          return; // Stop rendering
         }
       } else {
         setStatus('failed');
         setMessage(`Giao dịch thất bại hoặc đã bị hủy (Mã lỗi: ${vnp_ResponseCode})`);
+        
+        if (window.opener) {
+          window.opener.postMessage({ type: 'VNPAY_RETURN', status: 'failed' }, window.location.origin);
+          window.close(); // Close immediately
+          return;
+        }
       }
     };
 
@@ -62,7 +75,8 @@ export const VnpayReturnPage: React.FC = () => {
             <h2 style={{ color: 'var(--tc-success)' }}>Thanh Toán Thành Công!</h2>
             <p style={{ color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-6)', lineHeight: 1.6 }}>{message}</p>
             <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)', justifyContent: 'center' }}>
-              <Button variant="primary" onClick={() => navigate('/user/requests')}>Quay về Đơn yêu cầu</Button>
+              {!window.opener && <Button variant="primary" onClick={() => navigate('/user/requests')}>Quay về Đơn yêu cầu</Button>}
+              {window.opener && <p style={{ color: 'var(--tc-text-secondary)' }}>Cửa sổ sẽ tự động đóng sau vài giây...</p>}
             </div>
           </div>
         )}
@@ -73,7 +87,8 @@ export const VnpayReturnPage: React.FC = () => {
             <h2 style={{ color: 'var(--tc-danger)' }}>Thanh Toán Thất Bại</h2>
             <p style={{ color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-6)' }}>{message}</p>
             <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)', justifyContent: 'center' }}>
-              <Button variant="primary" onClick={() => navigate('/user/requests')}>Thử lại sau</Button>
+              {!window.opener && <Button variant="primary" onClick={() => navigate('/user/requests')}>Thử lại sau</Button>}
+              {window.opener && <p style={{ color: 'var(--tc-text-secondary)' }}>Cửa sổ sẽ tự động đóng sau vài giây...</p>}
             </div>
           </div>
         )}

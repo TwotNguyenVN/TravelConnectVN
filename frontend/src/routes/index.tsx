@@ -53,6 +53,7 @@ import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import TransactionHistoryPage from '../pages/user/TransactionHistoryPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
+import TourBookingPage from '../pages/public/TourBookingPage';
 import { AuthGuard } from './AuthGuard';
 import { RoleGuard } from './RoleGuard';
 
@@ -71,6 +72,7 @@ export const router = createBrowserRouter([
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'tours', element: <TourListPage /> },
       { path: 'tours/:id', element: <TourDetailPage /> },
+      { path: 'tours/:id/booking', element: <AuthGuard><TourBookingPage /></AuthGuard> },
       { path: 'tours/:id/map', element: <TourMapPage /> },
       { path: 'guides', element: <GuideListPage /> },
 

@@ -11,7 +11,7 @@ export class PaymentsService {
     const str: string[] = [];
     let key;
     for (key in obj) {
-      if (obj.hasOwnProperty(key)) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
         str.push(encodeURIComponent(key));
       }
     }
@@ -106,7 +106,7 @@ export class PaymentsService {
   // 2. IPN Listener (Dùng để VNPAY gọi về báo kết quả ngầm)
   async vnpayIpn(vnp_Params: any) {
     try {
-      let secureHash = vnp_Params['vnp_SecureHash'];
+      console.log("IPN Params:", vnp_Params); let secureHash = vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHashType'];
 
@@ -114,7 +114,7 @@ export class PaymentsService {
       
       let signData = '';
       for (const key in vnp_Params) {
-        if (vnp_Params.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(vnp_Params, key)) {
           signData += key + '=' + vnp_Params[key] + '&';
         }
       }
@@ -162,9 +162,9 @@ export class PaymentsService {
       } else {
         return { RspCode: '97', Message: 'Invalid Checksum' };
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('IPN Error:', error);
-      return { RspCode: '99', Message: 'Unknown error' };
+      return { RspCode: '99', Message: error?.message || 'Unknown error', ReceivedParams: vnp_Params };
     }
   }
 

@@ -412,7 +412,6 @@ Cập nhật 3 file:
 1. SESSION_LOG.md
 2. PROJECT_STATUS.md
 3. PROJECT_TASK.md
-
 Ghi rõ:
 - current sprint
 - chosen subtask
@@ -424,6 +423,7 @@ Ghi rõ:
 - best next single step
 
 Không cập nhật file khác nếu không có thay đổi phạm vi thật sự.
+4. Push lên github 
 
 
 

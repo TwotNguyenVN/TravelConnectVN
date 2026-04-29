@@ -108,6 +108,18 @@ Dự án hiện đang ở **Sprint 14 (Giai đoạn Final)**:
 
 ---
 
+## 💳 Thông tin Thanh toán Demo (VNPAY Sandbox)
+
+Để thử nghiệm chức năng thanh toán qua cổng VNPAY trong môi trường phát triển, vui lòng sử dụng thông tin thẻ test dưới đây (không sử dụng thẻ thật):
+
+*   **Ngân hàng:** `NCB`
+*   **Số thẻ:** `9704198526191432198`
+*   **Tên chủ thẻ:** `NGUYEN VAN A`
+*   **Ngày phát hành:** `07/15`
+*   **Mã OTP:** `123456`
+
+---
+
 ## ✍️ Tác giả & Liên hệ
 
 *   **Dự án:** Đồ án Cơ sở - TravelConnectVN
