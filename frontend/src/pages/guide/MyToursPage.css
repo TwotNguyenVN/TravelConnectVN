@@ -78,11 +78,13 @@
 
 .tc-my-tours__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--tc-spacing-6);
 }
 
 .tc-tour-manage-card {
+  width: 300px;
+  height: 500px;
   background: var(--tc-bg-default);
   border-radius: var(--tc-radius-lg);
   overflow: hidden;
