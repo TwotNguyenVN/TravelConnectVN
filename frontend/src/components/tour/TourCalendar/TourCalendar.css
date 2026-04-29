@@ -1,81 +1,83 @@
 .tc-tour-calendar {
   display: flex;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.06);
   overflow: hidden;
-  max-width: 900px;
+  max-width: 1100px;
   margin: 20px auto;
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
+  border: 1px solid #f1f5f9;
 }
 
 /* Sidebar Chọn Tháng */
 .tc-calendar-sidebar {
-  width: 180px;
-  background: #f8fafc;
-  padding: 24px 16px;
-  border-right: 1px solid #edf2f7;
+  width: 160px;
+  background: #ffffff;
+  padding: 40px 15px;
+  border-right: 1px solid #f1f5f9;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
 .tc-calendar-sidebar__title {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  text-transform: none;
+  letter-spacing: 0;
+  padding-left: 10px;
 }
 
 .tc-month-btn {
-  padding: 12px;
+  padding: 12px 10px;
   border-radius: 10px;
-  border: 1px solid transparent;
+  border: none;
   background: transparent;
-  color: #475569;
-  font-weight: 600;
+  color: #006ce4;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s;
   text-align: center;
+  font-size: 14px;
 }
 
 .tc-month-btn:hover {
-  background: #f1f5f9;
-  color: #006ce4;
+  background: #f0f7ff;
 }
 
 .tc-month-btn--active {
-  background: #006ce4;
+  background: #006ce4 !important;
   color: #fff !important;
-  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.25);
+  font-weight: 600;
+  box-shadow: 0 8px 20px rgba(0, 108, 228, 0.25);
 }
 
 /* Main Calendar */
 .tc-calendar-main {
   flex: 1;
-  padding: 32px;
+  padding: 40px;
   display: flex;
   flex-direction: column;
 }
 
 .tc-calendar-header {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 32px;
   margin-bottom: 40px;
+  padding: 0 10px;
 }
 
 .tc-calendar-header h2 {
-  font-size: 22px;
-  font-weight: 800;
-  color: #006ce4;
+  font-size: 24px;
+  font-weight: 900;
+  color: var(--tc-primary);
   text-transform: uppercase;
   margin: 0;
-  min-width: 200px;
-  text-align: center;
+  letter-spacing: 2px;
 }
 
 .tc-nav-btn {
@@ -102,20 +104,21 @@
 .tc-calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 2px;
-  background: #edf2f7;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
+  gap: 0;
+  background: #fff;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
   overflow: hidden;
 }
 
 .tc-weekday {
   background: #fff;
-  padding: 12px;
+  padding: 20px 10px;
   text-align: center;
   font-weight: 700;
   font-size: 14px;
-  color: #64748b;
+  color: #1e293b;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .tc-weekday:nth-child(6), .tc-weekday:nth-child(7) {
@@ -124,24 +127,37 @@
 
 .tc-day {
   background: #fff;
-  min-height: 85px;
-  padding: 12px 8px;
+  min-height: 100px;
+  padding: 20px 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 8px;
   position: relative;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s;
+  border: 0.5px solid #f8fafc;
 }
 
-.tc-day:hover:not(.tc-day--empty) {
+.tc-day:hover:not(.tc-day--other-month) {
   background: #f8fafc;
+  z-index: 1;
 }
 
-.tc-day--empty {
-  background: #fcfcfc;
-  cursor: default;
+.tc-day--empty, .tc-day--other-month {
+  background-color: #fcfcfc;
+  color: #cbd5e1;
+}
+
+.tc-day--other-month .tc-day-number {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.tc-day--other-month:hover {
+  background-color: #f1f5f9;
+  color: var(--tc-primary);
 }
 
 .tc-day-number {
@@ -152,27 +168,38 @@
 
 /* Departure Specific Styles */
 .tc-day--departure .tc-day-number {
-  font-weight: 800;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.1rem;
 }
 
 .tc-day-price {
   font-size: 13px;
   font-weight: 700;
   color: #ef4444;
+  border: 1px solid #fee2e2;
+  background: #fff;
+  padding: 4px 10px;
+  border-radius: 8px;
+  margin-top: 4px;
 }
 
 .tc-day-slots {
   font-size: 11px;
-  color: #64748b;
-  margin-top: 2px;
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 .tc-day--selected {
+  border: 1px solid #006ce4 !important;
   background: #f0f7ff !important;
-  outline: 2px solid #006ce4;
-  outline-offset: -2px;
   z-index: 2;
+}
+
+.tc-day--selected .tc-day-price {
+  border-color: #006ce4;
+  background: #006ce4;
+  color: #fff;
 }
 
 .tc-day--full {

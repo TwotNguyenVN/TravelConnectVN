@@ -1,38 +1,102 @@
+.tc-guide-calendar {
+  max-width: 1200px;
+  width: 100%;
+}
+
+.tc-guide-calendar .tc-calendar-sidebar {
+  width: 160px;
+}
+
+.tc-guide-calendar .tc-day {
+  min-height: 110px;
+  padding: 16px 12px;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tc-guide-calendar .tc-day-number {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.tc-guide-calendar .tc-day-price {
+  font-size: 0.85rem;
+  background: #fff;
+  color: #dc2626;
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid #fee2e2;
+  display: inline-block;
+  font-weight: 700;
+}
+
 .tc-guide-calendar .tc-day--clickable:hover {
-  background-color: #f1f5f9;
+  background-color: #f8fafc;
   cursor: pointer;
-  border-color: var(--tc-primary);
+  box-shadow: inset 0 0 0 2px var(--tc-primary);
+  transform: scale(1.02);
+  z-index: 5;
 }
 
 .tc-guide-calendar .tc-day--scheduled {
-  background-color: #fff7ed;
+  background-color: #fffaf5;
   border: 1px solid #ffedd5;
   cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tc-guide-calendar .tc-day--scheduled:hover {
-  background-color: #ffedd5;
-  border-color: #fdba74;
+  background-color: #fff4e5;
+  border-color: #fb923c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(251, 146, 60, 0.2);
 }
 
 .tc-guide-calendar .tc-day--scheduled .tc-day-number {
   color: #ea580c;
-  font-weight: 600;
 }
 
 .tc-guide-calendar .tc-day--past {
-  background-color: #f8fafc;
-  color: #cbd5e1;
+  background-color: #f1f5f9;
+  color: #94a3b8;
   cursor: not-allowed;
+  opacity: 0.7;
+}
+.tc-guide-calendar .tc-day--other-month {
+  background-color: #fcfcfc;
+  color: #cbd5e1;
+}
+
+.tc-guide-calendar .tc-day--other-month .tc-day-number {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.tc-guide-calendar .tc-day--other-month:hover {
+  background-color: #f1f5f9;
+  color: var(--tc-primary);
 }
 
 .tc-guide-calendar .tc-day--past .tc-day-number {
-  color: #cbd5e1;
+  color: #94a3b8;
 }
 
 .tc-guide-calendar .tc-day-slots {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   color: #64748b;
-  margin-top: 2px;
+  font-weight: 500;
+  margin-top: auto;
+}
+
+/* Header improvements */
+.tc-guide-calendar .tc-calendar-header h2 {
+  font-size: 1.6rem;
+  letter-spacing: 1px;
+}
+
+.tc-guide-calendar .tc-month-btn {
+  font-size: 15px;
+  margin-bottom: 4px;
 }

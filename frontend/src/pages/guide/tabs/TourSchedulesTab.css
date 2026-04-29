@@ -1,24 +1,29 @@
 .tc-tour-schedules-tab {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  background: #f8fafc;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+  border: 1px solid #e2e8f0;
 }
 
 .tc-schedules-header {
-  margin-bottom: 24px;
+  margin-bottom: 48px;
   text-align: center;
 }
 
 .tc-schedules-header h2 {
-  font-size: 1.5rem;
+  font-size: 2.2rem;
+  font-weight: 800;
   color: var(--tc-text-primary);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
 }
 
 .tc-schedules-header p {
   color: var(--tc-text-secondary);
-  font-size: 0.95rem;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .tc-schedules-calendar-container {

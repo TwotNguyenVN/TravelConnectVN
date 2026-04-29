@@ -37,9 +37,13 @@ export const TourDetailPage: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const [detailRes, reviewsRes]: [any, any] = await Promise.all([
+        
+        // Parallelize all primary requests to avoid waterfall loading
+        const [detailRes, reviewsRes, accRes, favRes]: [any, any, any, any] = await Promise.all([
           tourService.getTourDetail(id),
           tourService.getTourReviews(id),
+          getTourAccommodations(id),
+          user ? favoriteService.checkIsFavorite(id) : Promise.resolve({ success: true, data: false })
         ]);
         
         if (detailRes.success && detailRes.data) {
@@ -48,13 +52,11 @@ export const TourDetailPage: React.FC = () => {
             reviews: reviewsRes?.data?.data || [],
           });
 
-          const accRes = await getTourAccommodations(id);
           if (accRes.success) {
             setAccommodations(accRes.data || []);
           }
 
-          if (user) {
-            const favRes = await favoriteService.checkIsFavorite(id);
+          if (user && favRes.success) {
             setIsFavorited(favRes.data || false);
           }
         }
@@ -529,40 +531,69 @@ export const TourDetailPage: React.FC = () => {
         <aside className="tc-tour-sidebar">
           <div className="tc-booking-card">
             <div className="tc-price-section">
-              <span className="tc-price-label">Giá từ</span>
+              <span className="tc-price-label">Giá:</span>
               <div className="tc-price-amount">
-                {(selectedSchedule ? selectedSchedule.price : tour.price).toLocaleString()}đ
-                <span className="tc-price-unit">/ khách</span>
+                {(selectedSchedule ? selectedSchedule.price : tour.price).toLocaleString()} <span className="currency-symbol">đ</span>
+                <span className="tc-price-unit"> / Khách</span>
               </div>
             </div>
 
-            <div className="tc-booking-form">
-              <div className="tc-form-field">
-                <label>Số lượng người</label>
-                <input 
-                  type="number" 
-                  min="1" 
-                  max={tour.maxParticipants} 
-                  value={participantCount}
-                  onChange={(e) => setParticipantCount(parseInt(e.target.value) || 1)}
-                />
+            <div className="tc-tour-info-list">
+              <div className="tc-info-item">
+                <span className="tc-info-icon">🎟️</span>
+                <span className="tc-info-label">Mã tour:</span>
+                <span className="tc-info-value tc-info-code">TC-{tour.id.substring(0, 8).toUpperCase()}</span>
               </div>
+              <div className="tc-info-item">
+                <span className="tc-info-icon">📍</span>
+                <span className="tc-info-label">Khởi hành:</span>
+                <span className="tc-info-value">{tour.location}</span>
+              </div>
+              <div className="tc-info-item">
+                <span className="tc-info-icon">📅</span>
+                <span className="tc-info-label">Ngày khởi hành:</span>
+                <span className="tc-info-value">
+                  {selectedSchedule ? formatDate(selectedSchedule.startDate) : 'Vui lòng chọn ngày'}
+                </span>
+              </div>
+              <div className="tc-info-item">
+                <span className="tc-info-icon">🕒</span>
+                <span className="tc-info-label">Thời gian:</span>
+                <span className="tc-info-value">{tour.numDays}N{tour.numNights}Đ</span>
+              </div>
+              <div className="tc-info-item">
+                <span className="tc-info-icon">👥</span>
+                <span className="tc-info-label">Số chỗ còn:</span>
+                <span className="tc-info-value tc-info-slots">
+                  {selectedSchedule ? selectedSchedule.remainingSlots : tour.maxParticipants}
+                </span>
+              </div>
+            </div>
+
+            <div className="tc-booking-actions">
+              <button className="tc-btn-icon-only" onClick={handleChat} title="Chat với HDV">
+                <span role="img" aria-label="chat">📝</span>
+              </button>
+              <button className="tc-btn-outline" onClick={() => document.getElementById('tour-calendar-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                Ngày khác
+              </button>
               <button 
-                className="tc-btn-book" 
+                className="tc-btn-primary-red" 
                 onClick={handleBooking}
                 disabled={isBooking}
               >
-                {isBooking ? 'Đang gửi...' : 'Đăng ký ngay'}
+                {isBooking ? '...' : 'Đặt ngay'}
               </button>
-              <button className="tc-btn-chat" onClick={handleChat}>
-                <span>💬</span> Chat với HDV
-              </button>
+            </div>
+            
+            <div style={{ marginTop: '16px' }}>
               <button 
-                className={`tc-btn-favorite ${isFavorited ? 'active' : ''}`} 
+                className={`tc-btn-favorite-simple ${isFavorited ? 'active' : ''}`} 
                 onClick={handleToggleFavorite}
                 disabled={isTogglingFavorite}
+                style={{ width: '100%', background: 'none', border: 'none', color: isFavorited ? 'var(--tc-danger)' : '#64748b', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
-                <span>{isFavorited ? '❤️' : '🤍'}</span> {isFavorited ? 'Đã lưu' : 'Lưu vào yêu thích'}
+                {isFavorited ? '❤️ Đã lưu' : '🤍 Lưu vào yêu thích'}
               </button>
             </div>
           </div>
@@ -576,13 +607,15 @@ export const TourDetailPage: React.FC = () => {
                   {tour.guide?.name?.charAt(0) || 'G'}
                 </div>
               )}
-              <div>
+              <div className="tc-guide-info">
                 <div className="tc-guide-name">{tour.guide?.name}</div>
                 <div className="tc-guide-tag">Hướng dẫn viên địa phương</div>
+                <div className="tc-guide-rating">
+                  ⭐ {tour.guide?.rating?.toFixed(1) || '5.0'}
+                </div>
               </div>
             </div>
-            <div className="tc-guide-bio">"{tour.guide?.bio}"</div>
-            <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--tc-primary)', fontWeight: '700' }}>
+            <div className="tc-guide-exp">
               🎖 {tour.guide?.exp} kinh nghiệm
             </div>
           </Link>

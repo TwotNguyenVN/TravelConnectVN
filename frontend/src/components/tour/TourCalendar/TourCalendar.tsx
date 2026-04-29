@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import './TourCalendar.css';
 
 interface DepartureDate {
@@ -17,12 +17,52 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Months for sidebar: current + 7 months ahead
+  // Tự động chuyển đến tháng có lịch đầu tiên nếu tháng hiện tại không có lịch
+  useEffect(() => {
+    if (schedules && schedules.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      const hasSchedulesThisMonth = schedules.some(s => {
+        const sDate = new Date(s.startDate || (s as any).date);
+        return sDate.getMonth() === month && sDate.getFullYear() === year;
+      });
+
+      if (!hasSchedulesThisMonth) {
+        const futureSchedules = [...schedules]
+          .filter(s => new Date(s.startDate || (s as any).date) >= today)
+          .sort((a, b) => new Date(a.startDate || (a as any).date).getTime() - new Date(b.startDate || (b as any).date).getTime());
+
+        if (futureSchedules.length > 0) {
+          const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as any).date);
+          setCurrentDate(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
+        }
+      }
+    }
+  }, [schedules]);
+
+  // Months for sidebar: 12 months starting from the first month with a schedule
   const sidebarMonths = useMemo(() => {
+    let startMonth = new Date();
+    startMonth.setHours(0, 0, 0, 0);
+
+    if (schedules && schedules.length > 0) {
+      const futureSchedules = [...schedules]
+        .filter(s => new Date(s.startDate || (s as any).date) >= startMonth)
+        .sort((a, b) => new Date(a.startDate || (a as any).date).getTime() - new Date(b.startDate || (b as any).date).getTime());
+
+      if (futureSchedules.length > 0) {
+        const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as any).date);
+        startMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+      }
+    }
+
     const months = [];
-    const now = new Date();
-    for (let i = 0; i < 8; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
       months.push({
         m: d.getMonth(),
         y: d.getFullYear(),
@@ -30,7 +70,7 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
       });
     }
     return months;
-  }, []);
+  }, [schedules]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -39,16 +79,29 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
   const calendarDays = useMemo(() => {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
     
     // Adjust for Vietnamese calendar (T2 starts week)
     const emptyDaysBefore = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
     
     const days = [];
-    
-    for (let i = 0; i < emptyDaysBefore; i++) {
-      days.push({ day: null, fullDate: null });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    // Fill previous month days
+    for (let i = emptyDaysBefore - 1; i >= 0; i--) {
+      const d = prevMonthLastDay - i;
+      const dateObj = new Date(year, month - 1, d);
+      days.push({ 
+        day: d, 
+        fullDate: null,
+        dateObj, 
+        isOtherMonth: true,
+        isPast: dateObj < today 
+      });
     }
     
+    // Fill current month days
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -66,8 +119,25 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
       days.push({
         day: d,
         fullDate: dateString,
-        schedule
+        dateObj,
+        schedule,
+        isOtherMonth: false,
+        isPast: dateObj < today
       });
+    }
+
+    // Fill next month days to complete 42 cells (7x6 grid)
+    let nextMonthDay = 1;
+    while (days.length < 42) {
+      const dateObj = new Date(year, month + 1, nextMonthDay);
+      days.push({ 
+        day: nextMonthDay, 
+        fullDate: null,
+        dateObj, 
+        isOtherMonth: true,
+        isPast: dateObj < today 
+      });
+      nextMonthDay++;
     }
     
     return days;
@@ -81,6 +151,11 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
   };
 
   const handleDayClick = (dayData: any) => {
+    if (dayData.isOtherMonth) {
+      setCurrentDate(new Date(dayData.dateObj.getFullYear(), dayData.dateObj.getMonth(), 1));
+      return;
+    }
+
     if (dayData.schedule) {
       setSelectedDate(dayData.fullDate);
       if (onDateSelect) onDateSelect(dayData.schedule);
@@ -127,7 +202,7 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
           {calendarDays.map((dayData, idx) => (
             <div
               key={idx}
-              className={`tc-day ${!dayData.day ? 'tc-day--empty' : ''} ${dayData.schedule ? 'tc-day--departure' : ''} ${selectedDate === dayData.fullDate ? 'tc-day--selected' : ''} ${dayData.schedule?.remainingSlots === 0 ? 'tc-day--full' : ''}`}
+              className={`tc-day ${dayData.isOtherMonth ? 'tc-day--other-month' : ''} ${dayData.schedule ? 'tc-day--departure' : ''} ${dayData.fullDate && selectedDate === dayData.fullDate ? 'tc-day--selected' : ''} ${dayData.schedule?.remainingSlots === 0 ? 'tc-day--full' : ''}`}
               onClick={() => handleDayClick(dayData)}
             >
               {dayData.day && (

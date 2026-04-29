@@ -267,18 +267,24 @@ export class ToursService {
       images.push('https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image');
     }
 
-    // Tính rating trung bình
-    const aggregate = await this.prisma.tour_reviews.aggregate({
-      where: { tour_id: id, visibility_status: 'visible' },
-      _avg: { rating: true },
-    });
+    // Fetch ratings in parallel
+    const [tourRating, guideRating] = await Promise.all([
+      this.prisma.tour_reviews.aggregate({
+        where: { tour_id: id, visibility_status: 'visible' },
+        _avg: { rating: true },
+      }),
+      this.prisma.guide_reviews.aggregate({
+        where: { guide_profile_id: (tour as any).guide_profiles?.user_id },
+        _avg: { rating: true },
+      })
+    ]);
 
     return {
       id: tour.id,
       title: tour.title,
       cover: images[0],
       price: Number(tour.price),
-      rating: aggregate._avg.rating || 0.0,
+      rating: tourRating._avg.rating || 0.0,
       location: tour.province,
       duration: tour.duration || (tour.start_date && tour.end_date ? `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
       numDays: tour.num_days,
@@ -303,6 +309,7 @@ export class ToursService {
         avatar: (tour as any).guide_profiles?.avatar_url || '',
         exp: `${(tour as any).guide_profiles?.years_of_experience || 0} năm`,
         bio: (tour as any).guide_profiles?.bio || 'Chưa có giới thiệu.',
+        rating: guideRating._avg.rating || 5.0,
       },
       destinations: await Promise.all(((tour as any).tour_destinations || []).map(async (dest: any) => {
         // Log the first one to verify data presence (invisible to user but helps debug)
@@ -941,7 +948,13 @@ export class ToursService {
           }
         },
         tour_schedules: {
-          orderBy: { start_date: 'asc' }
+          orderBy: { start_date: 'asc' },
+          include: {
+            tour_requests: {
+              where: { status: { in: ['paid', 'approved', 'completed'] } },
+              select: { participant_count: true }
+            }
+          }
         }
       },
     });
@@ -954,7 +967,19 @@ export class ToursService {
       throw new NotFoundException('Bạn không có quyền xem tour này');
     }
 
-    return tour;
+    // Tính tổng số người tham gia cho mỗi lịch trình
+    const schedulesWithCounts = tour.tour_schedules.map(schedule => {
+      const currentParticipants = schedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+      return {
+        ...schedule,
+        current_participants: currentParticipants
+      };
+    });
+
+    return {
+      ...tour,
+      tour_schedules: schedulesWithCounts
+    };
   }
 
   async getTourItinerary(tourId: string) {

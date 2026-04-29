@@ -1,6 +1,6 @@
 .tc-tour-management-page {
   padding: 24px;
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
@@ -32,38 +32,39 @@
 
 .tc-management-tabs {
   display: flex;
-  gap: 32px;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 12px;
+  width: fit-content;
+  margin-bottom: 24px;
 }
 
 .tc-manage-tab {
   background: none;
   border: none;
-  padding: 12px 4px;
-  font-size: 16px;
+  padding: 10px 24px;
+  font-size: 15px;
   font-weight: 600;
-  color: var(--tc-text-secondary);
+  color: #64748b;
   cursor: pointer;
-  position: relative;
-  transition: color 0.2s;
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tc-manage-tab:hover {
-  color: var(--tc-text-primary);
+  color: var(--tc-primary);
+  background: rgba(0, 108, 228, 0.05);
 }
 
 .tc-manage-tab.active {
-  color: var(--tc-primary);
+  color: white;
+  background: var(--tc-primary);
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.2);
 }
 
 .tc-manage-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background-color: var(--tc-primary);
-  border-radius: 3px 3px 0 0;
+  display: none;
 }
 
 /* Ensure the child form doesn't have duplicate headers if not wanted, though it's okay to keep */

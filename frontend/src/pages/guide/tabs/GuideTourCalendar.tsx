@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import '../../../components/tour/TourCalendar/TourCalendar.css'; // Reusing base styles
 import './GuideTourCalendar.css';
 
@@ -7,6 +7,7 @@ interface Schedule {
   start_date: string | Date;
   price: number;
   max_participants: number;
+  current_participants?: number;
   status: string;
 }
 
@@ -18,12 +19,54 @@ interface GuideTourCalendarProps {
 const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDateClick }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Months for sidebar: current + 7 months ahead
+  // Tự động chuyển đến tháng có lịch đầu tiên nếu tháng hiện tại không có lịch
+  useEffect(() => {
+    if (schedules && schedules.length > 0) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+
+      // Kiểm tra xem tháng hiện tại có lịch nào không
+      const hasSchedulesThisMonth = schedules.some(s => {
+        const sDate = new Date(s.start_date);
+        return sDate.getMonth() === month && sDate.getFullYear() === year;
+      });
+
+      if (!hasSchedulesThisMonth) {
+        // Tìm lịch trình sớm nhất trong tương lai
+        const futureSchedules = [...schedules]
+          .filter(s => new Date(s.start_date) >= today)
+          .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+
+        if (futureSchedules.length > 0) {
+          const firstDate = new Date(futureSchedules[0].start_date);
+          setCurrentDate(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
+        }
+      }
+    }
+  }, [schedules]);
+
+  // Months for sidebar: 12 months starting from the first month with a schedule
   const sidebarMonths = useMemo(() => {
+    let startMonth = new Date();
+    startMonth.setHours(0, 0, 0, 0);
+
+    if (schedules && schedules.length > 0) {
+      const futureSchedules = [...schedules]
+        .filter(s => new Date(s.start_date) >= startMonth)
+        .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+
+      if (futureSchedules.length > 0) {
+        const firstDate = new Date(futureSchedules[0].start_date);
+        startMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
+      }
+    }
+
     const months = [];
-    const now = new Date();
-    for (let i = 0; i < 8; i++) {
-      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(startMonth.getFullYear(), startMonth.getMonth() + i, 1);
       months.push({
         m: d.getMonth(),
         y: d.getFullYear(),
@@ -31,7 +74,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
       });
     }
     return months;
-  }, []);
+  }, [schedules]);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
@@ -40,19 +83,28 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
   const calendarDays = useMemo(() => {
     const firstDayOfMonth = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
     
     // Adjust for Vietnamese calendar (T2 starts week)
     const emptyDaysBefore = firstDayOfMonth === 0 ? 6 : firstDayOfMonth - 1;
     
     const days = [];
-    
-    for (let i = 0; i < emptyDaysBefore; i++) {
-      days.push({ day: null, fullDate: null, dateObj: null });
-    }
-    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
+    
+    // Fill previous month days
+    for (let i = emptyDaysBefore - 1; i >= 0; i--) {
+      const d = prevMonthLastDay - i;
+      const dateObj = new Date(year, month - 1, d);
+      days.push({ 
+        day: d, 
+        dateObj, 
+        isOtherMonth: true,
+        isPast: dateObj < today 
+      });
+    }
+    
+    // Fill current month days
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(year, month, d);
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -73,8 +125,22 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         fullDate: dateString,
         dateObj,
         schedule,
-        isPast
+        isPast,
+        isOtherMonth: false
       });
+    }
+
+    // Fill next month days to complete 42 cells (7x6 grid)
+    let nextMonthDay = 1;
+    while (days.length < 42) {
+      const dateObj = new Date(year, month + 1, nextMonthDay);
+      days.push({ 
+        day: nextMonthDay, 
+        dateObj, 
+        isOtherMonth: true,
+        isPast: dateObj < today 
+      });
+      nextMonthDay++;
     }
     
     return days;
@@ -88,6 +154,13 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
   };
 
   const handleDayClick = (dayData: any) => {
+    if (!dayData.dateObj) return;
+
+    if (dayData.isOtherMonth) {
+      setCurrentDate(new Date(dayData.dateObj.getFullYear(), dayData.dateObj.getMonth(), 1));
+      return;
+    }
+
     if (dayData.day && !dayData.isPast) {
       onDateClick(dayData.dateObj, dayData.schedule);
     }
@@ -133,7 +206,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
           {calendarDays.map((dayData, idx) => (
             <div
               key={idx}
-              className={`tc-day ${!dayData.day ? 'tc-day--empty' : ''} ${dayData.schedule ? 'tc-day--scheduled' : ''} ${dayData.isPast ? 'tc-day--past' : 'tc-day--clickable'}`}
+              className={`tc-day ${dayData.isOtherMonth ? 'tc-day--other-month' : ''} ${dayData.schedule ? 'tc-day--scheduled' : ''} ${dayData.isPast ? 'tc-day--past' : 'tc-day--clickable'}`}
               onClick={() => handleDayClick(dayData)}
               title={dayData.isPast ? 'Không thể thao tác trên ngày trong quá khứ' : 'Click để cấu hình lịch'}
             >
@@ -144,7 +217,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                     <>
                       <span className="tc-day-price">{formatPrice(dayData.schedule.price)}</span>
                       <span className="tc-day-slots">
-                        Max {dayData.schedule.max_participants}
+                        {dayData.schedule.current_participants || 0}/{dayData.schedule.max_participants}
                       </span>
                     </>
                   )}
