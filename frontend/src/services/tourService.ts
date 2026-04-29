@@ -94,4 +94,16 @@ export const tourService = {
   deleteTour: async (id: string) => {
     return api.patch(`/tours/guide/${id}/delete`);
   },
+
+  createTourSchedule: async (tourId: string, data: { startDate: string; price: number; maxParticipants: number }) => {
+    return api.post(`/tours/${tourId}/schedules`, data);
+  },
+
+  updateTourSchedule: async (tourId: string, scheduleId: string, data: { price?: number; maxParticipants?: number; status?: string }) => {
+    return api.patch(`/tours/${tourId}/schedules/${scheduleId}`, data);
+  },
+
+  deleteTourSchedule: async (tourId: string, scheduleId: string) => {
+    return api.delete(`/tours/${tourId}/schedules/${scheduleId}`);
+  },
 };

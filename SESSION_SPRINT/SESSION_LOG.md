@@ -4781,3 +4781,44 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ### Quick Handoff
 - Link từ chat sang profile đã hoạt động mượt mà.
+
+=============================================================================================
+
+## Session 2026-04-29 - Standardizing UI Components & Fixing Rating Fallbacks
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Đồng bộ hóa kích thước Card và xử lý triệt để lỗi hiển thị 5 sao mặc định.
+
+### Context checked
+- [x] Đã kiểm tra kích thước Card trên trang chủ (300x500px).
+- [x] Đã xác nhận Backend trả về 5.0 mặc định trong `ToursService`, `GuidesService`, và `RecommendationsService`.
+
+### Done
+- **UI Standardization**:
+    - Cập nhật `MyToursPage.css` để đồng bộ kích thước Card Tour trong trang quản lý của HDV thành 300x500px (giống trang chủ).
+    - Tối ưu hóa Grid layout để hiển thị cân đối với kích thước card mới.
+- **Rating Logic Fix (Backend & Frontend)**:
+    - Sửa toàn bộ các giá trị fallback `5.0` thành `0.0` trong các service ở Backend.
+    - Cập nhật Frontend để hiển thị "0" (0 sao) thay vì "0.0" cho các đối tượng chưa có đánh giá.
+- **Push Git**: Đã đẩy code lên nhánh chính.
+
+### Files Changed
+- `backend/src/tours/tours.service.ts` (Committed previously)
+- `backend/src/guides/guides.service.ts` (Committed previously)
+- `backend/src/recommendations/recommendations.service.ts` (Committed previously)
+- `frontend/src/pages/public/TourDetailPage.tsx` (Committed previously)
+- `frontend/src/pages/public/TourListPage.tsx` (Committed previously)
+- `frontend/src/pages/public/GuideDetailPage.tsx` (Committed previously)
+- `frontend/src/pages/guide/MyToursPage.css`
+
+### Tested / Verified
+- [x] Xác nhận Card trong trang `/guide/tours` đã có kích thước 300x500px.
+- [x] Xác nhận Tour/HDV mới hiển thị đúng "0 sao".
+
+### Result
+- [x] Hoàn thành
+
+### Quick Handoff
+- Hệ thống đánh giá và kích thước card đã được chuẩn hóa.

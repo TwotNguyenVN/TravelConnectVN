@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
   Request,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
@@ -163,5 +164,40 @@ export class ToursController {
   async deleteTour(@Request() req, @Param('id') id: string) {
     const userId = req.user.id;
     return this.toursService.deleteTour(userId, id);
+  }
+
+  // Lịch khởi hành
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
+  @Post(':id/schedules')
+  async createSchedule(
+    @Request() req,
+    @Param('id') tourId: string,
+    @Body() createScheduleDto: { startDate: string; price: number; maxParticipants: number }
+  ) {
+    return this.toursService.createTourSchedule(req.user.id, tourId, createScheduleDto);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
+  @Patch(':id/schedules/:scheduleId')
+  async updateSchedule(
+    @Request() req,
+    @Param('id') tourId: string,
+    @Param('scheduleId') scheduleId: string,
+    @Body() updateScheduleDto: { price?: number; maxParticipants?: number; status?: string }
+  ) {
+    return this.toursService.updateTourSchedule(req.user.id, tourId, scheduleId, updateScheduleDto);
+  }
+
+  @UseGuards(AuthGuard, RoleGuard)
+  @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
+  @Delete(':id/schedules/:scheduleId')
+  async deleteSchedule(
+    @Request() req,
+    @Param('id') tourId: string,
+    @Param('scheduleId') scheduleId: string
+  ) {
+    return this.toursService.deleteTourSchedule(req.user.id, tourId, scheduleId);
   }
 }

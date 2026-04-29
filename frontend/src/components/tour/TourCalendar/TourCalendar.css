@@ -1,0 +1,214 @@
+.tc-tour-calendar {
+  display: flex;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  max-width: 900px;
+  margin: 20px auto;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+/* Sidebar Chọn Tháng */
+.tc-calendar-sidebar {
+  width: 180px;
+  background: #f8fafc;
+  padding: 24px 16px;
+  border-right: 1px solid #edf2f7;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tc-calendar-sidebar__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tc-month-btn {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #475569;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.tc-month-btn:hover {
+  background: #f1f5f9;
+  color: #006ce4;
+}
+
+.tc-month-btn--active {
+  background: #006ce4;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.25);
+}
+
+/* Main Calendar */
+.tc-calendar-main {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tc-calendar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.tc-calendar-header h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #006ce4;
+  text-transform: uppercase;
+  margin: 0;
+  min-width: 200px;
+  text-align: center;
+}
+
+.tc-nav-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #64748b;
+}
+
+.tc-nav-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+/* Calendar Grid */
+.tc-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  background: #edf2f7;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.tc-weekday {
+  background: #fff;
+  padding: 12px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 14px;
+  color: #64748b;
+}
+
+.tc-weekday:nth-child(6), .tc-weekday:nth-child(7) {
+  color: #ef4444;
+}
+
+.tc-day {
+  background: #fff;
+  min-height: 85px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tc-day:hover:not(.tc-day--empty) {
+  background: #f8fafc;
+}
+
+.tc-day--empty {
+  background: #fcfcfc;
+  cursor: default;
+}
+
+.tc-day-number {
+  font-size: 16px;
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Departure Specific Styles */
+.tc-day--departure .tc-day-number {
+  font-weight: 800;
+  color: #1a1a1a;
+}
+
+.tc-day-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ef4444;
+}
+
+.tc-day-slots {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.tc-day--selected {
+  background: #f0f7ff !important;
+  outline: 2px solid #006ce4;
+  outline-offset: -2px;
+  z-index: 2;
+}
+
+.tc-day--full {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tc-day--full .tc-day-slots {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.tc-calendar-footer {
+  margin-top: 32px;
+  color: #ef4444;
+  font-style: italic;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .tc-tour-calendar {
+    flex-direction: column;
+  }
+  .tc-calendar-sidebar {
+    width: 100%;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 12px;
+  }
+  .tc-calendar-sidebar__title {
+    display: none;
+  }
+  .tc-calendar-main {
+    padding: 16px;
+  }
+  .tc-day {
+    min-height: 70px;
+  }
+}

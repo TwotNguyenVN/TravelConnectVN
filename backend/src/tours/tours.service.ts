@@ -234,6 +234,23 @@ export class ToursService {
         tour_destinations: {
           orderBy: { sequence_no: 'asc' },
         },
+        tour_schedules: {
+          where: {
+            status: 'available',
+            start_date: { gte: new Date() },
+          },
+          include: {
+            tour_requests: {
+              where: {
+                status: { in: ['approved', 'payment_pending', 'paid'] }
+              },
+              select: {
+                participant_count: true
+              }
+            }
+          },
+          orderBy: { start_date: 'asc' },
+        },
       },
     });
 
@@ -334,6 +351,17 @@ export class ToursService {
           loc.notes ||
           `Tham quan ${loc.location_name} tại ${loc.address || tour.province}.`,
       })),
+      schedules: (tour.tour_schedules || []).map((s) => {
+        const bookedCount = (s as any).tour_requests?.reduce((sum, req) => sum + req.participant_count, 0) || 0;
+        return {
+          id: s.id,
+          startDate: s.start_date,
+          price: Number(s.price),
+          maxParticipants: s.max_participants,
+          remainingSlots: Math.max(0, s.max_participants - bookedCount),
+          status: s.status,
+        };
+      }),
     };
   }
 
@@ -687,7 +715,24 @@ export class ToursService {
         }
       }
 
-      // 2.4 Gắn nơi lưu trú (Accommodations)
+      // 2.4 Tạo lịch khởi hành (Schedules)
+      if (data.schedules && Array.isArray(data.schedules)) {
+        const scheduleData = data.schedules.map((s) => ({
+          tour_id: tour.id,
+          start_date: new Date(s.startDate),
+          price: s.price ? Number(s.price) : Number(data.price),
+          max_participants: s.maxParticipants ? Number(s.maxParticipants) : Number(data.maxParticipants),
+          status: 'available',
+        }));
+
+        if (scheduleData.length > 0) {
+          await tx.tour_schedules.createMany({
+            data: scheduleData,
+          });
+        }
+      }
+
+      // 2.5 Gắn nơi lưu trú (Accommodations)
       if (data.accommodations && Array.isArray(data.accommodations)) {
         const accData = data.accommodations.map((acc, index) => ({
           tour_id: tour.id,
@@ -842,6 +887,21 @@ export class ToursService {
         }
       }
 
+      // 3.6 Cập nhật Lịch khởi hành (Schedules) nếu có
+      if (data.schedules && Array.isArray(data.schedules)) {
+        await tx.tour_schedules.deleteMany({ where: { tour_id: tourId } });
+        const scheduleData = data.schedules.map((s) => ({
+          tour_id: tourId,
+          start_date: new Date(s.startDate),
+          price: s.price ? Number(s.price) : Number(updatedTour.price),
+          max_participants: s.maxParticipants ? Number(s.maxParticipants) : Number(updatedTour.max_participants),
+          status: 'available',
+        }));
+        if (scheduleData.length > 0) {
+          await tx.tour_schedules.createMany({ data: scheduleData });
+        }
+      }
+
       return updatedTour;
     }).catch(error => {
       if (error.code === 'P2002' || error.message?.includes('violates check constraint')) {
@@ -879,6 +939,9 @@ export class ToursService {
               where: { status: 'paid' }
             }
           }
+        },
+        tour_schedules: {
+          orderBy: { start_date: 'asc' }
         }
       },
     });
@@ -1031,5 +1094,101 @@ export class ToursService {
     });
 
     return { success: true, message: 'Xóa tour thành công' };
+  }
+
+  // --- LỊCH KHỞI HÀNH (TOUR SCHEDULES) ---
+
+  async createTourSchedule(userId: string, tourId: string, data: { startDate: string; price: number; maxParticipants: number }) {
+    // 1. Kiểm tra quyền sở hữu
+    const tour = await this.prisma.tours.findFirst({
+      where: {
+        id: tourId,
+        guide_profiles: { user_id: userId },
+      },
+    });
+
+    if (!tour) {
+      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+    }
+
+    // 2. Kiểm tra xem ngày này đã có lịch chưa
+    const existingSchedule = await this.prisma.tour_schedules.findFirst({
+      where: {
+        tour_id: tourId,
+        start_date: new Date(data.startDate),
+      },
+    });
+
+    if (existingSchedule) {
+      throw new BadRequestException('Ngày này đã có lịch khởi hành');
+    }
+
+    // 3. Tạo mới
+    return this.prisma.tour_schedules.create({
+      data: {
+        tour_id: tourId,
+        start_date: new Date(data.startDate),
+        price: data.price,
+        max_participants: data.maxParticipants,
+        status: 'available',
+      },
+    });
+  }
+
+  async updateTourSchedule(userId: string, tourId: string, scheduleId: string, data: { price?: number; maxParticipants?: number; status?: string }) {
+    // 1. Kiểm tra quyền sở hữu
+    const tour = await this.prisma.tours.findFirst({
+      where: {
+        id: tourId,
+        guide_profiles: { user_id: userId },
+      },
+    });
+
+    if (!tour) {
+      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+    }
+
+    // 2. Cập nhật
+    return this.prisma.tour_schedules.update({
+      where: { id: scheduleId },
+      data: {
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.maxParticipants !== undefined && { max_participants: data.maxParticipants }),
+        ...(data.status !== undefined && { status: data.status }),
+      },
+    });
+  }
+
+  async deleteTourSchedule(userId: string, tourId: string, scheduleId: string) {
+    // 1. Kiểm tra quyền sở hữu
+    const tour = await this.prisma.tours.findFirst({
+      where: {
+        id: tourId,
+        guide_profiles: { user_id: userId },
+      },
+    });
+
+    if (!tour) {
+      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+    }
+
+    // 2. Kiểm tra xem có người đã đặt chưa
+    const participants = await this.prisma.tour_requests.count({
+      where: {
+        schedule_id: scheduleId,
+        status: { in: ['paid', 'approved', 'completed'] },
+      },
+    });
+
+    if (participants > 0) {
+      throw new BadRequestException('Không thể xóa lịch đã có người đặt');
+    }
+
+    // 3. Xóa
+    await this.prisma.tour_schedules.delete({
+      where: { id: scheduleId },
+    });
+
+    return { success: true, message: 'Xóa lịch thành công' };
   }
 }

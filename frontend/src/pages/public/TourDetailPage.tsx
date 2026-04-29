@@ -9,6 +9,7 @@ import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { TourMap } from '../../components/tours/TourMap';
+import { TourCalendar } from '../../components/tour/TourCalendar/TourCalendar';
 import './TourDetailPage.css';
 
 export const TourDetailPage: React.FC = () => {
@@ -29,6 +30,7 @@ export const TourDetailPage: React.FC = () => {
   
   // Gallery Carousel State
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
 
   useEffect(() => {
     const fetchTourData = async () => {
@@ -86,10 +88,20 @@ export const TourDetailPage: React.FC = () => {
 
     try {
       setIsBooking(true);
+      
+      if (tour.schedules?.length > 0 && !selectedSchedule) {
+        toast.warning("Vui lòng chọn ngày khởi hành trên lịch");
+        // Scroll to calendar section
+        const calendarEl = document.getElementById('tour-calendar-section');
+        if (calendarEl) calendarEl.scrollIntoView({ behavior: 'smooth' });
+        return;
+      }
+
       await tourRequestService.createRequest({
         tourId: tour.id,
+        scheduleId: selectedSchedule?.id,
         participantCount: participantCount,
-        note: bookingNote || `Yêu cầu tham gia tour ${tour.title}`
+        note: bookingNote || `Yêu cầu tham gia tour ${tour.title}${selectedSchedule ? ` ngày ${formatDate(selectedSchedule.startDate)}` : ''}`
       });
       toast.success("Yêu cầu của bạn đã được gửi thành công. Hướng dẫn viên sẽ sớm phản hồi!");
     } catch (error: any) {
@@ -257,6 +269,24 @@ export const TourDetailPage: React.FC = () => {
                 </h2>
                 <div className="tc-description">{tour.description}</div>
               </div>
+
+              {tour.schedules?.length > 0 && (
+                <div className="tc-detail-section" id="tour-calendar-section">
+                  <h2 className="tc-section-title">
+                    <span>📅</span> Lịch khởi hành
+                  </h2>
+                  <TourCalendar 
+                    schedules={tour.schedules} 
+                    onDateSelect={(s) => setSelectedSchedule(s)} 
+                  />
+                  {selectedSchedule && (
+                    <div style={{ marginTop: '16px', padding: '12px', background: '#f0f7ff', borderRadius: '8px', border: '1px solid #006ce4' }}>
+                      <strong>Bạn đã chọn ngày:</strong> {formatDate(selectedSchedule.startDate)} 
+                      <span style={{ marginLeft: '12px' }}><strong>Giá:</strong> {selectedSchedule.price.toLocaleString()}đ</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <div className="tc-detail-section">
                 <h2 className="tc-section-title">
@@ -501,7 +531,7 @@ export const TourDetailPage: React.FC = () => {
             <div className="tc-price-section">
               <span className="tc-price-label">Giá từ</span>
               <div className="tc-price-amount">
-                {tour.price.toLocaleString()}đ
+                {(selectedSchedule ? selectedSchedule.price : tour.price).toLocaleString()}đ
                 <span className="tc-price-unit">/ khách</span>
               </div>
             </div>

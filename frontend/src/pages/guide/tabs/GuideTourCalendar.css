@@ -1,0 +1,38 @@
+.tc-guide-calendar .tc-day--clickable:hover {
+  background-color: #f1f5f9;
+  cursor: pointer;
+  border-color: var(--tc-primary);
+}
+
+.tc-guide-calendar .tc-day--scheduled {
+  background-color: #fff7ed;
+  border: 1px solid #ffedd5;
+  cursor: pointer;
+}
+
+.tc-guide-calendar .tc-day--scheduled:hover {
+  background-color: #ffedd5;
+  border-color: #fdba74;
+}
+
+.tc-guide-calendar .tc-day--scheduled .tc-day-number {
+  color: #ea580c;
+  font-weight: 600;
+}
+
+.tc-guide-calendar .tc-day--past {
+  background-color: #f8fafc;
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.tc-guide-calendar .tc-day--past .tc-day-number {
+  color: #cbd5e1;
+}
+
+.tc-guide-calendar .tc-day-slots {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}

@@ -29,7 +29,7 @@ export class TourRequestsService {
 
 
   async createRequest(userId: string, dto: CreateTourRequestDto) {
-    const { tourId, participantCount, note } = dto;
+    const { tourId, scheduleId, participantCount, note } = dto;
 
     // 1. Kiểm tra tour tồn tại và lấy thông tin guide
     const tour = await this.prisma.tours.findUnique({
@@ -50,10 +50,24 @@ export class TourRequestsService {
       );
     }
 
-    // 3. Kiểm tra số lượng chỗ còn lại (Business logic: total participants in approved/paid requests)
+    // 3. Kiểm tra số lượng chỗ còn lại
+    let maxParticipants = tour.max_participants;
+    let schedule: any = null;
+
+    if (scheduleId) {
+      schedule = await this.prisma.tour_schedules.findUnique({
+        where: { id: scheduleId }
+      });
+      if (!schedule || schedule.tour_id !== tourId) {
+        throw new NotFoundException('Lịch khởi hành không hợp lệ');
+      }
+      maxParticipants = schedule.max_participants;
+    }
+
     const approvedRequests = await this.prisma.tour_requests.aggregate({
       where: {
         tour_id: tourId,
+        schedule_id: scheduleId || null,
         status: { in: ['approved', 'payment_pending', 'paid'] },
       },
       _sum: {
@@ -62,9 +76,9 @@ export class TourRequestsService {
     });
 
     const currentParticipants = approvedRequests._sum.participant_count || 0;
-    if (currentParticipants + participantCount > tour.max_participants) {
+    if (currentParticipants + participantCount > maxParticipants) {
       throw new BadRequestException(
-        `Tour chỉ còn ${tour.max_participants - currentParticipants} chỗ trống`,
+        `Chỉ còn ${maxParticipants - currentParticipants} chỗ trống cho đợt này`,
       );
     }
 
@@ -87,6 +101,7 @@ export class TourRequestsService {
     const request = await this.prisma.tour_requests.create({
       data: {
         tour_id: tourId,
+        schedule_id: scheduleId || null,
         user_id: userId,
         participant_count: participantCount,
         note,

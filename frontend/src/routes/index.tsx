@@ -18,6 +18,7 @@ import { ProfilePage } from '../pages/user/ProfilePage';
 import { NotificationsPage } from '../pages/user/NotificationsPage';
 import { ActivityLogsPage } from '../pages/user/ActivityLogsPage';
 import { TourMapPage } from '../pages/public/TourMapPage';
+import { CalendarDemoPage } from '../pages/public/CalendarDemoPage';
 
 import FavoritesPage from '../pages/user/FavoritesPage';
 
@@ -28,6 +29,7 @@ import GuideListPage from '../pages/public/GuideListPage';
 import GuideDetailPage from '../pages/public/GuideDetailPage';
 import MyToursPage from '../pages/guide/MyToursPage';
 import TourFormPage from '../pages/guide/TourFormPage';
+import TourManagementPage from '../pages/guide/TourManagementPage';
 import TourItineraryPage from '../pages/guide/TourItineraryPage';
 import TourImagesPage from '../pages/guide/TourImagesPage';
 import { MyTourRequestsPage } from '../pages/user/MyTourRequestsPage';
@@ -75,6 +77,7 @@ export const router = createBrowserRouter([
       { path: 'guides/:id', element: <GuideDetailPage /> },
       { path: 'companions', element: <CompanionListPage /> },
       { path: 'companions/:id', element: <CompanionDetailPage /> },
+      { path: 'demo/calendar', element: <CalendarDemoPage /> },
     ],
   },
   {
@@ -117,7 +120,7 @@ export const router = createBrowserRouter([
       { path: 'verification', element: <GuideVerificationPage /> },
       { path: 'tours', element: <MyToursPage /> },
       { path: 'tours/create', element: <TourFormPage /> },
-      { path: 'tours/edit/:id', element: <TourFormPage /> },
+      { path: 'tours/edit/:id', element: <TourManagementPage /> },
       { path: 'tours/:id/itinerary', element: <TourItineraryPage /> },
       { path: 'tours/:id/images', element: <TourImagesPage /> },
       { path: 'tour-requests', element: <GuideRequestsPage /> },
