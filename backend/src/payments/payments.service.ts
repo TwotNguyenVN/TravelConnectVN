@@ -1,10 +1,16 @@
 import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { SocketGateway } from '../socket/socket.gateway';
 
 @Injectable()
 export class PaymentsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService,
+    private socketGateway: SocketGateway
+  ) {}
 
   private sortObject(obj: any): any {
     const sorted: Record<string, string> = {};
@@ -23,7 +29,7 @@ export class PaymentsService {
   }
 
   // 1. Tạo URL thanh toán VNPAY
-  async createPaymentUrl(userId: string, tourRequestId: string, ipAddr: string) {
+  async createPaymentUrl(userId: string, tourRequestId: string, ipAddr: string, paymentType: 'full' | 'deposit' = 'full') {
     try {
       // Tìm thông tin yêu cầu tour
       const request = await this.prisma.tour_requests.findUnique({
@@ -37,7 +43,8 @@ export class PaymentsService {
 
       // Tạo giao dịch nội bộ
       const transactionId = crypto.randomUUID(); // Dùng uuid ngẫu nhiên làm mã đơn nội bộ
-      const amount = Number(request.tours.price) * request.participant_count;
+      const totalAmount = Number(request.tours.price) * request.participant_count;
+      const amount = paymentType === 'deposit' ? Math.floor(totalAmount * 0.5) : totalAmount;
 
       await this.prisma.payment_transactions.create({
         data: {
@@ -158,6 +165,53 @@ export class PaymentsService {
           ] : [])
         ]);
 
+        // Nếu thanh toán thành công, gửi thông báo cho Guide
+        if (isSuccess) {
+          const requestWithGuide = await this.prisma.tour_requests.findUnique({
+            where: { id: transaction.tour_request_id },
+            include: { 
+              tours: { include: { guide_profiles: true } },
+              users_tour_requests_user_idTousers: true
+            }
+          });
+
+          if (requestWithGuide) {
+            const guideUserId = requestWithGuide.tours.guide_profiles.user_id;
+            const customerName = requestWithGuide.users_tour_requests_user_idTousers.full_name;
+            const tourTitle = requestWithGuide.tours.title;
+            const amount = Number(transaction.amount);
+            const totalPrice = Number(requestWithGuide.tours.price) * requestWithGuide.participant_count;
+            
+            let paymentDesc = `đã thanh toán ${amount.toLocaleString()} đ`;
+            if (amount >= totalPrice) {
+              paymentDesc = 'đã thanh toán 100%';
+            } else if (amount >= totalPrice * 0.45) {
+              paymentDesc = 'đã thanh toán 50% (Cọc)';
+            }
+
+            const title = 'Yêu cầu tham gia tour mới (Đã thanh toán)';
+            const content = `Khách hàng ${customerName} đã đặt tour "${tourTitle}" và ${paymentDesc}. Vui lòng kiểm tra và xử lý.`;
+
+            // 1. Lưu thông báo vào DB
+            await this.notificationsService.create({
+              user_id: guideUserId,
+              title: title,
+              content: content,
+              type: 'tour_request',
+              entity_type: 'TOUR_REQUEST',
+              entity_id: transaction.tour_request_id,
+            });
+
+            // 2. Phát tín hiệu realtime qua Socket
+            this.socketGateway.sendToUser(guideUserId, 'new_tour_request', {
+              requestId: transaction.tour_request_id,
+              tourTitle: tourTitle,
+              message: content,
+              paymentStatus: paymentDesc
+            });
+          }
+        }
+
         return { RspCode: '00', Message: 'Confirm Success' };
       } else {
         return { RspCode: '97', Message: 'Invalid Checksum' };
@@ -196,5 +250,24 @@ export class PaymentsService {
     }
 
     return transaction;
+  }
+
+  async cancelTransaction(userId: string, id: string) {
+    const transaction = await this.prisma.payment_transactions.findUnique({
+      where: { id },
+    });
+
+    if (!transaction || transaction.user_id !== userId) {
+      throw new NotFoundException('Giao dịch không tồn tại');
+    }
+
+    if (transaction.status !== 'pending') {
+      throw new BadRequestException('Chỉ có thể hủy giao dịch đang chờ');
+    }
+
+    return this.prisma.payment_transactions.update({
+      where: { id },
+      data: { status: 'cancelled' },
+    });
   }
 }

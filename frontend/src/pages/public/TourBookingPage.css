@@ -424,3 +424,224 @@
     width: 100%;
   }
 }
+
+/* Payment Selection & Modal Styles */
+.tc-payment-selection {
+  width: 100%;
+  max-width: 900px;
+  margin: 20px auto;
+  text-align: center;
+  background: white;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+.tc-selection-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 10px;
+}
+
+.tc-selection-subtitle {
+  color: #718096;
+  margin-bottom: 40px;
+}
+
+.tc-payment-options {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 40px;
+  justify-content: center;
+}
+
+.tc-payment-option-card {
+  flex: 1;
+  max-width: 400px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 30px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.tc-payment-option-card:hover {
+  border-color: var(--tc-primary, #3182ce);
+  background: white;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.tc-payment-option-card.selected {
+  border-color: var(--tc-primary, #3182ce);
+  background: #ebf8ff;
+}
+
+.tc-option-header {
+  margin-bottom: 20px;
+}
+
+.tc-option-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #edf2f7;
+  color: #4a5568;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.tc-option-tag.primary {
+  background: #e6fffa;
+  color: #2c7a7b;
+}
+
+.tc-option-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2d3748;
+}
+
+.tc-option-amount {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--tc-primary, #3182ce);
+  margin-bottom: 15px;
+}
+
+.tc-option-desc {
+  font-size: 14px;
+  color: #718096;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.tc-btn-back {
+  background: none;
+  border: none;
+  color: #718096;
+  font-weight: 500;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+/* Modal Styles */
+.tc-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.tc-confirm-modal {
+  background: white;
+  width: 90%;
+  max-width: 450px;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  animation: modalIn 0.3s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.tc-modal-icon {
+  font-size: 50px;
+  margin-bottom: 20px;
+}
+
+.tc-confirm-modal h3 {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 15px;
+}
+
+.tc-confirm-modal p {
+  color: #4a5568;
+  margin-bottom: 10px;
+}
+
+.tc-modal-amount {
+  background: #f8fafc;
+  padding: 15px;
+  border-radius: 12px;
+  margin: 20px 0 !important;
+}
+
+.tc-modal-amount span {
+  display: block;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--tc-primary, #e53e3e);
+  margin-top: 5px;
+}
+
+.tc-modal-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.tc-btn-cancel {
+  flex: 1;
+  padding: 14px;
+  background: #edf2f7;
+  border: none;
+  border-radius: 10px;
+  color: #4a5568;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tc-btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.tc-btn-confirm {
+  flex: 2;
+  padding: 14px;
+  background: var(--tc-primary, #e53e3e);
+  border: none;
+  border-radius: 10px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tc-btn-confirm:hover {
+  background: #c53030;
+}
+
+@media (max-width: 768px) {
+  .tc-payment-options {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .tc-payment-option-card {
+    width: 100%;
+  }
+}
+

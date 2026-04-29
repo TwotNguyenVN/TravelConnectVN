@@ -158,14 +158,16 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Current Sprint
 - [x] Sprint 12 — Chat trực tiếp và chat nhóm bài đồng hành
-- [~] Sprint 14 — Final QA, demo data, tài liệu, bảo vệ
+- [x] Sprint 14 — Final QA, demo data, tài liệu, bảo vệ
+- [~] Lane 18.2 — Premium Demo Data
 
 ### Current Single Focus
-- [x] Hoàn tất Sprint 12 (Chat module UI & Logic)
-- [~] Sprint 14: Polish UI/UX & Performance Optimization (Tour Detail DONE)
+- [x] Hoàn tất luồng Đặt Tour & Thanh toán VNPAY Popup (Premium flow).
+- [x] Thiết lập hệ thống quản lý giao dịch & Lịch sử thanh toán (Tabs, Modal, Cancel logic).
+- [~] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
 
 ### Current Best Next Step
-- [ ] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
+- [ ] Lane 18.3: Cập nhật các sơ đồ UML cho luồng thanh toán và quản lý giao dịch vào báo cáo.
 
 
 

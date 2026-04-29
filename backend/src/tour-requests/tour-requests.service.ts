@@ -121,26 +121,6 @@ export class TourRequestsService {
       { tour_title: tour.title },
     );
 
-    // 7. Tạo thông báo cho Guide trong DB + Socket realtime
-
-    await this.notificationsService.create({
-      user_id: tour.guide_profiles.user_id,
-      title: 'Yêu cầu tham gia tour mới',
-      content: `Người dùng đã gửi yêu cầu tham gia tour "${tour.title}" của bạn.`,
-      type: 'tour_request',
-      entity_type: 'TOUR_REQUEST',
-      entity_id: request.id,
-    });
-
-
-
-    // 7. Phát tín hiệu realtime cho Guide qua Socket
-    this.socketGateway.sendToUser(tour.guide_profiles.user_id, 'new_tour_request', {
-      requestId: request.id,
-      tourTitle: tour.title,
-      message: `Bạn có một yêu cầu tham gia tour mới cho "${tour.title}"`,
-    });
-
     return request;
   }
 
@@ -167,6 +147,11 @@ export class TourRequestsService {
           },
           tour_reviews: true,
           guide_reviews: true,
+          payment_transactions: {
+            where: { status: 'paid' },
+            orderBy: { created_at: 'desc' },
+            take: 1
+          }
         },
         orderBy: { requested_at: 'desc' },
         skip,
@@ -176,21 +161,40 @@ export class TourRequestsService {
     ]);
 
     return {
-      data: requests.map((req) => ({
-        id: req.id,
-        tourId: req.tour_id,
-        tourTitle: req.tours.title,
-        guideName: req.tours.guide_profiles.users?.full_name,
-        participantCount: req.participant_count,
-        status: req.status,
-        requestedAt: req.requested_at,
-        processedAt: req.processed_at,
-        responseNote: req.response_note,
-        cancellationNote: req.cancellation_note,
-        tourPrice: Number(req.tours.price),
-        hasTourReview: !!req.tour_reviews,
-        hasGuideReview: !!req.guide_reviews,
-      })),
+      data: requests.map((req) => {
+        const lastPaidTransaction = req.payment_transactions[0];
+        const totalPrice = Number(req.tours.price) * req.participant_count;
+        let paymentStatus = 'Chưa thanh toán';
+        
+        if (lastPaidTransaction) {
+          const paidAmount = Number(lastPaidTransaction.amount);
+          if (paidAmount >= totalPrice) {
+            paymentStatus = 'Đã thanh toán 100%';
+          } else if (paidAmount >= totalPrice * 0.45) {
+            paymentStatus = 'Đã thanh toán 50% (Cọc)';
+          } else {
+            paymentStatus = `Đã thanh toán ${paidAmount.toLocaleString()} đ`;
+          }
+        }
+
+        return {
+          id: req.id,
+          tourId: req.tour_id,
+          tourTitle: req.tours.title,
+          guideName: req.tours.guide_profiles.users?.full_name,
+          participantCount: req.participant_count,
+          status: req.status,
+          requestedAt: req.requested_at,
+          processedAt: req.processed_at,
+          responseNote: req.response_note,
+          cancellationNote: req.cancellation_note,
+          tourPrice: Number(req.tours.price),
+          totalPrice: totalPrice,
+          paymentStatus: paymentStatus,
+          hasTourReview: !!req.tour_reviews,
+          hasGuideReview: !!req.guide_reviews,
+        };
+      }),
       total,
       page,
       limit,
@@ -215,6 +219,7 @@ export class TourRequestsService {
       tours: {
         guide_profile_id: guideProfile.id,
       },
+      status: 'paid', // Chỉ hiển thị các yêu cầu đã thanh toán
     };
     if (status) where.status = status;
     if (tourId) where.tour_id = tourId;
@@ -225,6 +230,11 @@ export class TourRequestsService {
         include: {
           users_tour_requests_user_idTousers: true,
           tours: true,
+          payment_transactions: {
+            where: { status: 'paid' },
+            orderBy: { created_at: 'desc' },
+            take: 1
+          }
         },
         orderBy: { requested_at: 'desc' },
         skip,
@@ -234,20 +244,39 @@ export class TourRequestsService {
     ]);
 
     return {
-      data: requests.map((req) => ({
-        id: req.id,
-        tourId: req.tour_id,
-        tourTitle: req.tours.title,
-        userName: req.users_tour_requests_user_idTousers.full_name,
-        userAvatar: req.users_tour_requests_user_idTousers.avatar_url,
-        participantCount: req.participant_count,
-        status: req.status,
-        note: req.note,
-        responseNote: req.response_note,
-        cancellationNote: req.cancellation_note,
-        requestedAt: req.requested_at,
-        processedAt: req.processed_at,
-      })),
+      data: requests.map((req) => {
+        const lastPaidTransaction = req.payment_transactions[0];
+        const totalPrice = Number(req.tours.price) * req.participant_count;
+        let paymentStatus = 'Chưa thanh toán';
+        
+        if (lastPaidTransaction) {
+          const paidAmount = Number(lastPaidTransaction.amount);
+          if (paidAmount >= totalPrice) {
+            paymentStatus = 'Đã thanh toán 100%';
+          } else if (paidAmount >= totalPrice * 0.45) { // 0.45 to handle minor rounding issues
+            paymentStatus = 'Đã thanh toán 50% (Cọc)';
+          } else {
+            paymentStatus = `Đã thanh toán ${paidAmount.toLocaleString()} đ`;
+          }
+        }
+
+        return {
+          id: req.id,
+          tourId: req.tour_id,
+          tourTitle: req.tours.title,
+          userName: req.users_tour_requests_user_idTousers.full_name,
+          userAvatar: req.users_tour_requests_user_idTousers.avatar_url,
+          participantCount: req.participant_count,
+          status: req.status,
+          note: req.note,
+          responseNote: req.response_note,
+          cancellationNote: req.cancellation_note,
+          requestedAt: req.requested_at,
+          processedAt: req.processed_at,
+          paymentStatus: paymentStatus,
+          totalPrice: totalPrice,
+        };
+      }),
       total,
       page,
       limit,

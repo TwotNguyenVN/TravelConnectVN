@@ -29,7 +29,9 @@ const TourBookingPage: React.FC = () => {
   const [schedule, setSchedule] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
+  const [currentStep, setCurrentStep] = useState<number>(1); // Changed from union to number to avoid OXC issues
+  const [paymentType, setPaymentType] = useState<'full' | 'deposit'>('full');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Contact Info State
   const [contactInfo, setContactInfo] = useState({
@@ -127,15 +129,16 @@ const TourBookingPage: React.FC = () => {
       return;
     }
 
+    // Instead of submitting, transition to selection step (Step 1.5)
+    setCurrentStep(1.5);
+    window.scrollTo(0, 0);
+  };
+
+  const proceedToPayment = async () => {
+    setShowConfirmModal(false);
     let popup: Window | null = null;
     try {
       setIsSubmitting(true);
-
-      // Serialize contact and passenger info to put into notes
-      const bookingDetails = {
-        contact: contactInfo,
-        passengers: passengers
-      };
 
       const noteText = `THÔNG TIN ĐẶT TOUR:
 - Liên hệ: ${contactInfo.fullName} | ${contactInfo.phone} | ${contactInfo.email}
@@ -175,21 +178,18 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
 
       // 2. Generate Payment URL (VNPAY)
       toast.info("Đang chuyển hướng đến cổng thanh toán...");
-      const paymentRes = await paymentService.createVnpayUrl(tourRequestId);
+      const paymentRes = await paymentService.createVnpayUrl(tourRequestId, paymentType);
       
       if (paymentRes.success && paymentRes.data?.paymentUrl) {
         
         if (popup) {
-          // Chuyển hướng popup đến URL thật sau khi có kết quả API
           popup.location.href = paymentRes.data.paymentUrl;
-          setCurrentStep(2); // Chuyển sang bước 2: Đang chờ thanh toán
+          setCurrentStep(2); 
         } else {
-          // Nếu trình duyệt cài đặt chặn mọi popup, fallback sang redirect
           window.location.href = paymentRes.data.paymentUrl;
           return;
         }
 
-        // Listen for message from popup
         const handleMessage = (event: MessageEvent) => {
           if (event.origin !== window.location.origin) return;
           
@@ -197,25 +197,23 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
             window.removeEventListener('message', handleMessage);
             if (event.data.status === 'success') {
               toast.success('Thanh toán thành công!');
-              setCurrentStep(3); // Chuyển sang bước 3: Hoàn thành
+              setCurrentStep(3); 
               setIsSubmitting(false);
             } else {
               toast.error('Giao dịch thanh toán thất bại hoặc đã bị hủy.');
               setIsSubmitting(false);
-              setCurrentStep(1); // Quay lại bước 1
+              setCurrentStep(1); 
             }
           }
         };
         
         window.addEventListener('message', handleMessage);
         
-        // Handle case where user closes popup manually
         const checkClosed = setInterval(() => {
           if (!popup || popup.closed) {
             clearInterval(checkClosed);
             window.removeEventListener('message', handleMessage);
             if (currentStep === 2) {
-               // Nếu người dùng đóng popup khi đang ở bước 2
                setIsSubmitting(false);
                setCurrentStep(1);
             }
@@ -231,7 +229,6 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
       const msg = error.response?.data?.message || error.message || "Có lỗi xảy ra trong quá trình xử lý.";
       toast.error(msg);
       setIsSubmitting(false);
-      // Đóng popup nếu có lỗi xảy ra để tránh treo cửa sổ trống
       if (popup && !popup.closed) {
         popup.close();
       }
@@ -253,10 +250,12 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
       <div className="tc-booking-header">
         <div className="tc-booking-steps">
           <div className={`step ${currentStep >= 1 ? 'active' : ''}`}>1. Nhập thông tin</div>
+          <div className={`step-line ${currentStep >= 1.5 ? 'active' : ''}`}></div>
+          <div className={`step ${currentStep >= 1.5 ? 'active' : ''}`}>2. Chọn thanh toán</div>
           <div className={`step-line ${currentStep >= 2 ? 'active' : ''}`}></div>
-          <div className={`step ${currentStep >= 2 ? 'active' : ''}`}>2. Thanh toán</div>
+          <div className={`step ${currentStep >= 2 ? 'active' : ''}`}>3. Thanh toán</div>
           <div className={`step-line ${currentStep >= 3 ? 'active' : ''}`}></div>
-          <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>3. Hoàn thành</div>
+          <div className={`step ${currentStep >= 3 ? 'active' : ''}`}>4. Hoàn thành</div>
         </div>
       </div>
 
@@ -264,164 +263,203 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
         {currentStep === 1 && (
           <>
             <form className="tc-booking-form-section" onSubmit={handleSubmit}>
-          
-          {/* Thông tin liên lạc */}
-          <div className="tc-booking-card">
-            <h2 className="tc-card-title">Thông tin liên lạc</h2>
-            <div className="tc-form-grid">
-              <div className="tc-form-group full-width">
-                <label>Họ và Tên *</label>
-                <input type="text" name="fullName" value={contactInfo.fullName} onChange={handleContactChange} required placeholder="Nhập họ tên người đặt" />
+              <div className="tc-booking-card">
+                <h2 className="tc-card-title">Thông tin liên lạc</h2>
+                <div className="tc-form-grid">
+                  <div className="tc-form-group full-width">
+                    <label>Họ và Tên *</label>
+                    <input type="text" name="fullName" value={contactInfo.fullName} onChange={handleContactChange} required placeholder="Nhập họ tên người đặt" />
+                  </div>
+                  <div className="tc-form-group half-width">
+                    <label>Email *</label>
+                    <input type="email" name="email" value={contactInfo.email} onChange={handleContactChange} required placeholder="Nhập email" />
+                  </div>
+                  <div className="tc-form-group half-width">
+                    <label>Số điện thoại *</label>
+                    <input type="tel" name="phone" value={contactInfo.phone} onChange={handleContactChange} required placeholder="Nhập số điện thoại" />
+                  </div>
+                  <div className="tc-form-group full-width">
+                    <label>Ghi chú thêm</label>
+                    <textarea name="notes" value={contactInfo.notes} onChange={handleContactChange} placeholder="Yêu cầu đặc biệt, dị ứng thực phẩm..."></textarea>
+                  </div>
+                </div>
               </div>
-              <div className="tc-form-group half-width">
-                <label>Email *</label>
-                <input type="email" name="email" value={contactInfo.email} onChange={handleContactChange} required placeholder="Nhập email" />
-              </div>
-              <div className="tc-form-group half-width">
-                <label>Số điện thoại *</label>
-                <input type="tel" name="phone" value={contactInfo.phone} onChange={handleContactChange} required placeholder="Nhập số điện thoại" />
-              </div>
-              <div className="tc-form-group full-width">
-                <label>Ghi chú thêm</label>
-                <textarea name="notes" value={contactInfo.notes} onChange={handleContactChange} placeholder="Yêu cầu đặc biệt, dị ứng thực phẩm..."></textarea>
-              </div>
-            </div>
-          </div>
 
-          {/* Hành khách */}
-          <div className="tc-booking-card">
-            <div className="tc-passenger-header">
-              <h2 className="tc-card-title">Hành khách</h2>
-              <div className="tc-passenger-counter">
-                <button type="button" onClick={() => setParticipantCount(Math.max(1, participantCount - 1))}>-</button>
-                <span>{participantCount}</span>
-                <button type="button" onClick={() => setParticipantCount(Math.min(tour.maxParticipants, participantCount + 1))}>+</button>
-              </div>
-            </div>
+              <div className="tc-booking-card">
+                <div className="tc-passenger-header">
+                  <h2 className="tc-card-title">Hành khách</h2>
+                  <div className="tc-passenger-counter">
+                    <button type="button" onClick={() => setParticipantCount(Math.max(1, participantCount - 1))}>-</button>
+                    <span>{participantCount}</span>
+                    <button type="button" onClick={() => setParticipantCount(Math.min(tour.maxParticipants, participantCount + 1))}>+</button>
+                  </div>
+                </div>
 
-            <div className="tc-passengers-list">
-              {passengers.map((passenger, index) => (
-                <div key={passenger.id} className="tc-passenger-item">
-                  <div className="tc-passenger-index">Khách {index + 1}</div>
-                  
-                  <div className="tc-passenger-form-content">
-                    <div className="tc-passenger-row">
-                      <div className="tc-form-group flex-2">
-                        <label>Họ và Tên *</label>
-                        <input 
-                          type="text" 
-                          value={passenger.fullName} 
-                          onChange={(e) => handlePassengerChange(index, 'fullName', e.target.value)} 
-                          placeholder="VD: Nguyễn Văn A" 
-                          required 
-                        />
-                      </div>
-                      <div className="tc-form-group flex-1">
-                        <label>Giới tính</label>
-                        <select 
-                          value={passenger.gender} 
-                          onChange={(e) => handlePassengerChange(index, 'gender', e.target.value as any)}
-                        >
-                          <option value="male">Nam</option>
-                          <option value="female">Nữ</option>
-                        </select>
+                <div className="tc-passengers-list">
+                  {passengers.map((passenger, index) => (
+                    <div key={passenger.id} className="tc-passenger-item">
+                      <div className="tc-passenger-index">Khách {index + 1}</div>
+                      <div className="tc-passenger-form-content">
+                        <div className="tc-passenger-row">
+                          <div className="tc-form-group flex-2">
+                            <label>Họ và Tên *</label>
+                            <input 
+                              type="text" 
+                              value={passenger.fullName} 
+                              onChange={(e) => handlePassengerChange(index, 'fullName', e.target.value)} 
+                              placeholder="VD: Nguyễn Văn A" 
+                              required 
+                            />
+                          </div>
+                          <div className="tc-form-group flex-1">
+                            <label>Giới tính</label>
+                            <select 
+                              value={passenger.gender} 
+                              onChange={(e) => handlePassengerChange(index, 'gender', e.target.value as any)}
+                            >
+                              <option value="male">Nam</option>
+                              <option value="female">Nữ</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div className="tc-passenger-row">
+                          <div className="tc-form-group flex-1">
+                            <label>Ngày sinh *</label>
+                            <input 
+                              type="date" 
+                              value={passenger.birthDate} 
+                              onChange={(e) => handlePassengerChange(index, 'birthDate', e.target.value)} 
+                              required 
+                            />
+                          </div>
+                          <div className="tc-form-group flex-1">
+                            <label>Số điện thoại</label>
+                            <input 
+                              type="tel" 
+                              value={passenger.phone} 
+                              onChange={(e) => handlePassengerChange(index, 'phone', e.target.value)} 
+                              placeholder="Bỏ trống nếu là trẻ em"
+                            />
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    
-                    <div className="tc-passenger-row">
-                      <div className="tc-form-group flex-1">
-                        <label>Ngày sinh *</label>
-                        <input 
-                          type="date" 
-                          value={passenger.birthDate} 
-                          onChange={(e) => handlePassengerChange(index, 'birthDate', e.target.value)} 
-                          required 
-                        />
-                      </div>
-                      <div className="tc-form-group flex-1">
-                        <label>Số điện thoại</label>
-                        <input 
-                          type="tel" 
-                          value={passenger.phone} 
-                          onChange={(e) => handlePassengerChange(index, 'phone', e.target.value)} 
-                          placeholder="Bỏ trống nếu là trẻ em"
-                        />
-                      </div>
+                  ))}
+                </div>
+              </div>
+            </form>
+
+            <aside className="tc-booking-summary-section">
+              <div className="tc-summary-card">
+                <h2 className="tc-summary-title">Tóm tắt chuyến đi</h2>
+                <div className="tc-summary-tour-info">
+                  {tour.images && tour.images.length > 0 && (
+                    <img src={tour.images[0]} alt={tour.title} className="tc-summary-image" />
+                  )}
+                  <h3 className="tc-summary-tour-name">{tour.title}</h3>
+                </div>
+                <div className="tc-summary-details">
+                  <div className="tc-summary-row">
+                    <span className="icon">📍</span>
+                    <div className="info">
+                      <span className="label">Khởi hành từ</span>
+                      <span className="value">{tour.location}</span>
+                    </div>
+                  </div>
+                  <div className="tc-summary-row">
+                    <span className="icon">📅</span>
+                    <div className="info">
+                      <span className="label">Ngày khởi hành</span>
+                      <span className="value">{schedule ? formatDate(schedule.startDate) : 'Chưa chọn'}</span>
+                    </div>
+                  </div>
+                  <div className="tc-summary-row">
+                    <span className="icon">🕒</span>
+                    <div className="info">
+                      <span className="label">Thời gian</span>
+                      <span className="value">{tour.numDays} ngày {tour.numNights} đêm</span>
+                    </div>
+                  </div>
+                  <div className="tc-summary-row">
+                    <span className="icon">👥</span>
+                    <div className="info">
+                      <span className="label">Số hành khách</span>
+                      <span className="value">{participantCount} người</span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="tc-summary-price">
+                  <div className="tc-price-row">
+                    <span>Giá mỗi khách</span>
+                    <span>{pricePerPerson.toLocaleString()} đ</span>
+                  </div>
+                  <div className="tc-total-row">
+                    <span>Tổng cộng</span>
+                    <span className="tc-total-amount">{calculateTotal().toLocaleString()} đ</span>
+                  </div>
+                </div>
+                <button 
+                  className="tc-btn-checkout" 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Đang xử lý...' : 'Tiến hành thanh toán'}
+                </button>
+                <p className="tc-checkout-note">
+                  Bạn sẽ được chuyển hướng sang VNPAY để hoàn tất thanh toán an toàn.
+                </p>
+              </div>
+            </aside>
+          </>
+        )}
 
-        </form>
-
-        {/* Tóm tắt chuyến đi */}
-        <aside className="tc-booking-summary-section">
-          <div className="tc-summary-card">
-            <h2 className="tc-summary-title">Tóm tắt chuyến đi</h2>
-            <div className="tc-summary-tour-info">
-              {tour.images && tour.images.length > 0 && (
-                <img src={tour.images[0]} alt={tour.title} className="tc-summary-image" />
-              )}
-              <h3 className="tc-summary-tour-name">{tour.title}</h3>
-            </div>
-            
-            <div className="tc-summary-details">
-              <div className="tc-summary-row">
-                <span className="icon">📍</span>
-                <div className="info">
-                  <span className="label">Khởi hành từ</span>
-                  <span className="value">{tour.location}</span>
+        {currentStep === 1.5 && (
+          <div className="tc-payment-selection">
+            <h2 className="tc-selection-title">Chọn hình thức thanh toán</h2>
+            <p className="tc-selection-subtitle">Vui lòng chọn hình thức thanh toán phù hợp với bạn</p>
+            <div className="tc-payment-options">
+              <div className={`tc-payment-option-card ${paymentType === 'deposit' ? 'selected' : ''}`} onClick={() => { setPaymentType('deposit'); setShowConfirmModal(true); }}>
+                <div className="tc-option-header">
+                  <span className="tc-option-tag">Cọc trước</span>
+                  <h3 className="tc-option-name">Thanh toán trước 50%</h3>
                 </div>
+                <div className="tc-option-amount">{(calculateTotal() * 0.5).toLocaleString()} đ</div>
+                <p className="tc-option-desc">
+                  Thanh toán khoản còn lại trước ngày khởi hành 7 ngày (tour ngày thường), trước ngày khởi hành 15 ngày (tour lễ tết).
+                </p>
+                <div className="tc-option-check"></div>
               </div>
-              <div className="tc-summary-row">
-                <span className="icon">📅</span>
-                <div className="info">
-                  <span className="label">Ngày khởi hành</span>
-                  <span className="value">{schedule ? formatDate(schedule.startDate) : 'Chưa chọn'}</span>
+              <div className={`tc-payment-option-card ${paymentType === 'full' ? 'selected' : ''}`} onClick={() => { setPaymentType('full'); setShowConfirmModal(true); }}>
+                <div className="tc-option-header">
+                  <span className="tc-option-tag primary">Phổ biến</span>
+                  <h3 className="tc-option-name">Thanh toán 100%</h3>
                 </div>
-              </div>
-              <div className="tc-summary-row">
-                <span className="icon">🕒</span>
-                <div className="info">
-                  <span className="label">Thời gian</span>
-                  <span className="value">{tour.numDays} ngày {tour.numNights} đêm</span>
-                </div>
-              </div>
-              <div className="tc-summary-row">
-                <span className="icon">👥</span>
-                <div className="info">
-                  <span className="label">Số hành khách</span>
-                  <span className="value">{participantCount} người</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="tc-summary-price">
-              <div className="tc-price-row">
-                <span>Giá mỗi khách</span>
-                <span>{pricePerPerson.toLocaleString()} đ</span>
-              </div>
-              <div className="tc-total-row">
-                <span>Tổng cộng</span>
-                <span className="tc-total-amount">{calculateTotal().toLocaleString()} đ</span>
+                <div className="tc-option-amount">{calculateTotal().toLocaleString()} đ</div>
+                <p className="tc-option-desc">
+                  Thanh toán toàn bộ số tiền tour một lần duy nhất để giữ chỗ chắc chắn và không cần lo lắng về sau.
+                </p>
+                <div className="tc-option-check"></div>
               </div>
             </div>
-
-            <button 
-              className="tc-btn-checkout" 
-              onClick={handleSubmit} 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Đang xử lý...' : 'Tiến hành thanh toán'}
+            <button className="tc-btn-back" onClick={() => setCurrentStep(1)}>
+              ← Quay lại chỉnh sửa thông tin
             </button>
-            <p className="tc-checkout-note">
-              Bạn sẽ được chuyển hướng sang VNPAY để hoàn tất thanh toán an toàn.
-            </p>
           </div>
-        </aside>
-        </>
+        )}
+
+        {showConfirmModal && (
+          <div className="tc-modal-overlay">
+            <div className="tc-confirm-modal">
+              <div className="tc-modal-icon">⚠️</div>
+              <h3>Xác nhận lựa chọn</h3>
+              <p> Bạn đã chọn hình thức: <strong>{paymentType === 'deposit' ? 'Thanh toán trước 50%' : 'Thanh toán 100%'}</strong></p>
+              <p className="tc-modal-amount">Số tiền cần thanh toán ngay: <span>{(paymentType === 'deposit' ? calculateTotal() * 0.5 : calculateTotal()).toLocaleString()} đ</span></p>
+              <div className="tc-modal-actions">
+                <button className="tc-btn-cancel" onClick={() => setShowConfirmModal(false)}>Hủy bỏ</button>
+                <button className="tc-btn-confirm" onClick={proceedToPayment}>Xác nhận & Thanh toán</button>
+              </div>
+            </div>
+          </div>
         )}
 
         {currentStep === 2 && (

@@ -580,145 +580,40 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 
 ## 18. One-Line Truth
 
-**Sprint 14 đang triển khai (Final QA & Polish). Đã tối ưu hóa Performance & UI cho Tour Detail. Tiến độ dự án: 97%.**
+**Sprint 14 đang triển khai (Final QA & Polish). Đã hoàn thiện toàn bộ luồng Đặt Tour, Thanh toán VNPAY & Quản lý giao dịch. Tiến độ dự án: 99.5%.**
 ---
 
-### 23. Session Update (2026-04-22) - Sprint 13 Finalized & Sprint 14 UI Polish
+### 28. Session Update (2026-04-29) - Overhauling Transaction History & Payment Management
 
 #### Sprint
 - Sprint hiện tại: Sprint 14
 - Giai đoạn: Final — Đóng gói & Bảo vệ
-- Session focus: Đóng sổ Sprint 13, bắt đầu Sprint 14 (Rà soát UI & Labels)
-- Chosen subtask: Lane 18.1 – Rà soát giao diện và nhãn hiển thị cho sự chỉn chu
+- Session focus: User Transaction Management & UI Modernization.
+- Chosen subtask: Thiết lập các tab quản lý thanh toán, modal chi tiết và tính năng Hủy/Tiếp tục giao dịch.
 
 #### Done
-- [x] Đóng sổ Sprint 13 (AI, Payment, Accommodation, Recommendation).
-- [x] Cập nhật UML Activity Diagrams cho 4 luồng mở rộng vào `SPRINT_13_VNPAY.md`.
-- [x] Fix toàn bộ lỗi runtime map/TypeError gây trắng màn hình.
-- [x] Xác nhận hệ thống đạt 100% chức năng nghiệp vụ theo Spec v3.
-- [x] Thực hiện đợt rà soát UI "Polish" đầu tiên (Header, Home, Companion list).
+- [x] Triển khai hệ thống 3 tab lọc (**Tất cả | Đã thanh toán | Hủy**) cho lịch sử giao dịch.
+- [x] Thiết kế **Transaction Detail Modal** hỗ trợ xem chi tiết và điều hướng sang trang Tour.
+- [x] Thêm tính năng **Hủy giao dịch** (`POST /payments/:id/cancel`) cho trạng thái `pending`.
+- [x] Hỗ trợ **Tiếp tục thanh toán** bằng cách tạo lại URL VNPAY cho các yêu cầu chưa hoàn tất.
+- [x] Nâng cấp UI/UX trang `/user/payments` theo chuẩn Premium.
 
 #### Files Changed
-- `SESSION_SPRINT/SPRINT_13_VNPAY.md`
-- `SESSION_SPRINT/PROJECT_STATUS.md`
-- `SESSION_SPRINT/PROJECT_TASK.md`
-- `frontend/src/components/public/PublicHeader.tsx`
-- `frontend/src/pages/public/HomePage.tsx`
-- `frontend/src/pages/public/TourDetailPage.tsx`
-- `frontend/src/pages/public/CompanionListPage.tsx`
+- `backend/src/payments/payments.service.ts`
+- `backend/src/payments/payments.controller.ts`
+- `frontend/src/services/paymentService.ts`
+- `frontend/src/pages/user/TransactionHistoryPage.tsx`
+- `frontend/src/pages/user/TransactionHistoryPage.css`
 
 #### Tested
-- Kiểm tra tính nhất quán của nhãn tiếng Việt trên Header, Footer, Trang chủ.
-- Xác nhận nút "Thanh toán" tại trang Chi tiết Tour đã hoạt động đúng logic.
+- Xác nhận luồng Hủy -> Cập nhật DB -> Giao diện phản hồi đúng.
+- Xác nhận điều hướng Tour từ Modal và Tiếp tục thanh toán mở VNPAY thành công.
 
 #### Result
-- [x] Sprint 13: DONE
-- [~] Sprint 14: IN PROGRESS
+- [x] Xong hoàn toàn subtask.
 
 #### Blockers / Risks
 - Không có.
 
 #### Suggested Next Single Step
-- **Lane 18.2 (Demo Data Enrichment)**: Thực hiện Seed bộ dữ liệu "Premium" (Tour chi tiết, Review thực tế, Lịch sử Chat AI mẫu).
-
-#### Files Changed
-- `SESSION_SPRINT/PROJECT_STATUS.md`
-- `SESSION_SPRINT/PROJECT_TASK.md`
-- `SESSION_SPRINT/SPRINT_13_VNPAY.md`
-
-- Toàn bộ luồng nghiệp vụ từ Guest -> User -> Guide -> Admin đã được rà soát sơ bộ.
-- AI Chat và VNPAY Sandbox hoạt động ổn định.
-
-#### Result
-- [x] SPRINT 14: Final QA, Demo Data & Documentation (100% - DONE)
-    - [x] Đã thực hiện rà soát UI Polish toàn diện (Việt hóa, cập nhật ảnh chất lượng).
-    - [x] Đã hoàn thành bộ dữ liệu Seed "Premium" (Tour chi tiết, Review thực tế, Lịch sử Chat AI).
-    - [x] Đã cập nhật UML (Activity, Sequence) và hoàn thiện Báo cáo tổng kết/Slide thuyết trình.
-    - [x] Hệ thống sẵn sàng cho buổi bảo vệ đồ án.
-
----
-
-
----
-
-### 24. Session Update (2026-04-28) - Fix Recommendation Loading Bug
-
-#### Sprint
-- Sprint hiện tại: Sprint 14
-- Giai đoạn: Final — Đóng gói & Bảo vệ
-- Session focus: Sửa lỗi hiển thị tour gợi ý không xuất hiện ngay sau khi login/reload.
-- Chosen subtask: Refactor `useEffect` dependencies trong `HomePage.tsx`.
-
-#### Done
-- [x] Sửa lỗi logic `useEffect` trong `HomePage.tsx` (tách fetch public data và user data).
-- [x] Giải thích cơ chế Session Persistence của dự án (Supabase LocalStorage).
-- [x] Xác nhận mục "Gợi ý dành riêng cho bạn" sẽ tải tự động ngay khi Auth session phục hồi.
-
-#### Files Changed
-- `frontend/src/pages/public/HomePage.tsx`
-- `SESSION_SPRINT/SESSION_LOG.md`
-- `SESSION_SPRINT/PROJECT_STATUS.md`
-- `SESSION_SPRINT/PROJECT_TASK.md`
-
-#### Result
-- [x] Hoàn thành subtask sửa lỗi.
-
-#### Suggested Next Single Step
-- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất cho buổi trình bày.
-
----
-
-### 25. Session Update (2026-04-28) - QA Role Testing & Access Control
-
-#### Sprint
-- Sprint hiện tại: Sprint 14
-- Giai đoạn: Final — Đóng gói & Bảo vệ
-- Session focus: Kiểm thử phân quyền và sửa lỗi logic Router.
-
-#### Done
-- [x] Sửa lỗi Role code `ADMIN` -> `SYSTEM_ADMIN` trong `index.tsx`.
-- [x] Kiểm thử vai trò Khách (Guest): Redirect về Login thành công.
-- [x] Kiểm thử vai trò Người dùng (User): Truy cập Profile OK, bị chặn vào Admin/Guide.
-- [x] Kiểm thử vai trò Hướng dẫn viên (Guide): Truy cập Guide area OK, bị chặn vào Admin.
-- [x] Kiểm thử vai trò Quản trị viên (Admin/Staff): Truy cập các vùng quản trị và guide area thành công.
-- [x] Xác nhận trang 403 (Forbidden) hoạt động đúng thiết kế.
-
-#### Files Changed
-- `frontend/src/routes/index.tsx`
-- `SESSION_SPRINT/SESSION_LOG.md`
-- `SESSION_SPRINT/PROJECT_STATUS.md`
-- `SESSION_SPRINT/PROJECT_TASK.md`
-
-#### Result
-- [x] Lane 18.1 (QA) hoàn tất 100%.
-
-#### Suggested Next Single Step
-- **Lane 18.2 (Demo Data)**: Nâng cấp dữ liệu demo Premium.
-
----
-
-### 26. Session Update (2026-04-29) - Modernizing Tour Detail & Performance Optimization
-
-#### Sprint
-- Sprint hiện tại: Sprint 14
-- Giai đoạn: Final — Đóng gói & Bảo vệ
-- Session focus: Tour Detail Modernization & Perceived Performance.
-
-#### Done
-- [x] Triển khai Skeleton Loading & Lazy Load (Combo Frontend Performance).
-- [x] Refactor Lịch trình sang dạng Accordion và đưa vào tab Tổng quan.
-- [x] Tối ưu hóa Parallel Data Fetching (`Promise.all`).
-- [x] Thêm nút "Xem vị trí" và Auto-date selection.
-- [x] Đồng bộ kích thước Calendar sidebar (110px).
-
-#### Files Changed
-- `frontend/src/pages/public/TourDetailPage.tsx`
-- `frontend/src/pages/public/TourDetailPage.css`
-- `frontend/src/components/tour/TourCalendar/TourCalendar.css`
-- `frontend/src/pages/guide/tabs/GuideTourCalendar.css`
-
-#### Result
-- [x] Xong hoàn toàn subtask tối ưu Tour Detail.
-
-#### Suggested Next Single Step
-- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất.
+- **Lane 18.3 (Documentation)**: Cập nhật các sơ đồ UML (Sequence, Activity) cho luồng thanh toán và quản lý giao dịch vào báo cáo cuối cùng.

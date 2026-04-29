@@ -14,7 +14,9 @@ export interface TourRequest {
   cancellationNote?: string;
   requestedAt: string;
   processedAt?: string;
+  paymentStatus?: string;
   tourPrice?: number;
+  totalPrice?: number;
   hasTourReview?: boolean;
   hasGuideReview?: boolean;
 }

@@ -121,6 +121,20 @@ export const GuideRequestsPage: React.FC = () => {
       render: (record: TourRequest) => getStatusBadge(record.status),
     },
     {
+      title: 'Thanh toán',
+      key: 'paymentStatus',
+      render: (record: TourRequest) => (
+        <span style={{ 
+          fontSize: 'var(--tc-font-size-sm)', 
+          fontWeight: 500,
+          color: record.paymentStatus?.includes('100%') ? 'var(--tc-success)' : 
+                 record.paymentStatus?.includes('50%') ? 'var(--tc-primary)' : 'var(--tc-gray-600)'
+        }}>
+          {record.paymentStatus || 'Chưa thanh toán'}
+        </span>
+      )
+    },
+    {
       title: 'Thao tác',
       key: 'actions',
       render: (record: TourRequest) => (
@@ -231,6 +245,18 @@ export const GuideRequestsPage: React.FC = () => {
             <div className="detail-row">
               <span className="detail-label">Trạng thái:</span>
               <span className="detail-value">{getStatusBadge(selectedRequest.status)}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Thanh toán:</span>
+              <span className="detail-value" style={{ fontWeight: 600, color: 'var(--tc-primary)' }}>
+                {selectedRequest.paymentStatus || 'Chưa thanh toán'}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Tổng giá trị:</span>
+              <span className="detail-value" style={{ fontWeight: 600 }}>
+                {selectedRequest.totalPrice?.toLocaleString()} đ
+              </span>
             </div>
             {selectedRequest.note && (
               <div className="detail-section">

@@ -4882,3 +4882,85 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 ### Quick Handoff
 - Tour Detail đã đạt chuẩn Premium cả về Performance và UI.
 - Next: Tập trung vào dữ liệu demo chất lượng cao.
+
+### 22. Session Update (2026-04-29) - Premium Tour Booking Flow & VNPAY Popup Integration
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Handoff & Completion of Tour Booking Experience.
+- Chosen subtask: Xây dựng luồng đặt tour đa bước và tích hợp thanh toán VNPAY dạng Popup.
+
+### Done
+- [x] Triển khai **TourBookingPage** đa bước (1. Thông tin -> 2. Thanh toán -> 3. Hoàn thành).
+- [x] Form hành khách **năng động**: Tự sinh các trường Họ tên, Giới tính, Ngày sinh, SĐT dựa trên số lượng khách.
+- [x] Tích hợp **VNPAY Popup**: Mở cửa sổ nhỏ đồng bộ để tránh bị trình duyệt chặn (Pop-up Blocker).
+- [x] **Cross-window Messaging**: Dùng `window.postMessage` để báo cáo kết quả thanh toán từ Popup về trang gốc.
+- [x] **Fix Backend IPN logic**: Sửa lỗi `hasOwnProperty` (prototype-less objects) và đồng bộ chữ ký Checksum.
+- [x] Giao diện hoàn tất đặt tour cao cấp với 2 lựa chọn: Xem đơn hàng hoặc Xem lịch sử thanh toán.
+- [x] Cập nhật tài liệu `README.md` với thông tin thẻ test VNPAY.
+- [x] Đã push toàn bộ code lên GitHub.
+
+### Files Changed
+- `frontend/src/pages/public/TourBookingPage.tsx`
+- `frontend/src/pages/public/TourBookingPage.css`
+- `frontend/src/pages/user/VnpayReturnPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/routes/index.tsx`
+- `backend/src/payments/payments.service.ts`
+- `README.md`
+- `Note.md`
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất cho buổi báo cáo.
+
+=============================================================================================
+
+## Session 23 2026-04-29 - Overhauling Transaction History & Payment Management
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: User Transaction Management & UI Modernization.
+- Chosen subtask: Thiết lập các tab quản lý thanh toán, modal chi tiết và tính năng Hủy/Tiếp tục giao dịch.
+
+### Done
+- **Backend (PaymentsModule)**:
+    - Triển khai API `cancelTransaction` (`POST /payments/:id/cancel`) để cập nhật trạng thái `cancelled` cho giao dịch `pending`.
+    - Kiểm tra quyền sở hữu (`userId`) nghiêm ngặt trước khi cho phép hủy.
+- **Frontend (Services)**:
+    - Cập nhật `paymentService.ts` thêm phương thức `cancelTransaction`.
+- **Frontend (UI/UX - Transaction History)**:
+    - Triển khai hệ thống 3 tab lọc: **Tất cả**, **Đã thanh toán**, **Hủy/Lỗi** tại `/user/payments`.
+    - Thiết kế **Transaction Detail Modal** hiển thị chi tiết thông tin thanh toán, mã VNPAY, thời gian và số tiền.
+    - Tích hợp tính năng **Hủy giao dịch** (cập nhật trạng thái) và **Tiếp tục thanh toán** (tạo URL VNPAY mới) cho các bản ghi `pending`.
+    - Thêm liên kết điều hướng từ tên Tour trong modal tới trang chi tiết Tour (`/tours/:id`).
+    - Nâng cấp toàn diện CSS theo phong cách OTA premium (Gradients, animations, bo góc 20px).
+
+### Files Changed
+- `backend/src/payments/payments.service.ts`
+- `backend/src/payments/payments.controller.ts`
+- `frontend/src/services/paymentService.ts`
+- `frontend/src/pages/user/TransactionHistoryPage.tsx`
+- `frontend/src/pages/user/TransactionHistoryPage.css`
+
+### Skills / Guides Used
+- `api-design`, `backend-patterns`, `frontend-design`, `ux-best-practices`.
+
+### Tested / Verified
+- [x] Lọc giao dịch theo trạng thái hoạt động chính xác.
+- [x] Modal hiển thị đúng thông tin khi click vào dòng.
+- [x] Tính năng Hủy giao dịch cập nhật DB và giao diện ngay lập tức.
+- [x] Link tour trong modal điều hướng đúng trang chi tiết.
+- [x] Nút Tiếp tục thanh toán mở đúng cổng VNPAY.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.3 (Documentation)**: Cập nhật các sơ đồ UML (Sequence, Activity) cho luồng thanh toán và quản lý giao dịch vào báo cáo cuối cùng.

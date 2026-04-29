@@ -161,6 +161,20 @@ export const MyTourRequestsPage: React.FC = () => {
       render: (record: TourRequest) => getStatusBadge(record.status),
     },
     {
+      title: 'Thanh toán',
+      key: 'paymentStatus',
+      render: (record: TourRequest) => (
+        <span style={{ 
+          fontSize: 'var(--tc-font-size-sm)', 
+          fontWeight: 600,
+          color: record.paymentStatus?.includes('100%') ? 'var(--tc-success)' : 
+                 record.paymentStatus?.includes('50%') ? 'var(--tc-primary)' : 'var(--tc-gray-600)'
+        }}>
+          {record.paymentStatus || 'Chưa thanh toán'}
+        </span>
+      )
+    },
+    {
       title: 'Thao tác',
       key: 'actions',
       render: (record: TourRequest) => (

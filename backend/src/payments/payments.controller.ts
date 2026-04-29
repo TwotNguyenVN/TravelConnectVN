@@ -11,7 +11,8 @@ export class PaymentsController {
   @Post('create-vnpay-url')
   async createPaymentUrl(
     @Req() req: Request,
-    @Body('tourRequestId') tourRequestId: string
+    @Body('tourRequestId') tourRequestId: string,
+    @Body('paymentType') paymentType: 'full' | 'deposit' = 'full'
   ) {
     const userId = (req as any).user.id;
     // VNPAY cần IP Address của user thực hiện thanh toán
@@ -19,7 +20,7 @@ export class PaymentsController {
                    req.socket.remoteAddress || 
                    '127.0.0.1';
 
-    const data = await this.paymentsService.createPaymentUrl(userId, tourRequestId, ipAddr as string);
+    const data = await this.paymentsService.createPaymentUrl(userId, tourRequestId, ipAddr as string, paymentType);
     return {
       success: true,
       message: 'Tạo URL thanh toán thành công',
@@ -54,6 +55,17 @@ export class PaymentsController {
     return {
       success: true,
       message: 'Lấy chi tiết giao dịch thành công',
+      data: data,
+    };
+  }
+  @UseGuards(AuthGuard)
+  @Post(':id/cancel')
+  async cancelTransaction(@Req() req: Request, @Param('id') id: string) {
+    const userId = (req as any).user.id;
+    const data = await this.paymentsService.cancelTransaction(userId, id);
+    return {
+      success: true,
+      message: 'Hủy giao dịch thành công',
       data: data,
     };
   }
