@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
@@ -7,12 +7,11 @@ import type { Tour } from '../../services/tourService';
 import { LoadingBlock, EmptyState } from '../../components/common';
 import './TourListPage.css';
 
-const provinces = [
-  "An Giang", "Bà Rịa - Vũng Tàu", "Bắc Giang", "Bắc Kạn", "Bạc Liêu", "Bắc Ninh", "Bến Tre", "Bình Định", "Bình Dương", "Bình Phước", "Bình Thuận", "Cà Mau", "Cao Bằng", "Cần Thơ", "Đà Nẵng", "Đắk Lắk", "Đắk Nông", "Điện Biên", "Đồng Nai", "Đồng Tháp", "Gia Lai", "Hà Giang", "Hà Nam", "Hà Nội", "Hà Tĩnh", "Hải Dương", "Hải Phòng", "Hậu Giang", "Hòa Bình", "Hồ Chí Minh", "Hưng Yên", "Khánh Hòa", "Kiên Giang", "Kon Tum", "Lai Châu", "Lâm Đồng", "Lạng Sơn", "Lào Cai", "Long An", "Nam Định", "Nghệ An", "Ninh Bình", "Ninh Thuận", "Phú Thọ", "Phú Yên", "Quảng Bình", "Quảng Nam", "Quảng Ngãi", "Quảng Ninh", "Quảng Trị", "Sóc Trăng", "Sơn La", "Tây Ninh", "Thái Bình", "Thái Nguyên", "Thanh Hóa", "Thừa Thiên Huế", "Tiền Giang", "Trà Vinh", "Tuyên Quang", "Vĩnh Long", "Vĩnh Phúc", "Yên Bái"
-];
+import { provinces } from '../../constants/provinces';
 
 export const TourListPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,17 +19,24 @@ export const TourListPage: React.FC = () => {
     page: 1,
     limit: 10,
     sortBy: 'newest',
-    province: '',
+    province: searchParams.get('province') || '',
     categoryId: '',
-    minPrice: 0,
-    maxPrice: 10000000
+    minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0,
+    maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 100000000,
+    startDate: searchParams.get('startDate') || ''
   });
 
   const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [locationSearch, setLocationSearch] = useState('');
+  const [locationSearch, setLocationSearch] = useState(searchParams.get('province') || '');
+  const [startDateSearch, setStartDateSearch] = useState(searchParams.get('startDate') || '');
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
   const [sortBy, setSortBy] = useState('newest');
+
+  // Price range state
+  const [minPrice, setMinPrice] = useState<number>(searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0);
+  const [maxPrice, setMaxPrice] = useState<number>(searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 100000000);
+  const minGap = 500000; // Minimum gap between min and max
 
   const filteredProvinces = provinces.filter((p) =>
     p.toLowerCase().includes(locationSearch.toLowerCase())
@@ -54,15 +60,17 @@ export const TourListPage: React.FC = () => {
       categoryId: selectedCategories.join(','),
       minPrice,
       maxPrice,
+      startDate: startDateSearch,
       sortBy
     });
   };
 
   const handleClearFilters = () => {
     setLocationSearch('');
+    setStartDateSearch('');
     setSelectedCategories([]);
     setMinPrice(0);
-    setMaxPrice(10000000);
+    setMaxPrice(100000000);
     setFilters({
       page: 1,
       limit: 10,
@@ -70,8 +78,10 @@ export const TourListPage: React.FC = () => {
       province: '',
       categoryId: '',
       minPrice: 0,
-      maxPrice: 10000000
+      maxPrice: 100000000,
+      startDate: ''
     });
+    navigate('/tours');
   };
 
   useEffect(() => {
@@ -89,10 +99,7 @@ export const TourListPage: React.FC = () => {
   }, []);
 
 
-  // Price range state
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(10000000);
-  const minGap = 500000; // Minimum gap between min and max
+  // Price range state is already initialized above
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value, 10);
@@ -126,6 +133,26 @@ export const TourListPage: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const province = searchParams.get('province') || '';
+    const minP = searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : 0;
+    const maxP = searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 100000000;
+    const sDate = searchParams.get('startDate') || '';
+    
+    setLocationSearch(province);
+    setStartDateSearch(sDate);
+    setMinPrice(minP);
+    setMaxPrice(maxP);
+    
+    setFilters(prev => ({
+      ...prev,
+      province,
+      minPrice: minP,
+      maxPrice: maxP,
+      startDate: sDate
+    }));
+  }, [searchParams]);
 
   useEffect(() => {
     fetchTours();
@@ -207,6 +234,16 @@ export const TourListPage: React.FC = () => {
           </div>
 
           <div style={{ marginBottom: 'var(--tc-spacing-4)' }}>
+            <h3 style={{ fontSize: 'var(--tc-font-size-sm)', marginBottom: 'var(--tc-spacing-2)' }}>Ngày bắt đầu</h3>
+            <input 
+              type="date" 
+              value={startDateSearch}
+              onChange={(e) => setStartDateSearch(e.target.value)}
+              style={{ width: '100%', padding: 'var(--tc-spacing-2)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)', outline: 'none', cursor: 'pointer' }}
+            />
+          </div>
+
+          <div style={{ marginBottom: 'var(--tc-spacing-4)' }}>
             <h3 style={{ fontSize: 'var(--tc-font-size-sm)', marginBottom: 'var(--tc-spacing-2)' }}>Loại Tour</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-1)' }}>
               {categories.map(cat => (
@@ -232,25 +269,25 @@ export const TourListPage: React.FC = () => {
               <div style={{ 
                 position: 'absolute', top: 0, bottom: 0, 
                 backgroundColor: 'var(--tc-primary)', borderRadius: '3px',
-                left: `${(minPrice / 10000000) * 100}%`,
-                right: `${100 - (maxPrice / 10000000) * 100}%`
+                left: `${(minPrice / 100000000) * 100}%`,
+                right: `${100 - (maxPrice / 100000000) * 100}%`
               }}></div>
               
               <input 
                 type="range" 
                 min="0" 
-                max="10000000" 
-                step="100000"
+                max="100000000" 
+                step="500000"
                 value={minPrice} 
                 onChange={handleMinChange}
                 className="tc-range-slider"
-                style={{ zIndex: minPrice > 5000000 ? 5 : 3 }}
+                style={{ zIndex: minPrice > 50000000 ? 5 : 3 }}
               />
               <input 
                 type="range" 
                 min="0" 
-                max="10000000" 
-                step="100000"
+                max="100000000" 
+                step="500000"
                 value={maxPrice} 
                 onChange={handleMaxChange}
                 className="tc-range-slider"
@@ -259,7 +296,7 @@ export const TourListPage: React.FC = () => {
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>
               <span>{minPrice === 0 ? '0đ' : `${(minPrice / 1000000).toFixed(1).replace('.0', '')}tr`}</span>
-              <span>{maxPrice >= 10000000 ? '10tr+' : `${(maxPrice / 1000000).toFixed(1).replace('.0', '')}tr`}</span>
+              <span>{maxPrice >= 100000000 ? '100tr+' : `${(maxPrice / 1000000).toFixed(1).replace('.0', '')}tr`}</span>
             </div>
           </div>
 

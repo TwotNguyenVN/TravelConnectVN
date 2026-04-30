@@ -25,6 +25,7 @@ export interface TourFilters {
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
+  startDate?: string;
   sortBy?: string;
   page?: number;
   limit?: number;

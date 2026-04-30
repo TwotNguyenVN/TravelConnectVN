@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/common/Button/Button';
 import { Card } from '../../components/common/Card/Card';
-import { tourService } from '../../services/tourService';
+import { provinces } from '../../constants/provinces';
 import { getRecommendedTours } from '../../services/recommendationService';
 import type { Tour } from '../../services/tourService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -244,6 +244,64 @@ export const HomePage: React.FC = () => {
     return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_toi.png";
   };
 
+  const [isBudgetOpen, setIsBudgetOpen] = useState(false);
+  const [showLocationSuggestions, setShowLocationSuggestions] = useState(false);
+  const [location, setLocation] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [minBudget, setMinBudget] = useState(0);
+  const [maxBudget, setMaxBudget] = useState(100000000);
+  const minGap = 500000;
+  const budgetRef = useRef<HTMLDivElement>(null);
+  const locationRef = useRef<HTMLDivElement>(null);
+
+  const filteredProvinces = provinces.filter(p => 
+    p.toLowerCase().includes(location.toLowerCase())
+  );
+
+  const handleSearch = () => {
+    const params = new URLSearchParams();
+    if (location) params.set('province', location);
+    if (startDate) params.set('startDate', startDate);
+    
+    params.set('minPrice', minBudget.toString());
+    params.set('maxPrice', maxBudget.toString());
+    
+    navigate(`/tours?${params.toString()}`);
+  };
+
+  const handleMinBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (maxBudget - value >= minGap) {
+      setMinBudget(value);
+    }
+  };
+
+  const handleMaxBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    if (value - minBudget >= minGap) {
+      setMaxBudget(value);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    if (price === 0) return '0đ';
+    if (price >= 100000000) return '100tr+';
+    return `${(price / 1000000).toFixed(1).replace('.0', '')}tr`;
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (budgetRef.current && !budgetRef.current.contains(event.target as Node)) {
+        setIsBudgetOpen(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target as Node)) {
+        setShowLocationSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   useEffect(() => {
     const fetchPublicData = async () => {
       try {
@@ -329,11 +387,175 @@ export const HomePage: React.FC = () => {
           maxWidth: '850px',
           flexWrap: 'wrap'
         }}>
-          <input type="text" placeholder="Bạn muốn đi đâu?" style={{ flex: 1, minWidth: '200px', padding: 'var(--tc-spacing-3) var(--tc-spacing-4)', border: 'none', borderRadius: 'var(--tc-radius-md)', backgroundColor: '#ffffff', fontSize: 'var(--tc-font-size-md)', outline: 'none' }} />
-          <input type="date" style={{ padding: 'var(--tc-spacing-3) var(--tc-spacing-4)', border: 'none', borderRadius: 'var(--tc-radius-md)', backgroundColor: '#ffffff', fontSize: 'var(--tc-font-size-md)', outline: 'none' }} />
-          <Button variant="primary" style={{ padding: '0 var(--tc-spacing-6)', fontWeight: 600 }}>Tìm kiếm Tour</Button>
-          <Button variant="outline" onClick={() => navigate('/user/ai-assistant')} style={{ border: 'none', backgroundColor: 'rgba(255, 255, 255, 0.9)', color: 'var(--tc-primary)', fontWeight: 600, padding: '0 var(--tc-spacing-6)' }}>
-            ✨ Hỏi trợ lý AI
+          <div ref={locationRef} style={{ flex: 1.5, position: 'relative' }}>
+            <input 
+              type="text" 
+              placeholder="Bạn muốn đi đâu?" 
+              value={location}
+              onChange={(e) => {
+                setLocation(e.target.value);
+                setShowLocationSuggestions(true);
+              }}
+              onFocus={() => setShowLocationSuggestions(true)}
+              style={{ width: '100%', height: '48px', padding: '0 var(--tc-spacing-4)', border: 'none', borderRadius: 'var(--tc-radius-md)', backgroundColor: '#ffffff', fontSize: 'var(--tc-font-size-md)', outline: 'none', color: '#1a1a1a' }} 
+            />
+            {showLocationSuggestions && location && filteredProvinces.length > 0 && (
+              <div style={{
+                position: 'absolute',
+                top: 'calc(100% + 10px)',
+                left: 0,
+                right: 0,
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                zIndex: 100,
+                maxHeight: '300px',
+                overflowY: 'auto',
+                padding: '8px'
+              }}>
+                {filteredProvinces.map(p => (
+                  <div 
+                    key={p}
+                    onClick={() => {
+                      setLocation(p);
+                      setShowLocationSuggestions(false);
+                    }}
+                    style={{
+                      padding: '12px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontSize: '14px',
+                      fontWeight: 500,
+                      color: '#1a1a1a',
+                      transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    {p}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ flex: 1, height: '48px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: '0 var(--tc-spacing-4)', backgroundColor: '#ffffff', borderRadius: 'var(--tc-radius-md)' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '0', textTransform: 'uppercase' }}>Ngày đi</span>
+            <input 
+              type="date" 
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              style={{ width: '100%', padding: '0', border: 'none', backgroundColor: 'transparent', color: '#1a1a1a', fontSize: '15px', outline: 'none', fontWeight: 600, cursor: 'pointer' }} 
+            />
+          </div>
+
+          <div ref={budgetRef} style={{ flex: 1, height: '48px', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', padding: '0 var(--tc-spacing-4)', backgroundColor: '#ffffff', borderRadius: 'var(--tc-radius-md)', cursor: 'pointer' }} onClick={() => setIsBudgetOpen(!isBudgetOpen)}>
+            <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '0', textTransform: 'uppercase' }}>Ngân sách</span>
+            <span style={{ color: '#1a1a1a', fontSize: '15px', fontWeight: 600 }}>{formatPrice(minBudget)} - {formatPrice(maxBudget)}</span>
+            
+            {isBudgetOpen && (
+              <div 
+                onClick={(e) => e.stopPropagation()}
+                style={{ 
+                  position: 'absolute', 
+                  top: 'calc(100% + 12px)', 
+                  left: 'calc(50% - 160px)', 
+                  backgroundColor: 'white', 
+                  borderRadius: '24px', 
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.25)', 
+                  padding: '30px 24px', 
+                  zIndex: 1000,
+                  width: '320px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '24px',
+                  cursor: 'default',
+                  border: '1px solid rgba(0,0,0,0.06)',
+                  boxSizing: 'border-box',
+                  overflowX: 'hidden'
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '15px', fontWeight: 800, color: '#1a1a1a', letterSpacing: '-0.2px' }}>Khoảng giá</span>
+                  <span style={{ fontSize: '14px', fontWeight: 700, color: 'var(--tc-primary)', backgroundColor: '#f0f7ff', padding: '6px 12px', borderRadius: '10px' }}>
+                    {formatPrice(minBudget)} - {formatPrice(maxBudget)}
+                  </span>
+                </div>
+
+                <div style={{ 
+                  position: 'relative', 
+                  height: '6px', 
+                  margin: '20px 10px', 
+                  width: '252px', 
+                  backgroundColor: '#f1f5f9', 
+                  borderRadius: '4px' 
+                }}>
+                  <div style={{ 
+                    position: 'absolute', top: 0, bottom: 0, 
+                    backgroundColor: 'var(--tc-primary)', borderRadius: '4px',
+                    left: `${(minBudget / 100000000) * 100}%`,
+                    right: `${100 - (maxBudget / 100000000) * 100}%`
+                  }}></div>
+                  
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100000000" 
+                    step="500000"
+                    value={minBudget} 
+                    onChange={handleMinBudgetChange}
+                    className="tc-range-slider"
+                    style={{ zIndex: minBudget > 50000000 ? 1002 : 1000, width: '252px', margin: 0, padding: 0, left: 0 }}
+                  />
+                  <input 
+                    type="range" 
+                    min="0" 
+                    max="100000000" 
+                    step="500000"
+                    value={maxBudget} 
+                    onChange={handleMaxBudgetChange}
+                    className="tc-range-slider"
+                    style={{ zIndex: 1001, width: '252px', margin: 0, padding: 0, left: 0 }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#94a3b8', fontWeight: 700, padding: '0 10px' }}>
+                  <span>0đ</span>
+                  <span>100tr+</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <Button 
+            variant="primary" 
+            onClick={handleSearch}
+            style={{ height: '48px', padding: '0 var(--tc-spacing-6)', fontWeight: 800, borderRadius: 'var(--tc-radius-md)', boxShadow: '0 4px 12px rgba(0, 108, 228, 0.2)' }}
+          >
+            Tìm kiếm
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/user/ai-assistant')} 
+            style={{ 
+              width: '48px',
+              height: '48px',
+              minWidth: '48px',
+              padding: 0,
+              border: 'none', 
+              backgroundColor: '#ffffff', 
+              color: 'var(--tc-primary)', 
+              fontWeight: 800,
+              fontSize: '20px',
+              borderRadius: 'var(--tc-radius-md)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+            }}
+            title="Hỏi trợ lý AI"
+          >
+            ✨
           </Button>
         </div>
       </section>

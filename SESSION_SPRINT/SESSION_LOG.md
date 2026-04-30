@@ -4964,3 +4964,63 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ### Suggested Next Single Step
 - **Lane 18.3 (Documentation)**: Cập nhật các sơ đồ UML (Sequence, Activity) cho luồng thanh toán và quản lý giao dịch vào báo cáo cuối cùng.
+
+=============================================================================================
+
+## Session 24 2026-04-30 - Perfecting Search Experience & Budget Filtering
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Final — Đóng gói & Bảo vệ
+- Session focus: Refining search bar, dual-range budget slider, and location autocomplete.
+- Chosen subtask: Nâng cấp thanh tìm kiếm với gợi ý địa điểm và bộ lọc ngân sách cao cấp.
+
+### Context checked
+- [x] Đã đọc TRAVEL_PROJECT_MASTER_SPEC_v3_FINAL.md
+- [x] Đã đọc PROJECT_STATUS.md
+- [x] Đã đọc PROJECT_TASK.md
+- [x] Đã đọc SPRINT_14.md
+
+### Done
+- [x] Triển khai **Dual-Range Budget Slider** (0đ - 100tr+) đồng bộ giữa Trang chủ và Trang danh sách tour.
+- [x] Khắc phục triệt để lỗi hiển thị (overflow) của thanh trượt bằng cách sử dụng calc() và chiều rộng cố định (strict width).
+- [x] Triển khai **Location Autocomplete**: Tự động gợi ý tỉnh thành Việt Nam khi người dùng nhập vào ô địa điểm.
+- [x] Tách danh sách tỉnh thành (63 tỉnh thành) ra file constant dùng chung (provinces.ts).
+- [x] Đồng bộ hóa tham số tìm kiếm (minPrice, maxPrice, province) khi chuyển trang từ Home sang Tour List.
+- [x] Cập nhật UI nút "Hỏi trợ lý AI" về tỷ lệ 1:1 (48x48px).
+
+### Files Changed
+- frontend/src/pages/public/HomePage.tsx
+- frontend/src/pages/public/TourListPage.tsx
+- frontend/src/constants/provinces.ts
+- frontend/src/index.css
+
+### Skills / Guides Used
+- api-design, frontend-design, ux-best-practices.
+
+### UI Style Rules Applied
+- Sử dụng Design Tokens cho màu sắc và spacing.
+- Áp dụng hiệu ứng hover và shadow cao cấp cho các dropdown.
+- Đảm bảo tính đáp ứng (responsive) cho thanh tìm kiếm.
+
+### Schema / Migration / Seed Notes
+- Không áp dụng vì phiên này không đụng database.
+
+### Tested / Verified
+- [x] Thanh trượt ngân sách hoạt động mượt mà trên UI.
+- [x] Gợi ý địa điểm hiển thị đúng và chọn được dữ liệu.
+- [x] Đồng bộ hóa dữ liệu giữa các trang thành công.
+
+### Result
+- [x] Xong hoàn toàn subtask
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Data Polish)**: Cập nhật dữ liệu demo cho các tour tiêu biểu để khớp với khoảng giá 0-100tr.
+
+### Quick Handoff
+- Thanh tìm kiếm và bộ lọc giá đã đạt chuẩn Premium.
+- Autocomplete địa điểm hoạt động mượt mà.
+- Next: Dữ liệu demo.

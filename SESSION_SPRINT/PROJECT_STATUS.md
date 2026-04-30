@@ -583,37 +583,25 @@ Không để `PROJECT_STATUS.md` bị lỗi thời sau nhiều phiên.
 **Sprint 14 đang triển khai (Final QA & Polish). Đã hoàn thiện toàn bộ luồng Đặt Tour, Thanh toán VNPAY & Quản lý giao dịch. Tiến độ dự án: 99.5%.**
 ---
 
-### 28. Session Update (2026-04-29) - Overhauling Transaction History & Payment Management
-
-#### Sprint
-- Sprint hiện tại: Sprint 14
-- Giai đoạn: Final — Đóng gói & Bảo vệ
-- Session focus: User Transaction Management & UI Modernization.
-- Chosen subtask: Thiết lập các tab quản lý thanh toán, modal chi tiết và tính năng Hủy/Tiếp tục giao dịch.
-
-#### Done
-- [x] Triển khai hệ thống 3 tab lọc (**Tất cả | Đã thanh toán | Hủy**) cho lịch sử giao dịch.
-- [x] Thiết kế **Transaction Detail Modal** hỗ trợ xem chi tiết và điều hướng sang trang Tour.
-- [x] Thêm tính năng **Hủy giao dịch** (`POST /payments/:id/cancel`) cho trạng thái `pending`.
-- [x] Hỗ trợ **Tiếp tục thanh toán** bằng cách tạo lại URL VNPAY cho các yêu cầu chưa hoàn tất.
-- [x] Nâng cấp UI/UX trang `/user/payments` theo chuẩn Premium.
-
-#### Files Changed
-- `backend/src/payments/payments.service.ts`
-- `backend/src/payments/payments.controller.ts`
-- `frontend/src/services/paymentService.ts`
-- `frontend/src/pages/user/TransactionHistoryPage.tsx`
-- `frontend/src/pages/user/TransactionHistoryPage.css`
-
-#### Tested
-- Xác nhận luồng Hủy -> Cập nhật DB -> Giao diện phản hồi đúng.
-- Xác nhận điều hướng Tour từ Modal và Tiếp tục thanh toán mở VNPAY thành công.
-
-#### Result
-- [x] Xong hoàn toàn subtask.
-
-#### Blockers / Risks
-- Không có.
-
-#### Suggested Next Single Step
-- **Lane 18.3 (Documentation)**: Cập nhật các sơ đồ UML (Sequence, Activity) cho luồng thanh toán và quản lý giao dịch vào báo cáo cuối cùng.
+### 24. Session Update (2026-04-30) - Perfecting Search Bar & Budget Filtering
+- **Current sprint**: Sprint 14
+- **Chosen subtask**: Nâng cấp thanh tìm kiếm với gợi ý địa điểm và bộ lọc ngân sách dạng slider cao cấp.
+- **Done**:
+    - [x] Triển khai **Dual-Range Budget Slider** (0đ - 100tr+) đồng bộ giữa Trang chủ và Trang danh sách tour.
+    - [x] Khắc phục lỗi hiển thị (overflow) và định vị (positioning) của thanh trượt ngân sách.
+    - [x] Triển khai **Location Autocomplete**: Tự động gợi ý tỉnh thành Việt Nam khi người dùng nhập vào ô địa điểm.
+    - [x] Tách danh sách tỉnh thành (63 tỉnh thành) ra file constant dùng chung (`/constants/provinces.ts`).
+    - [x] Đồng bộ hóa tham số tìm kiếm (minPrice, maxPrice, province) khi chuyển trang từ Home sang Tour List.
+    - [x] Thu nhỏ nút "Hỏi trợ lý AI" thành tỷ lệ 1:1 theo yêu cầu.
+- **Files changed**:
+    - `frontend/src/pages/public/HomePage.tsx`
+    - `frontend/src/pages/public/TourListPage.tsx`
+    - `frontend/src/constants/provinces.ts`
+    - `frontend/src/index.css`
+- **Tested/verified**:
+    - [x] Thanh trượt ngân sách hoạt động mượt mà, không bị văng ra ngoài khung.
+    - [x] Gợi ý địa điểm hiển thị đúng theo nội dung nhập và có thể chọn bằng click.
+    - [x] Dữ liệu tìm kiếm từ trang chủ được truyền sang trang danh sách tour chính xác.
+- **Result status**: [x] Xong hoàn toàn subtask.
+- **Blockers/risks**: Không có.
+- **Best next single step**: Lane 18.2 (Data Polish): Cập nhật dữ liệu demo cho các tour tiêu biểu để khớp với khoảng giá 0-100tr vừa nâng cấp.

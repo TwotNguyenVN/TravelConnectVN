@@ -143,6 +143,25 @@ export class ToursService {
       if (filter.maxPrice) where.price.lte = Number(filter.maxPrice);
     }
 
+    if (filter.startDate) {
+      const searchDate = new Date(filter.startDate);
+      if (!isNaN(searchDate.getTime())) {
+        where.AND.push({
+          OR: [
+            { start_date: { gte: searchDate } },
+            {
+              tour_schedules: {
+                some: {
+                  start_date: { gte: searchDate },
+                  status: 'available'
+                }
+              }
+            }
+          ]
+        });
+      }
+    }
+
     if (filter.keyword) {
       where.AND.push({
         OR: [

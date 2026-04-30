@@ -7,6 +7,27 @@ các file mà bạn sẽ đọc khi bắt đầu quy trình làm việc
 
 ý nghĩa của 2 file workflows-w-agent.md rules-w-agent.md 
 
+# 3 Bàn giao giữa hai phiên
+Hãy chốt phiên làm việc hiện tại.
+
+Cập nhật 3 file:
+1. SESSION_LOG.md
+2. PROJECT_STATUS.md
+3. PROJECT_TASK.md
+Ghi rõ:
+- current sprint
+- chosen subtask
+- done
+- files changed
+- tested/verified
+- result status: [ ] / [~] / [x]
+- blockers/risks
+- best next single step
+
+Không cập nhật file khác nếu không có thay đổi phạm vi thật sự.
+4. Push lên github 
+
+
 cd backend
 npm run start:dev
 
@@ -405,25 +426,7 @@ Sau khi đọc xong, trả lời:
 Không đọc toàn bộ các sprint khác.
 
 
-# 3 Bàn giao giữa hai phiên
-Hãy chốt phiên làm việc hiện tại.
 
-Cập nhật 3 file:
-1. SESSION_LOG.md
-2. PROJECT_STATUS.md
-3. PROJECT_TASK.md
-Ghi rõ:
-- current sprint
-- chosen subtask
-- done
-- files changed
-- tested/verified
-- result status: [ ] / [~] / [x]
-- blockers/risks
-- best next single step
-
-Không cập nhật file khác nếu không có thay đổi phạm vi thật sự.
-4. Push lên github 
 
 
 

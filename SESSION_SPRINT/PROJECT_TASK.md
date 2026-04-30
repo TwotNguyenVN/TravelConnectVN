@@ -164,6 +164,7 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 ### Current Single Focus
 - [x] Hoàn tất luồng Đặt Tour & Thanh toán VNPAY Popup (Premium flow).
 - [x] Thiết lập hệ thống quản lý giao dịch & Lịch sử thanh toán (Tabs, Modal, Cancel logic).
+- [x] Nâng cấp thanh tìm kiếm với gợi ý địa điểm và bộ lọc giá 2 đầu (Slider).
 - [~] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
 
 ### Current Best Next Step
