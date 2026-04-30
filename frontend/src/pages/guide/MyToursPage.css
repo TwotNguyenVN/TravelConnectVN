@@ -187,9 +187,19 @@
 .tc-tour-manage-card__footer {
   padding: var(--tc-spacing-4);
   border-top: 1px solid var(--tc-border);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+
+.tc-tour-manage-card__footer-actions {
+  display: flex;
+  flex-direction: column;
   gap: var(--tc-spacing-2);
+  width: 100%;
+}
+
+.tc-tour-manage-card__row {
+  display: flex;
+  gap: var(--tc-spacing-2);
+  width: 100%;
 }
 
 .tc-tour-manage-card__delete-btn {

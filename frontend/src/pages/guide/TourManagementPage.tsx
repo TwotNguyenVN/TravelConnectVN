@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TourFormPage from './TourFormPage';
 import { TourSchedulesTab } from './tabs/TourSchedulesTab';
 import { TourReviewsTab } from './tabs/TourReviewsTab';
@@ -8,7 +8,17 @@ import './TourManagementPage.css';
 const TourManagementPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<'details' | 'schedules' | 'reviews'>('details');
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get('tab') as 'details' | 'schedules' | 'reviews' | null;
+  
+  const [activeTab, setActiveTab] = useState<'details' | 'schedules' | 'reviews'>(initialTab || 'details');
+  
+  useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+    }
+  }, [location.search]);
 
   if (!id) {
     navigate('/guide/tours');

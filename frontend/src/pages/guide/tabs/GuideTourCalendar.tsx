@@ -166,6 +166,19 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     }
   };
 
+  const getScheduleStatusClass = (schedule: Schedule) => {
+    if (!schedule) return "";
+    if (schedule.status === 'full') return "tc-day--full-manual";
+    if (schedule.status === 'completed') return "tc-day--completed";
+    
+    const current = schedule.current_participants || 0;
+    const max = schedule.max_participants;
+
+    if (current === 0) return "tc-day--empty";
+    if (current < max) return "tc-day--has-guests";
+    return "tc-day--full";
+  };
+
   return (
     <div className="tc-tour-calendar tc-guide-calendar">
       {/* Sidebar chọn tháng */}
@@ -206,15 +219,30 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
           {calendarDays.map((dayData, idx) => (
             <div
               key={idx}
-              className={`tc-day ${dayData.isOtherMonth ? 'tc-day--other-month' : ''} ${dayData.schedule ? 'tc-day--scheduled' : ''} ${dayData.isPast ? 'tc-day--past' : 'tc-day--clickable'}`}
+              className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${dayData.schedule ? `tc-day--scheduled ${getScheduleStatusClass(dayData.schedule)}` : ""} ${dayData.isPast ? "tc-day--past" : "tc-day--clickable"}`}
               onClick={() => handleDayClick(dayData)}
-              title={dayData.isPast ? 'Không thể thao tác trên ngày trong quá khứ' : 'Click để cấu hình lịch'}
+              title={dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch"}
             >
               {dayData.day && (
                 <>
                   <span className="tc-day-number">{dayData.day}</span>
                   {dayData.schedule && (
                     <>
+                      {dayData.schedule.status === 'completed' && (
+                        <div className="tc-day-completed-tick" title="Đã hoàn thành">
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </div>
+                      )}
+                      {dayData.schedule.status === 'full' && (
+                        <div className="tc-day-paused-icon" title="Tạm ngưng nhận khách">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="6" y="4" width="4" height="16"></rect>
+                            <rect x="14" y="4" width="4" height="16"></rect>
+                          </svg>
+                        </div>
+                      )}
                       <span className="tc-day-price">{formatPrice(dayData.schedule.price)}</span>
                       <span className="tc-day-slots">
                         {dayData.schedule.current_participants || 0}/{dayData.schedule.max_participants}
@@ -225,6 +253,29 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
               )}
             </div>
           ))}
+        </div>
+
+        <div className="tc-calendar-legend">
+          <div className="tc-legend-item">
+            <span className="tc-dot tc-dot--empty"></span> Chưa có khách
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot tc-dot--has-guests"></span> Đang có khách
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot tc-dot--full"></span> Đã đủ người
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot" style={{ backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>✓</span> Đã hoàn thành
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot" style={{ backgroundColor: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+              <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="5" y="4" width="4" height="16"></rect>
+                <rect x="15" y="4" width="4" height="16"></rect>
+              </svg>
+            </span> Tạm ngưng
+          </div>
         </div>
 
         <div className="tc-calendar-footer">

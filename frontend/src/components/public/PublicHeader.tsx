@@ -7,6 +7,7 @@ import notificationService from '../../services/notificationService';
 
 
 import { useSocket } from '../../contexts/SocketContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 
 
 export const PublicHeader: React.FC = () => {
@@ -51,7 +52,7 @@ export const PublicHeader: React.FC = () => {
   };
 
   const displayName = profile?.full_name || user?.user_metadata?.full_name || user?.email || 'Người dùng';
-  const displayAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url;
+  const displayAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || DEFAULT_AVATAR;
   const initial = displayName[0]?.toUpperCase() || 'N';
 
   const isGuide = roles.includes('GUIDE');

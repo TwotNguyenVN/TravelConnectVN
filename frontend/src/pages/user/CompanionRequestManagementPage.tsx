@@ -5,6 +5,7 @@ import {
 } from '../../components/common';
 import { useToast } from '../../contexts/ToastContext';
 import { companionService } from '../../services/companionService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './CompanionRequestManagementPage.css';
 
 const CompanionRequestManagementPage: React.FC = () => {
@@ -108,7 +109,7 @@ const CompanionRequestManagementPage: React.FC = () => {
             return (
             <Card key={req.id} className={`request-card status-${req.status}`}>
               <div className="request-user">
-                <img src={user?.avatar_url || 'https://via.placeholder.com/50'} alt="Avatar" />
+                <img src={user?.avatar_url || DEFAULT_AVATAR} alt="Avatar" />
                 <div className="user-info">
                   <span className="user-name">{user?.full_name}</span>
                   <span className="request-time">Gửi lúc {formatDate(req.requested_at)}</span>
@@ -173,7 +174,7 @@ const CompanionRequestManagementPage: React.FC = () => {
       >
         <div className="process-form">
           <div className="user-preview">
-            <img src={(selectedRequest?.users || selectedRequest?.users_companion_requests_user_idTousers)?.avatar_url || 'https://via.placeholder.com/40'} alt="" />
+            <img src={(selectedRequest?.users || selectedRequest?.users_companion_requests_user_idTousers)?.avatar_url || DEFAULT_AVATAR} alt="" />
             <span><strong>{(selectedRequest?.users || selectedRequest?.users_companion_requests_user_idTousers)?.full_name}</strong></span>
           </div>
           

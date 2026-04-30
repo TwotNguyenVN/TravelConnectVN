@@ -197,7 +197,7 @@ const MyToursPage: React.FC = () => {
               </div>
               <div className="tc-tour-manage-card__footer" onClick={(e) => e.stopPropagation()}>
                 {tour.businessStatus === 'draft' && (
-                  <>
+                  <div className="tc-tour-manage-card__row">
                     <Button 
                       variant="outline" 
                       size="small" 
@@ -215,36 +215,38 @@ const MyToursPage: React.FC = () => {
                     >
                       Xóa tour
                     </Button>
-                  </>
+                  </div>
                 )}
 
-                {(tour.businessStatus === 'published' || (tour.businessStatus === 'closed' && tour.visibilityStatus === 'hidden')) && (
-                  <>
-                    <Button variant="outline" size="small" fullWidth onClick={() => toast.info('Tính năng Thêm TV đang phát triển')}>
-                      Thêm tv
-                    </Button>
-                    {tour.businessStatus === 'closed' && tour.visibilityStatus === 'hidden' ? (
-                      <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'published', 'visible', 'Đã mở lại đăng ký')}>
-                        Mở ĐK
+                {(tour.businessStatus === 'published' || tour.businessStatus === 'completed' || (tour.businessStatus === 'closed' && tour.visibilityStatus === 'hidden')) && (
+                  <div className="tc-tour-manage-card__footer-actions">
+                    <div className="tc-tour-manage-card__row">
+                      <Button 
+                        variant="outline" 
+                        size="small" 
+                        fullWidth 
+                        onClick={() => navigate(`/guide/tours/edit/${tour.id}?tab=details`)}
+                      >
+                        Chi Tiết
                       </Button>
-                    ) : (
-                      <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'closed', 'hidden', 'Đã tạm ngưng đăng ký')}>
-                        Tạm Ngưng ĐK
+                      <Button 
+                        variant="outline" 
+                        size="small" 
+                        fullWidth 
+                        onClick={() => navigate(`/guide/tours/edit/${tour.id}?tab=reviews`)}
+                      >
+                        Bình Luận
                       </Button>
-                    )}
-                    <Button variant="outline" size="small" fullWidth onClick={() => handleStatusUpdateComplex(tour.id, 'closed', 'visible', 'Đã đóng đăng ký')}>
-                      Đóng ĐK
-                    </Button>
+                    </div>
                     <Button 
-                      variant="outline" 
+                      variant="primary" 
                       size="small" 
                       fullWidth 
-                      className="tc-tour-manage-card__delete-btn"
-                      onClick={() => handleStatusUpdate(tour.id, 'cancelled', 'Đã hủy tour')}
+                      onClick={() => navigate(`/guide/tours/edit/${tour.id}?tab=schedules`)}
                     >
-                      Hủy tour
+                      Lịch Trình Tour
                     </Button>
-                  </>
+                  </div>
                 )}
 
                 {tour.businessStatus === 'closed' && tour.visibilityStatus === 'visible' && (
@@ -258,33 +260,8 @@ const MyToursPage: React.FC = () => {
                   </Button>
                 )}
 
-                {tour.businessStatus === 'completed' && (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      size="small" 
-                      fullWidth 
-                      onClick={async () => {
-                        await handleStatusUpdate(tour.id, 'draft', 'Tour đã được đưa về bản nháp để chỉnh sửa');
-                        navigate(`/guide/tours/edit/${tour.id}`);
-                      }}
-                    >
-                      Mở Lại
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="small" 
-                      fullWidth 
-                      className="tc-tour-manage-card__delete-btn"
-                      onClick={() => handleStatusUpdate(tour.id, 'cancelled', 'Tour đã được chuyển vào mục Đã hủy')}
-                    >
-                      Xóa tour
-                    </Button>
-                  </>
-                )}
-
                 {tour.businessStatus === 'cancelled' && (
-                  <>
+                  <div className="tc-tour-manage-card__row">
                     <Button 
                       variant="outline" 
                       size="small" 
@@ -302,7 +279,7 @@ const MyToursPage: React.FC = () => {
                     >
                       Xóa tour
                     </Button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>

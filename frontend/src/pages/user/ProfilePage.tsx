@@ -8,6 +8,7 @@ import { supabase } from '../../utils/supabase';
 import { userService } from '../../services/userService';
 import { guideService } from '../../services/guideService'; 
 import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
@@ -334,13 +335,7 @@ export const ProfilePage: React.FC = () => {
 
           <div className="profile-avatar-overlap" onClick={handleAvatarClick}>
             <div className="avatar-wrapper-inner">
-              {formData.avatarUrl ? (
-                <img src={formData.avatarUrl} alt="Avatar" className="overlap-avatar-img" />
-              ) : (
-                <div className="overlap-avatar-placeholder">
-                  {formData.fullName?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase()}
-                </div>
-              )}
+              <img src={formData.avatarUrl || DEFAULT_AVATAR} alt="Avatar" className="overlap-avatar-img" />
               <div className="avatar-overlay">
                 <span className="avatar-overlay-icon">📸</span>
               </div>

@@ -7,6 +7,7 @@ import notificationService from '../../services/notificationService';
 
 import { useSocket } from '../../contexts/SocketContext';
 import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 
 export const AdminHeader: React.FC = () => {
   const { user } = useAuth();
@@ -107,15 +108,11 @@ export const AdminHeader: React.FC = () => {
           overflow: 'hidden',
           border: '2px solid var(--tc-border)'
         }}>
-          {user?.user_metadata?.avatar_url ? (
-            <img 
-              src={user.user_metadata.avatar_url} 
-              alt="Avatar" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-            />
-          ) : (
-            (user?.user_metadata?.full_name?.[0] || user?.email?.[0] || 'A').toUpperCase()
-          )}
+          <img 
+            src={user?.user_metadata?.avatar_url || DEFAULT_AVATAR} 
+            alt="Avatar" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
         </div>
         </div>
       </div>

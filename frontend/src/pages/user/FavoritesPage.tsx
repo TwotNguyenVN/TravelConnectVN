@@ -4,6 +4,7 @@ import { PageContainer, Card, Button, LoadingBlock, EmptyState } from '../../com
 import favoriteService from '../../services/favoriteService';
 import type { FavoriteTour, FavoriteGuide } from '../../services/favoriteService';
 import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './FavoritesPage.css';
 
 const FavoritesPage: React.FC = () => {
@@ -164,7 +165,7 @@ const FavoritesPage: React.FC = () => {
                     <div className="guide-favorite-card">
                       <Link to={`/guides/${guide.id}`}>
                         <img 
-                          src={guide.avatar || 'https://via.placeholder.com/80?text=Guide'} 
+                          src={guide.avatar || DEFAULT_AVATAR} 
                           alt={guide.name} 
                           className="guide-favorite-avatar" 
                         />

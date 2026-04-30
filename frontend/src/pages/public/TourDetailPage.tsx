@@ -8,6 +8,7 @@ import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './TourDetailPage.css';
 
 // Lazy load heavy components
@@ -571,7 +572,7 @@ export const TourDetailPage: React.FC = () => {
                     <div key={review.id} className="tc-review-item" style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #eee' }}>
                       <div className="tc-review-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '12px' }}>
                         <img 
-                          src={review.avatar || 'https://via.placeholder.com/40'} 
+                          src={review.avatar || DEFAULT_AVATAR} 
                           alt="Avatar" 
                           loading="lazy"
                           style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} 
@@ -674,13 +675,12 @@ export const TourDetailPage: React.FC = () => {
 
           <Link to={`/guides/${tour.guideId}`} className="tc-guide-card">
             <div className="tc-guide-header">
-              {tour.guide?.avatar ? (
-                <img src={tour.guide.avatar} alt={tour.guide.name} className="tc-guide-avatar" loading="lazy" />
-              ) : (
-                <div className="tc-guide-avatar-placeholder">
-                  {tour.guide?.name?.charAt(0) || 'G'}
-                </div>
-              )}
+              <img 
+                src={tour.guide?.avatar || DEFAULT_AVATAR} 
+                alt={tour.guide?.name} 
+                className="tc-guide-avatar" 
+                loading="lazy" 
+              />
               <div className="tc-guide-info">
                 <div className="tc-guide-name">{tour.guide?.name}</div>
                 <div className="tc-guide-tag">Hướng dẫn viên địa phương</div>

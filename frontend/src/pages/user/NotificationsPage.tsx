@@ -97,10 +97,15 @@ export const NotificationsPage: React.FC = () => {
     switch (notification.entity_type) {
       case 'TOUR_REQUEST':
         // Logic to distinguish guide-side vs user-side
+        const titleLower = notification.title.toLowerCase();
+        const contentLower = notification.content.toLowerCase();
         const isGuideNotification = 
-          notification.title.toLowerCase().includes('mới') || 
-          notification.title.toLowerCase().includes('hủy') ||
-          notification.title.toLowerCase().includes('thanh toán');
+          titleLower.includes('mới') || 
+          titleLower.includes('hủy') ||
+          titleLower.includes('thanh toán') ||
+          titleLower.includes('đăng ký') ||
+          contentLower.includes('khách hàng') ||
+          contentLower.includes('đặt tour');
           
         if (isGuide && isGuideNotification) {
           navigate('/guide/tour-requests');

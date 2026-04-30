@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import notificationService from '../../services/notificationService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 
 
 
@@ -77,33 +78,17 @@ export const GuideHeader: React.FC = () => {
           <div style={{ fontWeight: 600, fontSize: 'var(--tc-font-size-sm)' }}>{fullName}</div>
           <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>{email}</div>
         </div>
-        {avatarUrl ? (
-          <img 
-            src={avatarUrl} 
-            alt={fullName}
-            style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              objectFit: 'cover',
-              border: '2px solid var(--tc-success-bg)'
-            }}
-          />
-        ) : (
-          <div style={{
+        <img 
+          src={avatarUrl || DEFAULT_AVATAR} 
+          alt={fullName}
+          style={{
             width: '40px',
             height: '40px',
             borderRadius: '50%',
-            backgroundColor: 'var(--tc-success-bg)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--tc-success)',
-            fontWeight: 'bold'
-          }}>
-            {initial}
-          </div>
-        )}
+            objectFit: 'cover',
+            border: '2px solid var(--tc-success-bg)'
+          }}
+        />
         </div>
       </div>
     </header>

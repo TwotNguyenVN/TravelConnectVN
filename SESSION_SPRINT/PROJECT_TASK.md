@@ -880,3 +880,34 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 ### Suggested Next Single Step
 - **Lane 18.2 (End-to-End Flow Validation)**: Kiểm tra luồng đặt tour thực tế từ khách hàng sang HDV.
 
+
+---
+
+### 24. Session Update (2026-05-01) - Tour Management Refinement & Status Controls
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Refining Tour Management Refinement & Status Controls.
+- Chosen subtask: Nâng cấp trải nghiệm quản lý tour của HDV (Hoàn thành, Tạm ngưng, Điều hướng).
+
+### Done
+- [x] Triển khai **Xác nhận Hoàn thành** bằng Modal chuyên nghiệp thay cho `window.confirm`.
+- [x] Tối ưu **Điều hướng (Navigation)**: Tự động quay về tab "Lịch trình" (`?tab=schedules`) sau khi xóa hoặc hoàn thành tour.
+- [x] Bổ sung tính năng **Ngưng Nhận Thêm (Pause)**: Cho phép HDV chủ động đóng/mở nhận khách cho từng lịch khởi hành.
+- [x] Cập nhật **GuideTourCalendar**: 
+    - Hiển thị dấu tích xanh (✓) cho tour đã hoàn thành.
+    - Hiển thị biểu tượng Pause (||) màu cam cho tour tạm ngưng nhận khách.
+    - Cập nhật Chú thích (Legend) đầy đủ cho các trạng thái mới.
+- [x] Thêm nhãn trạng thái **"Ngưng nhận khách"** trực quan trong trang chi tiết lịch trình.
+
+### Files Changed
+- `frontend/src/pages/guide/TourScheduleDetailPage.tsx`
+- `frontend/src/pages/guide/TourScheduleDetailPage.css`
+- `frontend/src/pages/guide/tabs/GuideTourCalendar.tsx`
+- `frontend/src/pages/guide/tabs/GuideTourCalendar.css`
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Data Polish)**: Kiểm tra hiển thị của các tour đã hoàn thành/tạm ngưng trên giao diện người dùng công cộng (Public View).

@@ -8,11 +8,63 @@
   margin-bottom: 24px;
 }
 
+.tc-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tc-header-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.tc-btn-delete-schedule {
+  color: #ef4444 !important;
+  border-color: #fecaca !important;
+}
+
+.tc-btn-delete-schedule:hover {
+  background-color: #fef2f2 !important;
+  border-color: #ef4444 !important;
+}
+
+.tc-btn-delete-schedule:disabled {
+  color: #94a3b8 !important;
+  border-color: #e2e8f0 !important;
+  opacity: 0.6;
+}
+
+.tc-status-completed-tag {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 14px;
+  padding: 4px 12px;
+  background: #dcfce7;
+  color: #166534;
+  border-radius: 20px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.tc-status-full-tag {
+  display: inline-block;
+  margin-left: 12px;
+  font-size: 14px;
+  padding: 4px 12px;
+  background: #ffedd5;
+  color: #9a3412;
+  border-radius: 20px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
 .tc-schedule-detail-title {
   font-size: 24px;
   font-weight: 700;
   color: #1e293b;
-  margin: 16px 0 8px 0;
+  margin: 0 0 8px 0;
 }
 
 .tc-schedule-detail-subtitle {
@@ -263,6 +315,37 @@
 
 .tc-passengers-table tr:last-child td {
   border-bottom: none;
+}
+
+/* Modal Styling */
+.tc-modal-footer-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.tc-complete-confirm-body {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.tc-confirm-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.tc-complete-confirm-body p {
+  font-size: 16px;
+  color: #334155;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.tc-confirm-hint {
+  font-size: 14px !important;
+  color: #64748b !important;
+  margin-top: 8px;
 }
 
 /* Responsiveness */

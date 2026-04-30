@@ -7,6 +7,8 @@ các file mà bạn sẽ đọc khi bắt đầu quy trình làm việc
 
 ý nghĩa của 2 file workflows-w-agent.md rules-w-agent.md 
 
+đọc 3 file này để hiểu rõ quy trình làm việc của bạn
+
 # 3 Bàn giao giữa hai phiên
 Hãy chốt phiên làm việc hiện tại.
 

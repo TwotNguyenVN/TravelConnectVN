@@ -9,6 +9,7 @@ import { ReportModal } from '../../components/common/Report/ReportModal';
 import { companionService } from '../../services/companionService';
 import chatService from '../../services/chatService';
 import type { CompanionRequest } from '../../services/companionService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './CompanionDetailPage.css';
 
 const CompanionDetailPage: React.FC = () => {
@@ -191,7 +192,7 @@ const CompanionDetailPage: React.FC = () => {
               {post.companion_requests && post.companion_requests.length > 0 ? (
                 post.companion_requests.map((req: any) => (
                   <div key={req.id} className="member-item">
-                    <img src={req.users_companion_requests_user_idTousers?.avatar_url || 'https://via.placeholder.com/40'} alt="Avatar" />
+                    <img src={req.users_companion_requests_user_idTousers?.avatar_url || DEFAULT_AVATAR} alt="Avatar" />
                     <div className="member-info">
                       <span className="member-name">{req.users_companion_requests_user_idTousers?.full_name}</span>
                       <span className="member-tag">Thành viên</span>
@@ -257,7 +258,7 @@ const CompanionDetailPage: React.FC = () => {
           <Card className="author-card">
             <h3>Về chủ bài đăng</h3>
             <div className="author-profile">
-              <img src={post.users?.avatar_url || 'https://via.placeholder.com/60'} alt="Author" />
+              <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt="Author" />
               <div className="author-details">
                 <span className="author-name">{post.users?.full_name}</span>
                 <Button variant="outline" size="small">Xem hồ sơ</Button>

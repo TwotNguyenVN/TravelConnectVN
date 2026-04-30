@@ -1,5 +1,6 @@
 import React from 'react';
 import { Card, Badge } from '../common';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './GuideCard.css';
 
 export interface GuideListItem {
@@ -33,7 +34,7 @@ const GuideCard: React.FC<GuideCardProps> = ({ guide, onClick }) => {
         </div>
         <div className="guide-card-avatar-wrapper">
           <img 
-            src={guide.avatar || 'https://via.placeholder.com/100?text=Avatar'} 
+            src={guide.avatar || DEFAULT_AVATAR} 
             alt={guide.name} 
             className="guide-card-avatar"
           />

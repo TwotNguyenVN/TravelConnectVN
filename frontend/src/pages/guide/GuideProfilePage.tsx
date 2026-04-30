@@ -4,6 +4,7 @@ import { guideService, type MasterData, type GuideProfile } from '../../services
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { supabase } from '../../utils/supabase';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './GuideProfilePage.css';
 
 const GuideProfilePage: React.FC = () => {
@@ -361,7 +362,7 @@ const GuideProfilePage: React.FC = () => {
           <div className="profile-avatar-overlap" onClick={handleAvatarClick}>
             <div className="avatar-wrapper-inner">
               <img 
-                src={profile.avatarUrl || (profile as any).avatar_url || 'https://via.placeholder.com/120?text=AVT'} 
+                src={profile.avatarUrl || (profile as any).avatar_url || DEFAULT_AVATAR} 
                 alt="Avatar" 
                 className="overlap-avatar-img"
               />

@@ -4,6 +4,8 @@ import { tourService } from '../../services/tourService';
 import tourRequestService from '../../services/tourRequestService';
 import { useToast } from '../../contexts/ToastContext';
 import { Button } from '../../components/common/Button/Button';
+import { Modal } from '../../components/common/Modal/Modal';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './TourScheduleDetailPage.css';
 
 interface Passenger {
@@ -26,6 +28,7 @@ export const TourScheduleDetailPage: React.FC = () => {
   // Edit State
   const [maxParticipants, setMaxParticipants] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -54,7 +57,11 @@ export const TourScheduleDetailPage: React.FC = () => {
       // Fetch Requests for this schedule
       const reqRes = await tourRequestService.getGuideRequests({ scheduleId, limit: 100 });
       if (reqRes.data && reqRes.data.data) {
-        setRequests(reqRes.data.data);
+        // Sắp xếp theo thời gian đăng ký sớm nhất lên đầu
+        const sortedData = [...reqRes.data.data].sort((a, b) => 
+          new Date(a.requestedAt).getTime() - new Date(b.requestedAt).getTime()
+        );
+        setRequests(sortedData);
       }
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -75,6 +82,72 @@ export const TourScheduleDetailPage: React.FC = () => {
       fetchData();
     } catch (error) {
       toast.error('Lỗi khi cập nhật lịch trình');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteSchedule = async () => {
+    if (!scheduleId || !tourId) return;
+    if (totalRegistered > 0) {
+      toast.error('Không thể xóa lịch trình đã có khách đăng ký');
+      return;
+    }
+
+    if (!window.confirm('Bạn có chắc chắn muốn xóa lịch khởi hành này?')) return;
+
+    try {
+      setIsSaving(true);
+      await tourService.deleteTourSchedule(tourId, scheduleId);
+      toast.success('Xóa lịch khởi hành thành công!');
+      navigate(`/guide/tours/edit/${tourId}?tab=schedules`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Lỗi khi xóa lịch khởi hành');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCompleteSchedule = () => {
+    setIsCompleteModalOpen(true);
+  };
+
+  const confirmCompleteSchedule = async () => {
+    if (!scheduleId || !tourId) return;
+    
+    try {
+      setIsSaving(true);
+      await tourService.updateTourSchedule(tourId, scheduleId, {
+        status: 'completed'
+      });
+      toast.success('Đã đánh dấu tour hoàn thành!');
+      setIsCompleteModalOpen(false);
+      navigate(`/guide/tours/edit/${tourId}?tab=schedules`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleToggleAccepting = async () => {
+    if (!scheduleId || !tourId) return;
+    
+    const isCurrentlyAvailable = schedule.status === 'available';
+    const newStatus = isCurrentlyAvailable ? 'full' : 'available';
+    const actionText = isCurrentlyAvailable ? 'ngưng nhận thêm khách' : 'mở nhận khách trở lại';
+
+    if (!window.confirm(`Bạn có chắc chắn muốn ${actionText} cho lịch khởi hành này?`)) return;
+
+    try {
+      setIsSaving(true);
+      await tourService.updateTourSchedule(tourId, scheduleId, {
+        status: newStatus
+      });
+      toast.success(`Đã ${actionText} thành công!`);
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     } finally {
       setIsSaving(false);
     }
@@ -143,11 +216,39 @@ export const TourScheduleDetailPage: React.FC = () => {
   return (
     <div className="tc-schedule-detail-page">
       <div className="tc-schedule-detail-header">
-        <button className="tc-btn-back-manage" onClick={() => navigate(`/guide/tours/edit/${tourId}`)}>
-          ← Quay lại Lịch trình Tour
-        </button>
+        <div className="tc-header-top">
+          <button className="tc-btn-back-manage" onClick={() => navigate(`/guide/tours/edit/${tourId}?tab=schedules`)}>
+            ← Quay lại Lịch trình Tour
+          </button>
+          <div className="tc-header-actions">
+            <Button 
+              variant="outline" 
+              className="tc-btn-delete-schedule"
+              onClick={handleDeleteSchedule}
+              disabled={isSaving || totalRegistered > 0}
+            >
+              Xóa lịch trình
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleToggleAccepting}
+              disabled={isSaving || schedule.status === 'completed'}
+            >
+              {schedule.status === 'available' ? 'Ngưng Nhận Thêm' : 'Mở Nhận Lại'}
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={handleCompleteSchedule}
+              disabled={isSaving || schedule.status === 'completed'}
+            >
+              {schedule.status === 'completed' ? 'Đã hoàn thành' : 'Hoàn thành Tour'}
+            </Button>
+          </div>
+        </div>
         <h1 className="tc-schedule-detail-title">
           Chi tiết khởi hành: {formatDate(schedule.start_date || schedule.startDate)}
+          {schedule.status === 'completed' && <span className="tc-status-completed-tag">Đã hoàn thành</span>}
+          {schedule.status === 'full' && <span className="tc-status-full-tag">Ngưng nhận khách</span>}
         </h1>
         <p className="tc-schedule-detail-subtitle">{tour.title}</p>
       </div>
@@ -225,7 +326,7 @@ export const TourScheduleDetailPage: React.FC = () => {
                     <div className="tc-request-header">
                       <div className="tc-request-user">
                         <img 
-                          src={req.userAvatar || 'https://via.placeholder.com/40'} 
+                          src={req.userAvatar || DEFAULT_AVATAR} 
                           alt="Avatar" 
                           className="tc-request-avatar" 
                         />
@@ -280,6 +381,38 @@ export const TourScheduleDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal for Completion */}
+      <Modal
+        isOpen={isCompleteModalOpen}
+        onClose={() => setIsCompleteModalOpen(false)}
+        title="Xác nhận hoàn thành Tour"
+        size="small"
+        footer={
+          <div className="tc-modal-footer-actions">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsCompleteModalOpen(false)}
+              disabled={isSaving}
+            >
+              Hủy bỏ
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={confirmCompleteSchedule}
+              disabled={isSaving}
+            >
+              {isSaving ? 'Đang xử lý...' : 'Xác nhận hoàn thành'}
+            </Button>
+          </div>
+        }
+      >
+        <div className="tc-complete-confirm-body">
+          <div className="tc-confirm-icon">✅</div>
+          <p>Bạn có chắc chắn muốn đánh dấu lịch trình khởi hành này là <strong>Đã hoàn thành</strong>?</p>
+          <p className="tc-confirm-hint">Hành động này sẽ cập nhật trạng thái tour và không thể hoàn tác.</p>
+        </div>
+      </Modal>
     </div>
   );
 };

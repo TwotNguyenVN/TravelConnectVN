@@ -6,6 +6,7 @@ import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './GuideDetailPage.css';
 
 interface GuideDetail {
@@ -177,7 +178,7 @@ const GuideDetailPage: React.FC = () => {
               <div className="profile-avatar-absolute-section">
                 <div className="profile-avatar-container">
                   <img 
-                    src={guide.avatar || 'https://via.placeholder.com/168?text=Guide'} 
+                    src={guide.avatar || DEFAULT_AVATAR} 
                     alt={guide.name} 
                     className="profile-avatar-img"
                   />
@@ -386,7 +387,7 @@ const GuideDetailPage: React.FC = () => {
                     <div className="guide-review-header">
                       <div className="guide-review-user">
                         <div className="guide-review-avatar">
-                          <img src={review.avatar || 'https://via.placeholder.com/40'} alt={review.user} />
+                          <img src={review.avatar || DEFAULT_AVATAR} alt={review.user} />
                         </div>
                         <div>
                           <div className="guide-review-name">{review.user}</div>

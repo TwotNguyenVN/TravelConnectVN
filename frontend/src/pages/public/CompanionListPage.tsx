@@ -5,6 +5,7 @@ import {
 } from '../../components/common';
 import { companionService } from '../../services/companionService';
 import type { CompanionPost } from '../../services/companionService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './CompanionListPage.css';
 
 const CompanionListPage: React.FC = () => {
@@ -138,7 +139,7 @@ const CompanionListPage: React.FC = () => {
               </div>
               <div className="post-footer">
                 <div className="post-author">
-                  <img src={post.users?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(post.users?.full_name || 'U')}&background=random`} alt={post.users?.full_name} />
+                  <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt={post.users?.full_name} />
                   <span>{post.users?.full_name}</span>
                 </div>
                 <Button variant="outline" size="small">Chi tiết</Button>
