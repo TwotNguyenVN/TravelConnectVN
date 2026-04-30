@@ -32,6 +32,7 @@ import TourFormPage from '../pages/guide/TourFormPage';
 import TourManagementPage from '../pages/guide/TourManagementPage';
 import TourItineraryPage from '../pages/guide/TourItineraryPage';
 import TourImagesPage from '../pages/guide/TourImagesPage';
+import TourScheduleDetailPage from '../pages/guide/TourScheduleDetailPage';
 import { MyTourRequestsPage } from '../pages/user/MyTourRequestsPage';
 import { GuideRequestsPage } from '../pages/guide/GuideRequestsPage';
 import CompanionListPage from '../pages/public/CompanionListPage';
@@ -123,6 +124,7 @@ export const router = createBrowserRouter([
       { path: 'tours', element: <MyToursPage /> },
       { path: 'tours/create', element: <TourFormPage /> },
       { path: 'tours/edit/:id', element: <TourManagementPage /> },
+      { path: 'tours/:id/schedules/:scheduleId', element: <TourScheduleDetailPage /> },
       { path: 'tours/:id/itinerary', element: <TourItineraryPage /> },
       { path: 'tours/:id/images', element: <TourImagesPage /> },
       { path: 'tour-requests', element: <GuideRequestsPage /> },

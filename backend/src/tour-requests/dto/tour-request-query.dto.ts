@@ -12,6 +12,11 @@ export class TourRequestQueryDto {
   @IsOptional()
   status?: string;
 
+  @ApiProperty({ required: false })
+  @IsUUID()
+  @IsOptional()
+  scheduleId?: string;
+
   @ApiProperty({ required: false, default: 1 })
   @IsOptional()
   page?: number;

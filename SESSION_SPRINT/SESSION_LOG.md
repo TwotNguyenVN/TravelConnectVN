@@ -5024,3 +5024,48 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Thanh tìm kiếm và bộ lọc giá đã đạt chuẩn Premium.
 - Autocomplete địa điểm hoạt động mượt mà.
 - Next: Dữ liệu demo.
+
+---
+
+### 23. Session Update (2026-04-30) - Tour Schedule Details & Guide Management
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Building Tour Schedule Details & Guide Management.
+- Chosen subtask: Phát triển trang Chi tiết Lịch khởi hành cho HDV và tối ưu điều hướng thông báo.
+
+### Done
+- [x] Cập nhật **TourRequestQueryDto** hỗ trợ lọc theo `scheduleId`.
+- [x] Nâng cấp **TourRequestsService** phía Backend để trả về thông tin thanh toán chi tiết.
+- [x] Triển khai trang **TourScheduleDetailPage** (UI Premium) hiển thị danh sách khách hàng.
+- [x] Tích hợp logic **Parsing Passenger Note** để trích xuất thông tin hành khách từ ghi chú booking.
+- [x] Cho phép HDV cập nhật số lượng khách tối đa (`maxParticipants`) và khóa giá tour (`price` readonly).
+- [x] Sửa lỗi điều hướng tại **NotificationsPage**: Tự động chuyển hướng HDV đến `/guide/tour-requests` khi có thông báo về tour.
+- [x] Fix lỗi Vite import và đồng bộ tên thuộc tính (`tour_schedules`).
+
+### Files Changed
+- `backend/src/tour-requests/dto/tour-request-query.dto.ts`
+- `backend/src/tour-requests/tour-requests.service.ts`
+- `frontend/src/routes/index.tsx`
+- `frontend/src/services/tourRequestService.ts`
+- `frontend/src/services/tourService.ts`
+- `frontend/src/pages/guide/tabs/TourSchedulesTab.tsx`
+- `frontend/src/pages/guide/TourScheduleDetailPage.tsx` (NEW)
+- `frontend/src/pages/guide/TourScheduleDetailPage.css` (NEW)
+- `frontend/src/pages/user/NotificationsPage.tsx`
+- `frontend/src/pages/user/NotificationsPage.css`
+
+### Tested / Verified
+- [x] Kiểm tra compilation Frontend & Backend (Success).
+- [x] Xác minh logic parsing chuỗi thông tin hành khách.
+- [x] Kiểm tra luồng điều hướng từ Lịch trình sang trang Chi tiết.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (End-to-End Flow Validation)**: Thực hiện một luồng đặt tour hoàn chỉnh từ phía khách hàng (thanh toán 100%) và kiểm tra thông báo/danh sách khách hàng hiển thị trên tài khoản HDV.
+

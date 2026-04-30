@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { tourService } from '../../../services/tourService';
 import { useToast } from '../../../contexts/ToastContext';
 import { Button } from '../../../components/common/Button/Button';
@@ -14,6 +15,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
   const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -44,16 +46,15 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
   };
 
   const handleDateClick = (date: Date, schedule: any) => {
-    setSelectedDate(date);
     if (schedule) {
-      setEditingSchedule(schedule);
-      setPrice(schedule.price);
-      setMaxParticipants(schedule.max_participants || schedule.maxParticipants);
-    } else {
-      setEditingSchedule(null);
-      setPrice(tour?.price || 0);
-      setMaxParticipants(tour?.max_participants || tour?.maxParticipants || 10);
+      navigate(`/guide/tours/${tourId}/schedules/${schedule.id}`);
+      return;
     }
+    
+    setSelectedDate(date);
+    setEditingSchedule(null);
+    setPrice(tour?.price || 0);
+    setMaxParticipants(tour?.max_participants || tour?.maxParticipants || 10);
     setIsModalOpen(true);
   };
 
@@ -139,7 +140,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
               </Button>
             )}
             <Button variant="outline" onClick={() => setIsModalOpen(false)} disabled={saving}>Hủy</Button>
-            <Button variant="primary" onClick={handleSaveSchedule} isLoading={saving}>Lưu</Button>
+            <Button variant="primary" onClick={handleSaveSchedule} isLoading={saving}>Xác Nhận Mở</Button>
           </div>
         }
       >

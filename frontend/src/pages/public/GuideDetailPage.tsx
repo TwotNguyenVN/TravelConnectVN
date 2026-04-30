@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageContainer, Button, LoadingBlock, EmptyState, Card, Badge } from '../../components/common';
+import { PageContainer, Button, LoadingBlock, EmptyState, Card, Badge, TourCard } from '../../components/common';
 import { guideService } from '../../services/guideService';
 import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
@@ -357,25 +357,13 @@ const GuideDetailPage: React.FC = () => {
             </div>
 
             {guide.tours && guide.tours.length > 0 ? (
-              <div className="tours-grid">
+              <div className="tours-grid-premium">
                 {guide.tours.map(tour => (
-                  <div key={tour.id} className="tour-card" onClick={() => navigate(`/tours/${tour.id}`)}>
-                    <div className="tour-image-container">
-                      <img src={tour.image} alt={tour.title} className="tour-image" />
-                      <div className="tour-category-tag">{tour.category}</div>
-                    </div>
-                    <div className="tour-card-body">
-                      <h3 className="tour-title">{tour.title}</h3>
-                      <div className="tour-meta">
-                        <span>📍 {tour.province}</span>
-                        <span>⏱️ {tour.duration}</span>
-                      </div>
-                      <div className="tour-price-row">
-                        <div className="tour-price">{tour.price.toLocaleString('vi-VN')} VNĐ</div>
-                        <Button variant="ghost" size="small">Chi tiết →</Button>
-                      </div>
-                    </div>
-                  </div>
+                  <TourCard 
+                    key={tour.id} 
+                    tour={tour} 
+                    onClick={() => navigate(`/tours/${tour.id}`)} 
+                  />
                 ))}
               </div>
             ) : (

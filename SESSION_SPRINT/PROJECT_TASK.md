@@ -844,3 +844,39 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Premium Demo Data)**: Chỉnh sửa nội dung các tour/guide demo để đạt độ thẩm mỹ cao nhất.
+
+---
+
+### 23. Session Update (2026-04-30) - Tour Schedule Details & Guide Management
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Building Tour Schedule Details & Guide Management.
+- Chosen subtask: Phát triển trang Chi tiết Lịch khởi hành cho HDV và tối ưu điều hướng thông báo.
+
+### Done
+- [x] Cập nhật **TourRequestQueryDto** hỗ trợ lọc theo `scheduleId`.
+- [x] Nâng cấp **TourRequestsService** phía Backend để trả về thông tin thanh toán chi tiết.
+- [x] Triển khai trang **TourScheduleDetailPage** (UI Premium) hiển thị danh sách khách hàng.
+- [x] Tích hợp logic **Parsing Passenger Note** để trích xuất thông tin hành khách từ ghi chú booking.
+- [x] Cho phép HDV cập nhật số lượng khách tối đa (`maxParticipants`) và khóa giá tour (`price` readonly).
+- [x] Sửa lỗi điều hướng tại **NotificationsPage**: Tự động chuyển hướng HDV đến `/guide/tour-requests` khi có thông báo về tour.
+- [x] Fix lỗi Vite import và đồng bộ tên thuộc tính (`tour_schedules`).
+
+### Files Changed
+- `backend/src/tour-requests/dto/tour-request-query.dto.ts`
+- `backend/src/tour-requests/tour-requests.service.ts`
+- `frontend/src/routes/index.tsx`
+- `frontend/src/services/tourRequestService.ts`
+- `frontend/src/services/tourService.ts`
+- `frontend/src/pages/guide/tabs/TourSchedulesTab.tsx`
+- `frontend/src/pages/guide/TourScheduleDetailPage.tsx`
+- `frontend/src/pages/guide/TourScheduleDetailPage.css`
+- `frontend/src/pages/user/NotificationsPage.tsx`
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.2 (End-to-End Flow Validation)**: Kiểm tra luồng đặt tour thực tế từ khách hàng sang HDV.
+

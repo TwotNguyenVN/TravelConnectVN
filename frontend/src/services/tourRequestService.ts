@@ -24,6 +24,7 @@ export interface TourRequest {
 export interface TourRequestQuery {
   tourId?: string;
   status?: string;
+  scheduleId?: string;
   page?: number;
   limit?: number;
 }

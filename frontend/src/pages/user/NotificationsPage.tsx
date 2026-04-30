@@ -4,6 +4,7 @@ import { Button } from '../../components/common/Button/Button';
 import { Badge } from '../../components/common/Badge/Badge';
 import { LoadingBlock, EmptyState } from '../../components/common';
 import { useToast } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 import notificationService from '../../services/notificationService';
 import type { Notification } from '../../services/notificationService';
 
@@ -17,7 +18,10 @@ export const NotificationsPage: React.FC = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const { toast } = useToast();
+  const { roles } = useAuth();
   const navigate = useNavigate();
+  
+  const isGuide = roles.includes('GUIDE');
 
   const fetchNotifications = async (pageNum: number, append = false) => {
     try {
@@ -92,7 +96,17 @@ export const NotificationsPage: React.FC = () => {
     // Navigate based on notification type
     switch (notification.entity_type) {
       case 'TOUR_REQUEST':
-        navigate('/user/requests');
+        // Logic to distinguish guide-side vs user-side
+        const isGuideNotification = 
+          notification.title.toLowerCase().includes('mới') || 
+          notification.title.toLowerCase().includes('hủy') ||
+          notification.title.toLowerCase().includes('thanh toán');
+          
+        if (isGuide && isGuideNotification) {
+          navigate('/guide/tour-requests');
+        } else {
+          navigate('/user/requests');
+        }
         break;
       case 'COMPANION_REQUEST':
         navigate('/user/companion-requests');

@@ -223,6 +223,7 @@ export class TourRequestsService {
     };
     if (status) where.status = status;
     if (tourId) where.tour_id = tourId;
+    if (query.scheduleId) where.schedule_id = query.scheduleId;
 
     const [requests, total] = await Promise.all([
       this.prisma.tour_requests.findMany({

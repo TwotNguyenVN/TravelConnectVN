@@ -41,22 +41,44 @@ export class PaymentsService {
       if (request.user_id !== userId) throw new BadRequestException('Bạn không có quyền thanh toán yêu cầu này');
       if (request.status !== 'approved' && request.status !== 'pending') throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán');
 
-      // Tạo giao dịch nội bộ
-      const transactionId = crypto.randomUUID(); // Dùng uuid ngẫu nhiên làm mã đơn nội bộ
+      // Tìm hoặc tạo giao dịch nội bộ
       const totalAmount = Number(request.tours.price) * request.participant_count;
       const amount = paymentType === 'deposit' ? Math.floor(totalAmount * 0.5) : totalAmount;
 
-      await this.prisma.payment_transactions.create({
-        data: {
-          id: transactionId,
+      // Kiểm tra xem đã có giao dịch pending cho yêu cầu này chưa
+      const existingTransaction = await this.prisma.payment_transactions.findFirst({
+        where: {
           tour_request_id: tourRequestId,
           user_id: userId,
-          amount: amount,
-          payment_method: 'vnpay',
-          status: 'pending',
-          transaction_code: transactionId, // Dùng làm vnp_TxnRef
-        },
+          status: 'pending'
+        }
       });
+
+      let transactionId: string;
+
+      if (existingTransaction) {
+        transactionId = existingTransaction.id;
+        // Cập nhật lại số tiền nếu người dùng thay đổi loại thanh toán (Full <-> Deposit)
+        if (Number(existingTransaction.amount) !== amount) {
+          await this.prisma.payment_transactions.update({
+            where: { id: transactionId },
+            data: { amount: amount }
+          });
+        }
+      } else {
+        transactionId = crypto.randomUUID();
+        await this.prisma.payment_transactions.create({
+          data: {
+            id: transactionId,
+            tour_request_id: tourRequestId,
+            user_id: userId,
+            amount: amount,
+            payment_method: 'vnpay',
+            status: 'pending',
+            transaction_code: transactionId, // Dùng làm vnp_TxnRef
+          },
+        });
+      }
 
       // Tạo tham số VNPAY
       const tmnCode = process.env.VNP_TMNCODE;

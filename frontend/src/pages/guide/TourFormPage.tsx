@@ -182,12 +182,12 @@ const TourFormPage: React.FC = () => {
 
   const getStatusLabel = (business: string, visibility: string) => {
     if (business === "draft") return { label: "Bản nháp", color: "var(--tc-text-secondary)", icon: "📝" };
+    if (business === "cancelled") return { label: "Đã xóa", color: "#ef4444", icon: "🗑️" };
+    
+    if (visibility === "hidden") return { label: "Đang ẩn", color: "#f59e0b", icon: "👁️‍🗨️" };
+    
     if (business === "published") return { label: "Đang mở", color: "#22c55e", icon: "🚀" };
-    if (business === "closed") {
-      if (visibility === "hidden") return { label: "Tạm ngưng", color: "#f59e0b", icon: "⏸️" };
-      return { label: "Đã đóng ĐK", color: "#6366f1", icon: "🔒" };
-    }
-    if (business === "cancelled") return { label: "Đã hủy", color: "#ef4444", icon: "🗑️" };
+    if (business === "closed") return { label: "Đã đóng ĐK", color: "#6366f1", icon: "🔒" };
     if (business === "completed") return { label: "Hoàn tất", color: "#10b981", icon: "🏆" };
     return { label: "Không rõ", color: "var(--tc-text-secondary)", icon: "❓" };
   };
@@ -377,18 +377,10 @@ const TourFormPage: React.FC = () => {
       return !!(formData.title && formData.categoryId && formData.price !== undefined && formData.price >= 0);
     }
     if (step === 2) {
-      const datesValid =
-        formData.startDate && formData.endDate
-          ? new Date(formData.endDate) >= new Date(formData.startDate)
-          : true;
-
       return !!(
         formData.province &&
         formData.numDays &&
         formData.numNights !== undefined &&
-        formData.startDate &&
-        formData.endDate &&
-        datesValid &&
         formData.meetPoint &&
         formData.meetAddress &&
         formData.meetTime
@@ -411,13 +403,15 @@ const TourFormPage: React.FC = () => {
         toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Giá, Tỉnh thành)");
         return false;
       }
+      if (formData.maxParticipants < 1 || formData.maxParticipants > 20) {
+        toast.warning("Số lượng khách tối đa phải từ 1 đến 20 người");
+        return false;
+      }
     }
     if (step === 2) {
       if (
         !formData.numDays ||
         formData.numNights === undefined ||
-        !formData.startDate ||
-        !formData.endDate ||
         !formData.meetPoint ||
         !formData.meetAddress ||
         !formData.meetTime
@@ -666,14 +660,6 @@ const TourFormPage: React.FC = () => {
         return;
       }
 
-      // Kiểm tra ngày nếu cả hai đều có
-      if (formData.startDate && formData.endDate) {
-        if (new Date(formData.endDate) < new Date(formData.startDate)) {
-          toast.error("Ngày kết thúc không thể trước ngày bắt đầu");
-          setCurrentStep(2);
-          return;
-        }
-      }
 
       setSubmitting(true);
       const draftData = { ...formData, businessStatus: 'draft' };
@@ -1000,7 +986,7 @@ const TourFormPage: React.FC = () => {
 
                 <div className="tc-form-group">
                   <label>
-                    Số lượng khách tối đa <span>*</span>
+                    Số lượng khách <span>*</span>
                   </label>
                   <input
                     type="number"
@@ -1009,6 +995,7 @@ const TourFormPage: React.FC = () => {
                     value={formData.maxParticipants ?? ""}
                     onChange={handleBasicChange}
                     min="1"
+                    max={20}
                     required
                   />
                 </div>
@@ -1078,36 +1065,6 @@ const TourFormPage: React.FC = () => {
                     </div>
                   </div>
 
-                <div className="tc-tour-form__grid">
-                  <div className="tc-form-group">
-                    <label>
-                      Ngày bắt đầu <span>*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name="startDate"
-                      className="tc-form-input"
-                      value={formData.startDate}
-                      onChange={handleBasicChange}
-                      required
-                      disabled={isPublished}
-                    />
-                  </div>
-                  <div className="tc-form-group">
-                    <label>
-                      Ngày kết thúc <span>*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name="endDate"
-                      className="tc-form-input"
-                      value={formData.endDate}
-                      onChange={handleBasicChange}
-                      required
-                      disabled={isPublished}
-                    />
-                  </div>
-                </div>
 
                 <div className="tc-form-group">
                   <label>
@@ -1531,43 +1488,9 @@ const TourFormPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="tc-dashboard-card tc-participants-count">
-              <div className="tc-dashboard-card__icon">👥</div>
-              <div className="tc-dashboard-card__info">
-                <span className="tc-dashboard-label">Khách đã tham gia</span>
-                <span className="tc-dashboard-value">
-                  {participantCount} / {formData.maxParticipants || 0}
-                </span>
-              </div>
-              <div className="tc-progress-bar">
-                <div 
-                  className="tc-progress-fill" 
-                  style={{ width: `${Math.min(100, (participantCount / (formData.maxParticipants || 1)) * 100)}%` }}
-                ></div>
-              </div>
 
-              {(isPublished || wasPublished.current) && (
-                <div className="tc-max-participants-update" style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #eee' }}>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--tc-text-secondary)', display: 'block', marginBottom: '8px' }}>
-                    Cập nhật số lượng khách tối đa
-                  </label>
-                  <input 
-                    type="number" 
-                    className="tc-form-input"
-                    style={{ padding: '8px 12px' }}
-                    value={formData.maxParticipants}
-                    onChange={(e) => setFormData({ ...formData, maxParticipants: parseInt(e.target.value) })}
-                    min={participantCount + 1}
-                    max={20}
-                  />
-                  <p style={{ fontSize: '0.7rem', color: 'var(--tc-text-secondary)', marginTop: '4px' }}>
-                    * Từ {participantCount + 1} đến 20
-                  </p>
-                </div>
-              )}
-            </div>
 
-            <div className="tc-settings-actions-grid" style={(isPublished || wasPublished.current) ? { gridTemplateColumns: 'repeat(3, 1fr)' } : {}}>
+            <div className="tc-settings-actions-grid" style={(isPublished || wasPublished.current) ? { gridTemplateColumns: 'repeat(2, 1fr)' } : {}}>
               {!(isPublished || wasPublished.current) && (
                 <>
                   <div 
@@ -1583,45 +1506,48 @@ const TourFormPage: React.FC = () => {
                     onClick={() => setSelectedAction('published')}
                   >
                     <div className="tc-action-card__icon">🌐</div>
-                    <div className="tc-action-card__label">Đăng bài</div>
+                    <div className="tc-action-card__label">Hoàn Tất</div>
                   </div>
                 </>
               )}
 
               {(isPublished || wasPublished.current) && (
                 <>
-                  {formData.businessStatus === 'closed' && formData.visibilityStatus === 'hidden' ? (
+                  {formData.visibilityStatus === 'hidden' ? (
                     <div 
-                      className="tc-action-card" 
-                      onClick={() => setFormData({ ...formData, businessStatus: 'published', visibilityStatus: 'visible' })}
+                      className="tc-action-card active" 
+                      onClick={() => setFormData({ ...formData, visibilityStatus: 'visible' })}
                     >
-                      <div className="tc-action-card__icon">🚀</div>
-                      <div className="tc-action-card__label">Mở ĐK</div>
+                      <div className="tc-action-card__icon">👁️</div>
+                      <div className="tc-action-card__label">Hiện</div>
                     </div>
                   ) : (
                     <div 
-                      className={`tc-action-card ${formData.businessStatus === 'closed' && formData.visibilityStatus === 'hidden' ? 'active' : ''}`} 
-                      onClick={() => setFormData({ ...formData, businessStatus: 'closed', visibilityStatus: 'hidden' })}
+                      className="tc-action-card" 
+                      onClick={() => setFormData({ ...formData, visibilityStatus: 'hidden' })}
                     >
-                      <div className="tc-action-card__icon">⏸️</div>
-                      <div className="tc-action-card__label">Tạm ngưng</div>
+                      <div className="tc-action-card__icon">👁️‍🗨️</div>
+                      <div className="tc-action-card__label">Ẩn</div>
                     </div>
                   )}
                   
-                  <div 
-                    className={`tc-action-card ${formData.businessStatus === 'closed' && formData.visibilityStatus === 'visible' ? 'active' : ''}`} 
-                    onClick={() => setFormData({ ...formData, businessStatus: 'closed', visibilityStatus: 'visible' })}
-                  >
-                    <div className="tc-action-card__icon">🔒</div>
-                    <div className="tc-action-card__label">Đóng ĐK</div>
-                  </div>
-                  <div 
-                    className={`tc-action-card ${formData.businessStatus === 'cancelled' ? 'active' : ''}`} 
-                    onClick={() => setFormData({ ...formData, businessStatus: 'cancelled' })}
-                  >
-                    <div className="tc-action-card__icon">🗑️</div>
-                    <div className="tc-action-card__label">Hủy</div>
-                  </div>
+                  {formData.businessStatus === 'cancelled' ? (
+                    <div 
+                      className="tc-action-card active" 
+                      onClick={() => setFormData({ ...formData, businessStatus: 'published' })}
+                    >
+                      <div className="tc-action-card__icon">🔄</div>
+                      <div className="tc-action-card__label">Hủy xóa</div>
+                    </div>
+                  ) : (
+                    <div 
+                      className="tc-action-card" 
+                      onClick={() => setFormData({ ...formData, businessStatus: 'cancelled' })}
+                    >
+                      <div className="tc-action-card__icon">🗑️</div>
+                      <div className="tc-action-card__label">Xóa</div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -1675,7 +1601,7 @@ const TourFormPage: React.FC = () => {
             borderRadius: '4px'
           }}>
             <p style={{ fontSize: '0.9rem', color: '#9a3412', fontWeight: '500' }}>
-              <strong>Lưu ý:</strong> Khi xác nhận sẽ không được chỉnh sửa nội dung nào của tour nữa trừ <strong>Số lượng khách tối đa</strong>.
+              <strong>Lưu ý:</strong> Sau khi đã được duyệt và đăng, bạn sẽ không thể chỉnh sửa nội dung của tour. Vui lòng kiểm tra kỹ thông tin trước khi nhấn Hoàn tất.
             </p>
           </div>
         </div>
