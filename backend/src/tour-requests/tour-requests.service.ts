@@ -136,8 +136,13 @@ export class TourRequestsService {
       this.prisma.tour_requests.findMany({
         where,
         include: {
+          tour_schedules: true,
           tours: {
             include: {
+              tour_images: {
+                orderBy: { is_cover: 'desc' },
+                take: 1
+              },
               guide_profiles: {
                 include: {
                   users: true,
@@ -150,7 +155,6 @@ export class TourRequestsService {
           payment_transactions: {
             where: { status: 'paid' },
             orderBy: { created_at: 'desc' },
-            take: 1
           }
         },
         orderBy: { requested_at: 'desc' },
@@ -181,7 +185,11 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
+          tourImage: req.tours.tour_images.find(img => img.is_cover)?.image_url || req.tours.tour_images[0]?.image_url,
+          startDate: req.tour_schedules?.start_date,
+          guideId: req.tours.guide_profiles.id, // Using profile ID for navigation
           guideName: req.tours.guide_profiles.users?.full_name,
+          guideAvatar: req.tours.guide_profiles.avatar_url || req.tours.guide_profiles.users?.avatar_url,
           participantCount: req.participant_count,
           status: req.status,
           requestedAt: req.requested_at,
@@ -230,11 +238,23 @@ export class TourRequestsService {
         where,
         include: {
           users_tour_requests_user_idTousers: true,
-          tours: true,
+          tour_schedules: true,
+          tours: {
+            include: {
+              tour_images: {
+                orderBy: { is_cover: 'desc' },
+                take: 1
+              },
+              guide_profiles: {
+                include: {
+                  users: true
+                }
+              }
+            }
+          },
           payment_transactions: {
             where: { status: 'paid' },
             orderBy: { created_at: 'desc' },
-            take: 1
           }
         },
         orderBy: { requested_at: 'desc' },
@@ -254,7 +274,7 @@ export class TourRequestsService {
           const paidAmount = Number(lastPaidTransaction.amount);
           if (paidAmount >= totalPrice) {
             paymentStatus = 'Đã thanh toán 100%';
-          } else if (paidAmount >= totalPrice * 0.45) { // 0.45 to handle minor rounding issues
+          } else if (paidAmount >= totalPrice * 0.45) {
             paymentStatus = 'Đã thanh toán 50% (Cọc)';
           } else {
             paymentStatus = `Đã thanh toán ${paidAmount.toLocaleString()} đ`;
@@ -265,6 +285,11 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
+          tourImage: req.tours.tour_images.find(img => img.is_cover)?.image_url || req.tours.tour_images[0]?.image_url,
+          startDate: req.tour_schedules?.start_date,
+          guideId: req.tours.guide_profiles.id,
+          guideName: req.tours.guide_profiles.users.full_name,
+          guideAvatar: req.tours.guide_profiles.avatar_url || req.tours.guide_profiles.users.avatar_url,
           userName: req.users_tour_requests_user_idTousers.full_name,
           userAvatar: req.users_tour_requests_user_idTousers.avatar_url,
           participantCount: req.participant_count,

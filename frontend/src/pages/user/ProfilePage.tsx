@@ -29,6 +29,7 @@ export const ProfilePage: React.FC = () => {
     travelStyle: '',
     preferredLanguageId: '' as string | number,
     otherLanguages: '', // Stores other languages as comma-separated string
+    facebookUrl: '',
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -86,6 +87,7 @@ export const ProfilePage: React.FC = () => {
           travelStyle: data.user_preferences?.preferred_trip_style || '',
           preferredLanguageId: data.user_preferences?.preferred_language_id || '',
           otherLanguages: data.user_preferences?.other_languages || '',
+          facebookUrl: data.facebook_url || '',
         });
 
         if (data.home_province_id && provincesRes.data) {
@@ -400,6 +402,14 @@ export const ProfilePage: React.FC = () => {
               type="date"
               value={formData.dateOfBirth}
               onChange={handleChange}
+              fullWidth
+            />
+            <Input
+              label="Link Facebook"
+              name="facebookUrl"
+              value={formData.facebookUrl}
+              onChange={handleChange}
+              placeholder="Nhập link Facebook của bạn (vd: https://facebook.com/username)"
               fullWidth
             />
           </div>

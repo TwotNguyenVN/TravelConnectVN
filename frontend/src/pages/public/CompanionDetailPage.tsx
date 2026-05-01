@@ -261,7 +261,13 @@ const CompanionDetailPage: React.FC = () => {
               <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt="Author" />
               <div className="author-details">
                 <span className="author-name">{post.users?.full_name}</span>
-                <Button variant="outline" size="small">Xem hồ sơ</Button>
+                <Button 
+                  variant="outline" 
+                  size="small"
+                  onClick={() => navigate(`/profile/${post.user_id}`)}
+                >
+                  Xem hồ sơ
+                </Button>
               </div>
             </div>
             {!isOwner && (

@@ -19,6 +19,7 @@ import { NotificationsPage } from '../pages/user/NotificationsPage';
 import { ActivityLogsPage } from '../pages/user/ActivityLogsPage';
 import { TourMapPage } from '../pages/public/TourMapPage';
 import { CalendarDemoPage } from '../pages/public/CalendarDemoPage';
+import { PublicProfilePage } from '../pages/public/PublicProfilePage';
 
 import FavoritesPage from '../pages/user/FavoritesPage';
 
@@ -33,14 +34,12 @@ import TourManagementPage from '../pages/guide/TourManagementPage';
 import TourItineraryPage from '../pages/guide/TourItineraryPage';
 import TourImagesPage from '../pages/guide/TourImagesPage';
 import TourScheduleDetailPage from '../pages/guide/TourScheduleDetailPage';
-import { MyTourRequestsPage } from '../pages/user/MyTourRequestsPage';
 import { GuideRequestsPage } from '../pages/guide/GuideRequestsPage';
 import CompanionListPage from '../pages/public/CompanionListPage';
 import CompanionDetailPage from '../pages/public/CompanionDetailPage';
 import MyCompanionPostsPage from '../pages/user/MyCompanionPostsPage';
 import CompanionFormPage from '../pages/user/CompanionFormPage';
 import CompanionRequestManagementPage from '../pages/user/CompanionRequestManagementPage';
-import MyCompanionRequestsPage from '../pages/user/MyCompanionRequestsPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminUserManagementPage } from '../pages/admin/AdminUserManagementPage';
 import { AdminReportManagementPage } from '../pages/admin/AdminReportManagementPage';
@@ -52,9 +51,9 @@ import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementP
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
-import TransactionHistoryPage from '../pages/user/TransactionHistoryPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
 import TourBookingPage from '../pages/public/TourBookingPage';
+import { BookingManagementPage } from '../pages/user/BookingManagementPage';
 import { AuthGuard } from './AuthGuard';
 import { RoleGuard } from './RoleGuard';
 
@@ -63,6 +62,7 @@ export const router = createBrowserRouter([
     path: '/',
     element: <PublicLayout />,
     children: [
+      { path: 'profile/:id', element: <PublicProfilePage /> },
       { index: true, element: <HomePage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
@@ -92,18 +92,19 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <ProfilePage /> },
-      { path: 'requests', element: <MyTourRequestsPage /> },
+      { path: 'requests', element: <BookingManagementPage /> },
       { path: 'companion-posts', element: <MyCompanionPostsPage /> },
       { path: 'companion-posts/create', element: <CompanionFormPage /> },
       { path: 'companion-posts/:id/edit', element: <CompanionFormPage /> },
       { path: 'companion-posts/:id/requests', element: <CompanionRequestManagementPage /> },
-      { path: 'companion-requests', element: <MyCompanionRequestsPage /> },
+      { path: 'companion-requests', element: <BookingManagementPage /> },
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'notifications', element: <NotificationsPage /> },
       { path: 'activity-logs', element: <ActivityLogsPage /> },
       { path: 'messages', element: <ChatPage /> },
       { path: 'ai-assistant', element: <AiChatPage /> },
-      { path: 'payments', element: <TransactionHistoryPage /> },
+      { path: 'payments', element: <BookingManagementPage /> },
+      { path: 'bookings', element: <BookingManagementPage /> },
       { path: 'payments/vnpay-return', element: <VnpayReturnPage /> },
     ],
 

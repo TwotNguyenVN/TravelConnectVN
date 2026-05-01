@@ -138,7 +138,13 @@ const CompanionListPage: React.FC = () => {
                 </div>
               </div>
               <div className="post-footer">
-                <div className="post-author">
+                <div 
+                  className="post-author"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/profile/${post.user_id}`);
+                  }}
+                >
                   <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt={post.users?.full_name} />
                   <span>{post.users?.full_name}</span>
                 </div>

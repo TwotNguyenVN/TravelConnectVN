@@ -1306,6 +1306,7 @@ model public_users {
   cover_url                                                             String?
   region                                                                String?
   home_province_id                                                      BigInt?
+  facebook_url                                                          String?
   admin_activity_logs                                                   admin_activity_logs[]
   ai_chat_sessions                                                      ai_chat_sessions[]
   companion_posts                                                       companion_posts[]

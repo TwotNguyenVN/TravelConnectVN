@@ -459,3 +459,68 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Data Polish)**: Kiểm tra hiển thị của các tour đã hoàn thành/tạm ngưng trên giao diện người dùng công cộng (Public View).
+
+---
+
+### 27. Session Update (2026-05-01) - Unified Booking Management Interface
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Unified Booking Management Interface.
+- Chosen subtask: Hợp nhất giao diện quản lý đặt chỗ, thanh toán và yêu cầu đồng hành.
+
+### Done
+- [x] Phát triển trang **BookingManagementPage**: Hợp nhất `MyTourRequestsPage`, `TransactionHistoryPage` và `MyCompanionRequestsPage`.
+- [x] Triển khai logic **Xác nhận tức thì (Instant Approval)**: Cho phép khách hàng thanh toán ngay cho yêu cầu tour `pending`, chuyển trạng thái thành `paid` (Confirmed) tự động.
+- [x] Thiết kế **UI Premium (Card-based)**:
+    - Hiển thị thông tin tour, HDV và tiến độ thanh toán (%) trên cùng một thẻ.
+    - Tích hợp lịch sử giao dịch (Expandable history) ngay trong thẻ đặt chỗ.
+    - Hệ thống nhãn trạng thái (Badge) Glassmorphism hiện đại.
+- [x] Bổ sung **Bộ lọc kép (Dual-layer Filtering)**: Lọc theo Loại hình (Tour/Đồng hành) và Trạng thái xử lý.
+- [x] Đồng bộ **Routing**: Chuyển hướng `/user/requests`, `/user/payments`, `/user/companion-requests` về trang quản lý tập trung.
+
+### Files Changed
+- [NEW] `frontend/src/pages/user/BookingManagementPage.tsx`
+- [NEW] `frontend/src/pages/user/BookingManagementPage.css`
+- [MODIFY] `frontend/src/routes/index.tsx`
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.3 (Cleanup)**: Gỡ bỏ hoàn toàn các file component cũ (`MyTourRequestsPage.tsx`, `TransactionHistoryPage.tsx`, `MyCompanionRequestsPage.tsx`) sau khi người dùng xác nhận ổn định.
+
+
+---
+
+### 26. Session Update (2026-05-01) - Booking Dashboard Optimization & Chat Fixes
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Booking Dashboard Optimization & Chat Fixes.
+- Chosen subtask: Hiện đại hóa giao diện Booking, xử lý thanh toán từng phần và sửa lỗi truy cập chat nhóm.
+
+### Done
+- [x] **Tối ưu Dashboard**: Mở rộng chiều ngang và tăng mật độ hiển thị thông tin cho trang "My Bookings".
+- [x] **Luồng hoàn thành Tour**: Bổ sung trạng thái `completed` cho `tour_requests`. Tự động cập nhật trạng thái yêu cầu khi HDV hoàn thành lịch trình.
+- [x] **Đánh giá sau Tour**: Tích hợp giao diện nút "Đánh giá Tour" và "Đánh giá HDV" cho các booking đã hoàn thành.
+- [x] **Hỗ trợ thanh toán từng phần**: Thêm nhãn "Chưa hoàn tất thanh toán" và nút "Hoàn tất thanh toán" cho các booking trả cọc.
+- [x] **Homepage Attribution**: Hiển thị tên người đăng bài trên các card "Bài đồng hành mới nhất" tại Trang chủ.
+- [x] **Sửa lỗi Chat nhóm**: Khắc phục lỗi 403 Forbidden khi truy cập chat nhóm bài đồng hành bằng cách tự động đồng bộ thành viên đã được duyệt.
+- [x] **Nâng cấp UX Chat**: Thêm bảng chi tiết thành viên (Participants panel) trong giao diện Chat nhóm.
+
+### Files Changed
+- [MODIFY] `backend/src/tours/tours.service.ts`
+- [MODIFY] `backend/src/chat/conversation.service.ts`
+- [MODIFY] `backend/src/companion-posts/companion-posts.service.ts`
+- [MODIFY] `frontend/src/pages/user/BookingManagementPage.tsx`
+- [MODIFY] `frontend/src/pages/user/BookingManagementPage.css`
+- [MODIFY] `frontend/src/pages/public/HomePage.tsx`
+- [MODIFY] `frontend/src/pages/chat/ChatPage.tsx`
+- [MODIFY] `frontend/src/pages/chat/ChatPage.css`
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Review Modals)**: Triển khai các Modal đánh giá tour và đánh giá HDV để hoàn tất luồng phản hồi sau chuyến đi.

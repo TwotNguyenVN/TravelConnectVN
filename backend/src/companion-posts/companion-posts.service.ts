@@ -397,12 +397,14 @@ export class CompanionPostsService {
         orderBy: { requested_at: 'desc' },
         include: {
           companion_posts: {
-            select: {
-              id: true,
-              title: true,
-              destination: true,
-              start_date: true,
-              business_status: true,
+            include: {
+              users: {
+                select: {
+                  id: true,
+                  full_name: true,
+                  avatar_url: true,
+                },
+              },
             },
           },
         },
@@ -595,6 +597,30 @@ export class CompanionPostsService {
       status: 'approved',
       message: `Yêu cầu tham gia đoàn "${request.companion_posts.title}" của bạn đã được CHẤP NHẬN!`,
     });
+
+    // 5. Nếu bài đăng đã có group chat, tự động add user vào
+    const conversation = await this.prisma.conversations.findFirst({
+      where: { related_companion_post_id: request.post_id }
+    });
+
+    if (conversation) {
+      await this.prisma.conversation_participants.upsert({
+        where: {
+          conversation_id_user_id: {
+            conversation_id: conversation.id,
+            user_id: request.user_id
+          }
+        },
+        create: {
+          conversation_id: conversation.id,
+          user_id: request.user_id
+        },
+        update: {
+          left_at: null,
+          joined_at: new Date()
+        }
+      });
+    }
 
     return {
       success: true,

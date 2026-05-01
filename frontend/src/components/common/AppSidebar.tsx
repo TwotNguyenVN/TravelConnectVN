@@ -25,8 +25,8 @@ export const AppSidebar: React.FC = () => {
               👤 Hồ sơ của tôi
             </NavLink>
           )}
-          <NavLink to="/user/requests" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            📅 Yêu cầu của tôi
+          <NavLink to="/user/bookings" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            📅 Hoạt động của tôi
           </NavLink>
           <NavLink to="/user/companion-posts" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             🤝 Bài đăng đồng hành
@@ -39,9 +39,6 @@ export const AppSidebar: React.FC = () => {
           </NavLink>
           <NavLink to="/user/messages" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             💬 Tin nhắn
-          </NavLink>
-          <NavLink to="/user/payments" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-            💳 Thanh toán
           </NavLink>
         </nav>
       </div>

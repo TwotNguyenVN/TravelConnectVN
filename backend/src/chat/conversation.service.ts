@@ -210,7 +210,42 @@ export class ConversationService {
 
     // Kiểm tra đã có group conversation chưa (unique constraint đã có trong DB)
     if (post.conversations) {
-      return this.enrichConversation(post.conversations.id, currentUserId);
+      const existingConvId = post.conversations.id;
+      
+      // Kiểm tra xem currentUserId đã là participant chưa
+      const participant = await this.prisma.conversation_participants.findUnique({
+        where: {
+          conversation_id_user_id: {
+            conversation_id: existingConvId,
+            user_id: currentUserId,
+          },
+        },
+      });
+
+      if (!participant || participant.left_at !== null) {
+        // Nếu chưa là participant hoặc đã rời nhóm, thì add/re-add vào
+        if (!participant) {
+          await this.prisma.conversation_participants.create({
+            data: {
+              conversation_id: existingConvId,
+              user_id: currentUserId,
+            },
+          });
+        } else {
+          // Re-add nếu đã rời
+          await this.prisma.conversation_participants.update({
+            where: {
+              conversation_id_user_id: {
+                conversation_id: existingConvId,
+                user_id: currentUserId,
+              },
+            },
+            data: { left_at: null, joined_at: new Date() },
+          });
+        }
+      }
+
+      return this.enrichConversation(existingConvId, currentUserId);
     }
 
     // Tập hợp participants: chủ bài + approved members

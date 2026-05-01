@@ -5110,3 +5110,122 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Tour management của HDV đã rất hoàn thiện với đầy đủ các nút điều khiển trạng thái.
 - UI Calendar đã minh bạch hơn với các icon trạng thái.
 - Next: Kiểm tra phía Public View.
+
+---
+
+### 25. Session Update (2026-05-01) - Unified Booking Management Interface
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Unified Booking Management Interface.
+- Chosen subtask: Hợp nhất giao diện quản lý đặt chỗ, thanh toán và yêu cầu đồng hành.
+
+### Done
+- [x] Phát triển trang **BookingManagementPage**: Hợp nhất ,  và .
+- [x] Triển khai logic **Xác nhận tức thì (Instant Approval)**: Cho phép khách hàng thanh toán ngay cho yêu cầu tour , chuyển trạng thái thành  (Confirmed) tự động.
+- [x] Thiết kế **UI Premium (Card-based)**:
+    - Hiển thị thông tin tour, HDV và tiến độ thanh toán (%) trên cùng một thẻ.
+    - Tích hợp lịch sử giao dịch (Expandable history) ngay trong thẻ đặt chỗ.
+    - Hệ thống nhãn trạng thái (Badge) Glassmorphism hiện đại.
+- [x] Bổ sung **Bộ lọc kép (Dual-layer Filtering)**: Lọc theo Loại hình (Tour/Đồng hành) và Trạng thái xử lý.
+- [x] Đồng bộ **Routing**: Chuyển hướng , ,  về trang quản lý tập trung.
+
+### Files Changed
+- [NEW] `frontend/src/pages/user/BookingManagementPage.tsx`
+- [NEW] `frontend/src/pages/user/BookingManagementPage.css`
+- [MODIFY] `frontend/src/routes/index.tsx`
+
+### Tested / Verified
+- [x] Kiểm tra tích hợp dữ liệu thật từ 3 dịch vụ: tourRequest, companion, payment.
+- [x] Xác minh logic lọc hoạt động chính xác cho cả 2 loại hình Tour và Đồng hành.
+- [x] Kiểm tra tính năng mở rộng lịch sử giao dịch và điều hướng thanh toán VNPAY.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.3 (Cleanup)**: Gỡ bỏ hoàn toàn các file component cũ (`MyTourRequestsPage.tsx`, `TransactionHistoryPage.tsx`, `MyCompanionRequestsPage.tsx`) sau khi người dùng xác nhận ổn định.
+
+### Quick Handoff
+- Giao diện quản lý của khách hàng đã được nâng cấp lên chuẩn cao cấp, tập trung mọi hoạt động vào một nơi.
+- Quy trình đặt tour được rút ngắn nhờ cơ chế "Thanh toán = Xác nhận".
+
+
+---
+
+### 25. Session Update (2026-05-01) - Unified Booking Management Interface
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Unified Booking Management Interface.
+- Chosen subtask: Hợp nhất giao diện quản lý đặt chỗ, thanh toán và yêu cầu đồng hành.
+
+### Done
+- [x] Phát triển trang **BookingManagementPage**: Hợp nhất `MyTourRequestsPage`, `TransactionHistoryPage` và `MyCompanionRequestsPage`.
+- [x] Triển khai logic **Xác nhận tức thì (Instant Approval)**: Cho phép khách hàng thanh toán ngay cho yêu cầu tour `pending`, chuyển trạng thái thành `paid` (Confirmed) tự động.
+- [x] Thiết kế **UI Premium (Card-based)**:
+    - Hiển thị thông tin tour, HDV và tiến độ thanh toán (%) trên cùng một thẻ.
+    - Tích hợp lịch sử giao dịch (Expandable history) ngay trong thẻ đặt chỗ.
+    - Hệ thống nhãn trạng thái (Badge) Glassmorphism hiện đại.
+- [x] Bổ sung **Bộ lọc kép (Dual-layer Filtering)**: Lọc theo Loại hình (Tour/Đồng hành) và Trạng thái xử lý.
+- [x] Đồng bộ **Routing**: Chuyển hướng `/user/requests`, `/user/payments`, `/user/companion-requests` về trang quản lý tập trung.
+
+### Files Changed
+- [NEW] `frontend/src/pages/user/BookingManagementPage.tsx`
+- [NEW] `frontend/src/pages/user/BookingManagementPage.css`
+- [MODIFY] `frontend/src/routes/index.tsx`
+
+### Tested / Verified
+- [x] Kiểm tra tích hợp dữ liệu thật từ 3 dịch vụ: tourRequest, companion, payment.
+- [x] Xác minh logic lọc hoạt động chính xác cho cả 2 loại hình Tour và Đồng hành.
+- [x] Kiểm tra tính năng mở rộng lịch sử giao dịch và điều hướng thanh toán VNPAY.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.3 (Cleanup)**: Gỡ bỏ hoàn toàn các file component cũ (`MyTourRequestsPage.tsx`, `TransactionHistoryPage.tsx`, `MyCompanionRequestsPage.tsx`) sau khi người dùng xác nhận ổn định.
+
+### Quick Handoff
+- Giao diện quản lý của khách hàng đã được nâng cấp lên chuẩn cao cấp, tập trung mọi hoạt động vào một nơi.
+- Quy trình đặt tour được rút ngắn nhờ cơ chế "Thanh toán = Xác nhận".
+
+
+---
+
+### 26. Session Update (2026-05-01) - Booking Dashboard Optimization & Chat Fixes
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Booking Dashboard Optimization & Chat Fixes.
+- Chosen subtask: Hiện đại hóa giao diện Booking, xử lý thanh toán từng phần và sửa lỗi truy cập chat nhóm.
+
+### Done
+- [x] **Tối ưu Dashboard**: Mở rộng chiều ngang và tăng mật độ hiển thị thông tin cho trang "My Bookings".
+- [x] **Luồng hoàn thành Tour**: Bổ sung trạng thái `completed` cho `tour_requests`. Tự động cập nhật trạng thái yêu cầu khi HDV hoàn thành lịch trình.
+- [x] **Đánh giá sau Tour**: Tích hợp giao diện nút "Đánh giá Tour" và "Đánh giá HDV" cho các booking đã hoàn thành.
+- [x] **Hỗ trợ thanh toán từng phần**: Thêm nhãn "Chưa hoàn tất thanh toán" và nút "Hoàn tất thanh toán" cho các booking trả cọc.
+- [x] **Homepage Attribution**: Hiển thị tên người đăng bài trên các card "Bài đồng hành mới nhất" tại Trang chủ.
+- [x] **Sửa lỗi Chat nhóm**: Khắc phục lỗi 403 Forbidden khi truy cập chat nhóm bài đồng hành bằng cách tự động đồng bộ thành viên đã được duyệt.
+- [x] **Nâng cấp UX Chat**: Thêm bảng chi tiết thành viên (Participants panel) trong giao diện Chat nhóm.
+
+### Files Changed
+- [MODIFY] `backend/src/tours/tours.service.ts`
+- [MODIFY] `backend/src/chat/conversation.service.ts`
+- [MODIFY] `backend/src/companion-posts/companion-posts.service.ts`
+- [MODIFY] `frontend/src/pages/user/BookingManagementPage.tsx`
+- [MODIFY] `frontend/src/pages/user/BookingManagementPage.css`
+- [MODIFY] `frontend/src/pages/public/HomePage.tsx`
+- [MODIFY] `frontend/src/pages/chat/ChatPage.tsx`
+- [MODIFY] `frontend/src/pages/chat/ChatPage.css`
+
+### Tested / Verified
+- [x] Xác minh lỗi chat 403 đã được xử lý hoàn toàn cho cả người dùng cũ và mới.
+- [x] Kiểm tra hiển thị trạng thái thanh toán và nút "Hoàn tất thanh toán" dựa trên `payPercent`.
+- [x] Kiểm tra giao diện Dashboard mới trên các độ phân giải màn hình khác nhau.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Review Modals)**: Triển khai các Modal đánh giá tour và đánh giá HDV để hoàn tất luồng phản hồi sau chuyến đi.

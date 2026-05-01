@@ -58,6 +58,9 @@ const ChatPage: React.FC = () => {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [inputText, setInputText] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loadingParticipants, setLoadingParticipants] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -180,6 +183,27 @@ const ChatPage: React.FC = () => {
     } finally {
       if (showLoading) setLoadingMessages(false);
     }
+  };
+  
+  const fetchParticipants = async (convId: string) => {
+    setLoadingParticipants(true);
+    try {
+      const res = await chatService.getParticipants(convId);
+      if (res.success && res.data) {
+        setParticipants(res.data);
+      }
+    } catch (error) {
+      console.error('Lỗi lấy danh sách thành viên:', error);
+    } finally {
+      setLoadingParticipants(false);
+    }
+  };
+
+  const handleToggleDetails = () => {
+    if (!showDetails && selectedConvId) {
+      fetchParticipants(selectedConvId);
+    }
+    setShowDetails(!showDetails);
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -352,7 +376,13 @@ const ChatPage: React.FC = () => {
               <div className="chat-header-actions">
                 <button className="chat-action-btn" title="Cuộc gọi"><i className="fa-solid fa-phone"></i></button>
                 <button className="chat-action-btn" title="Video call"><i className="fa-solid fa-video"></i></button>
-                <button className="chat-action-btn" title="Thông tin"><i className="fa-solid fa-circle-info"></i></button>
+                <button 
+                  className={`chat-action-btn ${showDetails ? 'active' : ''}`} 
+                  title="Thông tin"
+                  onClick={handleToggleDetails}
+                >
+                  <i className="fa-solid fa-circle-info"></i>
+                </button>
               </div>
             </div>
 
@@ -448,6 +478,63 @@ const ChatPage: React.FC = () => {
           </>
         )}
       </div>
+
+      {/* Details Panel */}
+      {showDetails && selectedConv && (
+        <div className="chat-details-panel">
+          <div className="details-header">
+            <h3>Thông tin nhóm</h3>
+            <button className="close-details-btn" onClick={() => setShowDetails(false)}>
+              <i className="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          
+          <div className="details-content">
+            <div className="details-section">
+              <h4>Thành viên ({participants.length})</h4>
+              <div className="participants-list">
+                {loadingParticipants ? (
+                  <div className="participants-loading">Đang tải...</div>
+                ) : (
+                  participants.map(p => (
+                    <div key={p.userId} className="participant-item">
+                      <img 
+                        src={p.avatarUrl || '/images/default-avatar.png'} 
+                        alt={p.fullName} 
+                        className="participant-avatar"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }}
+                      />
+                      <div className="participant-info">
+                        <div className="participant-name">{p.fullName}</div>
+                        <div className="participant-role">
+                          {p.isOwner ? 'Chủ nhóm' : 'Thành viên'}
+                        </div>
+                      </div>
+                      {isUserOnline(p.lastSeenAt) && <div className="participant-online-dot"></div>}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {selectedConv.companionPost && (
+              <div className="details-section mt-4">
+                <h4>Bài viết liên quan</h4>
+                <div 
+                  className="related-post-card"
+                  onClick={() => navigate(`/companions/${selectedConv.relatedCompanionPostId}`)}
+                >
+                  <img src={selectedConv.companionPost.coverUrl || ''} alt="Cover" />
+                  <div className="related-post-info">
+                    <div className="related-post-title text-truncate">{selectedConv.companionPost.title}</div>
+                    <div className="related-post-location"><i className="bi bi-geo-alt"></i> {selectedConv.companionPost.destination}</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

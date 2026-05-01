@@ -353,14 +353,17 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
           
-          <div style={{ display: 'flex', gap: 'var(--tc-spacing-5)', overflowX: 'auto', paddingBottom: 'var(--tc-spacing-4)' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
+            gap: 'var(--tc-spacing-5)'
+          }}>
             {recommendedTours.map((tour: any) => (
-              <div key={tour.id} style={{ width: '280px', height: '450px', flexShrink: 0 }}>
-                <TourCard 
-                  tour={tour} 
-                  onClick={() => navigate(`/tours/${tour.id}`)} 
-                />
-              </div>
+              <TourCard 
+                key={tour.id} 
+                tour={tour} 
+                onClick={() => navigate(`/tours/${tour.id}`)} 
+              />
             ))}
           </div>
         </section>
@@ -566,7 +569,16 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
 
-              <div style={{ padding: 'var(--tc-spacing-5)', marginTop: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+              <div style={{ padding: 'var(--tc-spacing-5)', marginTop: '25px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                <span style={{ 
+                  fontSize: 'var(--tc-font-size-sm)', 
+                  fontWeight: 600, 
+                  color: 'var(--tc-primary)', 
+                  marginBottom: 'var(--tc-spacing-2)',
+                  display: 'block'
+                }}>
+                  {post.authorName}
+                </span>
                 <h3 style={{ 
                   fontSize: '17px', 
                   fontWeight: 700, 

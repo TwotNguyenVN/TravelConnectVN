@@ -1192,8 +1192,8 @@ export class ToursService {
       throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
     }
 
-    // 2. Cập nhật
-    return this.prisma.tour_schedules.update({
+    // 2. Cập nhật lịch trình
+    const updatedSchedule = await this.prisma.tour_schedules.update({
       where: { id: scheduleId },
       data: {
         ...(data.price !== undefined && { price: data.price }),
@@ -1201,6 +1201,21 @@ export class ToursService {
         ...(data.status !== undefined && { status: data.status }),
       },
     });
+
+    // 3. Nếu trạng thái là 'completed', cập nhật tất cả các yêu cầu liên quan
+    if (data.status === 'completed') {
+      await this.prisma.tour_requests.updateMany({
+        where: {
+          schedule_id: scheduleId,
+          status: { in: ['paid', 'approved'] }
+        },
+        data: {
+          status: 'completed'
+        }
+      });
+    }
+
+    return updatedSchedule;
   }
 
   async deleteTourSchedule(userId: string, tourId: string, scheduleId: string) {

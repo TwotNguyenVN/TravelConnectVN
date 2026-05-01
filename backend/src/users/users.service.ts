@@ -30,6 +30,75 @@ export class UsersService {
     }
   }
 
+  async getPublicProfile(id: string) {
+    const user = await this.prisma.public_users.findUnique({
+      where: { id },
+      include: {
+        guide_profiles: {
+          select: { id: true, verification_status: true }
+        },
+        provinces: true,
+        user_preferences: {
+          include: {
+            languages: true
+          }
+        },
+        companion_posts: {
+          where: { visibility_status: 'visible' },
+          orderBy: { created_at: 'desc' },
+          take: 6
+        }
+      }
+    });
+
+    if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+
+    // Resolve other languages names if they are IDs
+    let otherLanguagesNames = user.user_preferences?.other_languages;
+    if (otherLanguagesNames) {
+      const ids = otherLanguagesNames.split(',').map(id => id.trim()).filter(id => !isNaN(Number(id)));
+      if (ids.length > 0) {
+        const languages = await this.prisma.languages.findMany({
+          where: { id: { in: ids.map(id => BigInt(id)) } },
+          select: { name: true }
+        });
+        otherLanguagesNames = languages.map(l => l.name).join(', ');
+      }
+    }
+
+    return {
+      id: user.id,
+      fullName: user.full_name,
+      avatarUrl: user.avatar_url,
+      coverUrl: user.cover_url,
+      phone: user.phone,
+      dateOfBirth: user.date_of_birth,
+      region: user.region,
+      homeProvince: user.provinces?.name,
+      joinedAt: user.created_at,
+      facebookUrl: user.facebook_url,
+      gender: user.gender,
+      preferences: {
+        travelStyle: user.user_preferences?.preferred_trip_style,
+        preferredLanguage: user.user_preferences?.languages?.name,
+        otherLanguages: otherLanguagesNames,
+      },
+      guideProfile: user.guide_profiles ? {
+        id: user.guide_profiles.id,
+        isVerified: user.guide_profiles.verification_status === 'verified' || user.guide_profiles.verification_status === 'approved'
+      } : null,
+      companionPosts: user.companion_posts.map(post => ({
+        id: post.id,
+        title: post.title,
+        destination: post.destination,
+        startDate: post.start_date,
+        endDate: post.end_date,
+        status: post.business_status,
+        images: post.images
+      }))
+    };
+  }
+
   async update(id: string, data: any) {
     try {
       // 1. Kiểm tra sự tồn tại của người dùng và lấy dữ liệu hiện tại
@@ -107,6 +176,7 @@ export class UsersService {
       // Media URLs
       if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
       if (data.coverUrl !== undefined) updateData.cover_url = data.coverUrl;
+      if (data.facebookUrl !== undefined) updateData.facebook_url = data.facebookUrl;
 
       // 3. Thực hiện cập nhật DB
       const updatedUser = await this.prisma.public_users.update({
