@@ -27,6 +27,7 @@ const CompanionDetailPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
   const [chatLoading, setChatLoading] = useState(false);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
 
   const fetchData = async () => {
     if (!id) return;
@@ -39,12 +40,17 @@ const CompanionDetailPage: React.FC = () => {
       } else {
         setError('Không tìm thấy bài đăng hoặc bài đăng đã bị xóa.');
       }
-
       if (user) {
         const reqRes = await companionService.getMyRequestForPost(id);
         if (reqRes.success && reqRes.data) {
           setMyRequest(reqRes.data);
         }
+      }
+
+      // Set initial active image
+      if (postRes.success && postRes.data.images?.length > 0) {
+        const cover = postRes.data.images.find((img: any) => img.isCover);
+        setActiveImage(cover?.imageUrl || postRes.data.images[0].imageUrl);
       }
     } catch (err: any) {
       console.error('Error fetching companion detail:', err);
@@ -142,9 +148,47 @@ const CompanionDetailPage: React.FC = () => {
       <div className="detail-layout">
         <div className="main-content">
           <Card className="detail-card">
+            {post.images && post.images.length > 0 ? (
+              <div className="detail-gallery">
+                <div className="main-image">
+                  <img 
+                    src={activeImage || (post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl)} 
+                    alt={post.title} 
+                  />
+                </div>
+                {post.images.length > 1 && (
+                  <div className="thumbnail-grid">
+                    {post.images.map((img: any, idx: number) => (
+                      <div 
+                        key={idx} 
+                        className={`thumbnail-item ${activeImage === img.imageUrl ? 'active' : ''}`}
+                        onClick={() => setActiveImage(img.imageUrl)}
+                      >
+                        <img src={img.imageUrl} alt={`${post.title} ${idx + 1}`} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="detail-no-image">
+                <div className="placeholder-image">
+                   <i className="lucide-image"></i>
+                   <span>Không có hình ảnh mô tả</span>
+                </div>
+              </div>
+            )}
+
             <div className="detail-header">
-              <Badge variant={post.business_status === 'open' ? 'success' : 'secondary'}>
-                {post.business_status === 'open' ? 'Đang tuyển' : 'Đã đóng'}
+              <Badge variant={
+                post.business_status === 'open' ? 'success' : 
+                post.business_status === 'completed' ? 'primary' :
+                'secondary'
+              }>
+                {post.business_status === 'open' ? 'Đang tuyển' : 
+                 post.business_status === 'closed' ? 'Đã đủ người' :
+                 post.business_status === 'completed' ? 'Đã hoàn tất' :
+                 'Đã hủy'}
               </Badge>
               <h1 className="detail-title">{post.title}</h1>
               <div className="detail-meta">
@@ -249,7 +293,7 @@ const CompanionDetailPage: React.FC = () => {
                 <h3>Tham gia chuyến đi?</h3>
                 <p>Gửi yêu cầu để chủ bài đăng có thể duyệt bạn vào nhóm.</p>
                 <Button variant="primary" fullWidth onClick={() => setShowRequestModal(true)} disabled={post.business_status !== 'open'}>
-                  {post.business_status === 'open' ? 'Gửi yêu cầu tham gia' : 'Đã ngừng nhận người'}
+                   {post.business_status === 'open' ? 'Gửi yêu cầu tham gia' : 'Đã đủ người'}
                 </Button>
               </div>
             )}
@@ -271,19 +315,13 @@ const CompanionDetailPage: React.FC = () => {
               </div>
             </div>
             {!isOwner && (
-              <div style={{ marginTop: 'var(--tc-spacing-4)', textAlign: 'center' }}>
+              <div className="report-container">
                 <button 
+                  className="report-button"
                   onClick={() => setShowReportModal(true)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: 'var(--tc-text-secondary)',
-                    fontSize: 'var(--tc-font-size-xs)',
-                    cursor: 'pointer',
-                    textDecoration: 'underline'
-                  }}
                 >
-                  Báo cáo bài đăng này
+                  <i className="lucide-flag"></i>
+                  Báo cáo bài đăng
                 </button>
               </div>
             )}

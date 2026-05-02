@@ -37,10 +37,12 @@ export class CompanionPostsService {
     const take = Number(limit);
 
     const where: any = {
-      business_status: status,
-      visibility_status: 'visible',
       deleted_at: null,
     };
+
+    if (status && status !== 'all') {
+      where.business_status = status;
+    }
 
     if (destination) {
       where.destination = { contains: destination, mode: 'insensitive' };
@@ -245,7 +247,7 @@ export class CompanionPostsService {
   }
 
   async getMyCompanionPosts(userId: string, query: any): Promise<ApiResponse<any>> {
-    const { page = '1', limit = '10', status } = query;
+    const { page = '1', limit = '10', status, keyword } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
@@ -256,6 +258,13 @@ export class CompanionPostsService {
 
     if (status) {
       where.business_status = status;
+    }
+
+    if (keyword) {
+      where.OR = [
+        { title: { contains: keyword, mode: 'insensitive' } },
+        { destination: { contains: keyword, mode: 'insensitive' } },
+      ];
     }
 
     const [total, items] = await Promise.all([

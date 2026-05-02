@@ -537,8 +537,6 @@ export class ToursService {
   async getLatestCompanionPosts() {
     const posts = await this.prisma.companion_posts.findMany({
       where: {
-        business_status: 'open',
-        visibility_status: 'visible',
         deleted_at: null,
       },
       include: {
@@ -563,6 +561,8 @@ export class ToursService {
         coverUrl: coverImg?.imageUrl || `https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80`,
         estimatedCost: p.estimated_cost,
         expectedMembers: p.expected_members,
+        businessStatus: p.business_status,
+        visibilityStatus: p.visibility_status,
         requirements: p.requirements
       };
     });

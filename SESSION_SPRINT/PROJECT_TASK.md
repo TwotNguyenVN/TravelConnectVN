@@ -165,7 +165,10 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 - [x] Hoàn tất luồng Đặt Tour & Thanh toán VNPAY Popup (Premium flow).
 - [x] Thiết lập hệ thống quản lý giao dịch & Lịch sử thanh toán (Tabs, Modal, Cancel logic).
 - [x] Nâng cấp thanh tìm kiếm với gợi ý địa điểm và bộ lọc giá 2 đầu (Slider).
-- [~] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
+- [x] Lane 18.2: Nâng cấp dữ liệu demo Premium cho 10 tour tiêu biểu.
+- [x] Nâng cấp visual Bài đồng hành: Image Gallery ở Chi tiết bài và Cover Image ở Danh sách bài.
+- [x] Fix lỗi Participant type và bổ sung Participant panel chi tiết trong Chat.
+- [~] Lane 18.2 — Review Modals (Post-tour review system).
 
 ### Current Best Next Step
 - [ ] Lane 18.3: Cập nhật các sơ đồ UML cho luồng thanh toán và quản lý giao dịch vào báo cáo.
@@ -698,6 +701,8 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 ## 16.3. Lane frontend
 - [x] M29 Chat trực tiếp User – Guide
 - [x] M30 Chat nhóm bài đồng hành
+- [x] Nâng cấp visual Bài đồng hành (Images, Layout)
+- [x] Fix lỗi Participant type in ChatPage.tsx
 
 ## 16.4. Lane test & validation
 - [x] Seed data để test full flow
@@ -976,3 +981,50 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Review Modals)**: Triển khai các Modal đánh giá tour và đánh giá HDV để hoàn tất luồng phản hồi sau chuyến đi.
+
+---
+
+### 29. Session Update (2026-05-02) - Companion Post Management & UI Refinement
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Companion Post Management & Public Visibility Refinement.
+- Chosen subtask: Chuyển đổi logic "Tạm ngưng" từ ẩn bài sang dừng đăng ký, duy trì hiển thị công cộng và tối ưu UI/UX bài đăng đồng hành.
+
+### Done
+- [x] **Quản lý Đăng ký**: Chuyển đổi nút "Hiện/Ẩn" thành logic quản lý trạng thái kinh doanh (`open`/`closed`). Bài đăng luôn hiển thị trên trang công cộng.
+- [x] **Nhãn Trạng thái Thông minh**:
+    - Công cộng: Hiển thị **"Đã đủ người"** cho các bài đăng đóng đăng ký.
+    - Chủ bài đăng: Hiển thị **"Đang tạm ngưng"**.
+- [x] **Đồng bộ Trang chủ**: Loại bỏ bộ lọc nghiêm ngặt trên Backend, cho phép bài đăng "Tạm ngưng" vẫn xuất hiện tại Trang chủ với nhãn phù hợp.
+- [x] **Xác nhận Hành động**: Tích hợp Modal xác nhận chuyên nghiệp cho các thao tác "Hoàn thành" và "Xóa bài".
+- [x] **Cập nhật Type Safety**: Bổ sung trạng thái `completed` vào giao diện TypeScript để hỗ trợ luồng kết thúc chuyến đi.
+- [x] **Cải thiện Chi tiết Bài đăng**: 
+    - Ghim các card "Tham gia" và "Về chủ bài đăng" giúp người dùng dễ tiếp cận khi cuộn trang.
+    - Sửa lỗi tỷ lệ ảnh Tour (16:9) và hỗ trợ xem nhiều ảnh.
+    - Thiết kế lại nút "Báo cáo bài đăng" chuyên nghiệp hơn với icon lá cờ.
+- [x] **Sửa lỗi TypeScript**: Khắc phục lỗi type mismatch của Button variant trên Homepage.
+
+### Files Changed
+- `backend/src/companion-posts/companion-posts.service.ts`
+- `backend/src/tours/tours.service.ts`
+- `frontend/src/pages/user/MyCompanionPostsPage.tsx`
+- `frontend/src/pages/public/CompanionListPage.tsx`
+- `frontend/src/pages/public/CompanionDetailPage.tsx`
+- `frontend/src/pages/public/CompanionDetailPage.css`
+- `frontend/src/pages/public/HomePage.tsx`
+- `frontend/src/services/companionService.ts`
+
+### Tested / Verified
+- [x] Kiểm tra luồng Tạm ngưng/Mở đăng ký trên trang cá nhân.
+- [x] Xác minh hiển thị nhãn "Đã đủ người" trên Trang chủ và trang danh sách.
+- [x] Kiểm tra ghim card và thiết kế nút báo cáo trên trang chi tiết.
+
+### Result Status
+- [x] Xong hoàn toàn subtask.
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Member Approval UX)**: Tối ưu hóa giao diện duyệt thành viên trong trang quản lý yêu cầu bài đăng đồng hành.

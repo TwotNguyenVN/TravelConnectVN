@@ -544,6 +544,32 @@ export const HomePage: React.FC = () => {
                   alt={post.title} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
+                
+                {/* Badge Overlay */}
+                <div style={{ 
+                  position: 'absolute', 
+                  top: '12px', 
+                  right: '12px',
+                  zIndex: 2
+                }}>
+                  <div style={{
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    color: 'white',
+                    backgroundColor: 
+                      post.businessStatus === 'open' ? 'var(--tc-success)' :
+                      post.businessStatus === 'completed' ? 'var(--tc-primary)' :
+                      'var(--tc-text-secondary)'
+                  }}>
+                    {post.businessStatus === 'open' ? 'Đang tuyển' : 
+                     post.businessStatus === 'closed' ? 'Đã đủ người' :
+                     post.businessStatus === 'completed' ? 'Đã hoàn tất' :
+                     'Đã hủy'}
+                  </div>
+                </div>
+
                 {/* Avatar Overlay */}
                 <div style={{ 
                   position: 'absolute', 
@@ -613,7 +639,14 @@ export const HomePage: React.FC = () => {
                   <span style={{ fontSize: '13px', color: 'var(--tc-primary)', fontWeight: 700 }}>
                     {post.authorName}
                   </span>
-                  <Button variant="outline" size="small" style={{ borderRadius: '20px', padding: '4px 16px' }}>Tham gia</Button>
+                  <Button 
+                    variant="outline" 
+                    size="small" 
+                    style={{ borderRadius: '20px', padding: '4px 16px' }}
+                    disabled={post.businessStatus !== 'open'}
+                  >
+                    {post.businessStatus === 'open' ? 'Tham gia' : 'Đã đủ người'}
+                  </Button>
                 </div>
               </div>
             </Card>

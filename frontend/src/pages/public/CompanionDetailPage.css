@@ -12,6 +12,83 @@
 .detail-card {
   padding: 32px;
   margin-bottom: 32px;
+  overflow: hidden; /* For rounded corners with image */
+}
+
+.detail-gallery {
+  margin: -32px -32px 32px -32px; /* Pull image to card edges */
+}
+
+.main-image {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.main-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.main-image:hover img {
+  transform: scale(1.02);
+}
+
+.thumbnail-grid {
+  display: flex;
+  gap: 8px;
+  padding: 12px 32px;
+  background: var(--bg-secondary);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.thumbnail-item {
+  width: 100px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.2s;
+  opacity: 0.6;
+}
+
+.thumbnail-item:hover,
+.thumbnail-item.active {
+  border-color: var(--primary-color);
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.thumbnail-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detail-no-image {
+  margin: -32px -32px 32px -32px;
+  height: 200px;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-image {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-tertiary);
+}
+
+.placeholder-image i {
+  font-size: 2.5rem;
 }
 
 .detail-title {
@@ -120,13 +197,14 @@
 .action-card, .author-card {
   padding: 24px;
   margin-bottom: 24px;
-  position: sticky;
-  top: 24px;
 }
 
 .side-content {
   display: flex;
   flex-direction: column;
+  position: sticky;
+  top: 85px;
+  align-self: flex-start;
 }
 
 .guest-actions h3 {
@@ -189,6 +267,44 @@
 
 .mt-4 { margin-top: 1rem; }
 .mb-4 { margin-bottom: 1rem; }
+
+/* Report Button Styling */
+.report-container {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.report-button {
+  background: none;
+  border: 1px solid var(--tc-border);
+  color: var(--tc-text-secondary);
+  font-size: 0.85rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  justify-content: center;
+}
+
+.report-button i {
+  font-size: 0.9rem;
+  color: var(--tc-text-secondary);
+}
+
+.report-button:hover {
+  background-color: var(--tc-danger-bg);
+  color: var(--tc-danger);
+  border-color: var(--tc-danger);
+}
+
+.report-button:hover i {
+  color: var(--tc-danger);
+}
 
 @media (max-width: 992px) {
   .detail-layout {

@@ -12,8 +12,9 @@ export interface CompanionPost {
   expected_members: number;
   description: string;
   requirements?: string;
-  business_status: 'open' | 'closed' | 'cancelled';
+  business_status: 'open' | 'closed' | 'cancelled' | 'completed';
   visibility_status: 'visible' | 'hidden';
+  images?: any[];
   created_at: string;
   users?: {
     id: string;

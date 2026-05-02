@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';
-import type { Conversation, Message } from '../../services/chatService';
+import type { Conversation, Message, Participant } from '../../services/chatService';
 import './ChatPage.css';
 
 const formatTime = (dateString: string) => {

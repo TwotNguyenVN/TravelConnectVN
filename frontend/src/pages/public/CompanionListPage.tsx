@@ -88,6 +88,7 @@ const CompanionListPage: React.FC = () => {
             options={[
               { value: 'open', label: 'Đang mở' },
               { value: 'closed', label: 'Đã đóng' },
+              { value: 'completed', label: 'Đã hoàn tất' },
             ]}
             value={filters.status}
             onChange={handleFilterChange}
@@ -112,43 +113,68 @@ const CompanionListPage: React.FC = () => {
         <div className="companion-grid">
           {posts.map(post => (
             <Card key={post.id} className="companion-card" onClick={() => navigate(`/companions/${post.id}`)}>
-              <div className="post-header">
-                <Badge variant={post.business_status === 'open' ? 'success' : 'secondary'}>
-                  {post.business_status === 'open' ? 'Đang tuyển' : 'Đã đóng'}
-                </Badge>
-                <span className="post-date">{formatDate(post.created_at)}</span>
+              <div className="post-image-container">
+                {post.images && post.images.length > 0 ? (
+                  <img 
+                    src={post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl} 
+                    alt={post.title} 
+                    className="post-cover"
+                  />
+                ) : (
+                  <div className="post-no-image">
+                    <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png" alt="Default" />
+                  </div>
+                )}
+                <div className="post-badge-overlay">
+                  <Badge variant={
+                    post.business_status === 'open' ? 'success' : 
+                    post.business_status === 'completed' ? 'primary' :
+                    'secondary'
+                  }>
+                    {post.business_status === 'open' ? 'Đang tuyển' : 
+                     post.business_status === 'closed' ? 'Đã đủ người' :
+                     post.business_status === 'completed' ? 'Đã hoàn tất' :
+                     'Đã hủy'}
+                  </Badge>
+                </div>
               </div>
-              <h3 className="post-title">{post.title}</h3>
-              <div className="post-info">
-                <div className="info-item">
-                  <i className="lucide-map-pin"></i>
-                  <span>{post.destination}</span>
+
+              <div className="post-content">
+                <div className="post-header">
+                  <span className="post-date">{formatDate(post.created_at)}</span>
                 </div>
-                <div className="info-item">
-                  <i className="lucide-calendar"></i>
-                  <span>{formatDate(post.start_date)} - {formatDate(post.end_date)}</span>
+                <h3 className="post-title">{post.title}</h3>
+                <div className="post-info">
+                  <div className="info-item">
+                    <i className="lucide-map-pin"></i>
+                    <span>{post.destination}</span>
+                  </div>
+                  <div className="info-item">
+                    <i className="lucide-calendar"></i>
+                    <span>{formatDate(post.start_date)} - {formatDate(post.end_date)}</span>
+                  </div>
+                  <div className="info-item">
+                    <i className="lucide-users"></i>
+                    <span>{post._count?.companion_requests || 0} / {post.expected_members} thành viên</span>
+                  </div>
+                  <div className="info-item">
+                    <i className="lucide-banknote"></i>
+                    <span>{formatCurrency(post.estimated_cost)}</span>
+                  </div>
                 </div>
-                <div className="info-item">
-                  <i className="lucide-users"></i>
-                  <span>{post._count?.companion_requests || 0} / {post.expected_members} thành viên</span>
+                <div className="post-footer">
+                  <div 
+                    className="post-author"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(`/profile/${post.user_id}`);
+                    }}
+                  >
+                    <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt={post.users?.full_name} />
+                    <span>{post.users?.full_name}</span>
+                  </div>
+                  <Button variant="outline" size="small">Chi tiết</Button>
                 </div>
-                <div className="info-item">
-                  <i className="lucide-banknote"></i>
-                  <span>Dự kiến: {formatCurrency(post.estimated_cost)}</span>
-                </div>
-              </div>
-              <div className="post-footer">
-                <div 
-                  className="post-author"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/profile/${post.user_id}`);
-                  }}
-                >
-                  <img src={post.users?.avatar_url || DEFAULT_AVATAR} alt={post.users?.full_name} />
-                  <span>{post.users?.full_name}</span>
-                </div>
-                <Button variant="outline" size="small">Chi tiết</Button>
               </div>
             </Card>
           ))}

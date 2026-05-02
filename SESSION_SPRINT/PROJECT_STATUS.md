@@ -524,3 +524,83 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Review Modals)**: Triển khai các Modal đánh giá tour và đánh giá HDV để hoàn tất luồng phản hồi sau chuyến đi.
+
+---
+
+### 28. Session Update (2026-05-01) - Companion Post Visual Enhancements & Fixes
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Companion Post UI Enhancements & Fixes.
+- Chosen subtask: Nâng cấp hiển thị hình ảnh bài đồng hành và sửa lỗi Participant type.
+
+### Done
+- [x] **Sửa lỗi Code**: Khắc phục lỗi `Cannot find name 'Participant'` trong `ChatPage.tsx` bằng cách thêm import từ `chatService`.
+- [x] **Chi tiết bài đồng hành**: Tích hợp bộ sưu tập hình ảnh (Gallery) vào trang `CompanionDetailPage`. Hiển thị ảnh bìa nổi bật và lưới ảnh nhỏ cho các ảnh còn lại.
+- [x] **Danh sách bài đồng hành**: Nâng cấp giao diện card trong `CompanionListPage` để hiển thị ảnh bìa của chuyến đi, giúp giao diện trực quan và thu hút hơn.
+- [x] **Placeholder Thông minh**: Thêm trạng thái hiển thị mặc định khi bài đăng không có hình ảnh.
+
+### Files Changed
+- [MODIFY] `frontend/src/pages/chat/ChatPage.tsx`
+- [MODIFY] `frontend/src/pages/public/CompanionDetailPage.tsx`
+- [MODIFY] `frontend/src/pages/public/CompanionDetailPage.css`
+- [MODIFY] `frontend/src/pages/public/CompanionListPage.tsx`
+- [MODIFY] `frontend/src/pages/public/CompanionListPage.css`
+
+### Tested / Verified
+- [x] Kiểm tra hiển thị ảnh trên trang chi tiết bài đồng hành (companions/:id).
+- [x] Kiểm tra hiển thị ảnh trên trang danh sách (companions).
+- [x] Xác minh build frontend không còn lỗi type `Participant`.
+
+### Result
+- [x] Hoàn thành nâng cấp visual cho Bài đồng hành.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Review Modals)**: Triển khai các Modal đánh giá tour và đánh giá HDV.
+
+---
+
+### 29. Session Update (2026-05-02) - Companion Post Management & UI Refinement
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Companion Post Management & Public Visibility Refinement.
+- Chosen subtask: Chuyển đổi logic "Tạm ngưng" từ ẩn bài sang dừng đăng ký, duy trì hiển thị công cộng và tối ưu UI/UX bài đăng đồng hành.
+
+### Done
+- [x] **Quản lý Đăng ký**: Chuyển đổi nút "Hiện/Ẩn" thành logic quản lý trạng thái kinh doanh (`open`/`closed`). Bài đăng luôn hiển thị trên trang công cộng.
+- [x] **Nhãn Trạng thái Thông minh**:
+    - Công cộng: Hiển thị **"Đã đủ người"** cho các bài đăng đóng đăng ký.
+    - Chủ bài đăng: Hiển thị **"Đang tạm ngưng"**.
+- [x] **Đồng bộ Trang chủ**: Loại bỏ bộ lọc nghiêm ngặt trên Backend, cho phép bài đăng "Tạm ngưng" vẫn xuất hiện tại Trang chủ với nhãn phù hợp.
+- [x] **Xác nhận Hành động**: Tích hợp Modal xác nhận chuyên nghiệp cho các thao tác "Hoàn thành" và "Xóa bài".
+- [x] **Cập nhật Type Safety**: Bổ sung trạng thái `completed` vào giao diện TypeScript để hỗ trợ luồng kết thúc chuyến đi.
+- [x] **Cải thiện Chi tiết Bài đăng**: 
+    - Ghim các card "Tham gia" và "Về chủ bài đăng" giúp người dùng dễ tiếp cận khi cuộn trang.
+    - Sửa lỗi tỷ lệ ảnh Tour (16:9) và hỗ trợ xem nhiều ảnh.
+    - Thiết kế lại nút "Báo cáo bài đăng" chuyên nghiệp hơn với icon lá cờ.
+- [x] **Sửa lỗi TypeScript**: Khắc phục lỗi type mismatch của Button variant trên Homepage.
+
+### Files Changed
+- `backend/src/companion-posts/companion-posts.service.ts`
+- `backend/src/tours/tours.service.ts`
+- `frontend/src/pages/user/MyCompanionPostsPage.tsx`
+- `frontend/src/pages/public/CompanionListPage.tsx`
+- `frontend/src/pages/public/CompanionDetailPage.tsx`
+- `frontend/src/pages/public/CompanionDetailPage.css`
+- `frontend/src/pages/public/HomePage.tsx`
+- `frontend/src/services/companionService.ts`
+
+### Tested / Verified
+- [x] Kiểm tra luồng Tạm ngưng/Mở đăng ký trên trang cá nhân.
+- [x] Xác minh hiển thị nhãn "Đã đủ người" trên Trang chủ và trang danh sách.
+- [x] Kiểm tra ghim card và thiết kế nút báo cáo trên trang chi tiết.
+
+### Result
+- [x] Xong hoàn toàn subtask.
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Member Approval UX)**: Tối ưu hóa giao diện duyệt thành viên trong trang quản lý yêu cầu bài đăng đồng hành.
