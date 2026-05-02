@@ -1,0 +1,8 @@
+{
+  error: {
+    code: 400,
+    message: 'API key expired. Please renew the API key.',
+    status: 'INVALID_ARGUMENT',
+    details: [ [Object], [Object] ]
+  }
+}

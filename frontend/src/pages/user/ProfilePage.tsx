@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card } from '../../components/common/Card/Card';
 import { Input } from '../../components/common/Input/Input';
@@ -13,6 +14,7 @@ import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
   const { user, refreshProfile } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -552,6 +554,26 @@ export const ProfilePage: React.FC = () => {
           </Button>
         </div>
       </form>
+
+      {/* Become a Guide Recruitment Banner */}
+      {!user?.roles?.some((r: any) => r.role_code === 'GUIDE') && (
+        <div className="tc-guide-recruit-banner">
+          <div className="recruit-content">
+            <div className="recruit-icon">💎</div>
+            <div className="recruit-text">
+              <h4>Bạn am hiểu địa phương?</h4>
+              <p>Trở thành Hướng dẫn viên trên TravelConnectVN để chia sẻ kiến thức và tăng thu nhập ngay hôm nay!</p>
+            </div>
+          </div>
+          <Button 
+            variant="primary" 
+            className="recruit-btn"
+            onClick={() => navigate('/user/guide-verification')}
+          >
+            Đăng ký làm Hướng dẫn viên
+          </Button>
+        </div>
+      )}
 
       {/* Section 5: Security - Separated as requested */}
       <div className="profile-form-section security-section">

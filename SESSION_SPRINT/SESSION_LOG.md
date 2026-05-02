@@ -5467,3 +5467,56 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ### Best Next Single Step
 - **Review & Demo**: Kiểm tra lại toàn bộ báo cáo lần cuối và chuẩn bị bài thuyết trình demo dựa trên các luồng đã audit.
+
+=============================================================================================
+
+## Session 2026-05-02 - Ổn định & Nâng cấp Giao diện AI Assistant
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Giai đoạn C — Hoàn thiện và Bảo vệ
+- Session focus: Khắc phục lỗi kết nối Gemini API, cải thiện UI/UX và lập kế hoạch AI thông minh theo phân quyền.
+- Chosen subtask: Sửa lỗi 500/404 API, tích hợp Markdown, căn lề tin nhắn, lập kế hoạch Role-Based AI.
+
+### Done
+- **Sửa lỗi API:**
+    - Cập nhật API Key mới (vừa gia hạn) vào file `.env`.
+    - Di chuyển từ SDK cũ sang `@google/genai` bản mới nhất, chuẩn hóa model `gemini-flash-latest`.
+    - Khắc phục lỗi Check Constraint tại Database (đổi `sender_type` từ `bot` sang `assistant`).
+- **Nâng cấp UI/UX:**
+    - Thiết kế lại giao diện theo phong cách ChatGPT với Sidebar quản lý phiên chat.
+    - Tích hợp `react-markdown` giúp hiển thị câu trả lời của AI chuyên nghiệp (hỗ trợ in đậm, danh sách, tiêu đề).
+    - Sửa lỗi căn lề tin nhắn: Tin nhắn User nằm bên phải (kèm Avatar), AI nằm bên trái (kèm icon ✨).
+    - Sửa lỗi mapping dữ liệu snake_case (`sender_type`, `session_id`) giúp giao diện đồng bộ chính xác với Backend.
+- **Lập kế hoạch:**
+    - Hoàn thành file `Plan.md` với 6 Task chi tiết để nâng cấp AI theo phân quyền (User/Guide/Admin).
+
+### Files Changed
+- `backend/src/ai-chat/ai-chat.service.ts`
+- `backend/.env`
+- `frontend/src/pages/user/AiChatPage.tsx`
+- `frontend/src/pages/user/AiChatPage.css`
+- `frontend/src/services/aiChatService.ts`
+- `Plan.md`
+
+### Tested / Verified
+- **API:** Test trực tiếp trên giao diện, AI phản hồi nhanh (< 2s) và chính xác.
+- **UI:** Kiểm tra trên màn hình, tin nhắn đã căn lề đúng, Markdown hiển thị chuẩn.
+- **Database:** Tin nhắn được lưu vào Postgres thành công, không còn lỗi Constraint.
+
+### Result
+- [x] Xong hoàn toàn phần ổn định và giao diện cơ bản.
+- [ ] Task 1-6 trong Plan.md đang chờ thực hiện.
+
+### Blockers / Risks
+- Chưa có rủi ro lớn. Cần đảm bảo token sử dụng không vượt ngưỡng RPM của gói Free khi nhiều người dùng cùng truy cập lúc bảo vệ.
+
+### Suggested Next Single Step
+- Thực hiện **Task 1: Tái cấu trúc bộ cung cấp ngữ cảnh** để AI bắt đầu nhận diện Role người dùng.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: AI Assistant Stabilization & Enhancement
+- Result: [x] Basic fixed & UI Revamped
+- Best next single step: Implement Task 1 from Plan.md
+- Must read first next session: Plan.md

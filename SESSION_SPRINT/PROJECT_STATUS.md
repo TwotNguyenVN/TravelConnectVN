@@ -726,3 +726,45 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Best Next Single Step
 - **Review & Demo**: Kiểm tra lại toàn bộ báo cáo lần cuối và chuẩn bị bài thuyết trình demo dựa trên các luồng đã audit.
+
+---
+
+### 32. Session Update (2026-05-02) - AI Assistant Stabilization & Premium UI
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: AI-01 (Sửa lỗi API) & AI-02 (Nâng cấp giao diện).
+
+### Done
+- [x] **Gemini API Integration**:
+    - Thay thế API Key đã hết hạn bằng Key mới.
+    - Chuyển sang sử dụng SDK `@google/genai` bản v1.
+    - Sửa lỗi Check Constraint database (`sender_type`: `bot` -> `assistant`).
+- [x] **Premium AI UI/UX**:
+    - Thiết kế lại giao diện Chat với Sidebar quản lý phiên hội thoại.
+    - Tích hợp `react-markdown` hiển thị nội dung câu trả lời chuẩn xác, thẩm mỹ.
+    - Sửa lỗi căn lề tin nhắn (User bên phải, AI bên trái) bằng cách đồng bộ snake_case data mapping.
+- [x] **AI Strategy Planning**:
+    - Hoàn thành `Plan.md` với lộ trình 6 task nâng cấp AI theo phân quyền (Role-Based).
+
+### Files Changed
+- `backend/src/ai-chat/ai-chat.service.ts`
+- `backend/.env`
+- `frontend/src/pages/user/AiChatPage.tsx`
+- `frontend/src/pages/user/AiChatPage.css`
+- `frontend/src/services/aiChatService.ts`
+- `Plan.md`
+
+### Tested / Verified
+- [x] AI Chat hoạt động mượt mà trên môi trường Local.
+- [x] Markdown rendering hiển thị đúng format (bold, list, headings).
+- [x] Dữ liệu hội thoại được lưu trữ và truy xuất đúng Title (theo tin nhắn đầu tiên).
+
+### Result Status
+- [x] Ổn định hóa AI hoàn tất. Sẵn sàng cho Phase nâng cấp tính năng thông minh.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Task 1 (Plan.md)**: Triển khai bộ lọc Context dựa trên Role người dùng.

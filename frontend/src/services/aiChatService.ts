@@ -1,21 +1,23 @@
 import api from './api';
 import type { ApiResponse } from '../types/api.types';
 
-export interface AiSession {
-  id: string;
-  userId: string;
-  status: string;
-  startedAt: string;
-  lastInteractionAt: string;
-}
-
 export interface AiMessage {
   id: string;
-  sessionId: string;
-  senderType: 'user' | 'bot';
+  session_id: string;
+  sender_type: 'user' | 'assistant';
   content: string;
-  modelName: string | null;
-  createdAt: string;
+  model_name: string | null;
+  created_at: string;
+}
+
+export interface AiSession {
+  id: string;
+  user_id: string;
+  status: string;
+  started_at: string;
+  last_interaction_at: string;
+  created_at?: string;
+  ai_chat_messages?: AiMessage[];
 }
 
 const aiChatService = {

@@ -104,8 +104,9 @@ export const router = createBrowserRouter([
       { path: 'messages', element: <ChatPage /> },
       { path: 'ai-assistant', element: <AiChatPage /> },
       { path: 'payments', element: <BookingManagementPage /> },
-      { path: 'bookings', element: <BookingManagementPage /> },
+      {path: 'bookings', element: <BookingManagementPage /> },
       { path: 'payments/vnpay-return', element: <VnpayReturnPage /> },
+      { path: 'guide-verification', element: <GuideVerificationPage /> },
     ],
 
 

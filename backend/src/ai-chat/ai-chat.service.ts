@@ -1,29 +1,30 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenAI } from '@google/genai';
 
 @Injectable()
 export class AiChatService {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
+  private client: GoogleGenAI;
 
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
-    if (!apiKey) {
-      console.warn('GEMINI_API_KEY is not defined in environment variables');
-    }
-    this.genAI = new GoogleGenerativeAI(apiKey || '');
-    // Sử dụng gemini-1.5-flash cho tốc độ nhanh và tiết kiệm token
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Khởi tạo client theo đúng chuẩn tài liệu mới nhất
+    this.client = new GoogleGenAI({ apiKey: apiKey || '' });
   }
 
   async getSessions(userId: string) {
     return this.prisma.ai_chat_sessions.findMany({
       where: { user_id: userId },
+      include: {
+        ai_chat_messages: {
+          orderBy: { created_at: 'asc' },
+          take: 1,
+        },
+      },
       orderBy: { last_interaction_at: 'desc' },
       take: 20,
     });
@@ -39,13 +40,12 @@ export class AiChatService {
   }
 
   async getMessages(sessionId: string, userId: string) {
-    // Verify ownership
     const session = await this.prisma.ai_chat_sessions.findUnique({
       where: { id: sessionId },
     });
 
     if (!session || session.user_id !== userId) {
-      throw new NotFoundException('Session không tồn tại hoặc không thuộc về bạn');
+      throw new NotFoundException('Session không tồn tại');
     }
 
     return this.prisma.ai_chat_messages.findMany({
@@ -55,7 +55,6 @@ export class AiChatService {
   }
 
   async sendMessage(sessionId: string, userId: string, content: string) {
-    // 1. Kiểm tra session
     const session = await this.prisma.ai_chat_sessions.findUnique({
       where: { id: sessionId },
     });
@@ -64,7 +63,7 @@ export class AiChatService {
       throw new NotFoundException('Session không tồn tại');
     }
 
-    // 2. Lưu tin nhắn của user
+    // 1. Lưu tin nhắn người dùng
     await this.prisma.ai_chat_messages.create({
       data: {
         session_id: sessionId,
@@ -73,88 +72,46 @@ export class AiChatService {
       },
     });
 
-    // 3. Chuẩn bị context cho AI (lấy dữ liệu Tour thực tế)
+    // 2. Lấy context dữ liệu thực tế
     const tours = await this.prisma.tours.findMany({
-      where: {
-        visibility_status: 'visible',
-        business_status: 'published',
-        deleted_at: null,
-      },
-      select: {
-        title: true,
-        province: true,
-        price: true,
-        description: true,
-        start_date: true,
-        end_date: true,
-      },
-      take: 10,
+      where: { visibility_status: 'visible', business_status: 'published', deleted_at: null },
+      select: { title: true, province: true, price: true },
+      take: 5,
     });
+    const toursContext = tours.map(t => `- ${t.title} (${t.province}): ${Number(t.price).toLocaleString()}đ`).join('\n');
 
-    const toursContext = tours.map(t => {
-      const durationDays = (t.start_date && t.end_date) 
-        ? Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24)) + 1 
-        : 'Chưa xác định';
-      return `- ${t.title} tại ${t.province}: ${durationDays === 'Chưa xác định' ? durationDays : durationDays + ' ngày'}, giá ${Number(t.price).toLocaleString()}đ. Mô tả: ${t.description?.substring(0, 100)}...`;
-    }).join('\n');
-
-    // 4. Lấy lịch sử hội thoại gần đây
-    const history = await this.prisma.ai_chat_messages.findMany({
-      where: { session_id: sessionId },
-      orderBy: { created_at: 'desc' },
-      take: 10,
-    });
-
-    const chatHistory = history.reverse().map(m => ({
-      role: m.sender_type === 'user' ? 'user' : 'model',
-      parts: [{ text: m.content }],
-    }));
-
-    // 5. Gọi Gemini API
+    // 3. Gọi Gemini API theo chuẩn tài liệu mới
     try {
-      const systemInstruction = `Bạn là trợ lý du lịch thông minh của TravelConnectVN. 
-      Nhiệm vụ của bạn là tư vấn tour du lịch và trả lời các câu hỏi về du lịch Việt Nam.
-      Dưới đây là danh sách một số tour hiện có trên hệ thống của chúng tôi để bạn tham khảo và giới thiệu:
-      ${toursContext}
+      const systemInstruction = `Bạn là trợ lý TravelConnectVN. Hãy tư vấn dựa trên các tour này nếu có thể:\n${toursContext}`;
       
-      Hãy trả lời thân thiện, hữu ích và tập trung vào việc giúp người dùng tìm được tour phù hợp. 
-      Nếu người dùng hỏi về tour không có trong danh sách, hãy trả lời dựa trên kiến thức của bạn nhưng vẫn khuyến khích họ khám phá các tour trên TravelConnectVN.`;
-
-      const chat = this.model.startChat({
-        history: chatHistory.slice(0, -1), // Không bao gồm tin nhắn vừa tạo
-        generationConfig: {
-          maxOutputTokens: 1000,
-        },
+      const response = await this.client.models.generateContent({
+        model: 'gemini-flash-latest', 
+        contents: `${systemInstruction}\n\nNgười dùng hỏi: ${content}`,
       });
 
-      // Thêm system instruction vào prompt đầu tiên hoặc xử lý qua tham số nếu SDK hỗ trợ (gemini-1.5 hỗ trợ systemInstruction riêng)
-      // Ở đây ta đơn giản là ghép vào message gửi đi nếu là message đầu, hoặc gán qua model config
-      
-      const prompt = content;
-      const result = await chat.sendMessage(prompt);
-      const response = await result.response;
-      const aiResponseText = response.text();
+      const aiResponseText = response.text || 'Xin lỗi, tôi gặp chút gián đoạn trong việc phản hồi.';
 
-      // 6. Lưu phản hồi của AI
+      // 4. Lưu phản hồi AI
       const aiMessage = await this.prisma.ai_chat_messages.create({
         data: {
           session_id: sessionId,
-          sender_type: 'bot',
+          sender_type: 'assistant',
           content: aiResponseText,
-          model_name: 'gemini-1.5-flash',
+          model_name: 'gemini-flash-latest',
         },
       });
 
-      // 7. Cập nhật last_interaction_at của session
+      // 5. Cập nhật session
       await this.prisma.ai_chat_sessions.update({
         where: { id: sessionId },
         data: { last_interaction_at: new Date() },
       });
 
       return aiMessage;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Gemini API Error:', error);
-      throw new InternalServerErrorException('Lỗi khi kết nối với dịch vụ AI');
+      // Trả về lỗi chi tiết để dễ debug nếu Key vẫn sai
+      throw new InternalServerErrorException(`Lỗi AI: ${error.message || 'Không xác định'}`);
     }
   }
 }

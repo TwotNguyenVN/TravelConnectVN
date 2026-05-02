@@ -1065,3 +1065,53 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Best Next Single Step
 - **Review & Demo**: Kiểm tra lại toàn bộ báo cáo và chuẩn bị demo.
+
+---
+
+### 32. Session Update (2026-05-02) - AI Assistant Stabilization & Role-Based Planning
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: AI-01 (Stabilization) & AI-02 (UI Overhaul).
+
+### Done
+- [x] **Task AI-01: Fix Gemini Integration**:
+    - [x] Cập nhật API Key mới.
+    - [x] Chuyển đổi sang SDK `@google/genai` bản ổn định.
+    - [x] Sửa lỗi Check Constraint Database (`bot` -> `assistant`).
+- [x] **Task AI-02: Premium UI Revamp**:
+    - [x] Xây dựng Sidebar quản lý Session.
+    - [x] Tích hợp `react-markdown` cho AI Response.
+    - [x] Sửa lỗi căn lề tin nhắn (User - Right, AI - Left).
+- [x] **Task AI-03: Implementation Planning**:
+    - [x] Xây dựng lộ trình 6 task nâng cấp AI thông minh tại `Plan.md`.
+
+### Future Tasks (from Plan.md)
+- [ ] **Task 1**: Tái cấu trúc bộ cung cấp ngữ cảnh (Refactor Context Provider).
+- [ ] **Task 2**: Hiện thực hóa ngữ cảnh cho User (Tours & Companions).
+- [ ] **Task 3**: Hiện thực hóa ngữ cảnh cho Guide (Tour Management).
+- [ ] **Task 4**: Hiện thực hóa ngữ cảnh cho Admin (System Monitoring).
+- [ ] **Task 5**: Tối ưu hóa Prompt & Định dạng đầu ra.
+- [ ] **Task 6**: Kiểm thử & Bảo mật dữ liệu.
+
+### Files Changed
+- `backend/src/ai-chat/ai-chat.service.ts`
+- `backend/.env`
+- `frontend/src/pages/user/AiChatPage.tsx`
+- `frontend/src/pages/user/AiChatPage.css`
+- `frontend/src/services/aiChatService.ts`
+- `Plan.md`
+
+### Tested / Verified
+- [x] AI phản hồi đúng format Markdown.
+- [x] User Message hiển thị đúng Avatar bên phải.
+- [x] Session Title hiển thị nội dung tin nhắn đầu tiên thay vì ID hex.
+
+### Result Status
+- [x] Hoàn thành subtask ổn định hóa.
+
+### Blockers / Risks
+- Không có.
+
+### Suggested Next Single Step
+- **Task 1**: Bắt đầu tái cấu trúc Backend để nhận diện Role người dùng.
