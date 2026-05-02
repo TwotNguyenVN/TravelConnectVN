@@ -319,50 +319,143 @@
   white-space: pre-line;
 }
 
-/* Accommodation Styles */
+/* Accommodation Card Styles */
 .tc-accommodation-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: var(--tc-spacing-4);
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--tc-spacing-5);
 }
 
-.tc-accommodation-item {
-  padding: var(--tc-spacing-4);
+.tc-accommodation-card {
   border: 1px solid var(--tc-border);
-  border-radius: var(--tc-radius-lg);
+  border-radius: var(--tc-radius-xl);
   background: white;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.tc-accommodation-name {
-  font-weight: 700;
-  margin-bottom: 4px;
+.tc-accommodation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--tc-primary);
 }
 
-.tc-accommodation-address {
-  font-size: var(--tc-font-size-xs);
-  color: var(--tc-text-secondary);
-  margin-bottom: 8px;
+.tc-acc-image-wrapper {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  background: #f1f5f9;
 }
 
-.tc-accommodation-tags {
+.tc-acc-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.tc-accommodation-card:hover .tc-acc-image {
+  transform: scale(1.05);
+}
+
+.tc-acc-content {
+  padding: var(--tc-spacing-4) var(--tc-spacing-5) var(--tc-spacing-5);
   display: flex;
+  flex-direction: column;
   gap: 8px;
+}
+
+.tc-acc-header {
+  display: flex;
   align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
-.tc-accommodation-type {
-  font-size: 10px;
-  background: var(--tc-primary-light);
-  color: var(--tc-primary);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-weight: 600;
-  text-transform: uppercase;
+.tc-acc-type-badge {
+  font-size: 11px;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  color: #1d4ed8;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
 }
 
-.tc-accommodation-stars {
-  color: #f59e0b;
+.tc-acc-province {
   font-size: 12px;
+  color: var(--tc-text-secondary);
+  font-weight: 500;
+}
+
+.tc-acc-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--tc-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.tc-acc-address {
+  font-size: var(--tc-font-size-sm);
+  color: var(--tc-text-secondary);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.tc-acc-dates {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.tc-acc-date {
+  font-size: 12px;
+  color: #065f46;
+  background: #ecfdf5;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.tc-acc-date strong {
+  font-weight: 700;
+}
+
+.tc-acc-notes {
+  font-size: 13px;
+  color: #92400e;
+  background: #fffbeb;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin: 0;
+  line-height: 1.4;
+  border: 1px solid #fde68a;
+}
+
+.tc-acc-footer {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+}
+
+.tc-acc-contact,
+.tc-acc-website {
+  font-size: 12px;
+  color: var(--tc-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.tc-acc-contact:hover,
+.tc-acc-website:hover {
+  color: #0056b3;
+  text-decoration: underline;
 }
 
 .tc-meet-info {

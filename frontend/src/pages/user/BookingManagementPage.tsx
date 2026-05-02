@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Badge, Button, LoadingBlock } from '../../components/common';
+import { Card, Badge, Button, LoadingBlock, ReviewModal } from '../../components/common';
 import { useToast } from '../../contexts/ToastContext';
 import tourRequestService from '../../services/tourRequestService';
 import { companionService } from '../../services/companionService';
@@ -36,6 +36,11 @@ export const BookingManagementPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<'all' | 'tour' | 'companion'>('all');
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [activities, setActivities] = useState<NormalizedActivity[]>([]);
+  const [reviewModal, setReviewModal] = useState<{
+    isOpen: boolean;
+    type: 'tour' | 'guide';
+    activity: NormalizedActivity | null;
+  }>({ isOpen: false, type: 'tour', activity: null });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -193,13 +198,16 @@ export const BookingManagementPage: React.FC = () => {
   };
 
   const handleReviewTour = (activity: NormalizedActivity) => {
-    // Navigate to tour detail page and scroll to review section or open review modal
-    navigate(`/tours/${activity.entityId}?review=true`);
+    setReviewModal({ isOpen: true, type: 'tour', activity });
   };
 
   const handleReviewGuide = (activity: NormalizedActivity) => {
-    // Navigate to guide profile page and scroll to review section or open review modal
-    navigate(`/guides/${activity.guideId}?review=true`);
+    setReviewModal({ isOpen: true, type: 'guide', activity });
+  };
+
+  const handleReviewSuccess = () => {
+    setReviewModal({ isOpen: false, type: 'tour', activity: null });
+    fetchData();
   };
 
   const filteredActivities = activities.filter(act => {
@@ -507,6 +515,18 @@ export const BookingManagementPage: React.FC = () => {
           })
         )}
       </div>
+
+      {reviewModal.activity && (
+        <ReviewModal
+          isOpen={reviewModal.isOpen}
+          onClose={() => setReviewModal({ isOpen: false, type: 'tour', activity: null })}
+          tourRequestId={reviewModal.activity.originalId}
+          tourTitle={reviewModal.activity.title}
+          guideName={reviewModal.activity.guideName}
+          type={reviewModal.type}
+          onSuccess={handleReviewSuccess}
+        />
+      )}
     </div>
   );
 };

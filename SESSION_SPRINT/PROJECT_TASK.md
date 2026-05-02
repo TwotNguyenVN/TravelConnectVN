@@ -1028,3 +1028,40 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Member Approval UX)**: Tối ưu hóa giao diện duyệt thành viên trong trang quản lý yêu cầu bài đăng đồng hành.
+
+---
+
+### 31. Session Update (2026-05-02) - Accommodation UI & UML Documentation
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: GAP-01 (Hiển thị lưu trú) & Lane 18.3 (Sơ đồ UML).
+
+### Done
+- [x] **GAP-01: Accommodation UI Refinement**:
+    - Fix field mapping từ API response sang UI.
+    - Thiết kế lại section "Nơi lưu trú dự kiến" với Premium Card.
+- [x] **Lane 18.3: UML Diagrams**:
+    - Tạo  với 6 sơ đồ.
+- [x] **Report Finalization**:
+    - Cập nhật kết quả kiểm thử tự động (20/20 test cases) vào báo cáo.
+
+### Files Changed
+- 
+- 
+- 
+- 
+- 
+
+### Tested / Verified
+- [x] TypeScript check passed.
+- [x] Toàn bộ báo cáo đã được cập nhật đầy đủ.
+
+### Result Status
+- [x] Hoàn thành toàn bộ GAP quan trọng.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo và chuẩn bị demo.

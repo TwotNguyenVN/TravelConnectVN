@@ -455,13 +455,66 @@ export const TourDetailPage: React.FC = () => {
                     <span>🏨</span> Nơi lưu trú dự kiến
                   </h2>
                   <div className="tc-accommodation-list">
-                    {accommodations.map((acc: any) => (
-                      <div key={acc.id} className="tc-accommodation-item">
-                        <div className="tc-accommodation-name">{acc.name}</div>
-                        <div className="tc-accommodation-address">{acc.address}</div>
-                        <div className="tc-accommodation-tags">
-                          <span className="tc-accommodation-type">{acc.type}</span>
-                          {acc.stars && <span className="tc-accommodation-stars">{'★'.repeat(acc.stars)}</span>}
+                    {accommodations.map((acc: any, index: number) => (
+                      <div key={acc.id || index} className="tc-accommodation-card">
+                        {acc.image_url && (
+                          <div className="tc-acc-image-wrapper">
+                            <img 
+                              src={acc.image_url} 
+                              alt={acc.name} 
+                              className="tc-acc-image"
+                              loading="lazy"
+                              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                          </div>
+                        )}
+                        <div className="tc-acc-content">
+                          <div className="tc-acc-header">
+                            <span className="tc-acc-type-badge">
+                              {acc.accommodation_type === 'hotel' ? '🏨 Khách sạn' :
+                               acc.accommodation_type === 'homestay' ? '🏡 Homestay' :
+                               acc.accommodation_type === 'resort' ? '🌴 Resort' :
+                               acc.accommodation_type === 'hostel' ? '🛏️ Hostel' :
+                               acc.accommodation_type || '🏠 Lưu trú'}
+                            </span>
+                            {acc.province && (
+                              <span className="tc-acc-province">📍 {acc.province}</span>
+                            )}
+                          </div>
+                          <h3 className="tc-acc-name">{acc.name}</h3>
+                          <p className="tc-acc-address">{acc.address}</p>
+
+                          {(acc.check_in_date || acc.check_out_date) && (
+                            <div className="tc-acc-dates">
+                              {acc.check_in_date && (
+                                <span className="tc-acc-date">
+                                  <strong>Nhận phòng:</strong> {new Date(acc.check_in_date).toLocaleDateString('vi-VN')}
+                                </span>
+                              )}
+                              {acc.check_out_date && (
+                                <span className="tc-acc-date">
+                                  <strong>Trả phòng:</strong> {new Date(acc.check_out_date).toLocaleDateString('vi-VN')}
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {acc.notes && (
+                            <p className="tc-acc-notes">💡 {acc.notes}</p>
+                          )}
+
+                          <div className="tc-acc-footer">
+                            {acc.contact_phone && (
+                              <a href={`tel:${acc.contact_phone}`} className="tc-acc-contact">
+                                📞 {acc.contact_phone}
+                              </a>
+                            )}
+                            {acc.website_url && (
+                              <a href={acc.website_url} target="_blank" rel="noopener noreferrer" className="tc-acc-website">
+                                🌐 Website
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </div>
                     ))}

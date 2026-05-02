@@ -5387,3 +5387,83 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Best next single step: Optimize member approval UI for companion posts.
 - Must read first next session: CompanionDetailPage.tsx, MyCompanionPostsPage.tsx
 - Must not do next session: Revert to hiding posts on pause.
+
+---
+
+### 31. Session Update (2026-05-02) - Accommodation UI & UML Documentation
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: GAP-01 (Hiển thị lưu trú) & Lane 18.3 (Sơ đồ UML).
+
+### Done
+- [x] **GAP-01: Accommodation UI Refinement**:
+    - Fix field mapping từ API response sang UI (, , , v.v.).
+    - Thiết kế lại section "Nơi lưu trú dự kiến" với Premium Card: Ảnh 16:9, badge loại hình thông minh, badge tỉnh thành, pill ngày nhận/trả phòng, liên hệ.
+- [x] **Lane 18.3: UML Diagrams**:
+    - Tạo  với 6 sơ đồ: Activity (Booking/Payment, RBAC, Admin Reports), Sequence (Chat, Companion), Component (Overall Architecture).
+    - Tích hợp tham chiếu UML vào báo cáo chính.
+- [x] **Report Finalization**:
+    - Cập nhật kết quả kiểm thử tự động (20/20 test cases) vào Chương 3 của báo cáo.
+    - Đồng bộ  và .
+
+### Files Changed
+- 
+- 
+- 
+- 
+- 
+
+### Tested / Verified
+- [x] TypeScript check passed (0 errors).
+- [x] Kết quả hiển thị UI accommodation đúng mapping và thẩm mỹ cao.
+- [x] Toàn bộ báo cáo đã được cập nhật đầy đủ sơ đồ và kết quả test.
+
+### Result Status
+- [x] Hoàn thành toàn bộ GAP quan trọng trước bảo vệ.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo lần cuối và chuẩn bị bài thuyết trình demo dựa trên các luồng đã audit.
+
+---
+
+### 31. Session Update (2026-05-02) - Accommodation UI & UML Documentation
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: GAP-01 (Hiển thị lưu trú) & Lane 18.3 (Sơ đồ UML).
+
+### Done
+- [x] **GAP-01: Accommodation UI Refinement**:
+    - Fix field mapping từ API response sang UI (`accommodation_type`, `image_url`, `notes`, v.v.).
+    - Thiết kế lại section "Nơi lưu trú dự kiến" với Premium Card: Ảnh 16:9, badge loại hình thông minh, badge tỉnh thành, pill ngày nhận/trả phòng, liên hệ.
+- [x] **Lane 18.3: UML Diagrams**:
+    - Tạo `UML_DIAGRAMS.md` với 6 sơ đồ: Activity (Booking/Payment, RBAC, Admin Reports), Sequence (Chat, Companion), Component (Overall Architecture).
+    - Tích hợp tham chiếu UML vào báo cáo chính.
+- [x] **Report Finalization**:
+    - Cập nhật kết quả kiểm thử tự động (20/20 test cases) vào Chương 3 của báo cáo.
+    - Đồng bộ `BAO_CAO_TONG.md` và `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md`.
+
+### Files Changed
+- `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.css`
+- `UML_DIAGRAMS.md`
+- `BAO_CAO_TONG.md`
+- `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md`
+
+### Tested / Verified
+- [x] TypeScript check passed (0 errors).
+- [x] Kết quả hiển thị UI accommodation đúng mapping và thẩm mỹ cao.
+- [x] Toàn bộ báo cáo đã được cập nhật đầy đủ sơ đồ và kết quả test.
+
+### Result Status
+- [x] Hoàn thành toàn bộ GAP quan trọng trước bảo vệ.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo lần cuối và chuẩn bị bài thuyết trình demo dựa trên các luồng đã audit.

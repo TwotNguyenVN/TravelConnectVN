@@ -604,3 +604,125 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Suggested Next Single Step
 - **Lane 18.2 (Member Approval UX)**: Tối ưu hóa giao diện duyệt thành viên trong trang quản lý yêu cầu bài đăng đồng hành.
+
+---
+
+### 30. Session Update (2026-05-02) - Project Audit, Review Modals & Unit Tests
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Session focus: Project Audit, GAP-09 Review Modals, GAP-02 Unit Tests.
+
+### Done
+- [x] **Audit toàn bộ dự án**: Phân tích source code frontend (50 pages, 17 services), backend (20 modules, 21 controllers), database (42+ bảng).
+- [x] **Tạo 4 file báo cáo audit**:
+    - `SOURCE_AUDIT_FEATURES.md` — Bảng tổng hợp tính năng với bằng chứng source code.
+    - `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md` — Báo cáo đầy đủ 3 chương + Kết luận (472 dòng).
+    - `DEMO_FLOWS_FROM_SOURCE.md` — 11 luồng demo chi tiết (~25-35 phút).
+    - `GAP_ANALYSIS.md` — 9 khoảng cách giữa kế hoạch và source code.
+- [x] **GAP-09: Review Modals**: Tích hợp ReviewModal vào BookingManagementPage. Nâng cấp ReviewModal với star hover effect, emoji feedback, character counter, success animation.
+- [x] **GAP-02: Unit Tests**: Viết 20 test cases cho 3 module backend lõi:
+    - `tours.service.spec.ts` — 6 tests (danh sách, chi tiết, danh mục).
+    - `reviews.service.spec.ts` — 8 tests (4 validation rules, success, pagination).
+    - `tour-requests.service.spec.ts` — 6 tests (tour not found, self-booking, capacity, duplicate).
+- [x] **Cập nhật BAO_CAO_TONG.md**: Copy nội dung báo cáo hoàn chỉnh vào file trống.
+
+### Files Changed
+- [NEW] `SOURCE_AUDIT_FEATURES.md`
+- [NEW] `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md`
+- [NEW] `DEMO_FLOWS_FROM_SOURCE.md`
+- [NEW] `GAP_ANALYSIS.md`
+- [MODIFY] `BAO_CAO_TONG.md` (copy nội dung)
+- [MODIFY] `frontend/src/pages/user/BookingManagementPage.tsx` (tích hợp ReviewModal)
+- [MODIFY] `frontend/src/components/common/Review/ReviewModal.tsx` (nâng cấp premium)
+- [NEW] `frontend/src/components/common/Review/ReviewModal.css`
+- [NEW] `backend/src/tours/tours.service.spec.ts`
+- [NEW] `backend/src/reviews/reviews.service.spec.ts`
+- [NEW] `backend/src/tour-requests/tour-requests.service.spec.ts`
+
+### Tested / Verified
+- [x] TypeScript check passed (0 errors).
+- [x] Jest: 3 suites, 20 tests, 20 passed, 0 failed (0.909s).
+
+### Result
+- [x] Xong hoàn toàn tất cả subtask trong session.
+
+### Suggested Next Single Step
+- **Lane 18.3**: Cập nhật sơ đồ UML cho luồng thanh toán và đánh giá vào báo cáo.
+
+---
+
+### 31. Session Update (2026-05-02) - Accommodation UI & UML Documentation
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: GAP-01 (Hiển thị lưu trú) & Lane 18.3 (Sơ đồ UML).
+
+### Done
+- [x] **GAP-01: Accommodation UI Refinement**:
+    - Fix field mapping từ API response sang UI.
+    - Thiết kế lại section "Nơi lưu trú dự kiến" với Premium Card.
+- [x] **Lane 18.3: UML Diagrams**:
+    - Tạo  với 6 sơ đồ.
+- [x] **Report Finalization**:
+    - Cập nhật kết quả kiểm thử tự động (20/20 test cases) vào báo cáo.
+
+### Files Changed
+- 
+- 
+- 
+- 
+- 
+
+### Tested / Verified
+- [x] TypeScript check passed.
+- [x] Toàn bộ báo cáo đã được cập nhật đầy đủ.
+
+### Result Status
+- [x] Hoàn thành toàn bộ GAP quan trọng.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo và chuẩn bị demo.
+
+---
+
+### 31. Session Update (2026-05-02) - Accommodation UI & UML Documentation
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: GAP-01 (Hiển thị lưu trú) & Lane 18.3 (Sơ đồ UML).
+
+### Done
+- [x] **GAP-01: Accommodation UI Refinement**:
+    - Fix field mapping từ API response sang UI (`accommodation_type`, `image_url`, `notes`, v.v.).
+    - Thiết kế lại section "Nơi lưu trú dự kiến" với Premium Card: Ảnh 16:9, badge loại hình thông minh, badge tỉnh thành, pill ngày nhận/trả phòng, liên hệ.
+- [x] **Lane 18.3: UML Diagrams**:
+    - Tạo `UML_DIAGRAMS.md` với 6 sơ đồ: Activity (Booking/Payment, RBAC, Admin Reports), Sequence (Chat, Companion), Component (Overall Architecture).
+    - Tích hợp tham chiếu UML vào báo cáo chính.
+- [x] **Report Finalization**:
+    - Cập nhật kết quả kiểm thử tự động (20/20 test cases) vào Chương 3 của báo cáo.
+    - Đồng bộ `BAO_CAO_TONG.md` và `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md`.
+
+### Files Changed
+- `frontend/src/pages/public/TourDetailPage.tsx`
+- `frontend/src/pages/public/TourDetailPage.css`
+- `UML_DIAGRAMS.md`
+- `BAO_CAO_TONG.md`
+- `BAO_CAO_TONG_HOP_DUA_TREN_SOURCE.md`
+
+### Tested / Verified
+- [x] TypeScript check passed (0 errors).
+- [x] Kết quả hiển thị UI accommodation đúng mapping và thẩm mỹ cao.
+- [x] Toàn bộ báo cáo đã được cập nhật đầy đủ sơ đồ và kết quả test.
+
+### Result Status
+- [x] Hoàn thành toàn bộ GAP quan trọng trước bảo vệ.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo lần cuối và chuẩn bị bài thuyết trình demo dựa trên các luồng đã audit.
