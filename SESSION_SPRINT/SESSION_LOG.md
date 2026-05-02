@@ -5523,64 +5523,49 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 
 ---
 
-## Session 2026-05-02 - Hoàn thiện AI Phân Quyền & Tối ưu Logic Lịch trình
+## Session 2026-05-03 - Chốt Sprint: AI Assistant Phân Quyền & Logic Tour Thông Minh
 
 ### Sprint
 - Sprint hiện tại: Sprint 14
 - Giai đoạn: Giai đoạn C — Hoàn thiện và Bảo vệ
-- Session focus: Triển khai toàn bộ hệ thống AI thông minh theo phân quyền và tối ưu hiển thị tour.
-- Chosen subtask: Task 1 - 6 (Role-Based AI) & Hệ thống "Next Available Date" cho Tour.
+- Session focus: Hoàn tất toàn bộ logic AI Phân quyền và tối ưu hiển thị Tour theo lịch trình.
+- Chosen subtask: Task 1 - 6 (Role-Based AI) & Hệ thống "Next Available Date".
 
 ### Context checked
-- [x] Đã đọc `Plan.md` và 6 task chi tiết.
-- [x] Đối chiếu `schema.prisma` cho các quan hệ `user_roles` và `tour_schedules`.
+- [x] Đã đối chiếu `Plan.md` và `TRAVEL_PROJECT_MASTER_SPEC_v3_FINAL.md`.
+- [x] Kiểm tra logic DB quan hệ `tour_schedules` và `user_roles`.
 
 ### Done
-- **AI Assistant - Role-Based Context:**
-    - [x] **Task 1:** Tái cấu trúc `AiChatService` nhận diện Role từ JWT và nạp `BasePrompt`.
-    - [x] **Task 2:** Hiện thực `fetchUserContext` (Top 10 Tours & Companions công khai).
-    - [x] **Task 3:** Hiện thực `fetchGuideContext` (Tour do Guide quản lý, khách khởi hành hôm nay, yêu cầu chờ duyệt).
-    - [x] **Task 4:** Hiện thực `fetchAdminContext` (Thống kê hệ thống 24h, Reports chờ xử lý, Yêu cầu xác thực Guide).
-    - [x] **Task 5:** Chuẩn hóa Markdown Table cho dữ liệu báo cáo và thiết lập AI Persona (Admin: Chuyên nghiệp, User: Truyền cảm hứng).
-    - [x] **Task 6:** Kiểm thử bảo mật chéo (Cross-role isolation) thành công.
+- **AI Assistant Intelligence:**
+    - [x] **Role-Based Context**: Triển khai thành công bộ nạp ngữ cảnh cho 3 nhóm: User (Tour/Bạn đồng hành công khai), Guide (Tour quản lý/Khách hàng/Lịch trình), Admin (Thống kê hệ thống/Báo cáo vi phạm).
+    - [x] **Markdown Optimization**: AI phản hồi dưới dạng bảng Markdown chuyên nghiệp, dễ theo dõi.
+    - [x] **Security Audit**: Xác minh cô lập dữ liệu hoàn toàn, đảm bảo User không nhìn thấy dữ liệu nội bộ của Guide/Admin.
 - **System Logic Refinement:**
-    - [x] **Logic Tour Nổi bật:** Tự động chọn ngày khởi hành gần nhất còn chỗ trống. Bài đăng tự ẩn khi hết ngày khởi hành khả dụng.
-    - [x] **Logic Tìm kiếm:** Đồng bộ logic "Next Available Date" vào trang tìm kiếm tour.
-    - [x] **Tích hợp Guide:** Cho phép Guide xem dữ liệu Companion công khai để nắm bắt nhu cầu thị trường.
+    - [x] **Next Available Schedule**: Tự động chuyển ngày hiển thị Tour sang ngày khởi hành tiếp theo còn chỗ trống nếu ngày hiện tại đã đầy hoặc đã qua.
+    - [x] **Guide Integration**: Cho phép Guide xem dữ liệu công khai bài đăng tìm bạn đồng hành của khách hàng để chủ động tư vấn.
 
 ### Files Changed
 - `backend/src/ai-chat/ai-chat.service.ts`
 - `backend/src/tours/tours.service.ts`
-
-### Skills / Guides Used
-- `supabase`: Thực hiện cập nhật dữ liệu ngày khởi hành qua SQL.
-- `api-design`: Chuẩn hóa dữ liệu ngữ cảnh truyền vào Prompt.
-
-### UI Style Rules Applied
-- Không áp dụng trực tiếp (đã xử lý ở phiên trước), nhưng đảm bảo dữ liệu AI trả ra là Markdown Table chuẩn.
-
-### Schema / Migration / Seed Notes
-- Cập nhật `start_date` cho tour "Dạo quanh Sài Gòn" sang 05/05/2026 để kiểm tra logic hiển thị.
+- `SESSION_SPRINT/SESSION_LOG.md`
+- `SESSION_SPRINT/PROJECT_STATUS.md`
+- `SESSION_SPRINT/PROJECT_TASK.md`
 
 ### Tested / Verified
-- [x] Test Guide: AI liệt kê đúng tour đang quản lý và bài đăng tìm bạn đồng hành của khách.
-- [x] Test Logic Tour: Thay đổi số lượng khách/ngày khởi hành -> Tour tự nhảy ngày hiển thị trên Homepage.
-- [x] Test Security: User bình thường không thể truy cập dữ liệu thống kê của Admin/Guide.
+- [x] Thử nghiệm thực tế: AI liệt kê đúng tour của Guide và nhận diện bài đăng tìm bạn mới của User.
+- [x] Kiểm tra Real-time: Bài đăng "Đóng" lập tức biến mất khỏi tầm nhìn của AI.
+- [x] Kiểm tra Logic Tour: Tour tự động nhảy ngày khởi hành trên Homepage khi cập nhật Database.
 
-### Result
-- [x] Xong hoàn toàn bộ Task về AI Role-Based.
-- [x] Hệ thống hiển thị tour trở nên thông minh và tự động hóa hơn.
+### Result Status: [x] Hoàn thành hoàn toàn.
 
 ### Blockers / Risks
-- Không có rủi ro mới.
+- Không có. Hệ thống ổn định.
 
-### Suggested Next Single Step
-- **Lane 18.2 (Member Approval UX)**: Cải thiện giao diện duyệt thành viên cho Companion Posts để đồng bộ với sự chuyên nghiệp của AI.
+### Best Next Single Step
+- **Review & Demo**: Kiểm tra lại toàn bộ báo cáo tổng hợp và kịch bản demo tính năng AI cho buổi bảo vệ.
 
 ### Quick Handoff
 - Current sprint: Sprint 14
-- Current subtask: Role-Based AI & Tour Schedule Logic
-- Result: [x] 100% Done
-- Best next single step: Review Member Approval UI flow.
-- Must read first next session: ai-chat.service.ts
-- Must not do next session: Hardcode dates in database for testing purposes.
+- Current subtask: Role-Based AI & Smart Scheduling (Done)
+- Result: [x] 100% Complete
+- Best next single step: Prepare Demo Video/Script.

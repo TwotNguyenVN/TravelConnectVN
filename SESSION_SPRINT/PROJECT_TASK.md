@@ -1139,3 +1139,18 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Result Status
 - [x] Hoàn thành 100% lộ trình nâng cấp AI thông minh.
+
+---
+
+### 33. Session Update (2026-05-03) - Chốt Sprint: AI Phân Quyền & Logic Tour Thông Minh
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: Task 1 - 6 (Plan.md) - Role-Based AI Intelligence.
+
+### Done
+- [x] **Task 1-6 (Plan.md)**: Hoàn tất lộ trình nâng cấp AI thông minh theo phân quyền.
+- [x] **Logic Tour**: Triển khai "Next Available Date" cho hệ thống Tour.
+- [x] **Security**: Đảm bảo cô lập dữ liệu người dùng/guide/admin.
+
+### Result Status: [x] Hoàn thành toàn bộ mục tiêu Sprint AI.

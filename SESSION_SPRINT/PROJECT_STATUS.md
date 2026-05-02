@@ -806,3 +806,36 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Best Next Single Step
 - **Review & Demo**: Duyệt lại toàn bộ luồng trải nghiệm người dùng và chuẩn bị kịch bản demo.
+
+---
+
+### 33. Session Update (2026-05-03) - Chốt Sprint: AI Phân Quyền & Logic Tour Thông Minh
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: Task 1 - 6 (Plan.md) & Tour Display Logic Optimization.
+
+### Done
+- [x] **AI Assistant Role-Based Intelligence**: 
+    - Triển khai nạp ngữ cảnh động cho User/Guide/Admin. 
+    - Bảo mật dữ liệu tuyệt đối giữa các Role.
+- [x] **Smart Tour Schedule Display**: 
+    - Tự động hiển thị ngày khởi hành tiếp theo còn chỗ trên cả Homepage và Search page.
+- [x] **Documentation & Source Sync**: 
+    - Hoàn tất đồng bộ mã nguồn và tài liệu log phiên.
+
+### Files Changed
+- backend/src/ai-chat/ai-chat.service.ts
+- backend/src/tours/tours.service.ts
+
+### Tested / Verified
+- [x] Hệ thống AI phản hồi chính xác theo vai trò đăng nhập.
+- [x] Tour tự động ẩn/hiển thị ngày mới dựa trên trạng thái chỗ trống trong DB.
+
+### Result Status: [x] Hoàn thành 100%.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Duyệt lại toàn bộ luồng trải nghiệm và chuẩn bị demo.
