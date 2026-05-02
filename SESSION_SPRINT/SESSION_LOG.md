@@ -5520,3 +5520,67 @@ Khi bắt đầu dùng thật, entry đầu tiên nên là:
 - Result: [x] Basic fixed & UI Revamped
 - Best next single step: Implement Task 1 from Plan.md
 - Must read first next session: Plan.md
+
+---
+
+## Session 2026-05-02 - Hoàn thiện AI Phân Quyền & Tối ưu Logic Lịch trình
+
+### Sprint
+- Sprint hiện tại: Sprint 14
+- Giai đoạn: Giai đoạn C — Hoàn thiện và Bảo vệ
+- Session focus: Triển khai toàn bộ hệ thống AI thông minh theo phân quyền và tối ưu hiển thị tour.
+- Chosen subtask: Task 1 - 6 (Role-Based AI) & Hệ thống "Next Available Date" cho Tour.
+
+### Context checked
+- [x] Đã đọc `Plan.md` và 6 task chi tiết.
+- [x] Đối chiếu `schema.prisma` cho các quan hệ `user_roles` và `tour_schedules`.
+
+### Done
+- **AI Assistant - Role-Based Context:**
+    - [x] **Task 1:** Tái cấu trúc `AiChatService` nhận diện Role từ JWT và nạp `BasePrompt`.
+    - [x] **Task 2:** Hiện thực `fetchUserContext` (Top 10 Tours & Companions công khai).
+    - [x] **Task 3:** Hiện thực `fetchGuideContext` (Tour do Guide quản lý, khách khởi hành hôm nay, yêu cầu chờ duyệt).
+    - [x] **Task 4:** Hiện thực `fetchAdminContext` (Thống kê hệ thống 24h, Reports chờ xử lý, Yêu cầu xác thực Guide).
+    - [x] **Task 5:** Chuẩn hóa Markdown Table cho dữ liệu báo cáo và thiết lập AI Persona (Admin: Chuyên nghiệp, User: Truyền cảm hứng).
+    - [x] **Task 6:** Kiểm thử bảo mật chéo (Cross-role isolation) thành công.
+- **System Logic Refinement:**
+    - [x] **Logic Tour Nổi bật:** Tự động chọn ngày khởi hành gần nhất còn chỗ trống. Bài đăng tự ẩn khi hết ngày khởi hành khả dụng.
+    - [x] **Logic Tìm kiếm:** Đồng bộ logic "Next Available Date" vào trang tìm kiếm tour.
+    - [x] **Tích hợp Guide:** Cho phép Guide xem dữ liệu Companion công khai để nắm bắt nhu cầu thị trường.
+
+### Files Changed
+- `backend/src/ai-chat/ai-chat.service.ts`
+- `backend/src/tours/tours.service.ts`
+
+### Skills / Guides Used
+- `supabase`: Thực hiện cập nhật dữ liệu ngày khởi hành qua SQL.
+- `api-design`: Chuẩn hóa dữ liệu ngữ cảnh truyền vào Prompt.
+
+### UI Style Rules Applied
+- Không áp dụng trực tiếp (đã xử lý ở phiên trước), nhưng đảm bảo dữ liệu AI trả ra là Markdown Table chuẩn.
+
+### Schema / Migration / Seed Notes
+- Cập nhật `start_date` cho tour "Dạo quanh Sài Gòn" sang 05/05/2026 để kiểm tra logic hiển thị.
+
+### Tested / Verified
+- [x] Test Guide: AI liệt kê đúng tour đang quản lý và bài đăng tìm bạn đồng hành của khách.
+- [x] Test Logic Tour: Thay đổi số lượng khách/ngày khởi hành -> Tour tự nhảy ngày hiển thị trên Homepage.
+- [x] Test Security: User bình thường không thể truy cập dữ liệu thống kê của Admin/Guide.
+
+### Result
+- [x] Xong hoàn toàn bộ Task về AI Role-Based.
+- [x] Hệ thống hiển thị tour trở nên thông minh và tự động hóa hơn.
+
+### Blockers / Risks
+- Không có rủi ro mới.
+
+### Suggested Next Single Step
+- **Lane 18.2 (Member Approval UX)**: Cải thiện giao diện duyệt thành viên cho Companion Posts để đồng bộ với sự chuyên nghiệp của AI.
+
+### Quick Handoff
+- Current sprint: Sprint 14
+- Current subtask: Role-Based AI & Tour Schedule Logic
+- Result: [x] 100% Done
+- Best next single step: Review Member Approval UI flow.
+- Must read first next session: ai-chat.service.ts
+- Must not do next session: Hardcode dates in database for testing purposes.

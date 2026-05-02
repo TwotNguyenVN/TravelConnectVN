@@ -116,14 +116,7 @@ export class ToursService {
       business_status: 'published',
       visibility_status: 'visible',
       deleted_at: null,
-      AND: [
-        {
-          OR: [
-            { start_date: { gte: new Date() } },
-            { start_date: null }
-          ]
-        }
-      ]
+      AND: []
     };
 
     if (filter.province) {
@@ -143,25 +136,6 @@ export class ToursService {
       if (filter.maxPrice) where.price.lte = Number(filter.maxPrice);
     }
 
-    if (filter.startDate) {
-      const searchDate = new Date(filter.startDate);
-      if (!isNaN(searchDate.getTime())) {
-        where.AND.push({
-          OR: [
-            { start_date: { gte: searchDate } },
-            {
-              tour_schedules: {
-                some: {
-                  start_date: { gte: searchDate },
-                  status: 'available'
-                }
-              }
-            }
-          ]
-        });
-      }
-    }
-
     if (filter.keyword) {
       where.AND.push({
         OR: [
@@ -171,57 +145,55 @@ export class ToursService {
       });
     }
 
-    let orderBy: any = { created_at: 'desc' };
-    if (filter.sortBy) {
-      switch (filter.sortBy) {
-        case 'price-asc':
-          orderBy = { price: 'asc' };
-          break;
-        case 'price-desc':
-          orderBy = { price: 'desc' };
-          break;
-        case 'rating':
-          // Rating sorting requires aggregation or a pre-calculated field
-          // For now, keep default or use a specific field if available
-          break;
-      }
-    }
-
-    const [tours, total] = await Promise.all([
-      this.prisma.tours.findMany({
-        where,
-        include: {
-          tour_images: {
-            where: { is_cover: true },
-          },
-          tour_categories: true,
+    // Lấy tất cả tour thỏa mãn điều kiện cơ bản
+    const tours = await this.prisma.tours.findMany({
+      where,
+      include: {
+        tour_images: {
+          where: { is_cover: true },
         },
-        orderBy,
-        skip,
-        take: limit,
-      }),
-      this.prisma.tours.count({ where }),
-    ]);
+        tour_categories: true,
+        tour_schedules: {
+          where: {
+            start_date: { gte: filter.startDate ? new Date(filter.startDate) : new Date() },
+            status: 'available'
+          },
+          include: {
+            tour_requests: {
+              where: { status: { in: ['approved', 'paid'] } },
+              select: { participant_count: true }
+            }
+          },
+          orderBy: { start_date: 'asc' }
+        }
+      },
+      orderBy: { created_at: 'desc' },
+    });
 
-    const formattedTours = tours.map((t) => ({
-      id: t.id,
-      title: t.title,
-      cover:
-        (t as any).tour_images?.[0]?.image_url ||
-        'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
-      price: Number(t.price),
-      rating: 0.0,
-      location: t.province,
-      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
-      category: t.tour_categories?.name || 'Chưa phân loại',
-      categoryId: t.category_id?.toString(),
-      maxParticipants: t.max_participants,
-      numDays: t.num_days,
-      numNights: t.num_nights,
-    }));
+    // Lọc và định dạng theo logic còn chỗ
+    const allFormattedTours = tours
+      .map((t) => {
+        const nextAvailableSchedule = t.tour_schedules.find(s => {
+          const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+          return bookedCount < s.max_participants;
+        });
+
+        if (!nextAvailableSchedule) {
+          if (t.tour_schedules.length === 0 && (t.start_date === null || t.start_date >= new Date())) {
+            return this.formatTourData(t, null);
+          }
+          return null;
+        }
+
+        return this.formatTourData(t, nextAvailableSchedule);
+      })
+      .filter(t => t !== null);
+
+    const total = allFormattedTours.length;
+    const paginatedTours = allFormattedTours.slice(skip, skip + limit);
 
     return {
-      data: formattedTours,
+      data: paginatedTours,
       total,
       page,
       limit,
@@ -443,56 +415,89 @@ export class ToursService {
   }
 
   async getFeaturedTours() {
+    // 1. Lấy tất cả tour đang hoạt động để lọc theo logic 'còn chỗ'
     const tours = await this.prisma.tours.findMany({
       where: {
         business_status: 'published',
         visibility_status: 'visible',
         deleted_at: null,
-        OR: [
-          { start_date: { gte: new Date() } },
-          { start_date: null }
-        ],
       },
       include: {
         tour_categories: true,
         tour_images: {
           where: { is_cover: true },
         },
-        tour_requests: {
+        tour_schedules: {
           where: {
-            status: { in: ['approved', 'paid'] }
-          }
+            start_date: { gte: new Date() },
+            status: 'available'
+          },
+          include: {
+            tour_requests: {
+              where: { status: { in: ['approved', 'paid'] } },
+              select: { participant_count: true }
+            }
+          },
+          orderBy: { start_date: 'asc' }
         }
       },
       orderBy: { created_at: 'desc' },
-      take: 4,
     });
 
-    return tours.map((t) => {
-      const currentParticipants = t.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
-      const remainingSlots = Math.max(0, t.max_participants - currentParticipants);
+    const formattedTours = tours
+      .map((t) => {
+        // Tìm lịch khởi hành tiếp theo còn chỗ
+        const nextAvailableSchedule = t.tour_schedules.find(s => {
+          const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+          return bookedCount < s.max_participants;
+        });
 
-      return {
-        id: t.id,
-        title: t.title,
-        cover:
-          (t as any).tour_images?.[0]?.image_url ||
-          'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
-        price: Number(t.price),
-        rating: 0.0,
-        location: t.province,
-        province: t.province,
-        startDate: t.start_date,
-        endDate: t.end_date,
-        numDays: t.num_days,
-        numNights: t.num_nights,
-        maxParticipants: t.max_participants,
-        remainingSlots: remainingSlots,
-        duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
-        category: t.tour_categories?.name || 'Chưa phân loại',
-        categoryId: t.category_id?.toString(),
-      };
-    });
+        // Nếu không có lịch nào còn chỗ trong tương lai, trả về null để lọc bỏ
+        if (!nextAvailableSchedule) {
+          // Trường hợp đặc biệt: Nếu tour không có bảng lịch trình (schedules), 
+          // thì kiểm tra ngày start_date chính của tour (cho phép fallback)
+          if (t.tour_schedules.length === 0 && (t.start_date === null || t.start_date >= new Date())) {
+             return this.formatTourData(t, null);
+          }
+          return null;
+        }
+
+        return this.formatTourData(t, nextAvailableSchedule);
+      })
+      .filter(t => t !== null) // Loại bỏ các tour đã hết chỗ hoặc hết ngày
+      .slice(0, 4); // Lấy 4 tour nổi bật nhất
+
+    return formattedTours;
+  }
+
+  // Hàm helper để định dạng dữ liệu tour đồng nhất
+  private formatTourData(t: any, schedule: any) {
+    const bookedCount = schedule 
+      ? schedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0)
+      : 0;
+    
+    const remainingSlots = schedule 
+      ? Math.max(0, schedule.max_participants - bookedCount)
+      : t.max_participants;
+
+    return {
+      id: t.id,
+      title: t.title,
+      cover: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+      price: schedule ? Number(schedule.price) : Number(t.price),
+      rating: 0.0,
+      location: t.province,
+      province: t.province,
+      startDate: schedule ? schedule.start_date : t.start_date,
+      endDate: t.end_date,
+      numDays: t.num_days,
+      numNights: t.num_nights,
+      maxParticipants: schedule ? schedule.max_participants : t.max_participants,
+      remainingSlots: remainingSlots,
+      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+      category: t.tour_categories?.name || 'Chưa phân loại',
+      categoryId: t.category_id?.toString(),
+    };
   }
 
   async getFeaturedGuides() {

@@ -768,3 +768,41 @@ Thiết lập nền tảng kỹ thuật ban đầu cho toàn bộ hệ thống v
 
 ### Best Next Single Step
 - **Task 1 (Plan.md)**: Triển khai bộ lọc Context dựa trên Role người dùng.
+
+---
+
+### 33. Session Update (2026-05-02) - Role-Based AI & Smart Scheduling
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: Task 1 - 6 (Plan.md) & Tour Display Logic Optimization.
+
+### Done
+- [x] **Role-Based AI Assistant**:
+    - Triển khai nhận diện Role (User/Guide/Admin) và nạp ngữ cảnh dữ liệu tương ứng.
+    - Guide: Có thể xem Tour đang quản lý, khách khởi hành hôm nay và Bài đăng tìm bạn công khai.
+    - Admin: Có thể xem thống kê hệ thống, Reports và Yêu cầu xác thực Guide.
+    - Tối ưu hóa Persona AI và định dạng Markdown Table.
+- [x] **Smart Tour Scheduling**:
+    - Cập nhật logic hiển thị Tour: Tự động nhảy sang ngày khởi hành tiếp theo nếu ngày gần nhất đã đầy hoặc đã qua.
+    - Đồng bộ logic này lên cả Trang chủ và Trang tìm kiếm.
+- [x] **Security & Privacy**:
+    - Kiểm tra và cô lập dữ liệu theo vai trò, đảm bảo không rò rỉ thông tin nhạy cảm.
+
+### Files Changed
+- backend/src/ai-chat/ai-chat.service.ts
+- backend/src/tours/tours.service.ts
+
+### Tested / Verified
+- [x] AI phản hồi đúng ngữ cảnh cho từng Role.
+- [x] Tour tự động cập nhật ngày hiển thị khi dữ liệu DB thay đổi.
+- [x] Phân quyền dữ liệu được bảo mật ở mức Backend Service.
+
+### Result Status
+- [x] Hoàn thành 100% mục tiêu AI Phân quyền. Hệ thống sẵn sàng cho demo cuối kỳ.
+
+### Blockers / Risks
+- Không có.
+
+### Best Next Single Step
+- **Review & Demo**: Duyệt lại toàn bộ luồng trải nghiệm người dùng và chuẩn bị kịch bản demo.

@@ -1115,3 +1115,27 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 
 ### Suggested Next Single Step
 - **Task 1**: Bắt đầu tái cấu trúc Backend để nhận diện Role người dùng.
+
+---
+
+### 33. Session Update (2026-05-02) - Role-Based AI & Smart Scheduling
+
+### Sprint
+- Current sprint: Sprint 14
+- Chosen subtask: Task 1 - 6 (Plan.md) - Role-Based AI Intelligence.
+
+### Done
+- [x] **Task 1: Refactor Context Provider**: Nhận diện Role và nạp Prompt cơ sở.
+- [x] **Task 2: User Context**: Tích hợp dữ liệu Tour & Companion công khai.
+- [x] **Task 3: Guide Context**: Tích hợp dữ liệu Tour cá nhân & Yêu cầu khách hàng.
+- [x] **Task 4: Admin Context**: Tích hợp số liệu hệ thống & Báo cáo vi phạm.
+- [x] **Task 5: Response Optimization**: Chuẩn hóa Markdown Table & AI Persona.
+- [x] **Task 6: Security Verification**: Xác minh cô lập dữ liệu thành công.
+- [x] **System Logic**: Tối ưu hiển thị ngày khởi hành tour thông minh (Next Available Date).
+
+### Files Changed
+- backend/src/ai-chat/ai-chat.service.ts
+- backend/src/tours/tours.service.ts
+
+### Result Status
+- [x] Hoàn thành 100% lộ trình nâng cấp AI thông minh.
