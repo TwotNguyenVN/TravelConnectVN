@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
 import { adminApi } from '../../api/admin.api';
 import { LoadingBlock } from '../../components/common';
@@ -11,6 +11,7 @@ interface CompanionPost {
   start_date: string;
   users: {
     full_name: string;
+    avatar_url?: string;
   };
   created_at: string;
 }
@@ -18,7 +19,6 @@ interface CompanionPost {
 export const AdminCompanionManagementPage: React.FC = () => {
   const [posts, setPosts] = useState<CompanionPost[]>([]);
   const [loading, setLoading] = useState(true);
-  const [_error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [visibility, setVisibility] = useState('');
   const { toast } = useToast();
@@ -26,17 +26,10 @@ export const AdminCompanionManagementPage: React.FC = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.getCompanionPosts({ search, visibility });
-      const postData = response.data?.items || response.data || [];
-      setPosts(Array.isArray(postData) ? postData : []);
-      setError(null);
+      const response = await adminApi.getCompanionPosts({ search, visibility, take: 50 });
+      setPosts(response.data?.items || []);
     } catch (err: any) {
-      console.error('Fetch Companion Posts Error:', err);
-      const status = err.response?.status;
-      const msg = err.response?.data?.message || err.message || 'Không thể tải danh sách bài viết';
-      const displayMsg = status ? `[${status}] ${msg}` : msg;
-      setError(displayMsg);
-      toast.error(displayMsg);
+      toast.error('Không thể tải danh sách bài viết');
     } finally {
       setLoading(false);
     }
@@ -47,7 +40,8 @@ export const AdminCompanionManagementPage: React.FC = () => {
   }, [visibility]);
 
   const handleModerate = async (id: string, status: string) => {
-    const reason = prompt('Nhập lý do thay đổi trạng thái:');
+    const actionLabel = status === 'visible' ? 'HIỂN THỊ' : status === 'hidden' ? 'ẨN' : 'CẢNH BÁO';
+    const reason = window.prompt(`Nhập lý do thực hiện thao tác ${actionLabel}:`);
     if (reason === null) return;
 
     try {
@@ -62,130 +56,141 @@ export const AdminCompanionManagementPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const styles: Record<string, React.CSSProperties> = {
-      visible: { backgroundColor: 'var(--tc-success-bg)', color: 'var(--tc-success)' },
-      hidden: { backgroundColor: 'var(--tc-danger-bg)', color: 'var(--tc-danger)' },
-      flagged: { backgroundColor: 'var(--tc-warning-bg)', color: 'var(--tc-warning)' },
-    };
-    return (
-      <span style={{
-        padding: '2px 8px',
-        borderRadius: '12px',
-        fontSize: 'var(--tc-font-size-xs)',
-        fontWeight: 600,
-        ...styles[status]
-      }}>
-        {status.toUpperCase()}
-      </span>
-    );
+  const statusConfig: Record<string, { label: string, color: string, bg: string }> = {
+    visible: { label: 'Đang hiển thị', color: '#059669', bg: '#ecfdf5' },
+    hidden: { label: 'Đã ẩn', color: '#e11d48', bg: '#fff1f2' },
+    flagged: { label: 'Cảnh báo', color: '#d97706', bg: '#fffbeb' },
   };
 
   return (
     <div style={{ padding: 'var(--tc-spacing-6)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--tc-spacing-6)' }}>
-        <h1 style={{ margin: 0, fontSize: 'var(--tc-font-size-2xl)' }}>Quản trị bài Tìm bạn đồng hành</h1>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 'var(--tc-spacing-8)' }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 'var(--tc-font-size-2xl)', fontWeight: 800, color: '#1e293b' }}>Quản trị Tìm bạn đồng hành</h1>
+          <p style={{ color: '#64748b', fontSize: 'var(--tc-font-size-sm)', marginTop: '4px' }}>Quản lý bài đăng tìm bạn đồng hành của người dùng</p>
+        </div>
         <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)' }}>
           <select 
             value={visibility} 
             onChange={(e) => setVisibility(e.target.value)}
             style={{
-              padding: '8px 12px',
-              borderRadius: 'var(--tc-radius-md)',
-              border: '1px solid var(--tc-border)'
+              padding: '10px 16px',
+              borderRadius: 'var(--tc-radius-lg)',
+              border: '1px solid var(--tc-border)',
+              backgroundColor: 'white',
+              fontSize: 'var(--tc-font-size-sm)',
+              outline: 'none'
             }}
           >
             <option value="">Tất cả trạng thái</option>
-            <option value="visible">Hiển thị</option>
+            <option value="visible">Đang hiển thị</option>
             <option value="hidden">Đã ẩn</option>
             <option value="flagged">Cảnh báo</option>
           </select>
-          <div style={{ display: 'flex', gap: 'var(--tc-spacing-2)' }}>
+          <div style={{ position: 'relative' }}>
+            <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }}>🔍</span>
             <input 
               type="text" 
               placeholder="Tìm kiếm bài viết..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && fetchPosts()}
               style={{
-                padding: '8px 12px',
-                borderRadius: 'var(--tc-radius-md)',
+                padding: '10px 12px 10px 38px',
+                borderRadius: 'var(--tc-radius-lg)',
                 border: '1px solid var(--tc-border)',
-                width: '250px'
+                width: '280px',
+                fontSize: 'var(--tc-font-size-sm)',
+                outline: 'none'
               }}
             />
-            <button 
-              onClick={fetchPosts}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--tc-primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: 'var(--tc-radius-md)',
-                cursor: 'pointer'
-              }}
-            >
-              Tìm
-            </button>
           </div>
+          <button onClick={fetchPosts} style={{
+            padding: '10px 20px',
+            backgroundColor: 'var(--tc-primary)',
+            color: 'white',
+            border: 'none',
+            borderRadius: 'var(--tc-radius-lg)',
+            cursor: 'pointer',
+            fontWeight: 600,
+            fontSize: 'var(--tc-font-size-sm)'
+          }}>Lọc</button>
         </div>
       </div>
 
-      <div style={{ backgroundColor: 'var(--tc-bg-default)', borderRadius: 'var(--tc-radius-lg)', border: '1px solid var(--tc-border)', overflow: 'hidden' }}>
+      {/* Table */}
+      <div style={{ 
+        backgroundColor: 'white', 
+        borderRadius: 'var(--tc-radius-xl)', 
+        border: '1px solid var(--tc-border)', 
+        overflow: 'hidden',
+        boxShadow: 'var(--tc-shadow-md)'
+      }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
-            <tr style={{ backgroundColor: 'var(--tc-bg-subtle)', borderBottom: '1px solid var(--tc-border)' }}>
-              <th style={{ padding: 'var(--tc-spacing-4)' }}>Bài viết</th>
-              <th style={{ padding: 'var(--tc-spacing-4)' }}>Người đăng</th>
-              <th style={{ padding: 'var(--tc-spacing-4)' }}>Điểm đến</th>
-              <th style={{ padding: 'var(--tc-spacing-4)' }}>Trạng thái</th>
-              <th style={{ padding: 'var(--tc-spacing-4)' }}>Thao tác</th>
+            <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--tc-border)' }}>
+              <th style={{ padding: 'var(--tc-spacing-5)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.1em' }}>Bài viết & Điểm đến</th>
+              <th style={{ padding: 'var(--tc-spacing-5)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.1em' }}>Người đăng</th>
+              <th style={{ padding: 'var(--tc-spacing-5)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.1em' }}>Thời gian</th>
+              <th style={{ padding: 'var(--tc-spacing-5)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.1em' }}>Trạng thái</th>
+              <th style={{ padding: 'var(--tc-spacing-5)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.1em' }}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={5} style={{ padding: 'var(--tc-spacing-10)', textAlign: 'center' }}>
-                  <LoadingBlock />
-                </td>
-              </tr>
+              <tr><td colSpan={5} style={{ padding: 'var(--tc-spacing-20)', textAlign: 'center' }}><LoadingBlock /></td></tr>
             ) : posts.length === 0 ? (
-              <tr>
-                <td colSpan={5} style={{ padding: 'var(--tc-spacing-10)', textAlign: 'center', color: 'var(--tc-text-secondary)' }}>
-                  Không tìm thấy bài viết nào.
-                </td>
-              </tr>
-            ) : (
-              posts.map(post => (
-                <tr key={post.id} style={{ borderBottom: '1px solid var(--tc-border)' }}>
-                  <td style={{ padding: 'var(--tc-spacing-4)' }}>
-                    <div style={{ fontWeight: 600 }}>{post.title}</div>
-                    <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>ID: {post.id}</div>
+              <tr><td colSpan={5} style={{ padding: 'var(--tc-spacing-20)', textAlign: 'center', color: '#94a3b8' }}>Không tìm thấy bài viết nào</td></tr>
+            ) : posts.map(post => {
+              const status = statusConfig[post.visibility_status] || statusConfig.visible;
+              return (
+                <tr key={post.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
+                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#1e293b', fontSize: 'var(--tc-font-size-sm)' }}>{post.title}</div>
+                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>📍 {post.destination}</div>
+                    </div>
                   </td>
-                  <td style={{ padding: 'var(--tc-spacing-4)' }}>
-                    {post.users?.full_name || 'N/A'}
+                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                        {post.users?.avatar_url ? <img src={post.users.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : 'U'}
+                      </div>
+                      <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>{post.users?.full_name}</span>
+                    </div>
                   </td>
-                  <td style={{ padding: 'var(--tc-spacing-4)' }}>
-                    {post.destination}
+                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                    <div style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 600 }}>{new Date(post.start_date).toLocaleDateString('vi-VN')}</div>
+                    <div style={{ fontSize: '10px', color: '#94a3b8' }}>Đăng lúc: {new Date(post.created_at).toLocaleDateString('vi-VN')}</div>
                   </td>
-                  <td style={{ padding: 'var(--tc-spacing-4)' }}>
-                    {getStatusBadge(post.visibility_status)}
+                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '6px',
+                      padding: '4px 10px', borderRadius: '20px', backgroundColor: status.bg, color: status.color,
+                      fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'
+                    }}>
+                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'currentColor' }}></span>
+                      {status.label}
+                    </span>
                   </td>
-                  <td style={{ padding: 'var(--tc-spacing-4)' }}>
-                    <div style={{ display: 'flex', gap: 'var(--tc-spacing-2)' }}>
+                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                    <div style={{ display: 'flex', gap: '6px' }}>
                       {post.visibility_status !== 'visible' && (
-                        <button onClick={() => handleModerate(post.id, 'visible')} style={{ padding: '4px 8px', fontSize: 'var(--tc-font-size-xs)' }}>Hiện</button>
+                        <button onClick={() => handleModerate(post.id, 'visible')} title="Hiển thị" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>👁️</button>
                       )}
                       {post.visibility_status !== 'hidden' && (
-                        <button onClick={() => handleModerate(post.id, 'hidden')} style={{ padding: '4px 8px', fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-danger)' }}>Ẩn</button>
+                        <button onClick={() => handleModerate(post.id, 'hidden')} title="Ẩn" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🙈</button>
                       )}
                       {post.visibility_status !== 'flagged' && (
-                        <button onClick={() => handleModerate(post.id, 'flagged')} style={{ padding: '4px 8px', fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-warning)' }}>Gắn cờ</button>
+                        <button onClick={() => handleModerate(post.id, 'flagged')} title="Cảnh báo" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🚩</button>
                       )}
+                      <button onClick={() => window.open(`/companion/${post.id}`, '_blank')} title="Xem chi tiết" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🔗</button>
                     </div>
                   </td>
                 </tr>
-              ))
-            )}
+              );
+            })}
           </tbody>
         </table>
       </div>

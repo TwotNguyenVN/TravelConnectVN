@@ -1154,25 +1154,3 @@ Nếu cần dữ liệu mới để demo hoặc test, agent phải coi đó là 
 - [x] **Security**: Đảm bảo cô lập dữ liệu người dùng/guide/admin.
 
 ### Result Status: [x] Hoàn thành toàn bộ mục tiêu Sprint AI.
-
----
-
-### 34. Session Update (2026-05-03) - Admin Management & Audit Infrastructure
-
-### Sprint
-- Current sprint: Sprint 14
-- Chosen subtask: Admin Management & System Audit.
-
-### Done
-- [x] **Audit Trail**: Redesigned Activity Log UI and integrated logging for all moderation events.
-- [x] **Admin UI**: Optimized Dashboard charts, User Management tabs, and Moderation flows (Tour/Companion/Report).
-- [x] **Reporting**: Added public "Report" button to Tour Detail page.
-- [x] **UML**: Documented 6 core system flows via sequence diagrams.
-
-### Files Changed
-- backend/src/admin/admin.service.ts
-- frontend/src/pages/admin/*
-- frontend/src/pages/public/TourDetailPage.tsx
-- UML/*.puml
-
-### Result Status: [x] Hoàn thành subtask.

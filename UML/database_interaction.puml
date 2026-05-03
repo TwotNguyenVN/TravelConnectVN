@@ -1,0 +1,113 @@
+@startuml database_interaction
+!theme plain
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+
+package "Phân hệ Tương tác & Quản trị Nội dung" {
+
+    package "Đánh giá & Yêu thích" {
+        entity "tour_reviews" as tour_reviews {
+            *id : uuid <<PK>>
+            --
+            tour_id : uuid <<FK>>
+            user_id : uuid <<FK>>
+            rating : int
+            comment : text
+        }
+
+        entity "guide_reviews" as guide_reviews {
+            *id : uuid <<PK>>
+            --
+            guide_profile_id : uuid <<FK>>
+            user_id : uuid <<FK>>
+            rating : int
+            comment : text
+        }
+
+        entity "favorite_tours" as fav_tours {
+            *user_id : uuid <<PK, FK>>
+            *tour_id : uuid <<PK, FK>>
+        }
+
+        entity "favorite_guides" as fav_guides {
+            *user_id : uuid <<PK, FK>>
+            *guide_profile_id : uuid <<PK, FK>>
+        }
+    }
+
+    package "Báo cáo & Kiểm duyệt" {
+        entity "reports" as reports {
+            *id : uuid <<PK>>
+            --
+            reporter_user_id : uuid <<FK>>
+            target_type : varchar
+            target_id : uuid
+            reason : varchar
+            status : varchar
+            processed_by_user_id : uuid <<FK>>
+        }
+
+        entity "report_processing_history" as report_history {
+            *id : uuid <<PK>>
+            --
+            report_id : uuid <<FK>>
+            action_by_user_id : uuid <<FK>>
+            action_type : varchar
+            note : text
+        }
+    }
+
+    package "Trao đổi & Thông báo" {
+        entity "conversations" as conversations {
+            *id : uuid <<PK>>
+            --
+            conversation_type : varchar
+            related_id : uuid
+        }
+
+        entity "conversation_participants" as participants {
+            *conversation_id : uuid <<PK, FK>>
+            *user_id : uuid <<PK, FK>>
+            --
+            joined_at : timestamptz
+        }
+
+        entity "messages" as messages {
+            *id : uuid <<PK>>
+            --
+            conversation_id : uuid <<FK>>
+            sender_user_id : uuid <<FK>>
+            content : text
+            message_type : varchar
+        }
+
+        entity "notifications" as notifications {
+            *id : uuid <<PK>>
+            --
+            user_id : uuid <<FK>>
+            title : varchar
+            content : text
+            is_read : boolean
+        }
+    }
+}
+
+' Relationships
+tour_reviews }o--|| tours
+guide_reviews }o--|| guide_profiles
+fav_tours }o--|| tours
+fav_guides }o--|| guide_profiles
+
+reports ||--o{ report_history
+conversations ||--o{ participants
+conversations ||--o{ messages
+users ||--o{ messages
+users ||--o{ participants
+users ||--o{ notifications
+
+@enduml

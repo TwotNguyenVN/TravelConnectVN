@@ -177,7 +177,10 @@ export class PaymentsService {
         await this.prisma.$transaction([
           this.prisma.payment_transactions.update({
             where: { id: orderId },
-            data: { status: newStatus }
+            data: { 
+              status: newStatus,
+              paid_at: isSuccess ? new Date() : undefined
+            }
           }),
           ...(isSuccess ? [
             this.prisma.tour_requests.update({

@@ -4,7 +4,7 @@ import { Card } from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
 import type { Tour } from '../../services/tourService';
-import { LoadingBlock, EmptyState } from '../../components/common';
+import { LoadingBlock, EmptyState, TourCard } from '../../components/common';
 import './TourListPage.css';
 
 import { provinces } from '../../constants/provinces';
@@ -327,44 +327,11 @@ export const TourListPage: React.FC = () => {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
             {tours.length > 0 ? (
               tours.map((tour: any) => (
-                <Card onClick={() => navigate(`/tours/${tour.id}`)} key={tour.id} style={{ overflow: 'hidden', padding: 0, border: '1px solid var(--tc-border)', borderRadius: 'var(--tc-radius-lg)', boxShadow: 'var(--tc-shadow-sm)', transition: 'transform 0.2s', cursor: 'pointer', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden' }}>
-                    <img src={tour.cover} alt={tour.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  </div>
-                  <div style={{ padding: 'var(--tc-spacing-4)', display: 'flex', flexDirection: 'column', flex: 1 }}>
-                    <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)', marginBottom: 'var(--tc-spacing-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>📍 {tour.location}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>⏱ {tour.duration}</span>
-                    </div>
-                    
-                    <h3 style={{ fontSize: 'var(--tc-font-size-md)', margin: '0 0 var(--tc-spacing-2) 0', color: 'var(--tc-text-primary)', fontWeight: '700', lineHeight: '1.4', height: '2.8em', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
-                      {tour.title}
-                    </h3>
-
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--tc-spacing-2)', marginBottom: 'var(--tc-spacing-3)' }}>
-                      <span style={{ fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', backgroundColor: 'rgba(0, 108, 228, 0.1)', padding: '2px 8px', borderRadius: '4px', color: 'var(--tc-primary)' }}>
-                        {tour.category}
-                      </span>
-                      {tour.maxParticipants && (
-                        <span style={{ fontSize: '10px', fontWeight: '600', textTransform: 'uppercase', backgroundColor: '#f1f5f9', padding: '2px 8px', borderRadius: '4px', color: '#64748b' }}>
-                          👥 Tối đa {tour.maxParticipants} khách
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--tc-border)', paddingTop: 'var(--tc-spacing-3)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ color: '#f59e0b', fontSize: '14px' }}>★</span>
-                        <span style={{ fontWeight: '700', color: 'var(--tc-text-primary)' }}>{tour.rating ?? 0}</span>
-                      </div>
-                      <div style={{ textAlign: 'right' }}>
-                        <span style={{ color: 'var(--tc-danger)', fontWeight: '800', fontSize: 'var(--tc-font-size-lg)' }}>
-                          {tour.price.toLocaleString()}đ
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
+                <TourCard 
+                  key={tour.id} 
+                  tour={tour} 
+                  onClick={() => navigate(`/tours/${tour.id}`)} 
+                />
               ))
             ) : (
               <div style={{ gridColumn: '1 / -1' }}>

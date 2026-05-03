@@ -9,8 +9,8 @@ export class AdminService {
   async getDashboardStats() {
     const [userCount, tourCount, companionCount, reportCount, pendingVerificationCount, totalRevenue] = await Promise.all([
       this.prisma.public_users.count(),
-      this.prisma.tours.count(),
-      this.prisma.companion_posts.count(),
+      this.prisma.tours.count({ where: { deleted_at: null } }),
+      this.prisma.companion_posts.count({ where: { deleted_at: null } }),
       this.prisma.reports.count({ where: { status: 'open' } }),
       this.prisma.guide_verification_requests.count({ where: { status: 'pending' } }),
       this.prisma.payment_transactions.aggregate({
@@ -48,16 +48,23 @@ export class AdminService {
   }
 
   async getStatisticsTours() {
-    const [categoryBreakdown, provinceBreakdown] = await Promise.all([
+    const [categoryBreakdown, provinceBreakdown, statusBreakdown] = await Promise.all([
       this.prisma.tours.groupBy({
         by: ['category_id'],
+        where: { deleted_at: null },
         _count: { id: true }
       }),
       this.prisma.tours.groupBy({
         by: ['province'],
+        where: { deleted_at: null },
         _count: { id: true },
         orderBy: { _count: { id: 'desc' } },
         take: 10
+      }),
+      this.prisma.tours.groupBy({
+        by: ['visibility_status'],
+        where: { deleted_at: null },
+        _count: { id: true }
       })
     ]);
 
@@ -71,7 +78,8 @@ export class AdminService {
         value: c._count.id 
       })),
 
-      provinces: provinceBreakdown.map(p => ({ name: p.province, value: p._count.id }))
+      provinces: provinceBreakdown.map(p => ({ name: p.province, value: p._count.id })),
+      statuses: statusBreakdown.map(s => ({ name: s.visibility_status, value: s._count.id }))
     };
   }
 
@@ -94,11 +102,11 @@ export class AdminService {
   }
 
   async getStatisticsRevenue() {
-    // Last 7 days revenue
     const sevenDaysAgo = new Date();
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); // Total 7 days including today
 
-    const dailyRevenue = await this.prisma.$queryRaw`
+    const dailyRevenue: any[] = await this.prisma.$queryRaw`
       SELECT 
         DATE(paid_at) as date, 
         SUM(amount) as total 
@@ -108,12 +116,27 @@ export class AdminService {
       ORDER BY date ASC
     `;
 
-    return {
-      daily: (dailyRevenue as any[]).map(d => ({
-        date: new Date(d.date).toLocaleDateString('vi-VN'),
-        amount: Number(d.total)
-      }))
-    };
+    // Map existing data for quick lookup
+    const revenueMap = new Map();
+    dailyRevenue.forEach(d => {
+      const dateStr = new Date(d.date).toLocaleDateString('vi-VN');
+      revenueMap.set(dateStr, Number(d.total));
+    });
+
+    // Fill in all 7 days
+    const daily: any[] = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(sevenDaysAgo);
+      date.setDate(sevenDaysAgo.getDate() + i);
+      const dateStr = date.toLocaleDateString('vi-VN');
+      
+      daily.push({
+        date: dateStr,
+        amount: revenueMap.get(dateStr) || 0
+      });
+    }
+
+    return { daily };
   }
 
 
@@ -213,6 +236,18 @@ export class AdminService {
         }
       });
 
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'user_management',
+          entity_type: 'users',
+          entity_pk: userId,
+          action_type: 'assign_role',
+          reason: dto.note,
+          new_data: { role_code: dto.roleCode }
+        }
+      });
+
       return ur;
     });
 
@@ -251,6 +286,17 @@ export class AdminService {
           changed_by_user_id: adminId,
           old_snapshot: user.user_roles_user_roles_user_idTousers,
           new_snapshot: user.user_roles_user_roles_user_idTousers.filter(ur => ur.role_code !== roleCode)
+        }
+      });
+
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'user_management',
+          entity_type: 'users',
+          entity_pk: userId,
+          action_type: 'revoke_role',
+          new_data: { role_code: roleCode }
         }
       });
 
@@ -308,6 +354,19 @@ export class AdminService {
           old_status: report.status,
           new_status: dto.status,
           note: dto.resolution_note
+        }
+      });
+
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'report_handling',
+          entity_type: 'reports',
+          entity_pk: id,
+          action_type: dto.status === 'resolved' ? 'resolve_report' : 'reject_report',
+          reason: dto.resolution_note,
+          old_data: { status: report.status },
+          new_data: { status: dto.status }
         }
       });
 
@@ -370,7 +429,7 @@ export class AdminService {
 
   async getTours(params: { skip?: number; take?: number; status?: string; visibility?: string; search?: string }) {
     const { skip, take, status, visibility, search } = params;
-    const where: any = {};
+    const where: any = { deleted_at: null };
     if (status) where.business_status = status;
     if (visibility) where.visibility_status = visibility;
     if (search) {
@@ -399,7 +458,7 @@ export class AdminService {
 
   async getCompanionPosts(params: { skip?: number; take?: number; visibility?: string; search?: string }) {
     const { skip, take, visibility, search } = params;
-    const where: any = {};
+    const where: any = { deleted_at: null };
     if (visibility) where.visibility_status = visibility;
     if (search) {
       where.title = { contains: search, mode: 'insensitive' };

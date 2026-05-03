@@ -1,0 +1,74 @@
+@startuml
+title Luồng Tìm kiếm và Xem chi tiết Tour - TravelConnectVN
+
+' Cấu hình giao diện
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+skinparam NoteBackgroundColor #FEFECE
+skinparam NoteBorderColor #A80036
+
+' Định nghĩa các tác nhân
+actor "Người dùng" as User #LightBlue
+participant "Giao diện (Frontend)" as FE #LightGreen
+participant "Máy chủ (Backend)" as BE #LightYellow
+database "Cơ sở dữ liệu" as DB #LightSalmon
+
+' ==========================================
+' GIAI ĐOẠN 1: TÌM KIẾM TOUR
+' ==========================================
+group #Lavender "Tìm kiếm & Lọc kết quả"
+    User -> FE: Truy cập danh sách Tour
+    FE -> BE: Lấy danh sách mặc định (GET /tours)
+    BE -> DB: SELECT * FROM tours WHERE status='visible'
+    DB --> BE: Danh sách Tour
+    BE --> FE: Trả về dữ liệu
+    
+    User -> FE: Nhập từ khóa, Chọn bộ lọc (Địa điểm, Giá, Loại...)
+    FE -> BE: GET /tours?search=...&price=...&category=...
+    activate BE
+    BE -> DB: Truy vấn theo điều kiện lọc\n(Kết hợp bảng tours, provinces, categories)
+    activate DB
+    DB --> BE: Kết quả lọc phù hợp
+    deactivate DB
+    BE --> FE: Trả về danh sách Tour đã lọc
+    deactivate BE
+    FE -> User: Hiển thị danh sách kết quả
+end
+
+' ==========================================
+' GIAI ĐOẠN 2: XEM CHI TIẾT TOUR
+' ==========================================
+group #OldLace "Xem chi tiết & Tổng hợp thông tin"
+    User -> FE: Nhấn chọn một Tour cụ thể
+    FE -> User: Hiển thị trang Chi tiết (Loading...)
+    
+    FE -> BE: Lấy chi tiết đầy đủ (GET /tours/:id)
+    activate BE
+    
+    group #Pink "Backend tổng hợp dữ liệu từ nhiều bảng"
+        BE -> DB: 1. Thông tin Tour chính (tours)
+        BE -> DB: 2. Hình ảnh (tour_images)
+        BE -> DB: 3. Lịch trình (tour_itinerary)
+        BE -> DB: 4. Lịch khởi hành (tour_schedules)
+        BE -> DB: 5. Hướng dẫn viên (guide_profiles & users)
+        BE -> DB: 6. Điểm đến & Bản đồ (tour_destinations)
+    end
+    
+    DB --> BE: Tập hợp dữ liệu đầy đủ
+    BE --> FE: Trả về Object Tour hoàn chỉnh
+    deactivate BE
+    
+    FE -> BE: Lấy đánh giá (GET /tours/:id/reviews)
+    BE -> DB: SELECT * FROM tour_reviews WHERE tour_id=...
+    DB --> BE: Danh sách đánh giá
+    BE --> FE: Trả về danh sách reviews
+
+    FE -> User: Hiển thị đầy đủ thông tin Tour\n(Hình ảnh, Lịch trình, HDV, Đánh giá, Bản đồ)
+end
+
+note over User, DB
+    Hệ thống tối ưu trải nghiệm bằng cách tải thông tin tour chính trước, 
+    sau đó kết hợp hiển thị các thành phần bổ trợ như bản đồ và đánh giá.
+end note
+
+@enduml

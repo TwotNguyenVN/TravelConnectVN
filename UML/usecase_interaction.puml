@@ -1,0 +1,90 @@
+@startuml usecase_interaction
+' ============================================================
+' Hình 3.5. Sơ đồ Use Case phân hệ Tương tác và Tiện ích
+' Chi tiết các chức năng Chat, AI, Thông báo, Đánh giá
+' ============================================================
+
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #555555
+  ArrowColor #333333
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #AAAAAA
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #336699
+}
+
+actor "Người dùng /\nKhách du lịch" as User
+actor "Hướng dẫn viên" as Guide
+
+Guide -|> User
+
+rectangle "Phân hệ Tương tác và Tiện ích" {
+
+  package "Nhắn tin" {
+    usecase "Chat 1-1\n(User ↔ Guide)" as UC1
+    usecase "Chat nhóm\nđồng hành" as UC2
+  }
+
+  package "Trí tuệ nhân tạo" {
+    usecase "Trợ lý AI\ntư vấn du lịch" as UC3
+    usecase "Nhận gợi ý\ncá nhân hóa" as UC4
+  }
+
+  package "Đánh giá & Phản hồi" {
+    usecase "Đánh giá Tour\n(⭐ + Bình luận)" as UC5
+    usecase "Đánh giá HDV\n(⭐ + Bình luận)" as UC6
+    usecase "Gửi báo cáo\nvi phạm" as UC7
+  }
+
+  package "Thông báo & Lịch sử" {
+    usecase "Nhận thông báo\nrealtime" as UC8
+    usecase "Xem nhật ký\nhoạt động cá nhân" as UC9
+    usecase "Quản lý Yêu thích\n(Tour & HDV)" as UC10
+  }
+}
+
+' --- User ---
+User --> UC1
+User --> UC2
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC6
+User --> UC7
+User --> UC8
+User --> UC9
+User --> UC10
+
+' --- Relationships ---
+UC2 ..> UC1 : <<extend>>
+
+note right of UC3
+  Google Generative AI (Gemini)
+  Tư vấn theo vai trò:
+  • User: gợi ý tour, lịch trình
+  • Guide: hỗ trợ quản lý tour
+  • Admin: phân tích dữ liệu
+end note
+
+note right of UC1
+  WebSocket (Socket.io)
+  Gửi/nhận tin nhắn realtime
+end note
+
+note right of UC4
+  Rule-based engine
+  Dựa trên sở thích &
+  hành vi người dùng
+end note
+
+@enduml

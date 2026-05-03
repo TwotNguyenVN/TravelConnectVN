@@ -9,6 +9,7 @@ import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import { DEFAULT_AVATAR } from '../../constants/images';
+import { ReportModal } from '../../components/common/Report/ReportModal';
 import './TourDetailPage.css';
 
 // Lazy load heavy components
@@ -35,6 +36,7 @@ export const TourDetailPage: React.FC = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
+  const [showReportModal, setShowReportModal] = useState(false);
 
   const toggleDay = (day: number) => {
     setExpandedDays(prev => ({
@@ -714,7 +716,7 @@ export const TourDetailPage: React.FC = () => {
               </button>
             </div>
             
-            <div style={{ marginTop: '16px' }}>
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <button 
                 className={`tc-btn-favorite-simple ${isFavorited ? 'active' : ''}`} 
                 onClick={handleToggleFavorite}
@@ -722,6 +724,20 @@ export const TourDetailPage: React.FC = () => {
                 style={{ width: '100%', background: 'none', border: 'none', color: isFavorited ? 'var(--tc-danger)' : '#64748b', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
                 {isFavorited ? '❤️ Đã lưu' : '🤍 Lưu vào yêu thích'}
+              </button>
+              
+              <button 
+                onClick={() => {
+                  if (!user) {
+                    toast.info("Vui lòng đăng nhập để gửi báo cáo");
+                    navigate('/login');
+                    return;
+                  }
+                  setShowReportModal(true);
+                }}
+                style={{ width: '100%', background: 'none', border: 'none', color: '#94a3b8', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              >
+                🚩 Báo cáo nội dung không đúng
               </button>
             </div>
           </div>
@@ -748,6 +764,14 @@ export const TourDetailPage: React.FC = () => {
           </Link>
         </aside>
       </div>
+
+      {showReportModal && (
+        <ReportModal 
+          targetType="tour"
+          targetId={tour.id}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
     </div>
   );
 };

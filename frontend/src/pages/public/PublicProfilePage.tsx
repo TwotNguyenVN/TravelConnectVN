@@ -314,14 +314,18 @@ export const PublicProfilePage: React.FC = () => {
                   let coverImage = 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=2021&auto=format&fit=crop';
                   
                   if (post.images) {
-                      if (typeof post.images === 'string') {
-                          try {
-                              const parsed = JSON.parse(post.images);
-                              if (Array.isArray(parsed) && parsed.length > 0) coverImage = parsed[0];
-                          } catch(e) {}
-                      } else if (Array.isArray(post.images) && post.images.length > 0) {
-                          coverImage = post.images[0];
-                      }
+                    if (typeof post.images === 'string') {
+                      try {
+                        const parsed = JSON.parse(post.images);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                          const firstImg = parsed[0];
+                          coverImage = typeof firstImg === 'string' ? firstImg : (firstImg.imageUrl || coverImage);
+                        }
+                      } catch (e) {}
+                    } else if (Array.isArray(post.images) && post.images.length > 0) {
+                      const firstImg = post.images[0];
+                      coverImage = typeof firstImg === 'string' ? firstImg : (firstImg.imageUrl || coverImage);
+                    }
                   }
                     
                   return (

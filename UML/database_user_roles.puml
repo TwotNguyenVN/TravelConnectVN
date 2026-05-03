@@ -1,0 +1,104 @@
+@startuml database_user_roles
+!theme plain
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+
+package "Phân hệ Người dùng & Phân quyền" {
+
+    entity "users (public.users)" as users {
+        *id : uuid <<PK>>
+        --
+        email : varchar
+        full_name : varchar
+        phone : varchar <<Unique>>
+        avatar_url : varchar
+        gender : varchar
+        date_of_birth : date
+        status : varchar
+        home_province_id : bigint <<FK>>
+        created_at : timestamptz
+        updated_at : timestamptz
+        last_seen_at : timestamptz
+    }
+
+    entity "roles" as roles {
+        *role_code : varchar <<PK>>
+        --
+        description : varchar
+        created_at : timestamptz
+    }
+
+    entity "user_roles" as user_roles {
+        *user_id : uuid <<PK, FK>>
+        *role_code : varchar <<PK, FK>>
+        assigned_at : timestamptz
+        assigned_by : uuid <<FK>>
+    }
+
+    entity "provinces" as provinces {
+        *id : bigint <<PK>>
+        --
+        name : varchar <<Unique>>
+        region : varchar
+        headquarters : varchar
+    }
+
+    entity "user_preferences" as user_preferences {
+        *user_id : uuid <<PK, FK>>
+        --
+        budget_min : decimal
+        budget_max : decimal
+        preferred_trip_style : varchar
+        preferred_language_id : bigint <<FK>>
+        updated_at : timestamptz
+    }
+
+    entity "user_preferred_categories" as user_preferred_categories {
+        *user_id : uuid <<PK, FK>>
+        *category_id : bigint <<PK, FK>>
+        created_at : timestamptz
+    }
+
+    entity "user_role_change_logs" as user_role_logs {
+        *id : uuid <<PK>>
+        --
+        target_user_id : uuid <<FK>>
+        changed_role_code : varchar <<FK>>
+        action_type : varchar
+        changed_by_user_id : uuid <<FK>>
+        old_snapshot : json
+        new_snapshot : json
+        note : text
+        created_at : timestamptz
+    }
+
+    entity "user_activity_logs" as activity_logs {
+        *id : uuid <<PK>>
+        --
+        user_id : uuid <<FK>>
+        activity_type : varchar
+        entity_type : varchar
+        entity_id : uuid
+        metadata : json
+        created_at : timestamptz
+    }
+}
+
+' Relationships
+users ||--o{ user_roles : "has"
+roles ||--o{ user_roles : "assigned to"
+users ||--o{ user_roles : "assigned by"
+provinces ||--o{ users : "is home of"
+users ||--|| user_preferences : "defines"
+users ||--o{ user_preferred_categories : "prefers"
+users ||--o{ user_role_logs : "target of"
+users ||--o{ user_role_logs : "action by"
+roles ||--o{ user_role_logs : "involved in"
+users ||--o{ activity_logs : "performs"
+
+@enduml

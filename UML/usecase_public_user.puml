@@ -1,0 +1,101 @@
+@startuml usecase_public_user
+' ============================================================
+' Hình 3.2. Sơ đồ Use Case phân hệ Public / User
+' Chi tiết các chức năng của Khách truy cập và Người dùng
+' ============================================================
+
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #555555
+  ArrowColor #333333
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #AAAAAA
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #336699
+}
+
+actor "Khách truy cập" as Guest
+actor "Người dùng /\nKhách du lịch" as User
+
+User -|> Guest
+
+rectangle "Phân hệ Public / User" {
+
+  package "Tài khoản" {
+    usecase "Đăng ký tài khoản" as UC1
+    usecase "Đăng nhập\n(Email / Google OAuth)" as UC2
+    usecase "Quên mật khẩu &\nXác thực OTP" as UC3
+    usecase "Quản lý hồ sơ cá nhân" as UC4
+    usecase "Đăng ký làm\nHướng dẫn viên" as UC5
+  }
+
+  package "Tour du lịch" {
+    usecase "Xem danh sách tour" as UC6
+    usecase "Tìm kiếm & Lọc tour" as UC7
+    usecase "Xem chi tiết tour" as UC8
+    usecase "Xem bản đồ lộ trình" as UC9
+    usecase "Đặt tour" as UC10
+    usecase "Thanh toán trực tuyến\n(VNPAY)" as UC11
+    usecase "Quản lý booking &\nGiao dịch" as UC12
+  }
+
+  package "Bạn đồng hành" {
+    usecase "Xem bài tìm bạn\nđồng hành" as UC13
+    usecase "Tạo / Sửa bài\ntìm bạn" as UC14
+    usecase "Gửi yêu cầu\ntham gia" as UC15
+    usecase "Duyệt yêu cầu\ntham gia" as UC16
+  }
+
+  package "Tương tác" {
+    usecase "Đánh giá Tour & HDV" as UC17
+    usecase "Quản lý Yêu thích" as UC18
+    usecase "Gửi báo cáo vi phạm" as UC19
+  }
+}
+
+' --- Guest ---
+Guest --> UC1
+Guest --> UC2
+Guest --> UC6
+Guest --> UC7
+Guest --> UC8
+Guest --> UC9
+Guest --> UC13
+
+' --- User (quyền riêng, kế thừa Guest) ---
+User --> UC3
+User --> UC4
+User --> UC5
+User --> UC10
+User --> UC11
+User --> UC12
+User --> UC14
+User --> UC15
+User --> UC16
+User --> UC17
+User --> UC18
+User --> UC19
+
+' --- Relationships ---
+UC10 ..> UC2 : <<include>>
+UC11 ..> UC10 : <<extend>>
+UC7 ..> UC6 : <<extend>>
+UC9 ..> UC8 : <<extend>>
+
+note right of UC11
+  Hỗ trợ 2 hình thức:
+  • Thanh toán toàn bộ (Full)
+  • Đặt cọc (Deposit)
+  VNPAY Sandbox + IPN callback
+end note
+
+@enduml
