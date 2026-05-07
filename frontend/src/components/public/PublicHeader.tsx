@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../common/Button/Button';
 import notificationService from '../../services/notificationService';
+import { ChatPopover } from './popovers/ChatPopover';
+import { NotificationPopover } from './popovers/NotificationPopover';
 
 
 import { useSocket } from '../../contexts/SocketContext';
@@ -15,6 +17,8 @@ export const PublicHeader: React.FC = () => {
   const { socket } = useSocket();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [showChatPopover, setShowChatPopover] = useState(false);
+  const [showNotifPopover, setShowNotifPopover] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -117,33 +121,85 @@ export const PublicHeader: React.FC = () => {
                 </span>
               </Link>
 
-              {/* Chat Icon */}
-              <Link to="/user/messages" style={{ position: 'relative', color: 'var(--tc-text-secondary)', display: 'flex', alignItems: 'center', padding: 'var(--tc-spacing-2)' }}>
-                <span style={{ fontSize: '20px' }}>💬</span>
-              </Link>
+              {/* Chat Popover Toggle */}
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={() => {
+                    setShowChatPopover(!showChatPopover);
+                    setShowNotifPopover(false);
+                  }}
+                  style={{ 
+                    position: 'relative', 
+                    color: 'var(--tc-text-secondary)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    padding: '8px', 
+                    borderRadius: '50%',
+                    backgroundColor: showChatPopover ? 'var(--tc-bg-muted)' : 'var(--tc-bg-surface)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </button>
+                {showChatPopover && <ChatPopover onClose={() => setShowChatPopover(false)} />}
+              </div>
 
-              {/* Notification Bell */}
-              <Link to="/user/notifications" style={{ position: 'relative', color: 'var(--tc-text-secondary)', display: 'flex', alignItems: 'center', padding: 'var(--tc-spacing-2)' }}>
-                <span style={{ fontSize: '20px' }}>🔔</span>
-                {unreadCount > 0 && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '2px',
-                    right: '2px',
-                    backgroundColor: 'var(--tc-danger)',
-                    color: 'white',
-                    fontSize: '10px',
-                    fontWeight: 'bold',
-                    padding: '2px 5px',
-                    borderRadius: '10px',
-                    minWidth: '18px',
-                    textAlign: 'center',
-                    border: '2px solid white'
-                  }}>
-                    {unreadCount > 99 ? '99+' : unreadCount}
-                  </span>
+              {/* Notification Popover Toggle */}
+              <div style={{ position: 'relative' }}>
+                <button 
+                  onClick={() => {
+                    setShowNotifPopover(!showNotifPopover);
+                    setShowChatPopover(false);
+                  }}
+                  style={{ 
+                    position: 'relative', 
+                    color: 'var(--tc-text-secondary)', 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'center',
+                    padding: '8px', 
+                    borderRadius: '50%',
+                    backgroundColor: showNotifPopover ? 'var(--tc-bg-muted)' : 'var(--tc-bg-surface)',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s'
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      backgroundColor: 'var(--tc-danger)',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      padding: '2px 5px',
+                      borderRadius: '10px',
+                      minWidth: '18px',
+                      textAlign: 'center',
+                      border: '2px solid var(--tc-bg-default)'
+                    }}>
+                      {unreadCount > 99 ? '99+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                {showNotifPopover && (
+                  <NotificationPopover 
+                    onClose={() => setShowNotifPopover(false)} 
+                    onNotificationRead={() => setUnreadCount(prev => Math.max(0, prev - 1))}
+                  />
                 )}
-              </Link>
+              </div>
 
               <Button variant="outline" size="small" onClick={handleLogout}>Đăng xuất</Button>
             </div>
