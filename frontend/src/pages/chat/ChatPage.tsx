@@ -4,6 +4,7 @@ import { useToast } from '../../contexts/ToastContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import chatService from '../../services/chatService';
 import type { Conversation, Message, Participant } from '../../services/chatService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './ChatPage.css';
 
 const formatTime = (dateString: string) => {
@@ -255,7 +256,7 @@ const ChatPage: React.FC = () => {
     if (!isGroup) {
       const otherUser = conv.participants[0];
       displayName = otherUser?.fullName || 'Người dùng';
-      avatar = otherUser?.avatarUrl || '/images/default-avatar.png';
+      avatar = otherUser?.avatarUrl || DEFAULT_AVATAR;
     } else {
       avatar = conv.companionPost?.coverUrl || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png';
     }
@@ -267,7 +268,7 @@ const ChatPage: React.FC = () => {
         onClick={() => setSelectedConvId(conv.id)}
       >
         <div className="conversation-avatar">
-          <img src={avatar} alt={displayName || 'Avatar'} onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }} />
+          <img src={avatar} alt={displayName || 'Avatar'} onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }} />
           {!isGroup && <span className={`status-indicator ${isUserOnline(conv.participants[0]?.lastSeenAt) ? 'status-online' : 'status-offline'}`}></span>}
           {isGroup && <span className="group-badge">Nhóm</span>}
         </div>
@@ -349,10 +350,10 @@ const ChatPage: React.FC = () => {
                 <img 
                   src={selectedConv.conversationType === 'group_companion' 
                     ? selectedConv.companionPost?.coverUrl || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png'
-                    : selectedConv.participants[0]?.avatarUrl || '/images/default-avatar.png'} 
+                    : selectedConv.participants[0]?.avatarUrl || DEFAULT_AVATAR} 
                   alt="Avatar" 
                   className="chat-header-avatar"
-                  onError={(e) => { (e.target as HTMLImageElement).src = selectedConv.conversationType === 'group_companion' ? 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png' : '/images/default-avatar.png'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).src = selectedConv.conversationType === 'group_companion' ? 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png' : DEFAULT_AVATAR; }}
                 />
                 <div className="chat-header-info">
                   <h3 
@@ -403,7 +404,7 @@ const ChatPage: React.FC = () => {
                           {!msg.isOwn && (
                             <div className="message-avatar">
                               {showAvatar ? (
-                                <img src={msg.sender.avatarUrl || '/images/default-avatar.png'} alt="Avatar" onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }} />
+                                <img src={msg.sender.avatarUrl || DEFAULT_AVATAR} alt="Avatar" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }} />
                               ) : <div className="avatar-placeholder"></div>}
                             </div>
                           )}
@@ -499,10 +500,10 @@ const ChatPage: React.FC = () => {
                   participants.map(p => (
                     <div key={p.userId} className="participant-item">
                       <img 
-                        src={p.avatarUrl || '/images/default-avatar.png'} 
+                        src={p.avatarUrl || DEFAULT_AVATAR} 
                         alt={p.fullName} 
                         className="participant-avatar"
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/images/default-avatar.png'; }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
                       />
                       <div className="participant-info">
                         <div className="participant-name">{p.fullName}</div>

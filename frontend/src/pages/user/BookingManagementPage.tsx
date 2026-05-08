@@ -5,6 +5,7 @@ import { useToast } from '../../contexts/ToastContext';
 import tourRequestService from '../../services/tourRequestService';
 import { companionService } from '../../services/companionService';
 import { paymentService } from '../../services/paymentService';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './BookingManagementPage.css';
 
 interface NormalizedActivity {
@@ -339,10 +340,10 @@ export const BookingManagementPage: React.FC = () => {
                           }}
                         >
                           <img 
-                            src={activity.guideAvatar || '/default-avatar.png'} 
+                            src={activity.guideAvatar || DEFAULT_AVATAR} 
                             alt={activity.guideName} 
                             className="tc-guide-avatar-md"
-                            onError={(e) => { (e.target as HTMLImageElement).src = '/default-avatar.png'; }}
+                            onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
                           />
                           <div className="tc-guide-detail">
                             <span className="tc-value tc-link">{activity.guideName}</span>
