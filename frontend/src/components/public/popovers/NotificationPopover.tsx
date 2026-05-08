@@ -78,31 +78,43 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
     <div
       ref={popoverRef}
       style={{
-        position: 'absolute',
-        top: '100%',
-        right: '-10px',
-        marginTop: '12px',
+        position: 'fixed',
+        top: '64px', // Below header
+        right: 0,
+        bottom: 0,
         width: '360px',
         backgroundColor: 'var(--tc-bg-default)',
-        borderRadius: '8px',
-        boxShadow: 'var(--tc-shadow-lg)',
-        border: '1px solid var(--tc-border)',
+        boxShadow: '-2px 0 10px rgba(0, 0, 0, 0.1)',
+        borderLeft: '1px solid var(--tc-border)',
         zIndex: 100,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
-        maxHeight: '480px',
+        height: 'calc(100vh - 64px)',
+        animation: 'slideInRight 0.3s ease-out'
       }}
     >
-      <div style={{ padding: '16px', borderBottom: '1px solid var(--tc-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Thông báo</h3>
+      <style>{`
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+      `}</style>
+      <div style={{ padding: '20px 16px', borderBottom: '1px solid var(--tc-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 700 }}>Thông báo</h3>
         <button 
           onClick={markAllAsRead}
-          style={{ background: 'none', border: 'none', color: 'var(--tc-primary)', cursor: 'pointer', fontSize: '0.9rem', padding: 0 }}
+          style={{ background: 'none', border: 'none', color: 'var(--tc-primary)', cursor: 'pointer', fontSize: '1rem', fontWeight: 500, padding: 0 }}
         >
           Đánh dấu đã đọc
         </button>
       </div>
+
+      <div style={{ display: 'flex', gap: '12px', padding: '8px 16px', fontSize: '0.9rem', fontWeight: 600 }}>
+        <span style={{ color: 'var(--tc-primary)', backgroundColor: 'var(--tc-primary-light)', padding: '6px 12px', borderRadius: '20px', cursor: 'pointer' }}>Tất cả</span>
+        <span style={{ cursor: 'pointer', padding: '6px 12px' }}>Chưa đọc</span>
+      </div>
+
       <div style={{ overflowY: 'auto', flex: 1, padding: '8px' }}>
         {loading ? (
           <div style={{ padding: '20px', textAlign: 'center', color: 'var(--tc-text-secondary)' }}>Đang tải...</div>
@@ -118,7 +130,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
                   display: 'flex',
                   alignItems: 'center',
                   padding: '12px',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   cursor: 'pointer',
                   transition: 'background-color 0.2s',
                   gap: '12px',
@@ -127,18 +139,21 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--tc-bg-hover)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = !notif.is_read ? 'var(--tc-bg-muted)' : 'transparent')}
               >
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--tc-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tc-primary)', fontSize: '1.2rem' }}>
+                <div style={{ position: 'relative', width: '56px', height: '56px', borderRadius: '50%', overflow: 'hidden', flexShrink: 0, backgroundColor: 'var(--tc-primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--tc-primary)', fontSize: '1.5rem' }}>
                   {/* Basic icon logic based on type */}
                   {notif.notification_type === 'request' ? '📝' : notif.notification_type === 'system' ? '⚙️' : '🔔'}
+                  {!notif.is_read && (
+                    <div style={{ position: 'absolute', bottom: '2px', right: '2px', width: '12px', height: '12px', backgroundColor: 'var(--tc-primary)', borderRadius: '50%', border: '2px solid var(--tc-bg-default)' }}></div>
+                  )}
                 </div>
                 <div style={{ flex: 1, overflow: 'hidden' }}>
                   <div style={{ fontSize: '0.95rem', color: 'var(--tc-text-primary)' }}>
-                    <strong>{notif.title}</strong>
+                    <div style={{ fontWeight: !notif.is_read ? 700 : 500 }}>{notif.title}</div>
                     <div style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', fontSize: '0.85rem', color: 'var(--tc-text-secondary)', marginTop: '2px' }}>
                       {notif.content}
                     </div>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: !notif.is_read ? 'var(--tc-primary)' : 'var(--tc-text-muted)', marginTop: '4px' }}>
+                  <div style={{ fontSize: '0.75rem', color: !notif.is_read ? 'var(--tc-primary)' : 'var(--tc-text-muted)', marginTop: '4px', fontWeight: !notif.is_read ? 600 : 400 }}>
                     {new Date(notif.created_at).toLocaleString()}
                   </div>
                 </div>
@@ -150,8 +165,8 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
           })
         )}
       </div>
-      <div style={{ padding: '12px', borderTop: '1px solid var(--tc-border)', textAlign: 'center' }}>
-        <a href="/user/notifications" style={{ color: 'var(--tc-primary)', textDecoration: 'none', fontWeight: 500, fontSize: '0.9rem' }}>
+      <div style={{ padding: '16px', borderTop: '1px solid var(--tc-border)', textAlign: 'center' }}>
+        <a href="/user/notifications" style={{ color: 'var(--tc-primary)', textDecoration: 'none', fontWeight: 600, fontSize: '0.95rem' }}>
           Xem tất cả thông báo
         </a>
       </div>
