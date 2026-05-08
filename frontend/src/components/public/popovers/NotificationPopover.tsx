@@ -86,7 +86,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
         backgroundColor: 'var(--tc-bg-default)',
         boxShadow: '-2px 0 10px rgba(0, 0, 0, 0.1)',
         borderLeft: '1px solid var(--tc-border)',
-        zIndex: 100,
+        zIndex: 10001,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',

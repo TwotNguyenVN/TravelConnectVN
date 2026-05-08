@@ -68,7 +68,7 @@ export const PublicHeader: React.FC = () => {
       borderBottom: '1px solid var(--tc-border)',
       position: 'sticky',
       top: 0,
-      zIndex: 50,
+      zIndex: (showChatPopover || showNotifPopover) ? 10002 : 50,
       boxShadow: 'var(--tc-shadow-sm)'
     }}>
 
