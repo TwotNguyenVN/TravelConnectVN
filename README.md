@@ -62,9 +62,12 @@ Dự án được thiết kế theo mô hình **4 Area** riêng biệt:
 ## 🚀 Hướng dẫn cài đặt & Sử dụng
 
 ### Yêu cầu hệ thống
-*   Node.js (v18 trở lên)
-*   NPM hoặc Yarn
-*   Tài khoản Supabase (đã cấu hình schema và env)
+*   **Node.js**: v24 trở lên (Script `setup.sh` có hỗ trợ tự động kiểm tra và cài đặt).
+*   **NPM** hoặc **Yarn**.
+*   **Terminal**:
+    *   **macOS**: Dùng Terminal mặc định.
+    *   **Windows**: Yêu cầu cài đặt [Git Bash](https://gitforwindows.org/) để chạy các script `.sh`.
+*   Tài khoản Supabase (đã cấu hình schema và env).
 
 ### Các bước cài đặt
 
@@ -74,27 +77,77 @@ git clone https://github.com/zTwotz/TravelConnectVN.git
 cd TravelConnectVN
 ```
 
-**2. Cài đặt Backend:**
-```bash
-cd backend
-npm install
-npx prisma generate
-# Cấu hình file .env với SUPABASE_URL và DIRECT_URL
-npm run start:dev
-```
+**2. Lựa chọn phương thức cài đặt:**
 
-**3. Cài đặt Frontend:**
+Bạn có thể chọn 1 trong 2 cách dưới đây:
+
+**Cách A: Cài đặt tự động qua Script (Khuyên dùng)**
+Hệ thống cung cấp script tự động cài đặt các thư viện cần thiết cho cả Frontend và Backend, đồng thời kiểm tra/cài đặt Node.js nếu cần.
+
+*   **Trên macOS (Terminal)** hoặc **Windows (Git Bash)**:
 ```bash
-cd ../frontend
-npm install
-# Cấu hình file .env với VITE_SUPABASE_URL và VITE_SUPABASE_ANON_KEY
-npm run dev
+./setup.sh
 ```
+*(Nếu Windows chưa có Node.js, script sẽ gọi `winget` để cài. Bạn có thể cần khởi động lại Git Bash sau khi cài đặt xong).*
+
+**Cách B: Cài đặt thủ công (Tự kiểm soát từng bước)**
+Dành cho người muốn theo dõi quá trình cài đặt chi tiết:
+
+1.  **Cài đặt Backend & Khởi tạo Prisma:**
+    ```bash
+    cd backend
+    npm install
+    npx prisma generate
+    cd ..
+    ```
+2.  **Cài đặt Frontend:**
+    ```bash
+    cd frontend
+    npm install
+    cd ..
+    ```
+
+**3. Cấu hình biến môi trường (.env):**
+Bất kể dùng cách cài đặt nào, bạn cần kết nối ứng dụng với cơ sở dữ liệu Supabase của mình.
+Hãy copy mẫu từ file `.env.example` (nếu có) hoặc tạo file mới:
+
+*   **Thư mục Backend (`backend/.env`)**:
+    ```env
+    SUPABASE_URL=your_supabase_url
+    DIRECT_URL=your_database_connection_string
+    ```
+*   **Thư mục Frontend (`frontend/.env`)**:
+    ```env
+    VITE_SUPABASE_URL=your_supabase_url
+    VITE_SUPABASE_ANON_KEY=your_anon_key
+    ```
+
+**4. Khởi chạy dự án:**
+Sau khi hoàn tất cấu hình, bạn cần mở **2 cửa sổ Terminal** chạy song song:
+
+*   **Terminal 1 (Khởi chạy Backend):**
+    ```bash
+    cd backend
+    npm run start:dev
+    ```
+    *(API sẽ chạy tại `http://localhost:3000`)*
+
+*   **Terminal 2 (Khởi chạy Frontend):**
+    ```bash
+    cd frontend
+    npm run dev
+    ```
+    *(Giao diện sẽ chạy tại `http://localhost:5173`, hãy mở link này trên trình duyệt)*
 
 ### Lệnh quan trọng
-*   `npm run dev`: Chạy môi trường phát triển.
-*   `./clean.sh`: Dọn dẹp máy sau khi làm việc (xóa node_modules dư thừa).
-*   `npx prisma studio`: Mở giao diện quản lý Database trực quan.
+*   `npm run dev`: Chạy môi trường phát triển (trong thư mục frontend).
+*   `./clean.sh`: Dọn dẹp máy sau khi làm việc (Lưu ý: trên Windows dùng Git Bash để chạy).
+*   **Mở Prisma Studio (Giao diện CSDL):**
+    ```bash
+    cd backend
+    npx prisma studio
+    ```
+*   **Xem tài liệu API (Swagger):** Mở trình duyệt và truy cập `http://localhost:3000/api/docs` (sau khi đã chạy backend).
 
 ---
 

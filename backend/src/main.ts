@@ -45,6 +45,17 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
 
+  // Swagger Setup
+  const { DocumentBuilder, SwaggerModule } = require('@nestjs/swagger');
+  const config = new DocumentBuilder()
+    .setTitle('TravelConnectVN API')
+    .setDescription('The TravelConnectVN API description')
+    .setVersion('1.0')
+    .addBearerAuth()
+    .build();
+  const documentFactory = () => SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, documentFactory);
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

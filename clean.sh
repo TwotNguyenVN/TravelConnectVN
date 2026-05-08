@@ -1,6 +1,12 @@
 #./clean.sh
 #!/bin/bash
 
+# ==========================================
+# HƯỚNG DẪN SỬ DỤNG:
+# - macOS: Chạy trực tiếp trên Terminal (./clean.sh)
+# - Windows: Vui lòng sử dụng Git Bash để chạy (./clean.sh)
+# ==========================================
+
 echo "🚀 Bắt đầu dọn dẹp dự án TravelConnectVN..."
 
 # 1. Xóa các thư mục build
