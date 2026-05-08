@@ -201,15 +201,28 @@ Nhiệm vụ: Giúp người dùng lên kế hoạch chuyến đi. Nếu họ h�
   }
 
   private async fetchUserContext() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const tours = await this.prisma.tours.findMany({
-      where: { visibility_status: 'visible', business_status: 'published', deleted_at: null },
+      where: { 
+        visibility_status: 'visible', 
+        business_status: 'published', 
+        deleted_at: null,
+        start_date: { gte: today }
+      },
       select: { title: true, province: true, price: true, start_date: true },
       orderBy: { created_at: 'desc' },
       take: 10,
     });
 
     const companions = await this.prisma.companion_posts.findMany({
-      where: { visibility_status: 'visible', business_status: 'open', deleted_at: null },
+      where: { 
+        visibility_status: 'visible', 
+        business_status: 'open', 
+        deleted_at: null,
+        start_date: { gte: today }
+      },
       select: { title: true, destination: true, start_date: true, expected_members: true },
       orderBy: { created_at: 'desc' },
       take: 10,
