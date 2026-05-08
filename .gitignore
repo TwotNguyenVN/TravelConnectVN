@@ -35,9 +35,9 @@ UML/
 docs/
 tree_structure.txt
 tree_structure_git.txt
-WORK.md
-WORK_w_AGENT.md
-CLAUDE.md
+*.md
+!README.md
+skills-lock.json
 
 # OS files
 .DS_Store
