@@ -134,15 +134,96 @@
   color: var(--text-primary);
 }
 
-.detail-section {
+/* Companion Intro Box Style */
+.companion-intro-box {
+  margin: 32px 0;
+  padding: 40px 32px;
+  background-color: var(--tc-primary-light);
+  border: 1px solid var(--tc-primary-light);
+  border-radius: 16px;
+  position: relative;
+  box-shadow: var(--tc-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.intro-header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the header too */
+  gap: 10px;
+  color: var(--tc-primary);
+  font-weight: 700;
+  font-size: 1rem;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.intro-header i {
+  font-size: 1.4rem;
+}
+
+.companion-intro-box p {
+  color: var(--tc-text-primary);
+  font-size: 1.6rem; /* Increased size */
+  line-height: 1.5;
+  font-weight: 700;
+  margin: 0;
+  text-align: center; /* Centered text */
+}
+
+/* Highlight Section Styling (Old section was removed from top, keeping styles for Requirements) */
+.highlight-section {
   margin-top: 32px;
 }
 
-.detail-section h3 {
-  font-size: 1.25rem;
+.highlight-section .section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 16px;
-  color: var(--text-primary);
-  font-weight: 700;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--tc-primary-light);
+}
+
+.highlight-section .section-header i {
+  font-size: 1.5rem;
+  color: var(--tc-primary);
+}
+
+.highlight-section .section-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--tc-text-primary);
+  font-weight: 800;
+}
+
+.content-box {
+  padding: 24px;
+  background: var(--tc-bg-default);
+  border: 1px solid var(--tc-border);
+  border-left: 6px solid var(--tc-primary);
+  border-radius: 8px;
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--tc-text-secondary);
+  white-space: pre-wrap;
+  box-shadow: var(--tc-shadow-sm);
+}
+
+.highlight-section.secondary .section-header {
+  border-bottom-color: var(--tc-warning-bg);
+}
+
+.highlight-section.secondary .section-header i {
+  color: var(--tc-warning);
+}
+
+.highlight-section.secondary .content-box {
+  background: linear-gradient(to right, var(--tc-warning-bg) 0%, rgba(255, 246, 229, 0.2) 100%);
+  border-left-color: var(--tc-warning);
 }
 
 .description-text, .requirements-text {

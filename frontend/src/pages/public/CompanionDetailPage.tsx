@@ -198,6 +198,14 @@ const CompanionDetailPage: React.FC = () => {
               </div>
             </div>
 
+            <div className="companion-intro-box">
+              <div className="intro-header">
+                <i className="fa-solid fa-map"></i>
+                <span>Mô tả chuyến đi</span>
+              </div>
+              <p>{post.description}</p>
+            </div>
+
             <div className="detail-info-grid">
               <div className="info-box">
                 <span className="label">Điểm đến</span>
@@ -217,15 +225,15 @@ const CompanionDetailPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="detail-section">
-              <h3>Mô tả lịch trình</h3>
-              <p className="description-text">{post.description}</p>
-            </div>
-
             {post.requirements && (
-              <div className="detail-section">
-                <h3>Yêu cầu đối với bạn đồng hành</h3>
-                <p className="requirements-text">{post.requirements}</p>
+              <div className="detail-section highlight-section secondary">
+                <div className="section-header">
+                  <i className="fa-solid fa-clipboard-check"></i>
+                  <h3>Yêu cầu đối với bạn đồng hành</h3>
+                </div>
+                <div className="content-box requirements-box">
+                  {post.requirements}
+                </div>
               </div>
             )}
           </Card>
