@@ -1,0 +1,83 @@
+@startuml
+title Luồng Tìm bạn Đồng hành (Tạo bài & Duyệt tham gia) - TravelConnectVN
+
+' Cấu hình giao diện
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+skinparam NoteBackgroundColor #FEFECE
+skinparam NoteBorderColor #A80036
+
+' Định nghĩa các tác nhân
+actor "Chủ bài đăng" as Owner #LightBlue
+actor "Người muốn tham gia" as Member #LightSalmon
+participant "Giao diện (Frontend)" as FE #LightGreen
+participant "Máy chủ (Backend)" as BE #LightYellow
+database "Cơ sở dữ liệu" as DB #LightSalmon
+
+' ==========================================
+' GIAI ĐOẠN 1: TẠO BÀI ĐĂNG ĐỒNG HÀNH
+' ==========================================
+group #Lavender "Bước 1: Tạo bài tìm bạn đồng hành"
+    Owner -> FE: Chọn "Đăng bài đồng hành"
+    FE -> User: Hiển thị biểu mẫu (Tiêu đề, Điểm đến, Thời gian, Số lượng...)
+    Owner -> FE: Nhập thông tin & Gửi
+    FE -> BE: POST /companion-posts
+    activate BE
+    BE -> DB: Lưu bài đăng (companion_posts)
+    activate DB
+    DB --> BE: Thành công
+    deactivate DB
+    BE --> FE: Trả về: "Đã đăng bài thành công"
+    deactivate BE
+    FE -> Owner: Thông báo & Hiển thị bài đăng trong danh sách cá nhân
+end
+
+' ==========================================
+' GIAI ĐOẠN 2: GỬI YÊU CẦU THAM GIA
+' ==========================================
+group #OldLace "Bước 2: Người dùng khác đăng ký tham gia"
+    Member -> FE: Xem danh sách bài đồng hành
+    FE -> BE: GET /companion-posts
+    BE -> DB: SELECT * FROM companion_posts WHERE status = 'visible'
+    DB --> BE: Danh sách bài đăng
+    BE --> FE: Hiển thị danh sách công khai
+    
+    Member -> FE: Xem chi tiết & Nhấn "Tham gia chuyến đi"
+    FE -> BE: POST /companion-posts/:id/requests
+    activate BE
+    BE -> DB: Lưu yêu cầu tham gia (companion_post_participants)
+    activate DB
+    DB --> BE: Thành công
+    deactivate BE
+    BE --> FE: Trả về: "Đã gửi yêu cầu tham gia"
+    FE -> Member: Thông báo đang chờ chủ bài duyệt
+end
+
+' ==========================================
+' GIAI ĐOẠN 3: DUYỆT / TỪ CHỐI YÊU CẦU
+' ==========================================
+group #HoneyDew "Bước 3: Chủ bài đăng điều phối thành viên"
+    Owner -> FE: Truy cập "Quản lý bài đăng của tôi"
+    FE -> BE: GET /companion-posts/me/requests
+    activate BE
+    BE -> DB: Truy vấn danh sách người đăng ký tham gia
+    DB --> BE: Danh sách thành viên chờ duyệt
+    BE --> FE: Hiển thị danh sách yêu cầu
+    
+    Owner -> FE: Xem Profile người đăng ký & Chọn "Duyệt" hoặc "Từ chối"
+    FE -> BE: PATCH /companion-posts/requests/:id/status
+    BE -> DB: Cập nhật trạng thái tham gia (APPROVED / REJECTED)
+    DB --> BE: Cập nhật thành công
+    
+    BE -> BE: Gửi thông báo đến Người đăng ký
+    BE --> FE: Trả về: "Xử lý thành công"
+    deactivate BE
+    FE -> Owner: Cập nhật danh sách thành viên chuyến đi
+end
+
+note over Owner, Member
+    Tính năng này giúp kết nối những người có cùng sở thích du lịch, 
+    giảm chi phí và tăng trải nghiệm giao lưu xã hội.
+end note
+
+@enduml

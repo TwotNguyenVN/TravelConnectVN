@@ -1,0 +1,88 @@
+@startuml usecase_admin
+' ============================================================
+' Hình 3.4. Sơ đồ Use Case phân hệ Quản trị hệ thống
+' Chi tiết các chức năng của Admin và Staff/Moderator
+' ============================================================
+
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI"
+skinparam usecase {
+  BackgroundColor #FEFEFE
+  BorderColor #555555
+  ArrowColor #333333
+}
+skinparam package {
+  BackgroundColor #F5F5F5
+  BorderColor #AAAAAA
+}
+skinparam rectangle {
+  BackgroundColor #FFFFFF
+  BorderColor #336699
+}
+
+actor "Quản trị viên" as Admin
+actor "Nhân sự kiểm duyệt /\nHỗ trợ" as Staff
+
+rectangle "Phân hệ Quản trị hệ thống" {
+
+  package "Tổng quan" {
+    usecase "Xem Dashboard\ntổng quan" as UC1
+    usecase "Phân quyền\nngười dùng" as UC2
+  }
+
+  package "Quản trị tài khoản" {
+    usecase "Xem danh sách\nngười dùng" as UC3
+    usecase "Khoá / Mở khoá\ntài khoản" as UC4
+  }
+
+  package "Kiểm duyệt nội dung" {
+    usecase "Kiểm duyệt Tour" as UC5
+    usecase "Kiểm duyệt bài\nđồng hành" as UC6
+    usecase "Quản lý đánh giá" as UC7
+  }
+
+  package "Xác minh & Báo cáo" {
+    usecase "Phê duyệt hồ sơ\nhướng dẫn viên" as UC8
+    usecase "Xử lý báo cáo\nvi phạm" as UC9
+  }
+
+  package "Giám sát" {
+    usecase "Xem nhật ký\nhệ thống" as UC10
+    usecase "Xem nhật ký\nhoạt động người dùng" as UC11
+  }
+}
+
+' --- Admin (toàn quyền) ---
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Admin --> UC6
+Admin --> UC7
+Admin --> UC8
+Admin --> UC9
+Admin --> UC10
+Admin --> UC11
+
+' --- Staff (quyền hạn chế) ---
+Staff --> UC5
+Staff --> UC6
+Staff --> UC7
+Staff --> UC9
+Staff --> UC10
+
+' --- Relationships ---
+UC4 ..> UC3 : <<extend>>
+
+note right of UC1
+  Biểu đồ thống kê (Recharts):
+  • Tăng trưởng người dùng
+  • Số lượng tour
+  • Doanh thu
+end note
+
+@enduml

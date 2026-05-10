@@ -1,0 +1,81 @@
+@startuml
+title Luồng Đăng ký, Đăng nhập và Phân quyền - TravelConnectVN
+
+' Cấu hình giao diện
+skinparam Style strictuml
+skinparam SequenceMessageAlignment center
+skinparam NoteBackgroundColor #FEFECE
+skinparam NoteBorderColor #A80036
+
+' Định nghĩa các tác nhân
+actor "Khách / Thành viên" as User #LightBlue
+participant "Giao diện (Frontend)" as FE #LightGreen
+participant "Máy chủ (Backend)" as BE #LightYellow
+database "Cơ sở dữ liệu" as DB #LightSalmon
+entity "Supabase Auth" as Auth #Violet
+
+' ==========================================
+' GIAI ĐOẠN 1: ĐĂNG KÝ (REGISTRATION)
+' ==========================================
+group #Lavender "Bước 1: Thiết lập tài khoản mới"
+    User -> FE: Nhập (Tên, Email, Mật khẩu)
+    FE -> BE: POST /auth/register
+    
+    BE -> Auth: Yêu cầu tạo tài khoản (Email/Pass)
+    activate Auth
+    Auth --> BE: AuthID (UUID)
+    deactivate Auth
+    
+    BE -> DB: 1. Lưu Profile người dùng\n2. Gán quyền mặc định (USER)
+    activate DB
+    DB --> BE: Hoàn tất lưu trữ
+    deactivate DB
+    
+    BE --> FE: Trả về: "Đăng ký thành công"
+    FE -> User: Thông báo & Chuyển hướng sang Đăng nhập
+end
+
+' ==========================================
+' GIAI ĐOẠN 2: ĐĂNG NHẬP & XÁC THỰC
+' ==========================================
+group #OldLace "Bước 2: Đăng nhập & Lấy quyền hạn"
+    User -> FE: Nhập Email & Mật khẩu
+    
+    FE -> Auth: Yêu cầu Login (credentials)
+    activate Auth
+    Auth --> FE: Trả về JWT Access Token
+    deactivate Auth
+    
+    FE -> BE: Lấy thông tin cá nhân (GET /auth/me)\n(Gửi kèm Token trong Header)
+    activate BE
+    BE -> Auth: Xác thực tính hợp lệ của Token
+    BE -> DB: Lấy danh sách Roles (Vai trò)
+    activate DB
+    DB --> BE: Danh sách vai trò: [USER, GUIDE, ADMIN]
+    deactivate DB
+    
+    BE --> FE: Trả về: { UserProfile, Roles: [...] }
+    deactivate BE
+end
+
+' ==========================================
+' GIAI ĐOẠN 3: PHÂN QUYỀN VÀ ĐIỀU HƯỚNG
+' ==========================================
+group #HoneyDew "Bước 3: Điều hướng theo vai trò (Role-based Routing)"
+    FE -> FE: Lưu Roles vào AuthContext (Global State)
+    
+    alt Có quyền ADMIN
+        FE -> User: Hiển thị giao diện Quản trị (Admin Area)
+    else Có quyền GUIDE
+        FE -> User: Hiển thị giao diện Hướng dẫn viên (Guide Area)
+    else Chỉ có quyền USER
+        FE -> User: Hiển thị giao diện Khách du lịch (User Area)
+    end
+end
+
+note over User, Auth
+    Hệ thống sử dụng **Supabase Auth** để bảo mật mật khẩu
+    và **Cơ sở dữ liệu riêng** để quản lý hồ sơ & phân quyền động.
+end note
+
+@enduml

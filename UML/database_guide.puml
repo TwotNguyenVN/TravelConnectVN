@@ -1,0 +1,107 @@
+@startuml database_guide
+!theme plain
+skinparam linetype ortho
+skinparam shadowing false
+skinparam class {
+    BackgroundColor White
+    ArrowColor #333333
+    BorderColor #555555
+}
+
+package "Phân hệ Hồ sơ Hướng dẫn viên" {
+
+    entity "guide_profiles" as guide_profiles {
+        *id : uuid <<PK>>
+        --
+        user_id : uuid <<FK, Unique>>
+        biography : text
+        working_area : varchar
+        province_id : bigint <<FK>>
+        base_price_per_day : decimal
+        years_of_experience : int
+        rating_average : decimal
+        total_reviews : int
+        verification_status : varchar
+        visibility_status : varchar
+        ...
+    }
+
+    entity "guide_languages" as guide_languages {
+        *guide_profile_id : uuid <<PK, FK>>
+        *language_id : bigint <<PK, FK>>
+        --
+        proficiency_level : varchar
+    }
+
+    entity "languages" as languages {
+        *id : bigint <<PK>>
+        --
+        name : varchar
+    }
+
+    entity "guide_skills" as guide_skills {
+        *guide_profile_id : uuid <<PK, FK>>
+        *skill_id : bigint <<PK, FK>>
+        --
+        years_of_experience : int
+    }
+
+    entity "skills" as skills {
+        *id : bigint <<PK>>
+        --
+        name : varchar
+        category : varchar
+    }
+
+    entity "guide_availabilities" as guide_availabilities {
+        *id : uuid <<PK>>
+        --
+        guide_profile_id : uuid <<FK>>
+        start_date : date
+        end_date : date
+        is_available : boolean
+        note : varchar
+    }
+
+    entity "guide_verification_requests" as verification_requests {
+        *id : uuid <<PK>>
+        --
+        guide_profile_id : uuid <<FK>>
+        status : varchar
+        submitted_at : timestamptz
+        processed_by_user_id : uuid <<FK>>
+        result_note : text
+    }
+
+    entity "guide_verification_documents" as verification_docs {
+        *id : uuid <<PK>>
+        --
+        request_id : uuid <<FK>>
+        document_type : varchar
+        document_url : varchar
+        status : varchar
+    }
+
+    entity "guide_reviews" as guide_reviews {
+        *id : uuid <<PK>>
+        --
+        guide_profile_id : uuid <<FK>>
+        user_id : uuid <<FK>>
+        tour_id : uuid <<FK>>
+        rating : int
+        comment : text
+        created_at : timestamptz
+    }
+}
+
+' Relationships
+guide_profiles ||--o{ guide_languages : "speaks"
+languages ||--o{ guide_languages
+guide_profiles ||--o{ guide_skills : "has"
+skills ||--o{ guide_skills
+guide_profiles ||--o{ guide_availabilities : "defines"
+guide_profiles ||--o{ verification_requests : "submits"
+verification_requests ||--o{ verification_docs : "contains"
+guide_profiles ||--o{ guide_reviews : "receives"
+
+@enduml
