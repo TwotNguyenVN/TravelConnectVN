@@ -51,8 +51,9 @@ export class RecommendationsService {
           guide_profiles: {
             include: {
               users: {
-                select: { full_name: true, avatar_url: true },
+                select: { full_name: true, avatar_url: true, phone: true },
               },
+              guide_languages: true
             },
           },
         },
@@ -61,6 +62,11 @@ export class RecommendationsService {
       // 3. Lọc và Chấm điểm (Rule-based)
       const scoredTours = tours
         .map((tour) => {
+          // Chặn hiển thị Tour nếu Guide chưa đạt 100% độ hoàn thiện
+          if (!this.isGuideProfileComplete(tour.guide_profiles)) {
+            return null;
+          }
+
           // Tìm lịch khởi hành tiếp theo còn chỗ
           const nextAvailableSchedule = tour.tour_schedules.find(s => {
             const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
@@ -158,5 +164,36 @@ export class RecommendationsService {
       console.error('Error getting recommendations:', error);
       throw new InternalServerErrorException('Failed to get recommendations');
     }
+  }
+
+  private isGuideProfileComplete(g: any): boolean {
+    if (!g) return false;
+    
+    // 1. Họ và tên
+    if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
+    
+    // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
+    const avatar = g.avatar_url || g.users?.avatar_url;
+    if (!avatar || avatar.trim() === '') return false;
+    
+    // 3. Số điện thoại
+    if (!g.users?.phone || g.users.phone.trim() === '') return false;
+    
+    // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
+    if (!g.bio || g.bio.trim().length < 20) return false;
+    
+    // 5. Số năm kinh nghiệm
+    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
+    
+    // 6. Tỉnh thành hoạt động chính
+    if (!g.home_province_id) return false;
+    
+    // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
+    if (!g.guide_languages || g.guide_languages.length === 0) return false;
+    
+    // 8. Xác minh danh tính
+    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
+    
+    return true;
   }
 }

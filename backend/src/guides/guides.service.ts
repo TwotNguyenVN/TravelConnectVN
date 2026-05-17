@@ -105,6 +105,7 @@ export class GuidesService {
           select: {
             full_name: true,
             avatar_url: true,
+            phone: true,
           },
         },
         guide_languages: {
@@ -138,7 +139,7 @@ export class GuidesService {
       },
     });
 
-    if (!guide || guide.visibility_status !== 'visible' || guide.deleted_at) {
+    if (!guide || guide.visibility_status !== 'visible' || guide.deleted_at || !this.isGuideProfileComplete(guide)) {
       throw new NotFoundException('Không tìm thấy hướng dẫn viên');
     }
 
@@ -375,8 +376,8 @@ export class GuidesService {
       id: g.id,
       userId: g.user_id,
       name: g.users?.full_name || 'Hướng dẫn viên',
-      avatar: g.users?.avatar_url || '', // Account avatar
-      avatarUrl: g.avatar_url || g.users?.avatar_url || '', // Profile avatar (fallback to account)
+      avatar: g.avatar_url || g.users?.avatar_url || '', // Profile avatar (fallback to account)
+      avatarUrl: g.avatar_url || g.users?.avatar_url || '', // Keep for compatibility
       coverUrl: g.cover_url || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/profile_cover_1.png',
       workingArea: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
@@ -393,8 +394,40 @@ export class GuidesService {
     };
   }
 
+  private isGuideProfileComplete(g: any): boolean {
+    if (!g) return false;
+    
+    // 1. Họ và tên
+    if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
+    
+    // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
+    const avatar = g.avatar_url || g.users?.avatar_url;
+    if (!avatar || avatar.trim() === '') return false;
+    
+    // 3. Số điện thoại
+    if (!g.users?.phone || g.users.phone.trim() === '') return false;
+    
+    // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
+    if (!g.bio || g.bio.trim().length < 20) return false;
+    
+    // 5. Số năm kinh nghiệm
+    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
+    
+    // 6. Tỉnh thành hoạt động chính
+    if (!g.home_province_id) return false;
+    
+    // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
+    if (!g.guide_languages || g.guide_languages.length === 0) return false;
+    
+    // 8. Xác minh danh tính
+    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
+    
+    return true;
+  }
+
   private async formatGuideDetail(g: any) {
     const publicInfo = await this.formatGuidePublic(g);
+    const isComplete = this.isGuideProfileComplete(g);
     return {
       ...publicInfo,
       bio: g.bio || '',
@@ -413,15 +446,15 @@ export class GuidesService {
       } : null,
       familiarProvinces: g.familiar_provinces || '',
       region: g.region || '',
-      tours: (g.tours || []).map((t: any) => ({
+      tours: isComplete ? (g.tours || []).map((t: any) => ({
         id: t.id,
         title: t.title,
         price: Number(t.price),
         province: t.province,
         image: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
         category: t.tour_categories?.name || 'Chưa phân loại',
-        duration: `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`,
-      })),
+        duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+      })) : [],
     };
   }
 }

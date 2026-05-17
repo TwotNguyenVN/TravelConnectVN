@@ -153,20 +153,19 @@ const GuideDashboardPage: React.FC = () => {
   };
 
   const calculateCompletion = () => {
-    if (!profile || !personalData) return { percent: 0, missing: [] };
-    
     const missing: string[] = [];
     let score = 0;
     const total = 8; // 8 items to check
 
-    if (personalData.fullName) score++; else missing.push('Họ và tên');
-    if (personalData.avatarUrl) score++; else missing.push('Ảnh đại diện');
-    if (personalData.phone) score++; else missing.push('Số điện thoại');
-    if (profile.bio && profile.bio.length > 20) score++; else missing.push('Giới thiệu bản thân (tối thiểu 20 ký tự)');
-    if (profile.yearsOfExperience !== undefined) score++; else missing.push('Số năm kinh nghiệm');
-    if (profile.homeProvinceId) score++; else missing.push('Tỉnh thành hoạt động chính');
-    if (profile.guideLanguages && profile.guideLanguages.length > 0) score++; else missing.push('Ngôn ngữ thông thạo');
-    if (profile.verificationStatus === 'approved' || profile.verificationStatus === 'verified') score++; else missing.push('Xác minh danh tính');
+    if (personalData && personalData.fullName) score++; else missing.push('Họ và tên');
+    if (personalData && personalData.avatarUrl) score++; else missing.push('Ảnh đại diện');
+    if (personalData && personalData.phone) score++; else missing.push('Số điện thoại');
+    
+    if (profile && profile.bio && profile.bio.length > 20) score++; else missing.push('Giới thiệu bản thân (tối thiểu 20 ký tự)');
+    if (profile && profile.yearsOfExperience !== undefined) score++; else missing.push('Số năm kinh nghiệm');
+    if (profile && profile.homeProvinceId) score++; else missing.push('Tỉnh thành hoạt động chính');
+    if (profile && profile.guideLanguages && profile.guideLanguages.length > 0) score++; else missing.push('Ngôn ngữ thông thạo');
+    if (profile && (profile.verificationStatus === 'approved' || profile.verificationStatus === 'verified')) score++; else missing.push('Xác minh danh tính');
 
     return {
       percent: Math.round((score / total) * 100),
@@ -202,6 +201,87 @@ const GuideDashboardPage: React.FC = () => {
             </Button>
           </div>
         </div>
+
+        {completion.percent < 100 && (
+          <div className="profile-completeness-banner animate-up">
+            <div className="completeness-banner-header">
+              <div className="completeness-title">
+                <span className="warning-icon">⚠️</span>
+                <div>
+                  <h3>Hồ sơ Hướng dẫn viên chưa hoàn thiện ({completion.percent}%)</h3>
+                  <p>Hồ sơ và các tour của bạn đang bị ẩn. Vui lòng bổ sung đầy đủ các phần còn thiếu dưới đây để hồ sơ hiển thị công khai 100%.</p>
+                </div>
+              </div>
+              <div className="completeness-percentage">
+                <div className="percentage-circle" style={{ '--percent': completion.percent } as React.CSSProperties}>
+                  <span className="percentage-text">{completion.percent}%</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="completeness-checklist-section">
+              <h4>Các phần còn thiếu cần bổ sung (Nhấp để đi đến thiết lập):</h4>
+              <div className="completeness-checklist-grid">
+                {completion.missing.map((item, idx) => {
+                  let action = () => {};
+                  let icon = "📝";
+                  if (item === 'Họ và tên') {
+                    action = () => {
+                      const input = document.getElementsByName('fullName')[0];
+                      if (input) {
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        (input as HTMLInputElement).focus();
+                      }
+                    };
+                    icon = "👤";
+                  } else if (item === 'Ảnh đại diện') {
+                    action = () => {
+                      if (fileInputRef.current) fileInputRef.current.click();
+                    };
+                    icon = "🖼️";
+                  } else if (item === 'Số điện thoại') {
+                    action = () => {
+                      const input = document.getElementsByName('phone')[0];
+                      if (input) {
+                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        (input as HTMLInputElement).focus();
+                      }
+                    };
+                    icon = "📞";
+                  } else if (item === 'Giới thiệu bản thân (tối thiểu 20 ký tự)') {
+                    action = () => navigate('/guide/profile');
+                    icon = "✍️";
+                  } else if (item === 'Số năm kinh nghiệm') {
+                    action = () => navigate('/guide/profile');
+                    icon = "💼";
+                  } else if (item === 'Tỉnh thành hoạt động chính') {
+                    action = () => navigate('/guide/profile');
+                    icon = "📍";
+                  } else if (item === 'Ngôn ngữ thông thạo') {
+                    action = () => navigate('/guide/profile');
+                    icon = "🗣️";
+                  } else if (item === 'Xác minh danh tính') {
+                    action = () => navigate('/guide/verification');
+                    icon = "🪪";
+                  }
+                  
+                  return (
+                    <button 
+                      key={idx} 
+                      className="completeness-checklist-item" 
+                      onClick={action}
+                      title={`Click để thiết lập ${item}`}
+                    >
+                      <span className="item-icon">{icon}</span>
+                      <span className="item-text">{item}</span>
+                      <span className="item-arrow">→</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="guide-stats-grid">
           <Card className="guide-stat-card">

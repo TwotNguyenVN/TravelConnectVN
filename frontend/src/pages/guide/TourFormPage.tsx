@@ -421,6 +421,14 @@ const TourFormPage: React.FC = () => {
         );
         return false;
       }
+      if (Number(formData.numDays) > 15) {
+        toast.warning("Số ngày tối đa cho phép là 15 ngày");
+        return false;
+      }
+      if (Number(formData.numNights) > 15) {
+        toast.warning("Số đêm tối đa cho phép là 15 đêm");
+        return false;
+      }
     }
     if (step === 3) {
       if (formData.itinerary.length === 0 || !formData.itinerary[0].locationName) {
@@ -1027,6 +1035,7 @@ const TourFormPage: React.FC = () => {
                         value={formData.numDays ?? ""}
                         onChange={handleBasicChange}
                         min="1"
+                        max="15"
                         required
                         disabled={isPublished}
                       />
@@ -1042,6 +1051,7 @@ const TourFormPage: React.FC = () => {
                         value={formData.numNights ?? ""}
                         onChange={handleBasicChange}
                         min="0"
+                        max="15"
                         required
                       />
                     </div>

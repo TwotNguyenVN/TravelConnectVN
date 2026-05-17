@@ -165,6 +165,18 @@ export class ToursService {
             }
           },
           orderBy: { start_date: 'asc' }
+        },
+        guide_profiles: {
+          include: {
+            users: {
+              select: {
+                full_name: true,
+                avatar_url: true,
+                phone: true,
+              }
+            },
+            guide_languages: true
+          }
         }
       },
       orderBy: { created_at: 'desc' },
@@ -173,6 +185,11 @@ export class ToursService {
     // Lọc và định dạng theo logic còn chỗ
     const allFormattedTours = tours
       .map((t) => {
+        // Chặn hiển thị Tour nếu Guide chưa đạt 100% độ hoàn thiện
+        if (!this.isGuideProfileComplete(t.guide_profiles)) {
+          return null;
+        }
+
         const nextAvailableSchedule = t.tour_schedules.find(s => {
           const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
           return bookedCount < s.max_participants;
@@ -439,6 +456,18 @@ export class ToursService {
             }
           },
           orderBy: { start_date: 'asc' }
+        },
+        guide_profiles: {
+          include: {
+            users: {
+              select: {
+                full_name: true,
+                avatar_url: true,
+                phone: true,
+              }
+            },
+            guide_languages: true
+          }
         }
       },
       orderBy: { created_at: 'desc' },
@@ -446,6 +475,11 @@ export class ToursService {
 
     const formattedTours = tours
       .map((t) => {
+        // Chặn hiển thị Tour nếu Guide chưa đạt 100% độ hoàn thiện
+        if (!this.isGuideProfileComplete(t.guide_profiles)) {
+          return null;
+        }
+
         // Tìm lịch khởi hành tiếp theo còn chỗ
         const nextAvailableSchedule = t.tour_schedules.find(s => {
           const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
@@ -498,6 +532,37 @@ export class ToursService {
       category: t.tour_categories?.name || 'Chưa phân loại',
       categoryId: t.category_id?.toString(),
     };
+  }
+
+  private isGuideProfileComplete(g: any): boolean {
+    if (!g) return false;
+    
+    // 1. Họ và tên
+    if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
+    
+    // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
+    const avatar = g.avatar_url || g.users?.avatar_url;
+    if (!avatar || avatar.trim() === '') return false;
+    
+    // 3. Số điện thoại
+    if (!g.users?.phone || g.users.phone.trim() === '') return false;
+    
+    // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
+    if (!g.bio || g.bio.trim().length < 20) return false;
+    
+    // 5. Số năm kinh nghiệm
+    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
+    
+    // 6. Tỉnh thành hoạt động chính
+    if (!g.home_province_id) return false;
+    
+    // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
+    if (!g.guide_languages || g.guide_languages.length === 0) return false;
+    
+    // 8. Xác minh danh tính
+    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
+    
+    return true;
   }
 
   async getFeaturedGuides() {
@@ -650,6 +715,14 @@ export class ToursService {
 
     if (!guideProfile) {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
+    }
+
+    // Validate max days/nights
+    if (data.numDays !== undefined && data.numDays !== null && data.numDays !== '' && Number(data.numDays) > 15) {
+      throw new BadRequestException('Số ngày tối đa cho phép là 15 ngày');
+    }
+    if (data.numNights !== undefined && data.numNights !== null && data.numNights !== '' && Number(data.numNights) > 15) {
+      throw new BadRequestException('Số đêm tối đa cho phép là 15 đêm');
     }
 
     // 2. Thực hiện tạo tour và các dữ liệu liên quan trong một transaction
@@ -806,6 +879,14 @@ export class ToursService {
 
     if (tour.guide_profile_id !== guideProfile.id) {
       throw new NotFoundException('Bạn không có quyền chỉnh sửa tour này');
+    }
+
+    // Validate max days/nights
+    if (data.numDays !== undefined && data.numDays !== null && data.numDays !== '' && Number(data.numDays) > 15) {
+      throw new BadRequestException('Số ngày tối đa cho phép là 15 ngày');
+    }
+    if (data.numNights !== undefined && data.numNights !== null && data.numNights !== '' && Number(data.numNights) > 15) {
+      throw new BadRequestException('Số đêm tối đa cho phép là 15 đêm');
     }
 
     // 3. Thực hiện cập nhật trong một transaction
