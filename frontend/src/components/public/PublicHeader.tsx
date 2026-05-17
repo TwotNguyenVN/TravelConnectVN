@@ -88,7 +88,7 @@ export const PublicHeader: React.FC = () => {
   const displayAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || DEFAULT_AVATAR;
   const initial = displayName[0]?.toUpperCase() || 'N';
 
-  const isAdmin = roles.includes('ADMIN');
+  const isAdmin = roles.includes('SYSTEM_ADMIN') || roles.includes('CONTENT_MODERATOR') || roles.includes('SUPPORT_STAFF');
   const isGuide = roles.includes('GUIDE');
   const profileLink = isAdmin ? '/admin' : (isGuide ? '/guide' : '/user');
 
