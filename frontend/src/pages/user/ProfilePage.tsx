@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/common/Card/Card';
 import { Input } from '../../components/common/Input/Input';
 import { Button } from '../../components/common/Button/Button';
 import { LoadingBlock } from '../../components/common';
