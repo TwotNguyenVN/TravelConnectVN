@@ -56,7 +56,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await Promise.all([
+        fetchProfile(user.id),
+        fetchRoles(user.id)
+      ]);
     }
   };
 
