@@ -51,6 +51,11 @@
 
 .tour-card-wishlist svg {
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  transition: transform 0.2s ease;
+}
+
+.tour-card-wishlist:hover svg {
+  transform: scale(1.25);
 }
 
 .tour-card-timer-overlay {
