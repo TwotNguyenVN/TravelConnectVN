@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import { Card } from '../../components/common/Card/Card';
 import { Input } from '../../components/common/Input/Input';
 import { Button } from '../../components/common/Button/Button';
 import { LoadingBlock } from '../../components/common';
@@ -13,7 +12,7 @@ import { DEFAULT_AVATAR } from '../../constants/images';
 import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
-  const { user, refreshProfile } = useAuth();
+  const { user, roles, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -290,6 +289,32 @@ export const ProfilePage: React.FC = () => {
     if (e) e.preventDefault();
     if (!user) return;
     
+    // 1. Phone number validation (digits only)
+    if (formData.phone) {
+      if (!/^[0-9]+$/.test(formData.phone)) {
+        toast.error('Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)');
+        return;
+      }
+    }
+
+    // 2. Date of Birth validation (valid date, year >= 1950, not in the future)
+    if (formData.dateOfBirth) {
+      const dob = new Date(formData.dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        toast.error('Ngày sinh không hợp lệ');
+        return;
+      }
+      const year = dob.getFullYear();
+      if (year < 1950) {
+        toast.error('Năm sinh không được trước năm 1950');
+        return;
+      }
+      if (dob > new Date()) {
+        toast.error('Ngày sinh không được ở tương lai');
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       await userService.updateProfile(formData);
@@ -556,7 +581,7 @@ export const ProfilePage: React.FC = () => {
       </form>
 
       {/* Become a Guide Recruitment Banner */}
-      {!user?.roles?.some((r: any) => r.role_code === 'GUIDE') && (
+      {!roles.includes('GUIDE') && (
         <div className="tc-guide-recruit-banner">
           <div className="recruit-content">
             <div className="recruit-icon">💎</div>

@@ -20,7 +20,15 @@ const AiChatPage: React.FC = () => {
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [sending, setSending] = useState(false);
   
+  // Custom states for interactive features
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
+  const [editTitleText, setEditTitleText] = useState('');
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const streamingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -28,10 +36,17 @@ const AiChatPage: React.FC = () => {
 
   useEffect(() => {
     fetchSessions();
+    return () => {
+      if (streamingIntervalRef.current) clearInterval(streamingIntervalRef.current);
+    };
   }, [user]);
 
   useEffect(() => {
     if (currentSessionId) {
+      if (streamingIntervalRef.current) {
+        clearInterval(streamingIntervalRef.current);
+        setSending(false);
+      }
       fetchMessages(currentSessionId);
     } else {
       setMessages([]);
@@ -41,6 +56,14 @@ const AiChatPage: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, sending]);
+
+  // Auto-resize input textarea
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+    }
+  }, [inputText]);
 
   const fetchSessions = async () => {
     if (!user) return;
@@ -77,15 +100,62 @@ const AiChatPage: React.FC = () => {
       if (res.success && res.data) {
         setSessions([res.data, ...sessions]);
         setCurrentSessionId(res.data.id);
+        toast.success('Đã khởi tạo hội thoại mới');
       }
     } catch (error) {
       toast.error('Không thể tạo phiên chat mới');
     }
   };
 
-  const handleSendMessage = async (e?: React.FormEvent) => {
+  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
+    e.stopPropagation();
+    if (!window.confirm('Bạn có chắc chắn muốn xóa hội thoại này không?')) return;
+    
+    try {
+      const res = await aiChatService.deleteSession(sessionId);
+      if (res.success) {
+        setSessions(prev => prev.filter(s => s.id !== sessionId));
+        toast.success('Đã xóa hội thoại');
+        if (currentSessionId === sessionId) {
+          setCurrentSessionId(null);
+        }
+      }
+    } catch (error) {
+      toast.error('Không thể xóa hội thoại');
+    }
+  };
+
+  const handleStartEditSession = (e: React.MouseEvent, session: AiSession) => {
+    e.stopPropagation();
+    setEditingSessionId(session.id);
+    setEditTitleText(session.context?.title || `Hội thoại ${session.id.substring(0, 4)}`);
+  };
+
+  const handleSaveSessionTitle = async (sessionId: string) => {
+    if (!editTitleText.trim()) {
+      setEditingSessionId(null);
+      return;
+    }
+
+    try {
+      const session = sessions.find(s => s.id === sessionId);
+      const updatedContext = { ...(session?.context || {}), title: editTitleText.trim() };
+      
+      const res = await aiChatService.updateSessionContext(sessionId, updatedContext);
+      if (res.success) {
+        setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, context: updatedContext } : s));
+        setEditingSessionId(null);
+        toast.success('Đã cập nhật tiêu đề hội thoại');
+      }
+    } catch (error) {
+      toast.error('Không thể cập nhật tiêu đề');
+    }
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent, directText?: string) => {
     if (e) e.preventDefault();
-    if (!inputText.trim() || sending) return;
+    const textToSend = directText || inputText;
+    if (!textToSend.trim() || sending) return;
 
     let sessionId = currentSessionId;
     if (!sessionId) {
@@ -100,33 +170,87 @@ const AiChatPage: React.FC = () => {
       }
     }
 
-    const userMessage = inputText.trim();
-    setInputText('');
+    const userMessage = textToSend.trim();
+    if (!directText) setInputText('');
     setSending(true);
 
-    // Optimistic update
-    const tempMessage: AiMessage = {
-      id: Date.now().toString(),
+    // Optimistic update of User Message
+    const tempUserMessage: AiMessage = {
+      id: `user-${Date.now()}`,
       session_id: sessionId!,
       sender_type: 'user',
       content: userMessage,
       model_name: null,
       created_at: new Date().toISOString(),
     };
-    setMessages(prev => [...prev, tempMessage]);
+    setMessages(prev => [...prev, tempUserMessage]);
 
     try {
       const res = await aiChatService.sendMessage(sessionId!, userMessage);
       if (res.success && res.data) {
-        setMessages(prev => [...prev, res.data!]);
-        // Cập nhật lại danh sách session để có preview mới nhất
-        fetchSessions();
+        const aiMsg = res.data;
+        
+        // Setup typing-effect simulated stream
+        const streamingMsg: AiMessage = {
+          ...aiMsg,
+          content: '', // Start empty
+        };
+        setMessages(prev => [...prev, streamingMsg]);
+
+        let currentText = '';
+        const fullText = aiMsg.content;
+        let index = 0;
+        const charPerTick = 3; // Type 3 chars at a time for speed/smoothness
+
+        streamingIntervalRef.current = setInterval(() => {
+          if (index < fullText.length) {
+            currentText += fullText.substring(index, index + charPerTick);
+            setMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, content: currentText } : m));
+            index += charPerTick;
+          } else {
+            if (streamingIntervalRef.current) clearInterval(streamingIntervalRef.current);
+            setMessages(prev => prev.map(m => m.id === aiMsg.id ? { ...m, content: fullText } : m));
+            setSending(false);
+            fetchSessions(); // Refresh sidebar to show latest preview
+          }
+        }, 15);
       }
     } catch (error) {
       toast.error('Lỗi khi gửi tin nhắn');
-    } finally {
       setSending(false);
     }
+  };
+
+  const handleCopyToClipboard = (e: React.MouseEvent, messageId: string, content: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(content).then(() => {
+      setCopiedMessageId(messageId);
+      toast.success('Đã sao chép tin nhắn vào bộ nhớ tạm');
+      setTimeout(() => setCopiedMessageId(null), 2000);
+    }).catch(() => {
+      toast.error('Không thể sao chép');
+    });
+  };
+
+  const handleRegenerate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (sending || messages.length < 2) return;
+    
+    // Find the last user message
+    const userMsgs = messages.filter(m => m.sender_type === 'user');
+    if (userMsgs.length === 0) return;
+    const lastUserMsg = userMsgs[userMsgs.length - 1];
+
+    // Remove the last AI message from UI before sending
+    setMessages(prev => {
+      const copy = [...prev];
+      if (copy[copy.length - 1].sender_type === 'assistant') {
+        copy.pop();
+      }
+      return copy;
+    });
+
+    handleSendMessage(undefined, lastUserMsg.content);
   };
 
   const formatDate = (dateStr?: string) => {
@@ -136,9 +260,21 @@ const AiChatPage: React.FC = () => {
     return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   };
 
+  const getSessionDisplayTitle = (s: AiSession) => {
+    if (s.context?.title) return s.context.title;
+    
+    if (s.ai_chat_messages && s.ai_chat_messages.length > 0) {
+      const content = s.ai_chat_messages[0].content;
+      return content.length > 25 ? content.substring(0, 25) + '...' : content;
+    }
+    
+    return `Hội thoại ${s.id.substring(0, 4)}`;
+  };
+
   return (
     <div className="ai-chat-page-wrapper">
-      <div className="ai-chat-layout">
+      <div className={`ai-chat-layout ${sidebarOpen ? 'sidebar-expanded' : 'sidebar-collapsed'}`}>
+        
         {/* Sidebar */}
         <aside className="ai-chat-sidebar">
           <div className="sidebar-header">
@@ -146,7 +282,7 @@ const AiChatPage: React.FC = () => {
               <div className="brand-icon">✨</div>
               <span>Travel Assistant</span>
             </div>
-            <button className="new-chat-btn" onClick={handleCreateSession}>
+            <button className="new-chat-btn" onClick={handleCreateSession} title="Cuộc trò chuyện mới">
               <i className="bi bi-plus-lg"></i>
             </button>
           </div>
@@ -167,14 +303,43 @@ const AiChatPage: React.FC = () => {
                   >
                     <div className="session-icon">💬</div>
                     <div className="session-details">
-                      <span className="session-title">
-                        {s.ai_chat_messages && s.ai_chat_messages.length > 0 
-                          ? (s.ai_chat_messages[0].content.length > 35 
-                              ? s.ai_chat_messages[0].content.substring(0, 35) + '...' 
-                              : s.ai_chat_messages[0].content)
-                          : `Hội thoại ${s.id.substring(0, 4)}`}
-                      </span>
+                      {editingSessionId === s.id ? (
+                        <input
+                          type="text"
+                          className="session-title-input"
+                          value={editTitleText}
+                          onChange={(e) => setEditTitleText(e.target.value)}
+                          onBlur={() => handleSaveSessionTitle(s.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleSaveSessionTitle(s.id);
+                            if (e.key === 'Escape') setEditingSessionId(null);
+                          }}
+                          autoFocus
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      ) : (
+                        <span className="session-title" onDoubleClick={(e) => handleStartEditSession(e, s)}>
+                          {getSessionDisplayTitle(s)}
+                        </span>
+                      )}
                       <span className="session-meta">{formatDate(s.created_at || s.started_at)}</span>
+                    </div>
+                    
+                    <div className="session-actions">
+                      <button 
+                        className="session-action-btn edit-btn"
+                        onClick={(e) => handleStartEditSession(e, s)}
+                        title="Đổi tên"
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                      <button 
+                        className="session-action-btn delete-btn"
+                        onClick={(e) => handleDeleteSession(e, s)}
+                        title="Xóa cuộc trò chuyện"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
                     </div>
                   </div>
                 ))
@@ -196,13 +361,29 @@ const AiChatPage: React.FC = () => {
         {/* Main Chat Area */}
         <main className="ai-chat-main">
           <header className="chat-header">
-            <div className="header-title">
-              <h4>Gemini 1.5 Pro</h4>
-              <span className="model-badge">AI Assistant</span>
+            <div className="header-left">
+              <button className="toggle-sidebar-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+                <i className={`bi ${sidebarOpen ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'}`}></i>
+              </button>
+              <div className="header-title">
+                <h4>Gemini 1.5 Pro</h4>
+                <span className="model-badge">AI Travel Assistant</span>
+              </div>
             </div>
             <div className="header-actions">
+              {messages.length > 0 && (
+                <Button 
+                  variant="outline" 
+                  size="small" 
+                  onClick={handleRegenerate} 
+                  disabled={sending || messages.length < 2}
+                  className="regenerate-btn-header"
+                >
+                  <i className="bi bi-arrow-clockwise me-1"></i> Làm lại câu cuối
+                </Button>
+              )}
               <Button variant="outline" size="small" onClick={() => setCurrentSessionId(null)}>
-                Làm mới
+                Hội thoại mới
               </Button>
             </div>
           </header>
@@ -217,17 +398,20 @@ const AiChatPage: React.FC = () => {
                   </div>
                 </div>
                 <h2>Xin chào, {profile?.full_name || 'bạn'}! 👋</h2>
-                <p>Tôi là trợ lý du lịch AI. Tôi có thể giúp bạn lên lịch trình, tìm điểm đến hoặc giải đáp bất kỳ thắc mắc nào về chuyến đi của bạn.</p>
+                <p>Tôi là trợ lý du lịch AI thông minh của TravelConnectVN. Hãy cho tôi biết nhu cầu của bạn, tôi sẽ lên lịch trình, đề xuất các tour tuyệt vời hoặc tìm kiếm bạn đồng hành hoàn hảo cho bạn!</p>
                 
                 <div className="suggestion-grid">
                   {[
-                    { label: '🏖️ Tour biển nổi bật', text: 'Gợi ý cho tôi một số tour biển nổi bật tại Việt Nam' },
-                    { label: '⛰️ Tư vấn đi Đà Lạt', text: 'Lập cho tôi lịch trình đi Đà Lạt 3 ngày 2 đêm từ TP.HCM' },
-                    { label: '🏮 Khám phá Hội An', text: 'Chơi gì ở Hội An buổi tối? Gợi ý các điểm check-in đẹp' },
-                    { label: '🍲 Đặc sản Hà Nội', text: 'Danh sách các món ăn phải thử khi đến Hà Nội' }
+                    { label: '🏖️ Khám phá Tour biển', text: 'Gợi ý cho tôi một số tour du lịch biển đảo nổi bật tại miền Trung và miền Nam.' },
+                    { label: '⛰️ Lịch trình Đà Lạt 3N2Đ', text: 'Thiết kế lịch trình du lịch Đà Lạt tự túc 3 ngày 2 đêm khởi hành từ TP.HCM chi tiết.' },
+                    { label: '🏮 Cẩm nang Hội An', text: 'Tóm tắt các điểm check-in hấp dẫn, món ăn ngon và hoạt động về đêm tại phố cổ Hội An.' },
+                    { label: '🍲 Bản đồ ăn uống Hà Nội', text: 'Liệt kê danh sách các món ăn đặc sản không thể bỏ lỡ tại Hà Nội kèm địa chỉ nổi tiếng.' }
                   ].map((item, idx) => (
-                    <button key={idx} className="suggestion-pill" onClick={() => setInputText(item.text)}>
-                      {item.label}
+                    <button key={idx} className="suggestion-pill" onClick={() => handleSendMessage(undefined, item.text)}>
+                      <div className="suggestion-pill-content">
+                        <strong>{item.label}</strong>
+                        <span>{item.text.substring(0, 50)}...</span>
+                      </div>
                     </button>
                   ))}
                 </div>
@@ -238,7 +422,7 @@ const AiChatPage: React.FC = () => {
                   <div className="chat-loading"><LoadingBlock /></div>
                 ) : (
                   <>
-                    {messages.map(m => (
+                    {messages.map((m, idx) => (
                       <div key={m.id} className={`chat-message ${m.sender_type}`}>
                         <div className="message-container">
                           <div className="avatar-circle">
@@ -250,9 +434,31 @@ const AiChatPage: React.FC = () => {
                           </div>
                           <div className="message-content-wrapper">
                             <div className="message-bubble">
-                              <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                {m.content}
-                              </ReactMarkdown>
+                              <div className="markdown-body">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {m.content}
+                                </ReactMarkdown>
+                              </div>
+                              
+                              <div className="message-bubble-actions">
+                                <button 
+                                  className="bubble-action-btn"
+                                  onClick={(e) => handleCopyToClipboard(e, m.id, m.content)}
+                                  title="Sao chép"
+                                >
+                                  <i className={`bi ${copiedMessageId === m.id ? 'bi-check-lg text-success' : 'bi-clipboard'}`}></i>
+                                </button>
+                                {m.sender_type === 'assistant' && idx === messages.length - 1 && (
+                                  <button 
+                                    className="bubble-action-btn"
+                                    onClick={handleRegenerate}
+                                    disabled={sending}
+                                    title="Thử lại câu hỏi này"
+                                  >
+                                    <i className="bi bi-arrow-clockwise"></i>
+                                  </button>
+                                )}
+                              </div>
                             </div>
                             <span className="message-time">
                               {new Date(m.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
@@ -261,7 +467,7 @@ const AiChatPage: React.FC = () => {
                         </div>
                       </div>
                     ))}
-                    {sending && (
+                    {sending && messages.length > 0 && messages[messages.length - 1].sender_type === 'user' && (
                       <div className="chat-message assistant typing">
                         <div className="message-container">
                           <div className="avatar-circle">
@@ -287,8 +493,9 @@ const AiChatPage: React.FC = () => {
           <footer className="chat-footer">
             <form className="input-container" onSubmit={handleSendMessage}>
               <textarea 
+                ref={textareaRef}
                 rows={1}
-                placeholder="Nhập câu hỏi của bạn tại đây..." 
+                placeholder="Nhập câu hỏi của bạn tại đây... (Nhấn Enter để gửi, Shift + Enter để xuống dòng)" 
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyDown={(e) => {
@@ -300,10 +507,14 @@ const AiChatPage: React.FC = () => {
                 disabled={sending}
               />
               <button type="submit" className="send-circle-btn" disabled={!inputText.trim() || sending}>
-                <i className="bi bi-arrow-up-short"></i>
+                {sending ? (
+                  <div className="spinner-border spinner-border-sm text-light" role="status"></div>
+                ) : (
+                  <i className="bi bi-arrow-up-short"></i>
+                )}
               </button>
             </form>
-            <p className="disclaimer">AI có thể đưa ra thông tin không chính xác. Hãy kiểm tra lại các thông tin quan trọng.</p>
+            <p className="disclaimer">AI có thể đưa ra thông tin không chính xác về địa điểm hoặc giá tour. Hãy đối chiếu các dữ liệu quan trọng.</p>
           </footer>
         </main>
       </div>

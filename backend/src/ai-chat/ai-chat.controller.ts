@@ -6,6 +6,8 @@ import {
   Param,
   UseGuards,
   Req,
+  Delete,
+  Patch,
 } from '@nestjs/common';
 import { AiChatService } from './ai-chat.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -60,6 +62,32 @@ export class AiChatController {
     return {
       success: true,
       message: 'Gửi tin nhắn thành công',
+      data,
+    };
+  }
+
+  @Delete('sessions/:id')
+  async deleteSession(@Req() req: Request, @Param('id') id: string) {
+    const userId = (req as any).user.id;
+    const data = await this.aiChatService.deleteSession(id, userId);
+    return {
+      success: true,
+      message: 'Xóa phiên chat thành công',
+      data,
+    };
+  }
+
+  @Patch('sessions/:id/context')
+  async updateSessionContext(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: { context: any },
+  ) {
+    const userId = (req as any).user.id;
+    const data = await this.aiChatService.updateSessionContext(id, userId, body.context);
+    return {
+      success: true,
+      message: 'Cập nhật ngữ cảnh phiên chat thành công',
       data,
     };
   }

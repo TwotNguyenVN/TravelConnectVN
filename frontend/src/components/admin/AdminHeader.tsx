@@ -88,8 +88,13 @@ export const AdminHeader: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
 
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 600, fontSize: 'var(--tc-font-size-sm)' }}>
-            {user?.user_metadata?.full_name || 'System Admin'}
+          <div 
+            style={{ fontWeight: 600, fontSize: 'var(--tc-font-size-sm)' }}
+            title={user?.user_metadata?.full_name || 'System Admin'}
+          >
+            {(user?.user_metadata?.full_name || 'System Admin').length > 30 
+              ? `${(user?.user_metadata?.full_name || 'System Admin').slice(0, 30)}...` 
+              : (user?.user_metadata?.full_name || 'System Admin')}
           </div>
           <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>
             {user?.email || 'admin@travelconnect.vn'}

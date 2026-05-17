@@ -6,6 +6,7 @@ import { provinces } from '../../constants/provinces';
 import { getRecommendedTours } from '../../services/recommendationService';
 import { tourService, type Tour } from '../../services/tourService';
 import { useAuth } from '../../contexts/AuthContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 
 export const HomePage: React.FC = () => {
   const navigate = useNavigate();
@@ -459,11 +460,12 @@ export const HomePage: React.FC = () => {
                     boxShadow: 'var(--tc-shadow-sm)',
                     zIndex: 2
                   }}>
-                    {guide.avatar ? (
-                      <img src={guide.avatar} alt={guide.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold', fontSize: '20px' }}>{guide.name.charAt(0)}</span>
-                    )}
+                    <img 
+                      src={guide.avatar || DEFAULT_AVATAR} 
+                      alt={guide.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
+                    />
                   </div>
                 </div>
 
@@ -587,11 +589,12 @@ export const HomePage: React.FC = () => {
                   boxShadow: 'var(--tc-shadow-sm)',
                   zIndex: 2
                 }}>
-                  {post.authorAvatar ? (
-                    <img src={post.authorAvatar} alt={post.authorName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <span style={{ color: 'var(--tc-primary)', fontWeight: 'bold', fontSize: '20px' }}>{post.authorName?.charAt(0) || 'U'}</span>
-                  )}
+                  <img 
+                    src={post.authorAvatar || DEFAULT_AVATAR} 
+                    alt={post.authorName} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
+                  />
                 </div>
               </div>
 

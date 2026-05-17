@@ -137,9 +137,19 @@ export class UsersService {
       // Date of birth validation
       if (data.dateOfBirth) {
         const dob = new Date(data.dateOfBirth);
-        if (!isNaN(dob.getTime())) {
-          updateData.date_of_birth = dob;
+        if (isNaN(dob.getTime())) {
+          throw new BadRequestException('Ngày sinh không hợp lệ');
         }
+        
+        const year = dob.getFullYear();
+        if (year < 1950) {
+          throw new BadRequestException('Năm sinh không được trước năm 1950');
+        }
+        if (dob > new Date()) {
+          throw new BadRequestException('Ngày sinh không được ở tương lai');
+        }
+        
+        updateData.date_of_birth = dob;
       }
 
       // Phone handling with proactive conflict check
@@ -149,6 +159,11 @@ export class UsersService {
         // Chỉ xử lý nếu phone thay đổi
         if (newPhone !== currentUser.phone) {
           if (newPhone !== null) {
+            // Kiểm tra số điện thoại chỉ chứa chữ số
+            if (!/^[0-9]+$/.test(newPhone)) {
+              throw new BadRequestException('Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)');
+            }
+
             // Kiểm tra xem số điện thoại này đã được người khác sử dụng chưa
             const existingUser = await this.prisma.public_users.findFirst({
               where: {
