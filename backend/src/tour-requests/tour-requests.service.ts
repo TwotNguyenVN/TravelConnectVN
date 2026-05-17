@@ -82,21 +82,6 @@ export class TourRequestsService {
       );
     }
 
-    // 4. Kiểm tra user đã có request active cho tour này chưa
-    const existingRequest = await this.prisma.tour_requests.findFirst({
-      where: {
-        tour_id: tourId,
-        user_id: userId,
-        status: { in: ['pending', 'approved', 'payment_pending', 'paid'] },
-      },
-    });
-
-    if (existingRequest) {
-      throw new BadRequestException(
-        'Bạn đã có một yêu cầu tham gia tour này đang được xử lý hoặc đã được chấp nhận',
-      );
-    }
-
     // 5. Tạo request
     const request = await this.prisma.tour_requests.create({
       data: {
