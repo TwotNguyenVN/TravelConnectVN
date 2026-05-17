@@ -20,7 +20,7 @@ export class GuideVerificationController {
   constructor(private readonly verificationService: GuideVerificationService) {}
 
   @Post('request')
-  @Roles(Role.GUIDE, Role.USER)
+  @Roles(Role.GUIDE)
   @UseGuards(RoleGuard)
   async createRequest(@Request() req, @Body() dto: CreateVerificationRequestDto) {
     const userId = req.user.id;
@@ -28,7 +28,7 @@ export class GuideVerificationController {
   }
 
   @Get('my-requests')
-  @Roles(Role.GUIDE, Role.USER)
+  @Roles(Role.GUIDE)
   @UseGuards(RoleGuard)
   async getMyRequests(@Request() req) {
     const userId = req.user.id;
@@ -36,7 +36,7 @@ export class GuideVerificationController {
   }
 
   @Get('status')
-  @Roles(Role.GUIDE, Role.USER)
+  @Roles(Role.GUIDE)
   @UseGuards(RoleGuard)
   async getStatus(@Request() req) {
     const userId = req.user.id;
@@ -44,7 +44,7 @@ export class GuideVerificationController {
   }
 
   @Get(':id')
-  @Roles(Role.GUIDE, Role.USER)
+  @Roles(Role.GUIDE)
   @UseGuards(RoleGuard)
   async getDetail(@Param('id') id: string) {
     return this.verificationService.getRequestDetail(id);

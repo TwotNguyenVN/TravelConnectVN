@@ -12,23 +12,12 @@ export class GuideVerificationService {
   ) {}
 
   async createRequest(userId: string, dto: CreateVerificationRequestDto) {
-    let guideProfile = await this.prisma.guide_profiles.findUnique({
+    const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
     });
 
     if (!guideProfile) {
-      // Tự động tạo hồ sơ hướng dẫn viên mặc định cho người dùng nếu chưa có
-      guideProfile = await this.prisma.guide_profiles.create({
-        data: {
-          user_id: userId,
-          verification_status: 'not_submitted',
-          visibility_status: 'visible',
-          is_accepting_tours: true,
-          bio: '',
-          years_of_experience: 0,
-          working_area: '',
-        },
-      });
+      throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên. Vui lòng cập nhật hồ sơ trước.');
     }
 
     // 2. Kiểm tra xem có yêu cầu nào đang chờ xử lý không
