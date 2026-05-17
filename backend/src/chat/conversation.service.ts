@@ -1,9 +1,13 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SocketGateway } from '../socket/socket.gateway';
 
 @Injectable()
 export class ConversationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly socketGateway: SocketGateway,
+  ) {}
 
   /**
    * GET /conversations
@@ -331,6 +335,52 @@ export class ConversationService {
       },
       data: { last_read_at: new Date() },
     });
+
+    // Tính lại tổng số unread messages của user này và emit qua socket
+    const newUnreadCount = await this.getUnreadMessageCount(userId);
+    this.socketGateway.sendToUser(userId, 'unread_message_count_updated', { count: newUnreadCount });
+  }
+
+  /**
+   * Lấy tổng số tin nhắn chưa đọc của một người dùng trong tất cả các cuộc trò chuyện.
+   */
+  async getUnreadMessageCount(userId: string): Promise<number> {
+    const participants = await this.prisma.conversation_participants.findMany({
+      where: {
+        user_id: userId,
+        left_at: null,
+      },
+      select: {
+        conversation_id: true,
+        last_read_at: true,
+      },
+    });
+
+    if (participants.length === 0) {
+      return 0;
+    }
+
+    let totalUnread = 0;
+
+    for (const p of participants) {
+      const unreadCount = await this.prisma.messages.count({
+        where: {
+          conversation_id: p.conversation_id,
+          sender_user_id: { not: userId },
+          deleted_at: null,
+          ...(p.last_read_at
+            ? {
+                sent_at: {
+                  gt: p.last_read_at,
+                },
+              }
+            : {}),
+        },
+      });
+      totalUnread += unreadCount;
+    }
+
+    return totalUnread;
   }
 
   // ────────── Private helpers ──────────

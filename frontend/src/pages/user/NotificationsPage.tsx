@@ -7,21 +7,38 @@ import { useToast } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
 import notificationService from '../../services/notificationService';
 import type { Notification } from '../../services/notificationService';
+import { useSocket } from '../../contexts/SocketContext';
 
 import './NotificationsPage.css';
 
 export const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setTotal] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const { toast } = useToast();
   const { roles } = useAuth();
   const navigate = useNavigate();
+  const { socket } = useSocket();
   
   const isGuide = roles.includes('GUIDE');
+
+  useEffect(() => {
+    if (socket) {
+      const handleNewNotification = (data: any) => {
+        setNotifications(prev => [data, ...prev]);
+        setTotal(prev => prev + 1);
+        toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
+      };
+
+      socket.on('new_notification', handleNewNotification);
+      return () => {
+        socket.off('new_notification', handleNewNotification);
+      };
+    }
+  }, [socket, toast]);
 
   const fetchNotifications = async (pageNum: number, append = false) => {
     try {

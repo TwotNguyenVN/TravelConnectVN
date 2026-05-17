@@ -32,7 +32,12 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }
 
     // Kết nối đến Backend (mặc định là localhost:3000 hoặc process.env.VITE_API_URL)
-    const socketInstance = io(import.meta.env.VITE_API_URL || 'http://localhost:3000', {
+    let socketUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      socketUrl = 'http://localhost:3000';
+    }
+
+    const socketInstance = io(socketUrl, {
       transports: ['websocket'],
     });
 

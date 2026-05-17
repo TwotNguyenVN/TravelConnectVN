@@ -3,6 +3,7 @@ import notificationService from '../../../services/notificationService';
 import type { Notification } from '../../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
 import { DEFAULT_AVATAR } from '../../../constants/images';
+import { useSocket } from '../../../contexts/SocketContext';
 
 interface NotificationPopoverProps {
   onClose: () => void;
@@ -14,6 +15,20 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
   const [loading, setLoading] = useState(true);
   const popoverRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const { socket } = useSocket();
+
+  useEffect(() => {
+    if (socket) {
+      const handleNewNotification = (data: any) => {
+        setNotifications(prev => [data, ...prev].slice(0, 10)); // Keep top 10
+      };
+
+      socket.on('new_notification', handleNewNotification);
+      return () => {
+        socket.off('new_notification', handleNewNotification);
+      };
+    }
+  }, [socket]);
 
   useEffect(() => {
     const fetchNotifications = async () => {
