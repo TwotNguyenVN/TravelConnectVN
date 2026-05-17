@@ -1105,7 +1105,6 @@ model tour_requests {
   schedule_id                                     String?                @db.Uuid
   tour_schedules                                  tour_schedules?        @relation(fields: [schedule_id], references: [id], onUpdate: NoAction)
 
-  @@unique([tour_id, user_id], map: "uq_active_tour_request_per_user", where: raw("(status = ANY (ARRAY['pending'::text, 'approved'::text, 'payment_pending'::text, 'paid'::text]))"))
   @@index([tour_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_tour_status")
   @@index([user_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_user_status")
   @@schema("public")

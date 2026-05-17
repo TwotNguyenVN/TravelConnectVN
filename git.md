@@ -879,3 +879,1261 @@ Câu quan trọng nhất:
 ```text
 Làm việc nhóm với Git không chỉ là biết lệnh Git, mà là biết tổ chức quy trình để code của mọi người không đè lên nhau và project luôn có một bản ổn định.
 ```
+tôi có thắc mắc
+Khi làm nhóm
+Mỗi thành viên pull code từ develop về làm
+khi làm xong 1 nhánh cho 1 chức năng rồi push lên github
+Sau đó lại pull code từ nhanh develop về để làm chức năng tiếp theo à
+nếu nhánh của chức năng vừa rồi chưa được Pull Request vào develop thì sao
+
+Và khi làm nhóm 4 người khi bắt đầu  ngày mới
+Mọi người đều pull code của ngày đó về để làm
+Họ phát triển rất nhiều nhánh cho nhiều chức năng và để đến cuối ngày mới Pull Request vào develop 1 lần được không, tức là họ vẫn chỉ giữ 1 bản develop từ đầu ngày và phát triển thêm chắc năng mới ra các nhánh khác, khi xong chức năng đó thì push lên git và không Pull Request vào develop, nhưng pull code từ develop ( nhanh delelop này vẫn đang là bản cũ chưa có Pull Request nào ) và để đến cuối ngày họ Pull Request vào develop 1 lần vài chục nhánh chức năng
+
+Đúng, bạn đang hỏi đúng “vấn đề thật” khi làm nhóm với Git: **nếu nhiều nhánh cùng phát triển song song mà chưa merge vào `develop` thì xử lý thế nào?**
+
+Câu trả lời ngắn gọn:
+
+> Mỗi chức năng nên tạo nhánh từ `develop` mới nhất. Làm xong chức năng nào thì nên tạo Pull Request sớm cho chức năng đó, không nên dồn vài chục nhánh đến cuối ngày mới PR cùng lúc.
+
+---
+
+# 1. Sau khi làm xong một nhánh feature, có cần pull `develop` để làm chức năng tiếp theo không?
+
+Có.
+
+Quy trình đúng là:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/chuc-nang-moi
+```
+
+Tức là mỗi khi bắt đầu chức năng mới, nên quay về `develop` và lấy code mới nhất.
+
+Ví dụ bạn làm xong chức năng đăng nhập:
+
+```text
+feature/login
+```
+
+Bạn push lên GitHub:
+
+```bash
+git push origin feature/login
+```
+
+Sau đó tạo Pull Request:
+
+```text
+feature/login → develop
+```
+
+Nếu bạn muốn làm tiếp chức năng đăng ký, bạn nên làm:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/register
+```
+
+---
+
+# 2. Nếu nhánh vừa làm chưa được Pull Request vào `develop` thì sao?
+
+Có 2 trường hợp.
+
+---
+
+## Trường hợp 1: Chức năng tiếp theo KHÔNG phụ thuộc chức năng vừa làm
+
+Ví dụ:
+
+```text
+Bạn vừa làm: feature/login
+Bạn muốn làm tiếp: feature/contact-page
+```
+
+Hai chức năng này không phụ thuộc nhau nhiều.
+
+Khi đó bạn cứ tạo nhánh mới từ `develop`:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/contact-page
+```
+
+Dù `feature/login` chưa được merge vào `develop`, cũng không sao.
+
+Sơ đồ:
+
+```text
+develop
+ ├── feature/login       chưa merge
+ └── feature/contact-page
+```
+
+Hai nhánh độc lập, sau này PR riêng.
+
+---
+
+## Trường hợp 2: Chức năng tiếp theo PHỤ THUỘC chức năng vừa làm
+
+Ví dụ:
+
+```text
+feature/login chưa merge
+```
+
+Nhưng bạn muốn làm tiếp:
+
+```text
+feature/user-profile
+```
+
+Mà `user-profile` cần code đăng nhập, token, auth service từ `feature/login`.
+
+Lúc này nếu tạo `feature/user-profile` từ `develop`, bạn sẽ chưa có code login.
+
+Có 2 cách xử lý.
+
+---
+
+## Cách tốt nhất: chờ `feature/login` được merge vào `develop`
+
+Quy trình sạch nhất:
+
+```text
+feature/login → PR → develop
+```
+
+Sau khi merge xong:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/user-profile
+```
+
+Cách này sạch, dễ review, ít conflict.
+
+---
+
+## Cách tạm thời: tạo nhánh mới từ nhánh cũ
+
+Nếu bắt buộc phải làm tiếp ngay, bạn có thể tạo nhánh mới từ `feature/login`.
+
+```bash
+git checkout feature/login
+git checkout -b feature/user-profile
+```
+
+Sơ đồ:
+
+```text
+develop
+ └── feature/login
+      └── feature/user-profile
+```
+
+Nhưng cách này có rủi ro:
+
+```text
+- Pull Request user-profile sẽ chứa cả code của login
+- Review khó hơn
+- Nếu login bị sửa nhiều trước khi merge, user-profile dễ conflict
+- Thứ tự merge phải đúng: login trước, user-profile sau
+```
+
+Nếu dùng cách này, cần nhớ:
+
+```text
+Merge feature/login vào develop trước.
+Sau đó cập nhật feature/user-profile theo develop.
+Rồi mới PR feature/user-profile vào develop.
+```
+
+---
+
+# 3. Có nên cuối ngày mới Pull Request một lần vài chục nhánh không?
+
+Không nên.
+
+Về lý thuyết thì làm được, nhưng trong thực tế rất dễ rối.
+
+Ví dụ nhóm 4 người, đầu ngày cùng pull `develop`:
+
+```text
+develop lúc 8:00 sáng
+```
+
+Sau đó mỗi người tạo nhiều nhánh:
+
+```text
+A: feature/login, feature/register, feature/profile
+B: feature/course, feature/lesson, feature/video
+C: feature/payment, feature/order, feature-coupon
+D: feature/report, feature-dashboard, feature-export
+```
+
+Đến cuối ngày mới tạo Pull Request hàng loạt.
+
+Vấn đề là: tất cả các nhánh này đều dựa trên `develop` cũ lúc 8:00 sáng.
+
+Trong ngày, nếu không merge dần vào `develop`, thì:
+
+```text
+- Các nhánh không biết sự thay đổi của nhau
+- Dễ sửa trùng file
+- Conflict tăng mạnh cuối ngày
+- Review bị quá tải
+- Khó biết lỗi đến từ nhánh nào
+- Nếu một PR lỗi, các PR phụ thuộc sau đó cũng bị kẹt
+```
+
+Đây là lỗi rất hay gặp khi làm nhóm.
+
+---
+
+# 4. Cách làm tốt hơn trong ngày
+
+Thay vì dồn cuối ngày, nên làm kiểu:
+
+```text
+Làm xong chức năng nhỏ nào → push → tạo Pull Request sớm
+```
+
+Không cần đợi cuối ngày.
+
+Ví dụ:
+
+## Buổi sáng
+
+```text
+8:00
+Tất cả pull develop mới nhất
+
+9:30
+A xong feature/login → PR vào develop
+
+10:00
+Leader/reviewer kiểm tra → merge vào develop
+
+10:15
+Mọi người pull develop mới nhất nếu cần
+```
+
+## Buổi trưa
+
+```text
+B xong feature/course-list → PR
+C xong feature/cart → PR
+```
+
+## Buổi chiều
+
+```text
+Những người làm chức năng mới sẽ tạo nhánh từ develop mới hơn
+```
+
+Như vậy `develop` được cập nhật từng bước, không bị dồn lỗi cuối ngày.
+
+---
+
+# 5. Quy trình khuyên dùng cho nhóm 4 người
+
+## Đầu ngày
+
+Mỗi người làm:
+
+```bash
+git checkout develop
+git pull origin develop
+```
+
+Sau đó tạo nhánh cho chức năng mình làm:
+
+```bash
+git checkout -b feature/login
+```
+
+---
+
+## Trong ngày
+
+Khi làm xong một chức năng nhỏ:
+
+```bash
+git add .
+git commit -m "feat: add login page"
+git push origin feature/login
+```
+
+Sau đó tạo PR ngay:
+
+```text
+feature/login → develop
+```
+
+Không cần chờ cuối ngày.
+
+---
+
+## Sau khi PR được merge
+
+Mọi người nên cập nhật lại `develop`:
+
+```bash
+git checkout develop
+git pull origin develop
+```
+
+Rồi tạo nhánh mới:
+
+```bash
+git checkout -b feature/register
+```
+
+---
+
+# 6. Nếu đang làm dở mà `develop` đã có code mới thì sao?
+
+Ví dụ bạn đang ở nhánh:
+
+```text
+feature/payment
+```
+
+Trong lúc đó người khác đã merge `feature/login` vào `develop`.
+
+Bạn nên cập nhật nhánh của bạn với `develop` mới.
+
+Cách đơn giản, dễ hiểu:
+
+```bash
+git checkout feature/payment
+git pull origin develop
+```
+
+Hoặc rõ hơn:
+
+```bash
+git checkout feature/payment
+git fetch origin
+git merge origin/develop
+```
+
+Sau đó xử lý conflict nếu có, rồi tiếp tục làm.
+
+Cách chuyên nghiệp hơn là `rebase`, nhưng nếu nhóm chưa vững Git thì dùng `merge origin/develop` dễ hiểu hơn.
+
+---
+
+# 7. Có nên tạo nhiều nhánh trong ngày từ cùng một bản `develop` cũ không?
+
+Chỉ nên làm nếu các chức năng thật sự độc lập.
+
+Ví dụ có thể chấp nhận:
+
+```text
+feature/about-page
+feature/contact-page
+feature/footer-ui
+```
+
+Các chức năng này ít đụng nhau.
+
+Nhưng không nên nếu các chức năng liên quan chặt:
+
+```text
+feature/auth-api
+feature/login
+feature/register
+feature-profile
+feature-role-permission
+```
+
+Vì các chức năng này dễ dùng chung file:
+
+```text
+authService
+User model
+routes/api.php
+middleware
+database migration
+```
+
+Nếu phát triển song song từ `develop` cũ, cuối ngày rất dễ conflict.
+
+---
+
+# 8. Nếu cuối ngày có nhiều PR cùng lúc thì nên merge thế nào?
+
+Nếu đã lỡ có nhiều PR cùng lúc, không merge bừa hàng loạt.
+
+Nên merge theo thứ tự:
+
+```text
+1. PR nền tảng trước
+2. PR chức năng phụ thuộc sau
+3. PR giao diện/tài liệu sau cùng
+```
+
+Ví dụ:
+
+```text
+1. feature/database-user-table
+2. feature/auth-api
+3. feature/login-page
+4. feature/register-page
+5. feature/user-profile
+```
+
+Sau mỗi lần merge một PR vào `develop`, các PR còn lại nên cập nhật lại với `develop`.
+
+Ví dụ nhánh `feature/register` cần update:
+
+```bash
+git checkout feature/register
+git fetch origin
+git merge origin/develop
+git push origin feature/register
+```
+
+Sau đó Pull Request sẽ được cập nhật.
+
+---
+
+# 9. Câu trả lời trực tiếp cho tình huống của bạn
+
+Bạn hỏi:
+
+> Mọi người pull `develop` đầu ngày, tạo rất nhiều nhánh, push lên GitHub nhưng không PR ngay, để cuối ngày PR vài chục nhánh vào `develop` được không?
+
+Trả lời:
+
+```text
+Được, nhưng không nên.
+```
+
+Vì:
+
+```text
+- develop bị cũ suốt cả ngày
+- các nhánh không nhận code mới của nhau
+- cuối ngày conflict rất nhiều
+- review quá tải
+- dễ merge nhầm code lỗi
+- khó kiểm soát thứ tự phụ thuộc giữa các chức năng
+```
+
+Cách tốt hơn:
+
+```text
+Xong chức năng nào thì PR sớm chức năng đó.
+PR nhỏ, review nhanh, merge dần vào develop.
+```
+
+---
+
+# 10. Quy tắc đơn giản nhất cho nhóm bạn
+
+Nhóm nên thống nhất như sau:
+
+```text
+1. Đầu ngày tất cả pull develop mới nhất.
+2. Mỗi người tạo nhánh feature từ develop.
+3. Làm xong chức năng nào thì push và tạo PR ngay.
+4. Không dồn quá nhiều PR đến cuối ngày.
+5. Sau khi PR nào được merge, ai làm chức năng liên quan phải pull develop mới.
+6. Nếu chức năng mới phụ thuộc chức năng cũ, chờ PR cũ merge rồi hãy tạo nhánh mới.
+7. Nếu bắt buộc làm tiếp ngay, có thể tạo nhánh mới từ nhánh cũ, nhưng phải merge theo đúng thứ tự.
+```
+
+---
+
+# 11. Ví dụ dễ hiểu
+
+## Cách không nên
+
+```text
+8:00
+A, B, C, D cùng pull develop
+
+Cả ngày:
+A tạo 5 nhánh
+B tạo 5 nhánh
+C tạo 5 nhánh
+D tạo 5 nhánh
+
+17:00
+Tạo 20 Pull Request cùng lúc vào develop
+```
+
+Kết quả dễ gặp:
+
+```text
+- PR này đụng PR kia
+- Merge PR đầu xong, PR sau bị conflict
+- Reviewer không kiểm nổi
+- Project develop có thể bị lỗi
+```
+
+---
+
+## Cách nên làm
+
+```text
+8:00
+Tất cả pull develop
+
+9:30
+A xong login → PR → review → merge
+
+10:00
+B pull develop mới nhất rồi làm register
+
+11:00
+C xong course-list → PR → review → merge
+
+13:00
+D pull develop mới nhất rồi làm report
+
+15:00
+B xong register → PR → review → merge
+
+17:00
+develop đã gom code ổn định trong ngày
+```
+
+Cách này ít conflict hơn rất nhiều.
+
+---
+
+# 12. Mô hình làm việc thực tế nên dùng
+
+```text
+main
+└── develop
+    ├── feature/login
+    ├── feature/register
+    ├── feature/payment
+    └── feature/report
+```
+
+Luồng làm việc:
+
+```text
+feature nhỏ → PR sớm → review → merge vào develop
+```
+
+Không nên:
+
+```text
+feature rất nhiều → cuối ngày PR hàng loạt → merge hàng loạt
+```
+
+---
+
+# 13. Kết luận ngắn gọn
+
+Khi làm nhóm:
+
+```text
+- Mỗi chức năng tạo nhánh từ develop mới nhất.
+- Làm xong chức năng thì tạo Pull Request sớm.
+- Không nên giữ develop cũ cả ngày rồi cuối ngày PR hàng loạt.
+- Nếu chức năng tiếp theo phụ thuộc chức năng trước, tốt nhất chờ chức năng trước merge vào develop.
+- Nếu không phụ thuộc, có thể tạo nhánh mới từ develop hiện tại.
+- Nếu đang làm dở mà develop có thay đổi mới, nên cập nhật nhánh của mình bằng cách merge origin/develop vào nhánh đó.
+```
+
+Câu dễ nhớ:
+
+> PR càng nhỏ và càng sớm thì càng dễ review, ít conflict, và project ổn định hơn.
+
+Không, **code đang làm không tự nhiên mất** khi bạn cập nhật nhánh `feature/payment` với `develop` mới. Nhưng để an toàn, bạn phải biết code của bạn đang ở trạng thái nào:
+
+```text
+1. Đã commit rồi → rất an toàn
+2. Chưa commit nhưng file đang sửa → cần cẩn thận
+3. Có conflict → phải tự chọn giữ code nào
+```
+
+---
+
+# 1. Trường hợp an toàn nhất: code của bạn đã commit
+
+Ví dụ bạn đang ở nhánh:
+
+```bash
+git checkout feature/payment
+```
+
+Bạn đã làm và commit:
+
+```bash
+git add .
+git commit -m "feat: add payment checkout UI"
+```
+
+Sau đó người khác merge `feature/login` vào `develop`.
+
+Bây giờ bạn muốn cập nhật `feature/payment` theo `develop` mới:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+Lúc này Git sẽ cố gắng gộp:
+
+```text
+code của bạn trong feature/payment
++
+code mới từ develop
+```
+
+Code bạn đã commit **không mất**. Nếu hai bên sửa khác file hoặc khác đoạn code, Git tự gộp được.
+
+---
+
+# 2. Nếu code đang làm chưa commit thì sao?
+
+Ví dụ bạn sửa vài file trong `feature/payment`, nhưng chưa commit.
+
+Khi chạy:
+
+```bash
+git merge origin/develop
+```
+
+Git có thể báo lỗi kiểu:
+
+```text
+Your local changes would be overwritten by merge
+```
+
+Nghĩa là Git sợ việc merge sẽ đè lên phần bạn đang sửa.
+
+## Cách xử lý tốt nhất
+
+Trước khi cập nhật từ `develop`, luôn kiểm tra:
+
+```bash
+git status
+```
+
+Nếu thấy có file đang sửa, bạn có 2 lựa chọn.
+
+---
+
+## Cách A: Commit tạm trước khi cập nhật
+
+Nếu phần bạn làm đã tương đối ổn:
+
+```bash
+git add .
+git commit -m "wip: payment work in progress"
+```
+
+Sau đó cập nhật:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+`wip` nghĩa là “work in progress”, tức là đang làm dở.
+
+Sau này nếu muốn sửa commit cho đẹp hơn thì có thể chỉnh lại, nhưng với nhóm mới học Git, cách này rất an toàn.
+
+---
+
+## Cách B: Stash code đang làm
+
+Nếu bạn chưa muốn commit, có thể dùng `stash`.
+
+```bash
+git stash
+```
+
+Lệnh này sẽ tạm cất code đang sửa vào một chỗ an toàn.
+
+Sau đó cập nhật nhánh:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+Rồi lấy lại code đang làm:
+
+```bash
+git stash pop
+```
+
+Quy trình đầy đủ:
+
+```bash
+git status
+git stash
+git fetch origin
+git merge origin/develop
+git stash pop
+```
+
+Nếu có conflict sau `stash pop`, bạn xử lý conflict rồi commit lại.
+
+---
+
+# 3. Nên dùng commit hay stash?
+
+Với nhóm mới học Git, mình khuyên:
+
+```text
+Nếu code đang làm có ý nghĩa → commit tạm
+Nếu chỉ sửa linh tinh/chưa muốn lưu lịch sử → stash
+```
+
+Thực tế dễ nhớ:
+
+| Tình huống                    | Nên dùng                       |
+| ----------------------------- | ------------------------------ |
+| Làm xong một phần nhỏ         | `commit`                       |
+| Đang sửa dở, chưa muốn commit | `stash`                        |
+| Sợ mất code                   | `commit` an toàn hơn           |
+| Muốn lịch sử Git sạch đẹp     | `stash` hoặc rebase/squash sau |
+
+Ví dụ tốt:
+
+```bash
+git add .
+git commit -m "wip: continue payment feature"
+git fetch origin
+git merge origin/develop
+```
+
+---
+
+# 4. Nếu merge bị conflict thì code có mất không?
+
+Không mất ngay. Git sẽ đánh dấu conflict trong file.
+
+Ví dụ:
+
+```js
+<<<<<<< HEAD
+const paymentStatus = "pending";
+=======
+const paymentStatus = "created";
+>>>>>>> origin/develop
+```
+
+Ý nghĩa:
+
+```text
+HEAD = code hiện tại của bạn trong feature/payment
+origin/develop = code mới từ develop
+```
+
+Bạn phải mở file lên và chọn phần đúng.
+
+Ví dụ sau khi sửa:
+
+```js
+const paymentStatus = "pending";
+```
+
+Hoặc kết hợp cả hai nếu cần.
+
+Sau đó:
+
+```bash
+git add .
+git commit -m "fix: resolve conflict with develop"
+```
+
+---
+
+# 5. `merge origin/develop` là gì?
+
+Khi bạn đang ở nhánh `feature/payment` và chạy:
+
+```bash
+git merge origin/develop
+```
+
+Nghĩa là:
+
+```text
+Lấy code mới nhất từ develop gộp vào nhánh feature/payment của bạn.
+```
+
+Sau merge, lịch sử Git sẽ giống như có một điểm gộp:
+
+```text
+develop:        A---B---C
+                     \
+feature/payment:      D---E---M
+                           ↑
+                         merge commit
+```
+
+Trong đó:
+
+```text
+D, E = commit của bạn
+C = code mới từ develop
+M = commit merge, gộp develop vào feature/payment
+```
+
+Ưu điểm:
+
+```text
+- Dễ hiểu
+- An toàn
+- Phù hợp với nhóm mới
+- Ít làm thay đổi lịch sử commit
+```
+
+Nhược điểm:
+
+```text
+- Lịch sử commit có thể hơi rối vì nhiều merge commit
+```
+
+---
+
+# 6. Rebase là gì?
+
+`rebase` cũng dùng để cập nhật nhánh feature theo `develop`, nhưng cách hoạt động khác `merge`.
+
+Khi bạn đang ở:
+
+```text
+feature/payment
+```
+
+và chạy:
+
+```bash
+git fetch origin
+git rebase origin/develop
+```
+
+Git sẽ làm như sau:
+
+```text
+1. Tạm nhấc các commit của bạn ra
+2. Đưa nhánh feature/payment lên nền develop mới nhất
+3. Gắn lại các commit của bạn lên trên develop mới
+```
+
+Ví dụ trước rebase:
+
+```text
+develop:        A---B---C
+                 \
+feature/payment:  D---E
+```
+
+Sau khi `develop` có commit mới:
+
+```text
+develop:        A---B---C---F---G
+                 \
+feature/payment:  D---E
+```
+
+Nếu dùng rebase:
+
+```text
+develop:        A---B---C---F---G
+                             \
+feature/payment:              D'---E'
+```
+
+Dấu `'` nghĩa là Git tạo lại commit của bạn trên nền mới.
+
+Hiểu đơn giản:
+
+> Rebase giống như nói: “Hãy coi như tôi bắt đầu làm `feature/payment` từ bản `develop` mới nhất.”
+
+---
+
+# 7. Merge và rebase khác nhau thế nào?
+
+## Merge
+
+```bash
+git merge origin/develop
+```
+
+Kết quả:
+
+```text
+Giữ nguyên lịch sử thật, thêm một commit merge.
+```
+
+Ưu điểm:
+
+```text
+- Dễ hiểu
+- Ít nguy hiểm hơn
+- Phù hợp cho nhóm mới
+```
+
+Nhược điểm:
+
+```text
+- Lịch sử có thể nhiều commit merge
+```
+
+---
+
+## Rebase
+
+```bash
+git rebase origin/develop
+```
+
+Kết quả:
+
+```text
+Làm lịch sử thẳng và sạch hơn.
+```
+
+Ưu điểm:
+
+```text
+- Lịch sử đẹp hơn
+- PR dễ nhìn hơn
+- Ít commit merge phụ
+```
+
+Nhược điểm:
+
+```text
+- Có thể gây rối nếu dùng sai
+- Vì rebase viết lại lịch sử commit
+- Cần cẩn thận khi nhánh đã push lên GitHub và có người khác cùng dùng
+```
+
+---
+
+# 8. Khi nào nên dùng merge, khi nào nên dùng rebase?
+
+## Với nhóm mới học Git
+
+Nên dùng:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+Vì dễ hiểu và an toàn.
+
+## Với nhóm đã quen Git hơn
+
+Có thể dùng:
+
+```bash
+git fetch origin
+git rebase origin/develop
+```
+
+Nhưng cần quy tắc:
+
+```text
+Chỉ rebase trên nhánh feature cá nhân của mình.
+Không rebase develop.
+Không rebase main.
+Không rebase nhánh người khác đang dùng chung.
+```
+
+---
+
+# 9. Rebase có làm mất code không?
+
+Bình thường là không. Nhưng vì `rebase` viết lại lịch sử commit nên nếu dùng sai có thể gây rối.
+
+Ví dụ an toàn:
+
+```text
+Bạn có nhánh feature/payment chỉ mình bạn làm.
+Bạn rebase feature/payment lên origin/develop.
+```
+
+Cái này ổn.
+
+Ví dụ nguy hiểm:
+
+```text
+Bạn và người khác cùng làm trên feature/payment.
+Bạn rebase rồi force push.
+Người kia có thể bị lệch lịch sử commit.
+```
+
+Vì vậy, nếu dùng rebase và đã push nhánh lên GitHub, sau rebase thường phải push kiểu:
+
+```bash
+git push --force-with-lease origin feature/payment
+```
+
+Không nên dùng:
+
+```bash
+git push --force
+```
+
+Vì `--force` có thể ghi đè code người khác.
+`--force-with-lease` an toàn hơn vì Git sẽ kiểm tra xem remote có thay đổi mới không.
+
+---
+
+# 10. Quy trình cập nhật nhánh feature an toàn nhất cho nhóm bạn
+
+## Cách dễ và an toàn: dùng merge
+
+Khi đang làm `feature/payment` và muốn cập nhật từ `develop`:
+
+```bash
+git status
+```
+
+Nếu có code đang sửa, commit tạm:
+
+```bash
+git add .
+git commit -m "wip: payment feature progress"
+```
+
+Sau đó:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+Nếu có conflict thì sửa conflict.
+
+Sau đó:
+
+```bash
+git add .
+git commit -m "fix: resolve conflict with develop"
+git push origin feature/payment
+```
+
+---
+
+# 11. Quy trình chuyên nghiệp hơn: dùng rebase
+
+Chỉ dùng nếu nhánh đó là nhánh cá nhân của bạn.
+
+```bash
+git status
+```
+
+Nếu có code đang sửa:
+
+```bash
+git add .
+git commit -m "wip: payment feature progress"
+```
+
+Sau đó:
+
+```bash
+git fetch origin
+git rebase origin/develop
+```
+
+Nếu có conflict, Git sẽ dừng lại.
+
+Bạn sửa conflict, rồi:
+
+```bash
+git add .
+git rebase --continue
+```
+
+Nếu lại conflict tiếp, tiếp tục sửa rồi:
+
+```bash
+git add .
+git rebase --continue
+```
+
+Nếu muốn hủy rebase:
+
+```bash
+git rebase --abort
+```
+
+Sau khi rebase xong, nếu nhánh đã từng push lên GitHub:
+
+```bash
+git push --force-with-lease origin feature/payment
+```
+
+Nếu chưa từng push nhánh đó lên GitHub:
+
+```bash
+git push origin feature/payment
+```
+
+---
+
+# 12. Ví dụ thực tế dễ hiểu
+
+Bạn đang làm:
+
+```text
+feature/payment
+```
+
+Code của bạn:
+
+```text
+PaymentPage.jsx
+paymentService.js
+```
+
+Người khác merge vào `develop`:
+
+```text
+feature/login
+```
+
+Code mới trên `develop`:
+
+```text
+authService.js
+UserContext.jsx
+```
+
+Nếu hai bên không sửa cùng file, cập nhật rất dễ:
+
+```bash
+git fetch origin
+git merge origin/develop
+```
+
+Git tự gộp được.
+
+Nhưng nếu cả hai cùng sửa:
+
+```text
+routes/api.php
+```
+
+thì dễ conflict. Khi đó bạn phải mở `routes/api.php` và chọn giữ cả route login và route payment.
+
+Ví dụ sau khi sửa đúng:
+
+```php
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/payment', [PaymentController::class, 'createPayment']);
+```
+
+Rồi commit lại:
+
+```bash
+git add routes/api.php
+git commit -m "fix: resolve api route conflict"
+```
+
+---
+
+# 13. Câu trả lời ngắn gọn cho thắc mắc của bạn
+
+## Khi cập nhật nhánh với `develop` mới, code đang làm có mất không?
+
+```text
+Không mất nếu bạn commit hoặc stash trước khi cập nhật.
+```
+
+Nguy hiểm nhất là:
+
+```text
+Bạn đang sửa nhiều file chưa commit,
+sau đó merge/rebase mà không kiểm tra git status.
+```
+
+Vì vậy luôn nhớ:
+
+```bash
+git status
+```
+
+trước khi merge/rebase.
+
+---
+
+## Nên xử lý thế nào?
+
+Quy trình an toàn:
+
+```bash
+git status
+git add .
+git commit -m "wip: save current work"
+
+git fetch origin
+git merge origin/develop
+```
+
+Hoặc nếu chưa muốn commit:
+
+```bash
+git stash
+git fetch origin
+git merge origin/develop
+git stash pop
+```
+
+---
+
+## Rebase là gì?
+
+```text
+Rebase là cách đưa nhánh feature của bạn lên nền develop mới nhất,
+rồi phát lại các commit của bạn lên trên đó.
+```
+
+Hiểu đơn giản:
+
+```text
+Merge = gộp develop mới vào nhánh của bạn
+Rebase = chuyển nhánh của bạn sang bắt đầu từ develop mới nhất
+```
+
+---
+
+# 14. Khuyến nghị cho nhóm của bạn
+
+Với nhóm đang học và làm đồ án, nên thống nhất:
+
+```text
+Dùng merge cho dễ hiểu và an toàn.
+Chưa cần dùng rebase nếu các thành viên chưa vững Git.
+```
+
+Quy trình nên dùng:
+
+```bash
+git checkout feature/payment
+git status
+git add .
+git commit -m "wip: payment progress"
+git fetch origin
+git merge origin/develop
+git push origin feature/payment
+```
+
+Khi nhóm quen hơn, có thể chuyển sang rebase để lịch sử commit đẹp hơn.
