@@ -79,11 +79,12 @@ export const OnboardingPage: React.FC = () => {
       try {
         const profileRes = await guideService.getMyProfile();
         if (profileRes.success && profileRes.data) {
-          setGuideInfo({
+          setGuideInfo(prev => ({
+            ...prev,
             workingArea: profileRes.data.workingArea || '',
             yearsOfExperience: profileRes.data.yearsOfExperience || 0,
             bio: profileRes.data.bio || '',
-          });
+          }));
           // Note: we don't pre-fill languages/skills here for simplicity in onboarding
         }
       } catch (err) {
