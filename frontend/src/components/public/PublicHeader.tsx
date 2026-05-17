@@ -7,6 +7,7 @@ import notificationService from '../../services/notificationService';
 import chatService from '../../services/chatService';
 import { ChatPopover } from './popovers/ChatPopover';
 import { NotificationPopover } from './popovers/NotificationPopover';
+import { useToast } from '../../contexts/ToastContext';
 
 
 import { useSocket } from '../../contexts/SocketContext';
@@ -16,6 +17,7 @@ import { DEFAULT_AVATAR } from '../../constants/images';
 export const PublicHeader: React.FC = () => {
   const { user, profile, roles, signOut } = useAuth();
   const { socket } = useSocket();
+  const { toast } = useToast();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadChatCount, setUnreadChatCount] = useState(0);
@@ -51,23 +53,31 @@ export const PublicHeader: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleNewNotification = () => {
+      const handleNewNotification = (data: any) => {
         setUnreadCount(prev => prev + 1);
+        toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
       };
 
       const handleUnreadChatCountUpdate = (data: { count: number }) => {
         setUnreadChatCount(data.count);
       };
 
+      const handleNewMessage = () => {
+        // Increment immediately when a new message arrives for real-time fallback
+        setUnreadChatCount(prev => prev + 1);
+      };
+
       socket.on('new_notification', handleNewNotification);
       socket.on('unread_message_count_updated', handleUnreadChatCountUpdate);
+      socket.on('new_message', handleNewMessage);
 
       return () => {
         socket.off('new_notification', handleNewNotification);
         socket.off('unread_message_count_updated', handleUnreadChatCountUpdate);
+        socket.off('new_message', handleNewMessage);
       };
     }
-  }, [socket]);
+  }, [socket, toast]);
 
   const handleLogout = async () => {
     await signOut();
