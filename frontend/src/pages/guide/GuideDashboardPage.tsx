@@ -377,7 +377,7 @@ const GuideDashboardPage: React.FC = () => {
                   </div>
                   <div className="guide-summary-item">
                     <span className="guide-summary-label">Vùng hoạt động</span>
-                    <span className="guide-summary-value">{profile?.workingArea || profile?.home_province?.name || 'Chưa cập nhật'}</span>
+                    <span className="guide-summary-value">{profile?.workingArea || profile?.homeProvince?.name || 'Chưa cập nhật'}</span>
                   </div>
                   <div style={{ marginTop: '16px' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>

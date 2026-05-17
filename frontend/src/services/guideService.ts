@@ -17,6 +17,7 @@ export interface GuideProfile {
   region?: string;
   coverUrl?: string;
   avatarUrl?: string;
+  visibilityStatus?: 'visible' | 'hidden';
 }
 
 export interface MasterData {
