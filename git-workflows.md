@@ -141,6 +141,35 @@ git push
 5. **Đúng nhánh, đúng việc**: Chỉ push lên nhánh `feature/*` hoặc `fix/*` do bạn tự tạo. Tuyệt đối không push trực tiếp lên `develop` hoặc `main` nếu chưa qua bước tạo Pull Request (PR) để review.
 6. **Luôn tạo nhánh từ develop**: Trước khi push code lên GitHub, đảm bảo code của bạn được phát triển trên một nhánh mới được tách ra trực tiếp từ nhánh `develop` mới nhất (`git checkout develop` -> `git pull origin develop` -> `git checkout -b <tên_nhánh_mới>`). Tuyệt đối không code trực tiếp trên develop hoặc main.
 
+## 🤖 7. Quy trình Git dành riêng cho AI Agent (Antigravity/Gemini)
+
+AI Agent khi làm việc trên dự án phải tuân thủ nghiêm ngặt quy trình làm việc và tích hợp Git sau để tránh đẩy code tự động quá nhiều:
+
+1. **Làm việc tại local theo từng yêu cầu**:
+   - Khi nhận yêu cầu mới hoặc sửa đổi, Agent luôn cập nhật code mới nhất từ nhánh `develop` trên GitHub về local trước:
+     ```bash
+     git checkout develop
+     git pull origin develop
+     ```
+   - Tạo nhánh feature riêng từ `develop` (hoặc tiếp tục làm trên nhánh feature hiện tại theo thống nhất) và tiến hành code.
+   - **Tuyệt đối KHÔNG tự động commit và push sau mỗi yêu cầu nhỏ** trừ khi người dùng yêu cầu trực tiếp. Giữ các thay đổi ở máy local.
+
+2. **Khi người dùng yêu cầu "push lên github"**:
+   - **Bước A (Commit & Push nhánh feature)**: Commit toàn bộ thay đổi local và push nhánh feature đó lên GitHub:
+     ```bash
+     git add .
+     git commit -m "<type>: <mô tả công việc bằng tiếng Anh hoặc Việt>"
+     git push origin <tên-nhánh-feature>
+     ```
+   - **Bước B (Merge tự động vào develop)**: Tại local, Agent tự chuyển sang nhánh `develop`, kéo code mới nhất, gộp (merge) nhánh feature đang làm vào `develop` và đẩy lên GitHub ngay lập tức để người dùng kiểm tra:
+     ```bash
+     git checkout develop
+     git pull origin develop
+     git merge <tên-nhánh-feature> --no-ff -m "merge: tích hợp nhánh <tên-nhánh-feature> vào develop"
+     git push origin develop
+     ```
+   - **Bước C (Cập nhật và chuẩn bị)**: Sau khi merge, luôn kéo phiên bản `develop` mới nhất về local để sẵn sàng cho bất kỳ yêu cầu mới nào tiếp theo từ người dùng.
+
 ---
 
 ## 🎯 Tóm tắt các lệnh hay dùng nhất
