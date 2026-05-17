@@ -4,6 +4,7 @@ import { PageContainer, Card, Badge, Button, LoadingBlock, Input } from '../../c
 import { guideService, type GuideProfile } from '../../services/guideService';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
+import { DEFAULT_AVATAR } from '../../constants/images';
 import './GuideDashboardPage.css';
 
 const GuideDashboardPage: React.FC = () => {
@@ -232,13 +233,7 @@ const GuideDashboardPage: React.FC = () => {
                 <form onSubmit={handleSavePersonal}>
                   <div className="personal-header-row">
                     <div className="personal-avatar-edit" onClick={handleAvatarClick}>
-                      {personalData.avatarUrl ? (
-                        <img src={personalData.avatarUrl} alt="Avatar" />
-                      ) : (
-                        <div className="avatar-placeholder">
-                          {personalData.fullName?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
+                      <img src={personalData.avatarUrl || DEFAULT_AVATAR} alt="Avatar" />
                       <div className="avatar-overlay">📷</div>
                       {isUploading && <div className="avatar-spinner"></div>}
                     </div>
@@ -377,7 +372,7 @@ const GuideDashboardPage: React.FC = () => {
                   </div>
                   <div className="guide-summary-item">
                     <span className="guide-summary-label">Vùng hoạt động</span>
-                    <span className="guide-summary-value">{profile?.workingArea || profile?.home_province?.name || 'Chưa cập nhật'}</span>
+                    <span className="guide-summary-value">{profile?.workingArea || profile?.homeProvince?.name || 'Chưa cập nhật'}</span>
                   </div>
                   <div style={{ marginTop: '16px' }}>
                     <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>

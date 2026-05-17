@@ -470,7 +470,19 @@ export const HomePage: React.FC = () => {
                 </div>
 
                 <div style={{ padding: 'var(--tc-spacing-5)', marginTop: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ fontSize: '19px', fontWeight: 700, margin: '0 0 6px 0', color: 'var(--tc-text-primary)' }}>{guide.name}</h3>
+                  <h3 style={{ 
+                    fontSize: '19px', 
+                    fontWeight: 700, 
+                    margin: '0 0 6px 0', 
+                    color: 'var(--tc-text-primary)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: 'block',
+                    width: '100%'
+                  }} title={guide.name}>
+                    {guide.name}
+                  </h3>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', color: '#333' }}>
                       <span style={{ color: '#006ce4' }}>🌐</span>
@@ -604,8 +616,12 @@ export const HomePage: React.FC = () => {
                   fontWeight: 600, 
                   color: 'var(--tc-primary)', 
                   marginBottom: 'var(--tc-spacing-2)',
-                  display: 'block'
-                }}>
+                  display: 'block',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  width: '100%'
+                }} title={post.authorName}>
                   {post.authorName}
                 </span>
                 <h3 style={{ 
@@ -639,7 +655,16 @@ export const HomePage: React.FC = () => {
                 </div>
                 
                 <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '12px', borderTop: '1px solid var(--tc-border)' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--tc-primary)', fontWeight: 700 }}>
+                  <span style={{ 
+                    fontSize: '13px', 
+                    color: 'var(--tc-primary)', 
+                    fontWeight: 700,
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    maxWidth: '120px',
+                    display: 'block'
+                  }} title={post.authorName}>
                     {post.authorName}
                   </span>
                   <Button 

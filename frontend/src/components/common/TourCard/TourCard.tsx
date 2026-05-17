@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '../Card/Card';
 import { Button } from '../Button/Button';
+import { useAuth } from '../../../contexts/AuthContext';
+import favoriteService from '../../../services/favoriteService';
 import './TourCard.css';
 
 export interface TourCardProps {
@@ -9,6 +11,10 @@ export interface TourCardProps {
 }
 
 export const TourCard: React.FC<TourCardProps> = ({ tour, onClick }) => {
+  const { user } = useAuth();
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+
   const tourCode = `TC-${tour.id.substring(0, 8).toUpperCase()}`;
   const remainingSlots = tour.remainingSlots !== undefined 
     ? tour.remainingSlots 
@@ -44,6 +50,47 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, onClick }) => {
     return () => clearInterval(timer);
   }, [tour.startDate, tour.start_date]);
 
+  useEffect(() => {
+    const checkFavorite = async () => {
+      if (user && tour.id) {
+        try {
+          const res = await favoriteService.checkIsFavorite(tour.id);
+          if (res.success) {
+            setIsFavorited(res.data || false);
+          }
+        } catch (error) {
+          console.error("Error checking favorite status:", error);
+        }
+      }
+    };
+    checkFavorite();
+  }, [tour.id, user]);
+
+  const handleToggleFavorite = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      alert('Vui lòng đăng nhập để lưu tour vào danh sách yêu thích!');
+      return;
+    }
+
+    if (isTogglingFavorite) return;
+
+    try {
+      setIsTogglingFavorite(true);
+      if (isFavorited) {
+        await favoriteService.removeTourFavorite(tour.id);
+        setIsFavorited(false);
+      } else {
+        await favoriteService.addTourFavorite(tour.id);
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    } finally {
+      setIsTogglingFavorite(false);
+    }
+  };
+
   const formatTime = (n: number) => n.toString().padStart(2, '0');
   
   // Image URL handling
@@ -64,8 +111,23 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, onClick }) => {
         />
         
         {/* Wishlist Icon */}
-        <div className="tour-card-wishlist">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <div 
+          className={`tour-card-wishlist ${isFavorited ? 'is-favorited' : ''}`}
+          onClick={handleToggleFavorite}
+          style={{ cursor: 'pointer' }}
+          title={isFavorited ? "Xóa khỏi danh sách yêu thích" : "Thêm vào danh sách yêu thích"}
+        >
+          <svg 
+            width="22" 
+            height="22" 
+            viewBox="0 0 24 24" 
+            fill={isFavorited ? "#e42b1f" : "none"} 
+            stroke={isFavorited ? "#e42b1f" : "white"} 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            style={{ transition: 'all 0.2s ease' }}
+          >
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
           </svg>
         </div>
