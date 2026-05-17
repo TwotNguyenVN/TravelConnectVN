@@ -75,6 +75,10 @@ const chatService = {
     return await api.get('/conversations');
   },
 
+  getUnreadMessageCount: async (): Promise<ApiResponse<{ count: number }>> => {
+    return await api.get('/conversations/unread-message-count');
+  },
+
   createDirect: async (guideUserId: string, relatedTourId?: string, initialMessage?: string): Promise<ApiResponse<Conversation>> => {
     return await api.post('/conversations/direct', { guideUserId, relatedTourId, initialMessage });
   },

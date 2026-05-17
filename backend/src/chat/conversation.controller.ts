@@ -32,6 +32,20 @@ export class ConversationController {
   }
 
   /**
+   * GET /conversations/unread-message-count
+   * Lấy tổng số tin nhắn chưa đọc của người dùng trong tất cả các cuộc trò chuyện.
+   */
+  @Get('unread-message-count')
+  async getUnreadMessageCount(@Request() req): Promise<ApiResponse<any>> {
+    const result = await this.conversationService.getUnreadMessageCount(req.user.id);
+    return {
+      success: true,
+      message: 'Lấy tổng số tin nhắn chưa đọc thành công',
+      data: { count: result },
+    };
+  }
+
+  /**
    * POST /conversations/direct
    * Tạo hoặc lấy lại direct conversation giữa current user và guide.
    * Body: { guideUserId, relatedTourId?, initialMessage? }

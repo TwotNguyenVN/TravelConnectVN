@@ -139,6 +139,7 @@ git push
 3. **Cập nhật code mới nhất**: Trước khi push code, hãy kéo phiên bản mới nhất trên GitHub về (`git pull origin develop`) để giải quyết mọi xung đột ở máy cá nhân trước khi đưa lên.
 4. **Không push file nhạy cảm**: Đảm bảo không vô tình push các file `.env`, file cấu hình tài khoản cá nhân, thư mục `node_modules` hay thư mục build (`dist`, `build`). Hãy cập nhật `.gitignore` đầy đủ.
 5. **Đúng nhánh, đúng việc**: Chỉ push lên nhánh `feature/*` hoặc `fix/*` do bạn tự tạo. Tuyệt đối không push trực tiếp lên `develop` hoặc `main` nếu chưa qua bước tạo Pull Request (PR) để review.
+6. **Luôn tạo nhánh từ develop**: Trước khi push code lên GitHub, đảm bảo code của bạn được phát triển trên một nhánh mới được tách ra trực tiếp từ nhánh `develop` mới nhất (`git checkout develop` -> `git pull origin develop` -> `git checkout -b <tên_nhánh_mới>`). Tuyệt đối không code trực tiếp trên develop hoặc main.
 
 ---
 

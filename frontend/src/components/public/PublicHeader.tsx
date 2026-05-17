@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../common/Button/Button';
 import notificationService from '../../services/notificationService';
+import chatService from '../../services/chatService';
 import { ChatPopover } from './popovers/ChatPopover';
 import { NotificationPopover } from './popovers/NotificationPopover';
 
@@ -17,6 +18,7 @@ export const PublicHeader: React.FC = () => {
   const { socket } = useSocket();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [showChatPopover, setShowChatPopover] = useState(false);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
 
@@ -32,7 +34,18 @@ export const PublicHeader: React.FC = () => {
           console.error('Error fetching unread count:', err);
         }
       };
+      const fetchUnreadChatCount = async () => {
+        try {
+          const res = await chatService.getUnreadMessageCount();
+          if (res.success) {
+            setUnreadChatCount(res.data?.count || 0);
+          }
+        } catch (err) {
+          console.error('Error fetching unread chat count:', err);
+        }
+      };
       fetchUnreadCount();
+      fetchUnreadChatCount();
     }
   }, [user]);
 
@@ -42,10 +55,16 @@ export const PublicHeader: React.FC = () => {
         setUnreadCount(prev => prev + 1);
       };
 
+      const handleUnreadChatCountUpdate = (data: { count: number }) => {
+        setUnreadChatCount(data.count);
+      };
+
       socket.on('new_notification', handleNewNotification);
+      socket.on('unread_message_count_updated', handleUnreadChatCountUpdate);
 
       return () => {
         socket.off('new_notification', handleNewNotification);
+        socket.off('unread_message_count_updated', handleUnreadChatCountUpdate);
       };
     }
   }, [socket]);
@@ -146,6 +165,24 @@ export const PublicHeader: React.FC = () => {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                   </svg>
+                  {unreadChatCount > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      top: '-2px',
+                      right: '-2px',
+                      backgroundColor: 'var(--tc-danger)',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: 'bold',
+                      padding: '2px 5px',
+                      borderRadius: '10px',
+                      minWidth: '18px',
+                      textAlign: 'center',
+                      border: '2px solid var(--tc-bg-default)'
+                    }}>
+                      {unreadChatCount > 99 ? '99+' : unreadChatCount}
+                    </span>
+                  )}
                 </button>
                 {showChatPopover && <ChatPopover onClose={() => setShowChatPopover(false)} />}
               </div>
