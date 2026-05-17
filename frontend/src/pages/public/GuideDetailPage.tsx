@@ -11,6 +11,7 @@ import './GuideDetailPage.css';
 
 interface GuideDetail {
   id: string;
+  userId?: string;
   name: string;
   avatar: string;
   workingArea: string;
@@ -125,9 +126,13 @@ const GuideDetailPage: React.FC = () => {
 
     try {
       setMessageLoading(true);
-      const res: any = await chatService.getOrCreateConversation(guide.id);
+      if (!guide.userId) {
+        toast.error('Không tìm thấy ID người dùng của hướng dẫn viên');
+        return;
+      }
+      const res: any = await chatService.createDirect(guide.userId);
       if (res.success) {
-        navigate(`/chat?id=${res.data.id}`);
+        navigate('/user/messages', { state: { conversationId: res.data.id } });
       }
     } catch (error) {
       console.error('Error starting conversation:', error);

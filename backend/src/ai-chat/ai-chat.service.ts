@@ -124,6 +124,35 @@ export class AiChatService {
     }
   }
 
+  async deleteSession(sessionId: string, userId: string) {
+    const session = await this.prisma.ai_chat_sessions.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session || session.user_id !== userId) {
+      throw new NotFoundException('Session không tồn tại');
+    }
+
+    return this.prisma.ai_chat_sessions.delete({
+      where: { id: sessionId },
+    });
+  }
+
+  async updateSessionContext(sessionId: string, userId: string, context: any) {
+    const session = await this.prisma.ai_chat_sessions.findUnique({
+      where: { id: sessionId },
+    });
+
+    if (!session || session.user_id !== userId) {
+      throw new NotFoundException('Session không tồn tại');
+    }
+
+    return this.prisma.ai_chat_sessions.update({
+      where: { id: sessionId },
+      data: { context },
+    });
+  }
+
   private async getRoleBasedContext(userId: string, role: string, userName: string): Promise<string> {
     // Base Prompt - Quy tắc chung cho AI
     let basePrompt = `Bạn là trợ lý ảo TravelConnectVN. Tên người dùng: ${userName}.

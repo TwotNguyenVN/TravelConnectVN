@@ -290,6 +290,32 @@ export const ProfilePage: React.FC = () => {
     if (e) e.preventDefault();
     if (!user) return;
     
+    // 1. Phone number validation (digits only)
+    if (formData.phone) {
+      if (!/^[0-9]+$/.test(formData.phone)) {
+        toast.error('Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)');
+        return;
+      }
+    }
+
+    // 2. Date of Birth validation (valid date, year >= 1950, not in the future)
+    if (formData.dateOfBirth) {
+      const dob = new Date(formData.dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        toast.error('Ngày sinh không hợp lệ');
+        return;
+      }
+      const year = dob.getFullYear();
+      if (year < 1950) {
+        toast.error('Năm sinh không được trước năm 1950');
+        return;
+      }
+      if (dob > new Date()) {
+        toast.error('Ngày sinh không được ở tương lai');
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       await userService.updateProfile(formData);

@@ -113,11 +113,12 @@ export const PublicHeader: React.FC = () => {
                       src={displayAvatar} 
                       alt="Avatar" 
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
                     />
                   ) : initial}
                 </div>
-                <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>
-                  {displayName}
+                <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }} title={displayName}>
+                  {displayName.length > 30 ? `${displayName.slice(0, 30)}...` : displayName}
                 </span>
               </Link>
 

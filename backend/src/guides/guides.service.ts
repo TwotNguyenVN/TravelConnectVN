@@ -373,6 +373,7 @@ export class GuidesService {
     const rating = await this.getGuideAverageRating(g.id);
     return {
       id: g.id,
+      userId: g.user_id,
       name: g.users?.full_name || 'Hướng dẫn viên',
       avatar: g.users?.avatar_url || '', // Account avatar
       avatarUrl: g.avatar_url || g.users?.avatar_url || '', // Profile avatar (fallback to account)

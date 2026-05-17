@@ -101,6 +101,32 @@ export const OnboardingPage: React.FC = () => {
   };
 
   const handleNext = async () => {
+    // Validation on basicInfo step
+    if (currentStep === OnboardingStep.BASIC_INFO) {
+      if (basicInfo.phone) {
+        if (!/^[0-9]+$/.test(basicInfo.phone)) {
+          toast.error('Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)');
+          return;
+        }
+      }
+      if (basicInfo.dateOfBirth) {
+        const dob = new Date(basicInfo.dateOfBirth);
+        if (isNaN(dob.getTime())) {
+          toast.error('Ngày sinh không hợp lệ');
+          return;
+        }
+        const year = dob.getFullYear();
+        if (year < 1950) {
+          toast.error('Năm sinh không được trước năm 1950');
+          return;
+        }
+        if (dob > new Date()) {
+          toast.error('Ngày sinh không được ở tương lai');
+          return;
+        }
+      }
+    }
+
     setIsLoading(true);
     try {
       if (currentStep === OnboardingStep.BASIC_INFO) {

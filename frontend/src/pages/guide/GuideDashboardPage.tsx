@@ -110,6 +110,33 @@ const GuideDashboardPage: React.FC = () => {
 
   const handleSavePersonal = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // 1. Phone number validation (digits only)
+    if (personalData.phone) {
+      if (!/^[0-9]+$/.test(personalData.phone)) {
+        setPersonalMessage({ type: 'error', text: 'Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)' });
+        return;
+      }
+    }
+
+    // 2. Date of Birth validation (valid date, year >= 1950, not in the future)
+    if (personalData.dateOfBirth) {
+      const dob = new Date(personalData.dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        setPersonalMessage({ type: 'error', text: 'Ngày sinh không hợp lệ' });
+        return;
+      }
+      const year = dob.getFullYear();
+      if (year < 1950) {
+        setPersonalMessage({ type: 'error', text: 'Năm sinh không được trước năm 1950' });
+        return;
+      }
+      if (dob > new Date()) {
+        setPersonalMessage({ type: 'error', text: 'Ngày sinh không được ở tương lai' });
+        return;
+      }
+    }
+
     setSavingPersonal(true);
     setPersonalMessage(null);
     
@@ -118,7 +145,7 @@ const GuideDashboardPage: React.FC = () => {
       await refreshProfile();
       setPersonalMessage({ type: 'success', text: 'Cập nhật thông tin cá nhân thành công!' });
     } catch (err: any) {
-      setPersonalMessage({ type: 'error', text: 'Lỗi khi cập nhật thông tin.' });
+      setPersonalMessage({ type: 'error', text: err.message || 'Lỗi khi cập nhật thông tin.' });
     } finally {
       setSavingPersonal(false);
     }

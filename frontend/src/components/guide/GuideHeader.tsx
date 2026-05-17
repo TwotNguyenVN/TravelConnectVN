@@ -75,7 +75,12 @@ export const GuideHeader: React.FC = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
 
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 600, fontSize: 'var(--tc-font-size-sm)' }}>{fullName}</div>
+          <div 
+            style={{ fontWeight: 600, fontSize: 'var(--tc-font-size-sm)' }} 
+            title={fullName}
+          >
+            {fullName.length > 30 ? `${fullName.slice(0, 30)}...` : fullName}
+          </div>
           <div style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>{email}</div>
         </div>
         <img 
