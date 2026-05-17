@@ -10,7 +10,9 @@ export const AppSidebar: React.FC = () => {
   return (
     <aside className="user-sidebar">
       <div className="sidebar-logo">
-        <span>🌍</span> TravelConnect
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span>🌍</span> TravelConnect
+        </Link>
       </div>
       
       <div className="nav-group">
