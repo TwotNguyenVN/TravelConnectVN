@@ -12,7 +12,7 @@ import { DEFAULT_AVATAR } from '../../constants/images';
 import './Profile.css';
 
 export const ProfilePage: React.FC = () => {
-  const { user, refreshProfile } = useAuth();
+  const { user, roles, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -581,7 +581,7 @@ export const ProfilePage: React.FC = () => {
       </form>
 
       {/* Become a Guide Recruitment Banner */}
-      {!user?.roles?.some((r: any) => r.role_code === 'GUIDE') && (
+      {!roles.includes('GUIDE') && (
         <div className="tc-guide-recruit-banner">
           <div className="recruit-content">
             <div className="recruit-icon">💎</div>
