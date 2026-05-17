@@ -158,6 +158,10 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--tc-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
 .conversation-time {
@@ -177,6 +181,10 @@
   font-size: 0.85rem;
   color: var(--tc-text-secondary);
   line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
 .unread-count {
@@ -281,6 +289,10 @@
   font-weight: 700;
   color: #1a1a1a;
   letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
 }
 
 .chat-header-title.clickable {

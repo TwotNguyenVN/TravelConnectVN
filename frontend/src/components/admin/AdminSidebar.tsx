@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, Link } from 'react-router-dom';
 
 export const AdminSidebar: React.FC = () => {
   const navigate = useNavigate();
@@ -33,9 +33,11 @@ export const AdminSidebar: React.FC = () => {
       top: 0,
     }}>
       <div style={{ padding: 'var(--tc-spacing-5)', borderBottom: '1px solid var(--tc-border)' }}>
-        <h2 style={{ margin: 0, color: 'var(--tc-primary)', fontSize: 'var(--tc-font-size-xl)' }}>
-          TravelConnect
-        </h2>
+        <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <h2 style={{ margin: 0, color: 'var(--tc-primary)', fontSize: 'var(--tc-font-size-xl)', cursor: 'pointer' }}>
+            TravelConnect
+          </h2>
+        </Link>
         <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>Admin Control Panel</span>
       </div>
 

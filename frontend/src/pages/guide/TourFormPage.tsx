@@ -108,7 +108,7 @@ const TourFormPage: React.FC = () => {
   const [formData, setFormData] = useState({
     title: "",
     categoryId: "",
-    price: "" as any,
+    price: 0,
     maxParticipants: "" as any,
     description: "",
     participantRequirements: "",
@@ -374,7 +374,7 @@ const TourFormPage: React.FC = () => {
 
   const isStepComplete = (step: number): boolean => {
     if (step === 1) {
-      return !!(formData.title && formData.categoryId && formData.price !== undefined && formData.price >= 0);
+      return !!(formData.title && formData.categoryId);
     }
     if (step === 2) {
       return !!(
@@ -399,8 +399,8 @@ const TourFormPage: React.FC = () => {
   };
   const validateStep = (step: number) => {
     if (step === 1) {
-      if (!formData.title || !formData.categoryId || !formData.price || formData.price <= 0 || !formData.province) {
-        toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Giá, Tỉnh thành)");
+      if (!formData.title || !formData.categoryId || !formData.province) {
+        toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Tỉnh thành)");
         return false;
       }
       if (formData.maxParticipants < 1 || formData.maxParticipants > 20) {
@@ -759,7 +759,7 @@ const TourFormPage: React.FC = () => {
         <aside className="tc-tour-form__sidebar">
           <div className="tc-stepper">
             {[
-              { n: 1, t: "Thông tin cơ bản", d: "Tiêu đề, loại hình & giá" },
+              { n: 1, t: "Thông tin cơ bản", d: "Tiêu đề & loại hình" },
               { n: 2, t: "Địa điểm & Thời gian", d: "Điểm hẹn & tọa độ" },
               { n: 3, t: "Mô tả lịch trình chi tiết", d: "Nội dung tour" },
               { n: 4, t: "Các địa điểm ghé thăm", d: "Danh sách điểm dừng" },
@@ -945,43 +945,25 @@ const TourFormPage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="tc-tour-form__grid">
-                  <div className="tc-form-group">
-                    <label>
-                      Loại hình tour <span>*</span>
-                    </label>
-                    <select
-                      name="categoryId"
-                      className="tc-form-select"
-                      value={formData.categoryId}
-                      onChange={handleBasicChange}
-                      required
-                      disabled={isPublished}
-                    >
-                      <option value="">Chọn loại hình</option>
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="tc-form-group">
-                    <label>
-                      Giá tour (VND/khách) <span>*</span>
-                    </label>
-                    <input
-                      type="number"
-                      name="price"
-                      className="tc-form-input"
-                      value={formData.price ?? ""}
-                      onChange={handleBasicChange}
-                      min="0"
-                      step="10000"
-                      required
-                      disabled={isPublished}
-                    />
-                  </div>
+                <div className="tc-form-group">
+                  <label>
+                    Loại hình tour <span>*</span>
+                  </label>
+                  <select
+                    name="categoryId"
+                    className="tc-form-select"
+                    value={formData.categoryId}
+                    onChange={handleBasicChange}
+                    required
+                    disabled={isPublished}
+                  >
+                    <option value="">Chọn loại hình</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="tc-form-group">
