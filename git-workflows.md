@@ -130,6 +130,18 @@ git push
 
 ---
 
+## 🛑 6. Nguyên tắc vàng khi Push lên GitHub (Push Guidelines)
+
+Để đảm bảo dự án vận hành trơn tru và chất lượng code luôn cao, bạn **bắt buộc** phải tuân thủ các nguyên tắc sau trước khi `git push`:
+
+1. **Kiểm tra biên dịch & Linter**: Luôn chạy lệnh kiểm tra lỗi cú pháp và type check ở máy local (`npx tsc --noEmit` hoặc linter) trước khi push. Tuyệt đối không đẩy code lỗi lên repo chung.
+2. **Không Force Push bừa bãi**: Tuyệt đối **không bao giờ** dùng `git push --force` (hoặc `-f`) trên các nhánh dùng chung như `develop` và `main`. Điều này sẽ ghi đè lịch sử commit của người khác và làm hỏng repo.
+3. **Cập nhật code mới nhất**: Trước khi push code, hãy kéo phiên bản mới nhất trên GitHub về (`git pull origin develop`) để giải quyết mọi xung đột ở máy cá nhân trước khi đưa lên.
+4. **Không push file nhạy cảm**: Đảm bảo không vô tình push các file `.env`, file cấu hình tài khoản cá nhân, thư mục `node_modules` hay thư mục build (`dist`, `build`). Hãy cập nhật `.gitignore` đầy đủ.
+5. **Đúng nhánh, đúng việc**: Chỉ push lên nhánh `feature/*` hoặc `fix/*` do bạn tự tạo. Tuyệt đối không push trực tiếp lên `develop` hoặc `main` nếu chưa qua bước tạo Pull Request (PR) để review.
+
+---
+
 ## 🎯 Tóm tắt các lệnh hay dùng nhất
 *   Xem trạng thái file: `git status`
 *   Xem danh sách nhánh: `git branch` (nhấn `q` để thoát)
