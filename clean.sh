@@ -1,11 +1,10 @@
-#./clean.sh
 #!/bin/bash
 
-# ==========================================
-# HƯỚNG DẪN SỬ DỤNG:
-# - macOS: Chạy trực tiếp trên Terminal (./clean.sh)
-# - Windows: Vui lòng sử dụng Git Bash để chạy (./clean.sh)
-# ==========================================
+# ==============================================================================
+# HƯỚNG DẪN SỬ DỤNG (macOS/Linux hoặc Git Bash trên Windows):
+# 1. Cấp quyền thực thi:  chmod +x clean.sh
+# 2. Chạy file script:     ./clean.sh
+# ==============================================================================
 
 echo "🚀 Bắt đầu dọn dẹp dự án TravelConnectVN..."
 

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# ==============================================================================
+# HƯỚNG DẪN SỬ DỤNG (macOS/Linux hoặc Git Bash trên Windows):
+# 1. Cấp quyền thực thi:  chmod +x setup.sh
+# 2. Chạy file script:     ./setup.sh
+# ==============================================================================
+
 # Configuration
 REQUIRED_NODE_VERSION=24
 
