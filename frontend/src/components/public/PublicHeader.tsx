@@ -88,8 +88,9 @@ export const PublicHeader: React.FC = () => {
   const displayAvatar = profile?.avatar_url || user?.user_metadata?.avatar_url || DEFAULT_AVATAR;
   const initial = displayName[0]?.toUpperCase() || 'N';
 
+  const isAdmin = roles.includes('ADMIN');
   const isGuide = roles.includes('GUIDE');
-  const profileLink = isGuide ? '/guide' : '/user';
+  const profileLink = isAdmin ? '/admin' : (isGuide ? '/guide' : '/user');
 
   return (
     <header style={{
