@@ -380,7 +380,7 @@ export const ProfilePage: React.FC = () => {
 
         <div className="header-action-bar">
           <div className="header-info">
-            <h2>{formData.fullName || 'Người dùng'}</h2>
+            <h2>{(formData.fullName || 'Người dùng').length > 30 ? (formData.fullName || 'Người dùng').substring(0, 30) + '...' : (formData.fullName || 'Người dùng')}</h2>
             <p className="header-subtitle">{user?.email}</p>
           </div>
           <div className="header-buttons">
