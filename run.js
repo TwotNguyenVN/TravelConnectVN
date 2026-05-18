@@ -57,7 +57,7 @@ function showBanner() {
   console.log('  ║    | || | | (_| |\\ V /  __/ | || \\__/\\ (_) | | | | | | |  __/ (__| |_   ║');
   console.log('  ║    |_||_|  \\__,_| \\_/ \\___| |_| \\____/\\___/|_| |_|_| |_|\\___|\\___|\\__|  ║');
   console.log('  ║                                                                        ║');
-  console.log('  ║                -- HỆ THỐNG QUẢN LÝ DỰ ÁN ĐA NỀN TẢNG --                ║');
+  console.log('  ║              -- HỆ THỐNG WEB KẾT NỐI DU LỊCH VIỆT NAM --               ║');
   console.log('  ╚════════════════════════════════════════════════════════════════════════╝');
   console.log(`${COLORS.reset}`);
 }
