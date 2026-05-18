@@ -440,12 +440,9 @@ const GuideProfilePage: React.FC = () => {
                   setProfile(prev => ({ 
                     ...prev, 
                     region: newRegion,
-                    homeProvinceId: undefined, // Reset when region changes
-                    familiarProvinces: '' 
                   }));
                 }}
                 style={{ width: '100%', padding: '12px', borderRadius: '12px', border: '1px solid var(--color-border)', backgroundColor: 'var(--color-bg-white)' }}
-                required
               >
                 <option value="">Chọn miền</option>
                 <option value="Miền Bắc">Miền Bắc</option>
@@ -454,7 +451,7 @@ const GuideProfilePage: React.FC = () => {
               </select>
             </div>
 
-            {profile.region && (
+            {/* Tỉnh thành hoạt động chính - hiển thị luôn */}
               <div className="tc-input-container tc-input-container--full-width" style={{ position: 'relative' }}>
                 <label className="tc-input-label">Tỉnh thành hoạt động chính / Am hiểu nhất</label>
                 <input
@@ -475,7 +472,7 @@ const GuideProfilePage: React.FC = () => {
                   <div className="province-suggestions-list">
                     {provinces
                       .filter(p => 
-                        p.region === profile.region && 
+                        (!profile.region || p.region === profile.region) && 
                         p.name.toLowerCase().includes(provinceSearch.toLowerCase())
                       )
                       .slice(0, 8)
@@ -496,15 +493,14 @@ const GuideProfilePage: React.FC = () => {
                           {p.name}
                         </div>
                       ))}
-                    {provinces.filter(p => p.region === profile.region && p.name.toLowerCase().includes(provinceSearch.toLowerCase())).length === 0 && (
+                    {provinces.filter(p => (!profile.region || p.region === profile.region) && p.name.toLowerCase().includes(provinceSearch.toLowerCase())).length === 0 && (
                       <div className="suggestion-item no-results">Không tìm thấy tỉnh thành</div>
                     )}
                   </div>
                 )}
               </div>
-            )}
 
-            {profile.region && (
+            {/* Các tỉnh thành lân cận - hiển thị luôn */}
               <div className="tc-input-container tc-input-container--full-width" style={{ position: 'relative' }}>
                 <label className="tc-input-label">Các tỉnh thành lân cận am hiểu khác (Chọn nhiều)</label>
                 
@@ -535,7 +531,7 @@ const GuideProfilePage: React.FC = () => {
                   <div className="province-suggestions-list">
                     {provinces
                       .filter(p => 
-                        p.region === profile.region && 
+                        (!profile.region || p.region === profile.region) && 
                         p.id !== profile.homeProvinceId &&
                         p.name.toLowerCase().includes(familiarSearch.toLowerCase()) &&
                         !(profile.familiarProvinces || '').split(',').map(s => s.trim()).includes(p.name)
@@ -553,16 +549,15 @@ const GuideProfilePage: React.FC = () => {
                           {p.name}
                         </div>
                       ))}
-                    {provinces.filter(p => p.region === profile.region && p.id !== profile.homeProvinceId && p.name.toLowerCase().includes(familiarSearch.toLowerCase()) && !(profile.familiarProvinces || '').split(',').map(s => s.trim()).includes(p.name)).length === 0 && (
+                    {provinces.filter(p => (!profile.region || p.region === profile.region) && p.id !== profile.homeProvinceId && p.name.toLowerCase().includes(familiarSearch.toLowerCase()) && !(profile.familiarProvinces || '').split(',').map(s => s.trim()).includes(p.name)).length === 0 && (
                       <div className="suggestion-item no-results">Không còn tỉnh thành nào phù hợp</div>
                     )}
                   </div>
                 )}
                 <p className="tc-input-helper-text" style={{ marginTop: '8px', fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                  Gợi ý: Chỉ hiển thị các tỉnh thuộc {profile.region}
+                  {profile.region ? `Gợi ý: Đang lọc các tỉnh thuộc ${profile.region}` : 'Gợi ý: Chọn miền ở trên để lọc tỉnh thành theo khu vực'}
                 </p>
               </div>
-            )}
 
             <Input
               label="Số năm kinh nghiệm"
