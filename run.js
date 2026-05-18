@@ -106,60 +106,43 @@ function runCommand(command, args, cwd) {
   });
 }
 
-// Tạo file .env mặc định nếu chưa tồn tại
+// Tạo file .env mặc định từ file .env.example nếu chưa tồn tại
 function setupEnvFiles() {
   const backendEnvPath = path.join(__dirname, 'backend', '.env');
+  const backendExamplePath = path.join(__dirname, 'backend', '.env.example');
   const frontendEnvPath = path.join(__dirname, 'frontend', '.env.local');
+  const frontendExamplePath = path.join(__dirname, 'frontend', '.env.example');
   
   console.log(`${COLORS.bright}Khởi tạo file cấu hình môi trường (.env):${COLORS.reset}`);
   
   // 1. Backend .env
   if (!fs.existsSync(backendEnvPath)) {
-    console.log(`${COLORS.yellow}- Đang khởi tạo tệp backend/.env mặc định...${COLORS.reset}`);
-    const defaultBackendEnv = `# TravelConnectVN Database Configuration
-PRISMA_CLIENT_ENGINE_TYPE="library"
-
-# Connection pooling for Prisma (Transaction mode)
-DATABASE_URL="postgresql://postgres.zkeymmxuncvlrlezrbye:Twot2k5TravelConnectVN.%2A%23@aws-1-ap-southeast-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
-
-# Direct connection for Prisma Migrations (Session mode)
-DIRECT_URL="postgresql://postgres.zkeymmxuncvlrlezrbye:Twot2k5TravelConnectVN.%2A%23@aws-1-ap-southeast-1.pooler.supabase.com:5432/postgres"
-
-# Supabase Auth configuration
-SUPABASE_URL="https://zkeymmxuncvlrlezrbye.supabase.co"
-SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprZXltbXh1bmN2bHJsZXpyYnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyODU3NDEsImV4cCI6MjA5MTg2MTc0MX0.lTAsni_daitMAiHsPTlAOgeh1bJXS_FghR_PkTF1Lg4"
-SUPABASE_JWT_SECRET="rjIIFAD5RE3xSsC5QJGSy+B6xhgbWjBzjehfNivnA/YswHP27a2pLOLO1MUVVnZvzfzjwxzb5q8a2Xkb7aPxoQ=="
-SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprZXltbXh1bmN2bHJsZXpyYnllIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjI4NTc0MSwiZXhwIjoyMDkxODYxNzQxfQ.Xpd5lKDOX-suqcfnel7lwnnnOKfAVBJw852jgpu8Q7o"
-
-# VNPAY SANDBOX
-VNP_TMNCODE="9NWOS2Q0"
-VNP_HASHSECRET="NEXBGPL6JCB08DBPMD3CHZBY0Z5LFYWQ"
-VNP_URL="https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-VNP_RETURN_URL="http://localhost:5173/user/payments/vnpay-return"
-
-# GEMINI AI API
-GEMINI_API_KEY="AIzaSyAtEVJy9fZZeqRCxxynvYbs2Vx8WlpYM0A"
-`;
-    fs.writeFileSync(backendEnvPath, defaultBackendEnv, 'utf8');
-    console.log(`${COLORS.green}✔ Đã tạo backend/.env thành công!${COLORS.reset}`);
+    if (fs.existsSync(backendExamplePath)) {
+      console.log(`${COLORS.yellow}- Đang khởi tạo tệp backend/.env từ backend/.env.example...${COLORS.reset}`);
+      fs.copyFileSync(backendExamplePath, backendEnvPath);
+      console.log(`${COLORS.green}✔ Đã tạo backend/.env thành công!${COLORS.reset}`);
+    } else {
+      console.log(`${COLORS.red}✗ Không tìm thấy tệp mẫu backend/.env.example để khởi tạo.${COLORS.reset}`);
+    }
   } else {
     console.log(`${COLORS.green}✔ Tệp backend/.env đã tồn tại.${COLORS.reset}`);
   }
   
   // 2. Frontend .env.local
   if (!fs.existsSync(frontendEnvPath)) {
-    console.log(`${COLORS.yellow}- Đang khởi tạo tệp frontend/.env.local mặc định...${COLORS.reset}`);
-    const defaultFrontendEnv = `VITE_SUPABASE_URL=https://zkeymmxuncvlrlezrbye.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InprZXltbXh1bmN2bHJsZXpyYnllIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyODU3NDEsImV4cCI6MjA5MTg2MTc0MX0.lTAsni_daitMAiHsPTlAOgeh1bJXS_FghR_PkTF1Lg4
-VITE_API_URL=http://localhost:3000
-`;
-    fs.writeFileSync(frontendEnvPath, defaultFrontendEnv, 'utf8');
-    console.log(`${COLORS.green}✔ Đã tạo frontend/.env.local thành công!${COLORS.reset}`);
+    if (fs.existsSync(frontendExamplePath)) {
+      console.log(`${COLORS.yellow}- Đang khởi tạo tệp frontend/.env.local từ frontend/.env.example...${COLORS.reset}`);
+      fs.copyFileSync(frontendExamplePath, frontendEnvPath);
+      console.log(`${COLORS.green}✔ Đã tạo frontend/.env.local thành công!${COLORS.reset}`);
+    } else {
+      console.log(`${COLORS.red}✗ Không tìm thấy tệp mẫu frontend/.env.example để khởi tạo.${COLORS.reset}`);
+    }
   } else {
     console.log(`${COLORS.green}✔ Tệp frontend/.env.local đã tồn tại.${COLORS.reset}`);
   }
   console.log();
 }
+
 
 // 1. Chức năng setup
 async function doSetup() {
