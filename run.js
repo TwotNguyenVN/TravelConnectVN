@@ -346,21 +346,24 @@ function showInteractiveMenu() {
   console.log(`${COLORS.dim}  [5] Thoát công cụ (Exit)${COLORS.reset}\n`);
   
   rl.question(`${COLORS.bright}Lựa chọn của bạn (1-5): ${COLORS.reset}`, async (answer) => {
-    rl.close();
     const selection = answer.trim();
     
     switch (selection) {
       case '1':
+        rl.close();
         await doSetup();
         break;
       case '2':
+        rl.close();
         doStart();
         break;
       case '3':
+        rl.close();
         doClean(false);
         break;
       case '4':
         rl.question(`${COLORS.red}${COLORS.bright}CẢNH BÁO: Thao tác này sẽ xóa toàn bộ node_modules. Bạn có chắc chắn? (y/n): ${COLORS.reset}`, (confirm) => {
+          rl.close();
           if (confirm.toLowerCase().trim() === 'y') {
             doClean(true);
           } else {
@@ -369,10 +372,12 @@ function showInteractiveMenu() {
         });
         break;
       case '5':
+        rl.close();
         console.log('Đã thoát. Chúc bạn code vui vẻ!');
         process.exit(0);
         break;
       default:
+        rl.close();
         console.log(`${COLORS.red}Lựa chọn không hợp lệ. Vui lòng chạy lại script!${COLORS.reset}\n`);
         process.exit(1);
     }
