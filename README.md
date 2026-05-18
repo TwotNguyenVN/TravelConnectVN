@@ -175,7 +175,7 @@ Dự án được tích hợp sẵn công cụ quản lý đa nền tảng bằn
 ```bash
 node run.js setup
 ```
-*(Lệnh này sẽ tự động cài đặt dependency (`node_modules`) cho cả Frontend và Backend, khởi tạo Prisma Client, và tự tạo sẵn các file `.env` mẫu để bạn chạy được ngay lập tức!)*
+*(Lệnh này sẽ tự động cài đặt các dependency (node_modules) cho cả Frontend và Backend và khởi tạo Prisma Client để dự án sẵn sàng hoạt động!)*
 
 ---
 
