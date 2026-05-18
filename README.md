@@ -198,15 +198,71 @@ cd ..
 
 ---
 
-#### 5. Khởi chạy dự án local (Đồng thời cả Frontend & Backend)
-Thông thường bạn phải mở 2 terminal để chạy riêng Backend và Frontend. Nhưng với công cụ mới, bạn chỉ cần mở **1 cửa sổ Terminal duy nhất** ở thư mục gốc và chạy:
-
+#### 5. Khởi chạy nhanh bằng Bộ công cụ (Khuyên dùng)
+Bạn chỉ cần mở **1 cửa sổ Terminal duy nhất** ở thư mục gốc và chạy:
 ```bash
 node run.js start
 ```
-*Lệnh này sẽ khởi động đồng thời cả NestJS Backend (chạy ở `http://localhost:3000`) và React Vite Frontend (chạy ở `http://localhost:5173`), tự động gộp và phân biệt luồng log hiển thị trên màn hình vô cùng trực quan! Nhấn `Ctrl + C` để tắt đồng thời cả hai máy chủ.*
+*Lệnh này sẽ tự động khởi động đồng thời cả NestJS Backend (cổng `3000`) và React Vite Frontend (cổng `5173`), tự động gộp và gắn nhãn màu sắc cho luồng log hiển thị vô cùng trực quan! Nhấn `Ctrl + C` để tắt đồng thời cả hai.*
 
-*(Nếu bạn vẫn muốn chạy thủ công bằng 2 terminal riêng biệt, hãy chạy `cd backend && npm run start:dev` ở terminal 1 và `cd frontend && npm run dev` ở terminal 2).*
+---
+
+### 📂 Hướng dẫn cài đặt & Khởi chạy thủ công (Bằng tay)
+
+Nếu bạn không muốn sử dụng bộ công cụ tự động, bạn hoàn toàn có thể cài đặt và khởi chạy dự án theo cách thủ công bằng cách sử dụng **2 cửa sổ Terminal riêng biệt** theo các bước chi tiết sau:
+
+#### Bước 1: Thiết lập & Khởi chạy NestJS Backend
+Mở **Terminal thứ nhất** tại thư mục gốc của dự án và thực hiện:
+
+1. **Di chuyển vào thư mục backend:**
+   ```bash
+   cd backend
+   ```
+2. **Cài đặt các thư viện liên quan:**
+   ```bash
+   npm install
+   ```
+3. **Cấu hình môi trường (`.env`):**
+   * Sao chép file mẫu thành file cấu hình chính thức:
+     ```bash
+     cp .env.example .env
+     ```
+   * Mở file `.env` vừa tạo và điền các thông số kết nối Database PostgreSQL (Supabase) cùng các API Keys.
+4. **Đẩy cấu trúc bảng lên Database & Sinh Client:**
+   ```bash
+   npx prisma db push
+   npx prisma generate
+   ```
+5. **Khởi chạy Backend ở chế độ phát triển (Development):**
+   ```bash
+   npm run start:dev
+   ```
+   *Backend sẽ khởi chạy thành công và lắng nghe tại cổng `http://localhost:3000`.*
+
+---
+
+#### Bước 2: Thiết lập & Khởi chạy React Vite Frontend
+Mở **Terminal thứ hai** tại thư mục gốc của dự án và thực hiện:
+
+1. **Di chuyển vào thư mục frontend:**
+   ```bash
+   cd frontend
+   ```
+2. **Cài đặt các thư viện liên quan:**
+   ```bash
+   npm install
+   ```
+3. **Cấu hình môi trường (`.env.local`):**
+   * Sao chép file mẫu thành file cấu hình chính thức:
+     ```bash
+     cp .env.example .env.local
+     ```
+   * Mở file `.env.local` và kiểm tra cấu hình kết nối tới api backend (mặc định là `VITE_API_URL=http://localhost:3000/api`).
+4. **Khởi chạy Frontend ở chế độ phát triển:**
+   ```bash
+   npm run dev
+   ```
+   *Frontend sẽ khởi chạy thành công và hiển thị tại địa chỉ `http://localhost:5173`.*
 
 ---
 
