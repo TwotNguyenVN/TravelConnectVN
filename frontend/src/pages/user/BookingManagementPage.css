@@ -254,6 +254,15 @@
 .tc-guide-detail {
   display: flex;
   flex-direction: column;
+  max-width: 150px;
+}
+
+.tc-guide-detail .tc-value {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  width: 100%;
 }
 
 .tc-sub-value {

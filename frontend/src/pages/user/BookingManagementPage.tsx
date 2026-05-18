@@ -346,7 +346,7 @@ export const BookingManagementPage: React.FC = () => {
                             onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_AVATAR; }}
                           />
                           <div className="tc-guide-detail">
-                            <span className="tc-value tc-link">{activity.guideName}</span>
+                            <span className="tc-value tc-link" title={activity.guideName}>{activity.guideName}</span>
                             <span className="tc-sub-value">Đối tác tin cậy</span>
                           </div>
                         </div>
