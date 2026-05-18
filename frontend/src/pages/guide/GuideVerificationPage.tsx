@@ -17,7 +17,7 @@ interface VerificationStatus {
 }
 
 export const GuideVerificationPage: React.FC = () => {
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -138,9 +138,6 @@ export const GuideVerificationPage: React.FC = () => {
 
       if (response.success) {
         toast.success('Yêu cầu xác minh của bạn đã được gửi thành công!');
-        if (refreshProfile) {
-          await refreshProfile();
-        }
         fetchStatus();
       } else {
         toast.error(response.message || 'Có lỗi xảy ra khi gửi yêu cầu');
