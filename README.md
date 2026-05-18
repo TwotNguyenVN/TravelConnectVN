@@ -210,24 +210,44 @@ node run.js start
 
 ---
 
-### 🛠️ Bộ công cụ CLI đa năng (run.js)
+### 🛠️ Bộ công cụ CLI đa năng (`run.js` / `TCVN`)
 
 Để hỗ trợ phát triển nhanh và tự động hóa các thao tác lặp đi lặp lại, dự án đi kèm một công cụ quản lý chuyên dụng chạy bằng Node.js. 
 
-Để xem toàn bộ hướng dẫn sử dụng, bạn có thể chạy:
+#### 1. Cách chạy thông thường:
+Bạn có thể chạy bằng lệnh `node run.js`:
 ```bash
 node run.js --help
 ```
 
-Hoặc sử dụng trực tiếp các lệnh cụ thể sau:
+#### 2. Cách chạy nhanh (Short Local Alias):
+Dự án cung cấp sẵn các tập lệnh viết tắt `tcvn` trong thư mục gốc. Từ terminal tại thư mục dự án, bạn có thể gõ trực tiếp:
+* **Windows (Command Prompt):** `tcvn` hoặc `tcvn <lệnh>`
+* **Windows (PowerShell):** `.\tcvn` hoặc `.\tcvn <lệnh>`
+* **macOS / Linux:** `./tcvn` hoặc `./tcvn <lệnh>`
 
+#### 3. Cài đặt lệnh toàn cục (Global CLI):
+Để có thể gõ chữ **`TCVN`** hoặc **`tcvn`** từ **bất kỳ thư mục nào** trong hệ thống terminal của bạn mà không cần gõ `node run.js` hay `.\tcvn`, bạn chỉ cần chạy lệnh liên kết một lần duy nhất tại thư mục gốc:
+```bash
+npm link
+```
+Sau đó, từ bất kỳ đâu, bạn chỉ cần gõ:
+```bash
+TCVN
+```
+Hoặc:
+```bash
+tcvn <lệnh> (ví dụ: tcvn start)
+```
+
+#### Bảng danh sách các lệnh thực thi:
 ```text
 CÁCH SỬ DỤNG TRAVELCONNECTVN CLI TOOL:
-  node run.js            - Khởi chạy ở chế độ menu tương tác
-  node run.js setup      - Cài đặt dependency & Prisma Client
-  node run.js start      - Khởi chạy đồng thời cả Backend & Frontend
-  node run.js clean      - Xóa các file rác và thư mục build dist
-  node run.js clean-all  - Xóa toàn bộ build dist và node_modules
+  tcvn            - Khởi chạy ở chế độ menu tương tác
+  tcvn setup      - Cài đặt dependency & Prisma Client
+  tcvn start      - Khởi chạy đồng thời cả Backend & Frontend
+  tcvn clean      - Xóa các file rác và thư mục build dist
+  tcvn clean-all  - Xóa toàn bộ build dist và node_modules
 ```
 
 ---

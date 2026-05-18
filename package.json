@@ -1,0 +1,11 @@
+{
+  "name": "travelconnectvn-cli",
+  "version": "1.0.0",
+  "description": "TravelConnectVN cross-platform CLI tool",
+  "main": "run.js",
+  "bin": {
+    "tcvn": "./run.js",
+    "TCVN": "./run.js"
+  },
+  "private": true
+}
