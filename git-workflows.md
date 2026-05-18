@@ -1031,7 +1031,52 @@ git push origin feature/ten-yeu-cau
 
 ---
 
-## 25. CÂU CẦN NHỚ
+## 25. CÁC TÌNH HUỐNG THỰC TẾ & CÁCH GIẢI QUYẾT (CASE STUDIES)
+
+Dưới đây là các sự cố quản lý nhánh thực tế đã xảy ra trong quá trình phát triển dự án và quy trình xử lý chuẩn hóa để tham chiếu sau này.
+
+### Tình huống 1: Lệch pha lịch sử (Branch Drift) giữa hai nhánh chính `main` và `develop`
+*   **Hiện tượng:** Nhánh `main` và `develop` trên GitHub bị trôi lệch lịch sử commit chéo nhau. Nguyên nhân thường là do các Pull Request revert trước đó được gộp không đồng bộ trên đám mây, dẫn đến việc không thể tạo một Pull Request sạch từ `develop` vào `main` (bị báo có xung đột hoặc lịch sử lộn xộn).
+*   **Giải pháp xử lý chuẩn:**
+    ```bash
+    # 1. Chuyển sang nhánh develop local và kéo mã mới nhất
+    git checkout develop
+    git pull origin develop
+    
+    # 2. Gộp ngược origin/main vào develop local để tự giải quyết xung đột lịch sử ở local
+    git merge origin/main
+    
+    # 3. (Nếu có xung đột) Giải quyết conflict thủ công, commit lại:
+    # git add . && git commit -m "merge: resolve history drift with main"
+    
+    # 4. Đẩy nhánh develop sạch đã được đồng bộ lên lại GitHub
+    git push origin develop
+    ```
+    *Ý nghĩa:* Giúp đồng bộ hóa lịch sử của cả 2 nhánh chính, tạo ra một mốc cơ sở (base line) chuẩn cho tất cả các PR tiếp theo.
+
+### Tình huống 2: Lệch pha commit do duyệt gộp Pull Request sớm (Premature PR Merging)
+*   **Hiện tượng:** 
+    1. Lập trình viên tạo nhánh tính năng (ví dụ: `feat/remove-env-setup-run-js`) và đẩy commit số 1 lên.
+    2. Pull Request gộp nhánh tính năng này vào `develop` được duyệt và gộp ngay lập tức trên GitHub.
+    3. Ngay sau đó, khách hàng hoặc leader yêu cầu chỉnh sửa/nâng cấp thêm trên cùng chức năng đó. Lập trình viên tiếp tục viết code và đẩy thêm các commit mới (commit số 2, 3...) lên nhánh tính năng này.
+    4. **Hậu quả:** Vì PR trước đó đã gộp và đóng lại, các commit mới đẩy lên sau này bị "mắc kẹt" trên nhánh tính năng ở remote và không tự động bay vào nhánh `develop` trên GitHub.
+*   **Giải pháp xử lý chuẩn:**
+    *   **Cách xử lý kỹ thuật:** Lập trình viên (hoặc AI) cần tạo một **Pull Request thứ hai (lần 2)** từ chính nhánh tính năng đó vào `develop` trên GitHub để kéo nốt các commit mới còn thiếu vào nhánh chính.
+    *   **Lưu ý kinh nghiệm:** Trong thực tế làm việc, chỉ nên duyệt gộp PR khi toàn bộ phần tính năng, kiểm thử (tests) và giao diện đi kèm đã được hoàn thành và kiểm duyệt toàn diện 100% trên nhánh tính năng.
+
+### Tình huống 3: Lệch pha giữa máy Local và GitHub đám mây (Local vs Remote Out-of-sync)
+*   **Hiện tượng:** Sau khi gộp Pull Request thành công trên GitHub, nhánh `develop` trên đám mây đã đi trước nhánh `develop` dưới máy local của bạn nhiều commit. Nếu lập trình viên gõ code tiếp hoặc tạo nhánh tính năng mới từ nhánh `develop` local cũ này, khi push lên GitHub chắc chắn sẽ bị báo lỗi và bị từ chối lệnh đẩy code do lịch sử bị phân nhánh (diverged).
+*   **Giải pháp xử lý chuẩn:**
+    *   Luôn luôn chuyển về nhánh `develop` local và đồng bộ ngay lập tức trước khi bắt đầu bất kỳ công việc mới nào:
+    ```bash
+    git checkout develop
+    git pull origin develop
+    ```
+    *Ý nghĩa:* Tua nhanh (fast-forward) local khớp 100% với đám mây, triệt tiêu mọi rủi ro xung đột lịch sử nhánh ngay từ đầu.
+
+---
+
+## 26. CÂU CẦN NHỚ
 
 > **PR càng nhỏ và càng sớm thì càng dễ review, ít conflict, và project ổn định hơn.**
 
