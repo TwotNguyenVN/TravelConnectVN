@@ -210,6 +210,28 @@ node run.js start
 
 ---
 
+### 🛠️ Bộ công cụ CLI đa năng (run.js)
+
+Để hỗ trợ phát triển nhanh và tự động hóa các thao tác lặp đi lặp lại, dự án đi kèm một công cụ quản lý chuyên dụng chạy bằng Node.js. 
+
+Để xem toàn bộ hướng dẫn sử dụng, bạn có thể chạy:
+```bash
+node run.js --help
+```
+
+Hoặc sử dụng trực tiếp các lệnh cụ thể sau:
+
+```text
+CÁCH SỬ DỤNG TRAVELCONNECTVN CLI TOOL:
+  node run.js            - Khởi chạy ở chế độ menu tương tác
+  node run.js setup      - Cài đặt dependency & Prisma Client
+  node run.js start      - Khởi chạy đồng thời cả Backend & Frontend
+  node run.js clean      - Xóa các file rác và thư mục build dist
+  node run.js clean-all  - Xóa toàn bộ build dist và node_modules
+```
+
+---
+
 ### Các công cụ hữu ích khi chạy
 *   **Menu Tương tác (Interactive CLI):** Bạn chỉ cần chạy `node run.js` không đối số để mở menu trực quan, lựa chọn Setup, Start, Clean bằng cách gõ phím số `1-5`.
 *   **Swagger API Docs:** Truy cập `http://localhost:3000/api/docs` để xem tài liệu API Endpoint.
