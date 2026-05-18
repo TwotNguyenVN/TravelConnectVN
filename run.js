@@ -49,17 +49,42 @@ const REQUIRED_NODE_VERSION = 24;
 // Banner ASCII nghệ thuật
 function showBanner() {
   console.clear();
-  console.log(`${COLORS.cyan}${COLORS.bright}`);
-  console.log('  ╔════════════════════════════════════════════════════════════════════════╗');
-  console.log('  ║   _____                      _  _____                            _     ║');
-  console.log('  ║  |_   _| __ __ ___   _____  | |/  __ \\ ___  _ __  _ __   ___  __| |_   ║');
-  console.log('  ║    | || \'__/ _` \\ \\ / / _ \\ | || /  \\/ _ \\| \'_ \\| \'_ \\ / _ \\/ __| __|  ║');
-  console.log('  ║    | || | | (_| |\\ V /  __/ | || \\__/\\ (_) | | | | | | |  __/ (__| |_   ║');
-  console.log('  ║    |_||_|  \\__,_| \\_/ \\___| |_| \\____/\\___/|_| |_|_| |_|\\___|\\___|\\__|  ║');
-  console.log('  ║                                                                        ║');
-  console.log('  ║              -- HỆ THỐNG WEB KẾT NỐI DU LỊCH VIỆT NAM --               ║');
-  console.log('  ╚════════════════════════════════════════════════════════════════════════╝');
-  console.log(`${COLORS.reset}`);
+  
+  const logo = [
+    "   _____                      _  _____                            _     ",
+    "  |_   _| __ __ ___   _____  | |/  __ \\ ___  _ __  _ __   ___  __| |_   ",
+    "    | || '_/ _` \\ \\ / / _ \\ | || /  \\/ _ \\| '_ \\| '_ \\ / _ \\/ __| __|  ",
+    "    | || | | (_| |\\ V /  __/ | || \\__/\\ (_) | | | | | | |  __/ (__| |_   ",
+    "    |_||_|  \\__,_| \\_/ \\___| |_| \\____/\\___/|_| |_|_| |_|\\___|\\___|\\__|  "
+  ];
+  
+  const cyan = `${COLORS.cyan}${COLORS.bright}`;
+  const magenta = `${COLORS.magenta}${COLORS.bright}`;
+  const yellow = `${COLORS.yellow}${COLORS.bright}`;
+  const reset = COLORS.reset;
+  
+  // Top Border (Cyan to Magenta split)
+  console.log(`  ${cyan}╔════════════════════════════════════${magenta}════════════════════════════════════╗`);
+  
+  // Logo lines split and colored in Neon Cyan & Magenta
+  logo.forEach(line => {
+    const part1 = line.substring(0, 32);
+    const part2 = line.substring(32);
+    console.log(`  ${cyan}║${part1}${magenta}${part2}║`);
+  });
+  
+  // Spacing
+  console.log(`  ${cyan}║                                    ${magenta}                                    ║`);
+  
+  // Subtitle (Golden Yellow with glowing sparkles, perfectly aligned)
+  const subtitleText = "✨  HỆ THỐNG WEB KẾT NỐI DU LỊCH VIỆT NAM  ✨";
+  const leftSpaces = " ".repeat(13);
+  const rightSpaces = " ".repeat(14);
+  console.log(`  ${cyan}║${leftSpaces}${yellow}${subtitleText}${magenta}${rightSpaces}║`);
+  
+  // Bottom Border (Cyan to Magenta split)
+  console.log(`  ${cyan}╚════════════════════════════════════${magenta}════════════════════════════════════╝`);
+  console.log(reset);
 }
 
 // Kiểm tra phiên bản Node.js
