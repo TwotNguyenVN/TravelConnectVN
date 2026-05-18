@@ -327,7 +327,7 @@ CÁCH SỬ DỤNG TRAVELCONNECTVN CLI TOOL:
 
 ## 👥 Quy chuẩn Git & Làm việc nhóm
 
-Để lịch sử Git của dự án luôn sạch đẹp, dễ theo dõi và tránh đè code của nhau, mọi thành viên và AI Agent khi tham gia đóng góp code đều phải tuân thủ nghiêm ngặt quy trình **Git Flow rút gọn** đã được quy định chi tiết tại [git-workflows.md](file:///Users/twot/Documents/CODE/DACS_TravelConnect_VN/TravelConnectVN/git-workflows.md):
+Để lịch sử Git của dự án luôn sạch đẹp, dễ theo dõi và tránh đè code của nhau, mọi thành viên khi tham gia đóng góp code đều phải tuân thủ nghiêm ngặt quy trình **Git Flow rút gọn** đã được quy định chi tiết tại [git-workflows.md](file:///Users/twot/Documents/CODE/DACS_TravelConnect_VN/TravelConnectVN/git-workflows.md):
 
 1.  **Nguyên tắc phân nhánh:**
     *   `main`: Nhánh chạy ổn định, tuyệt đối không commit trực tiếp.
@@ -335,9 +335,6 @@ CÁCH SỬ DỤNG TRAVELCONNECTVN CLI TOOL:
     *   `feature/*` hoặc `fix/*`: Nhánh làm chức năng/sửa lỗi riêng của từng người.
 2.  **Đặt tên Commit (Conventional Commits):**
     *   `feat: ...` (Tính năng mới), `fix: ...` (Sửa lỗi), `docs: ...` (Tài liệu), `style: ...` (Giao diện/Format), `refactor: ...` (Tối ưu code).
-3.  **Quy trình AI Assistant:**
-    *   Chỉ commit và push khi người dùng ra lệnh rõ ràng.
-    *   **Bắt buộc** sử dụng merge ở chế độ `--no-ff` (no fast-forward) để lưu lại dấu vết gộp nhánh rõ ràng trong commit tree.
 
 ---
 
