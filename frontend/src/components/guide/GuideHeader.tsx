@@ -12,7 +12,6 @@ export const GuideHeader: React.FC = () => {
   const fullName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Local Guide';
   const email = user?.email || 'guide@travelconnect.vn';
   const avatarUrl = user?.user_metadata?.avatar_url;
-  const initial = fullName.charAt(0).toUpperCase();
 
   const [unreadCount, setUnreadCount] = useState(0);
 
