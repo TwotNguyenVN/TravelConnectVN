@@ -24,9 +24,20 @@ api.interceptors.response.use(
     // Return the full body { success, message, data }
     return response.data;
   },
-  (error) => {
+  async (error) => {
     const message = error.response?.data?.message || error.message || 'Có lỗi xảy ra';
     console.error(`DEBUG - Axios Error: ${message}`, error.response?.data);
+    
+    // Check if unauthorized (401)
+    if (error.response?.status === 401) {
+      console.warn('DEBUG - Axios Interceptor: 401 Unauthorized detected. Signing out and clearing session...');
+      try {
+        await supabase.auth.signOut();
+      } catch (err) {
+        console.error('Error during auto sign-out:', err);
+      }
+    }
+    
     return Promise.reject(error);
   }
 );
