@@ -16,7 +16,11 @@ interface VerificationStatus {
   latestRequest: any;
 }
 
-export const GuideVerificationPage: React.FC = () => {
+interface GuideVerificationPageProps {
+  isEmbedded?: boolean;
+}
+
+export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ isEmbedded = false }) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
@@ -163,21 +167,14 @@ export const GuideVerificationPage: React.FC = () => {
     }
   };
 
-  if (loading) return <PageContainer><LoadingBlock /></PageContainer>;
+  if (loading) {
+    return isEmbedded ? <LoadingBlock /> : <PageContainer><LoadingBlock /></PageContainer>;
+  }
 
   const canSubmit = !status?.latestRequest || (status.latestRequest.status !== 'pending' && status.profileStatus !== 'approved');
 
-  return (
-    <PageContainer>
-      <div className="verification-header">
-        <h1>Xác minh Hướng dẫn viên</h1>
-        <p>
-          Gửi hồ sơ để nhận huy hiệu "Đã xác minh" và tăng uy tín với khách
-          hàng.
-        </p>
-      </div>
-
-      <div className="verification-layout">
+  const content = (
+    <div className="verification-layout">
         <div className="verification-main">
           <Card className="status-card">
             <div className="status-content">
@@ -462,6 +459,22 @@ export const GuideVerificationPage: React.FC = () => {
           </Card>
         </aside>
       </div>
+  );
+
+  if (isEmbedded) {
+    return content;
+  }
+
+  return (
+    <PageContainer>
+      <div className="verification-header">
+        <h1>Xác minh Hướng dẫn viên</h1>
+        <p>
+          Gửi hồ sơ để nhận huy hiệu "Đã xác minh" và tăng uy tín với khách
+          hàng.
+        </p>
+      </div>
+      {content}
     </PageContainer>
   );
 };

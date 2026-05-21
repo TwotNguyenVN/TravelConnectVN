@@ -27,6 +27,7 @@ export const TourScheduleDetailPage: React.FC = () => {
   
   // Edit State
   const [maxParticipants, setMaxParticipants] = useState<number>(0);
+  const [price, setPrice] = useState<number>(0);
   const [isSaving, setIsSaving] = useState(false);
   const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
 
@@ -48,6 +49,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       if (foundSchedule) {
         setSchedule(foundSchedule);
         setMaxParticipants(foundSchedule.max_participants ?? foundSchedule.maxParticipants);
+        setPrice(Number(foundSchedule.price));
       } else {
         toast.error('Không tìm thấy lịch khởi hành');
         navigate(`/guide/tours/edit/${tourId}`);
@@ -73,12 +75,17 @@ export const TourScheduleDetailPage: React.FC = () => {
 
   const handleUpdateSchedule = async () => {
     if (!scheduleId || !tourId) return;
+    if (price > Number(schedule.price)) {
+      toast.error('Giá chỉnh sửa chỉ được phép giảm xuống, không được phép tăng lên');
+      return;
+    }
     try {
       setIsSaving(true);
       await tourService.updateTourSchedule(tourId, scheduleId, {
-        maxParticipants: Number(maxParticipants)
+        maxParticipants: Number(maxParticipants),
+        price: Number(price)
       });
-      toast.success('Cập nhật số lượng khách thành công!');
+      toast.success('Cập nhật lịch khởi hành thành công!');
       fetchData();
     } catch (error) {
       toast.error('Lỗi khi cập nhật lịch trình');
@@ -262,12 +269,16 @@ export const TourScheduleDetailPage: React.FC = () => {
               <div className="tc-form-group">
                 <label>Giá Tour (đ/khách)</label>
                 <input 
-                  type="text" 
-                  value={(schedule.price || 0).toLocaleString() + ' đ'} 
-                  disabled 
-                  className="tc-input-disabled"
+                  type="number" 
+                  value={price} 
+                  onChange={(e) => setPrice(Number(e.target.value))} 
+                  min="0"
+                  className={price > Number(schedule.price) ? "tc-input-error" : ""}
                 />
-                <span className="tc-form-hint">Giá được thiết lập cố định khi tạo lịch.</span>
+                {price > Number(schedule.price) && (
+                  <span className="tc-error-text">Giá mới không được cao hơn giá hiện tại ({Number(schedule.price).toLocaleString()} đ)</span>
+                )}
+                <span className="tc-form-hint">Chỉ được phép giảm giá, không được tăng giá.</span>
               </div>
               <div className="tc-form-group">
                 <label>Số lượng khách tối đa</label>
@@ -282,7 +293,11 @@ export const TourScheduleDetailPage: React.FC = () => {
               <Button 
                 variant="primary" 
                 onClick={handleUpdateSchedule} 
-                disabled={isSaving || maxParticipants === (schedule.max_participants || schedule.maxParticipants)}
+                disabled={
+                  isSaving || 
+                  price > Number(schedule.price) || 
+                  (maxParticipants === (schedule.max_participants ?? schedule.maxParticipants) && price === Number(schedule.price))
+                }
                 fullWidth
               >
                 {isSaving ? 'Đang lưu...' : 'Lưu Thay Đổi'}

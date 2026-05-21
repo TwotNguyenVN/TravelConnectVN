@@ -84,7 +84,11 @@ export class AiChatController {
     @Body() body: { context: any },
   ) {
     const userId = (req as any).user.id;
-    const data = await this.aiChatService.updateSessionContext(id, userId, body.context);
+    const data = await this.aiChatService.updateSessionContext(
+      id,
+      userId,
+      body.context,
+    );
     return {
       success: true,
       message: 'Cập nhật ngữ cảnh phiên chat thành công',

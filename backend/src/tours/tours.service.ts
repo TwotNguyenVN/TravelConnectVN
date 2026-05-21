@@ -1278,6 +1278,20 @@ export class ToursService {
       throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
     }
 
+    const currentSchedule = await this.prisma.tour_schedules.findUnique({
+      where: { id: scheduleId },
+    });
+
+    if (!currentSchedule) {
+      throw new NotFoundException('Không tìm thấy lịch khởi hành');
+    }
+
+    if (data.price !== undefined && data.price !== null) {
+      if (Number(data.price) > Number(currentSchedule.price)) {
+        throw new BadRequestException('Giá chỉnh sửa chỉ được phép giảm xuống, không được phép tăng lên');
+      }
+    }
+
     // 2. Cập nhật lịch trình
     const updatedSchedule = await this.prisma.tour_schedules.update({
       where: { id: scheduleId },
