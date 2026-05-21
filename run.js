@@ -46,6 +46,71 @@ const COLORS = {
 
 const REQUIRED_NODE_VERSION = 24;
 
+// Tự động cấu hình môi trường shell (Aliases: tcvn, run, runf, runb)
+function setupShellEnvironment() {
+  const zshrcPath = path.join(os.homedir(), '.zshrc');
+  const projectRoot = __dirname;
+  
+  const shellConfig = `
+# ==========================================
+# TravelConnectVN custom aliases & functions
+# ==========================================
+alias tcvn="node ${projectRoot}/run.js"
+alias TCVN="tcvn"
+alias Tcvn="tcvn"
+
+function run() {
+  local current_dir=$(pwd)
+  local project_root="${projectRoot}"
+  
+  if [[ "$current_dir" == "$project_root" ]]; then
+    echo "Bạn đang ở thư mục gốc. Bạn muốn chạy Backend hay Frontend?"
+    echo "1. Backend"
+    echo "2. Frontend"
+    echo -n "Chọn (1/2): "
+    read choice
+    echo ""
+    if [[ "$choice" == "1" ]]; then
+      cd "$project_root/backend" && npm run start:dev
+    elif [[ "$choice" == "2" ]]; then
+      cd "$project_root/frontend" && npm run dev
+    else
+      echo "Lựa chọn không hợp lệ."
+    fi
+  elif [[ "$current_dir" == "$project_root/frontend" ]]; then
+    npm run dev
+  elif [[ "$current_dir" == "$project_root/backend" ]]; then
+    npm run start:dev
+  else
+    echo "Lệnh 'run' không hỗ trợ trong thư mục này."
+  fi
+}
+
+function runf() {
+  cd "${projectRoot}/frontend" && npm run dev
+}
+
+function runb() {
+  cd "${projectRoot}/backend" && npm run start:dev
+}
+# ==========================================
+`;
+
+  try {
+    if (fs.existsSync(zshrcPath)) {
+      const zshrcContent = fs.readFileSync(zshrcPath, 'utf8');
+      if (!zshrcContent.includes('TravelConnectVN custom aliases & functions')) {
+        fs.appendFileSync(zshrcPath, '\n' + shellConfig);
+        console.log(`${COLORS.bgGreen}${COLORS.bright} ĐÃ CẤU HÌNH TỰ ĐỘNG TERMINAL ${COLORS.reset}`);
+        console.log(`${COLORS.green}Các lệnh rút gọn (tcvn, run, runf, runb) đã được cài đặt vào ~/.zshrc.${COLORS.reset}`);
+        console.log(`${COLORS.yellow}>>> Vui lòng khởi động lại Terminal hoặc chạy: source ~/.zshrc để có hiệu lực. <<<${COLORS.reset}\n`);
+      }
+    }
+  } catch (error) {
+    console.log(`${COLORS.red}Lỗi khi cấu hình tự động ~/.zshrc: ${error.message}${COLORS.reset}`);
+  }
+}
+
 // Banner ASCII nghệ thuật
 function showBanner() {
   console.clear();
@@ -386,6 +451,7 @@ function showInteractiveMenu() {
 
 // Xử lý tham số dòng lệnh đầu vào
 function main() {
+  setupShellEnvironment();
   const args = process.argv.slice(2);
   
   if (args.length === 0) {

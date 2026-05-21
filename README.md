@@ -282,19 +282,18 @@ Dự án cung cấp sẵn các tập lệnh viết tắt `tcvn` trong thư mục
 * **Windows (PowerShell):** `.\tcvn` hoặc `.\tcvn <lệnh>`
 * **macOS / Linux:** `./tcvn` hoặc `./tcvn <lệnh>`
 
-#### 3. Cài đặt lệnh toàn cục (Global CLI):
-Để có thể gõ chữ **`TCVN`** hoặc **`tcvn`** từ **bất kỳ thư mục nào** trong hệ thống terminal của bạn mà không cần gõ `node run.js` hay `.\tcvn`, bạn chỉ cần chạy lệnh liên kết một lần duy nhất tại thư mục gốc:
-```bash
-npm link
-```
-Sau đó, từ bất kỳ đâu, bạn chỉ cần gõ:
-```bash
-TCVN
-```
-Hoặc:
-```bash
-tcvn <lệnh> (ví dụ: tcvn start)
-```
+#### 3. Tự động cấu hình Terminal thông minh (Khuyên dùng trên macOS/Linux):
+Từ bản cập nhật mới, khi bạn chạy lệnh \`node run.js\` lần đầu tiên tại thư mục gốc, hệ thống sẽ tự động chèn bộ lệnh tắt (alias) thông minh vào file \`~/.zshrc\` của máy bạn.
+Sau khi chạy xong, hãy chạy lệnh sau để nạp lại terminal:
+\`\`\`bash
+source ~/.zshrc
+\`\`\`
+Từ lúc này, bạn được sở hữu các lệnh tắt siêu tốc độ vô cùng tiện lợi:
+* **\`tcvn\`** (hoặc \`TCVN\`, \`Tcvn\`): Mở Menu chức năng (thay cho việc phải gõ \`node run.js\`).
+* **\`run\`** (Khi đang ở thư mục gốc): Hệ thống sẽ hỏi bạn muốn chạy Backend hay Frontend, tự di chuyển vào và chạy server tương ứng.
+* **\`run\`** (Khi đang đứng trong thư mục \`frontend\` hoặc \`backend\`): Tự động nhận diện đúng thư mục và chạy server (không cần gõ thêm chữ gì).
+* **\`runf\`** (Từ bất kỳ đâu): Tự động nhảy về thư mục \`frontend\` và chạy \`npm run dev\`.
+* **\`runb\`** (Từ bất kỳ đâu): Tự động nhảy về thư mục \`backend\` và chạy \`npm run start:dev\`.
 
 #### Bảng danh sách các lệnh thực thi:
 ```text
