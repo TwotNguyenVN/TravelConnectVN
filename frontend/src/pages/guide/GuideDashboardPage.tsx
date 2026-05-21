@@ -1,21 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PageContainer, Card, Badge, Button, LoadingBlock, Input } from '../../components/common';
+import { PageContainer, Card, Badge, Button, LoadingBlock } from '../../components/common';
 import { guideService, type GuideProfile } from '../../services/guideService';
 import { userService } from '../../services/userService';
 import { useAuth } from '../../contexts/AuthContext';
-import { DEFAULT_AVATAR } from '../../constants/images';
 import './GuideDashboardPage.css';
 
 const GuideDashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, refreshProfile } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const [profile, setProfile] = useState<GuideProfile | null>(null);
   const [loading, setLoading] = useState(true);
   
-  // Personal Profile State
+  // Personal Profile State (for completion calculation)
   const [personalData, setPersonalData] = useState({
     fullName: '',
     phone: '',
@@ -23,9 +21,6 @@ const GuideDashboardPage: React.FC = () => {
     gender: '',
     avatarUrl: '',
   });
-  const [savingPersonal, setSavingPersonal] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-  const [personalMessage, setPersonalMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -60,40 +55,6 @@ const GuideDashboardPage: React.FC = () => {
     }
   };
 
-  const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setPersonalData({ ...personalData, [e.target.name]: e.target.value });
-  };
-
-  const handleAvatarClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      setPersonalMessage({ type: 'error', text: 'Kích thước ảnh không được vượt quá 2MB.' });
-      return;
-    }
-
-    setIsUploading(true);
-    setPersonalMessage(null);
-
-    try {
-      const response = await userService.updateAvatar(file);
-      if (response.success && response.data) {
-        setPersonalData(prev => ({ ...prev, avatarUrl: response.data.avatarUrl }));
-        await refreshProfile();
-        setPersonalMessage({ type: 'success', text: 'Cập nhật ảnh đại diện thành công!' });
-      }
-    } catch (err: any) {
-      setPersonalMessage({ type: 'error', text: 'Lỗi khi tải ảnh lên.' });
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
   const handleToggleVisibility = async (status: 'visible' | 'hidden') => {
     if (!profile) return;
     try {
@@ -106,49 +67,6 @@ const GuideDashboardPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Error toggling visibility:', err);
-    }
-  };
-
-  const handleSavePersonal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // 1. Phone number validation (digits only)
-    if (personalData.phone) {
-      if (!/^[0-9]+$/.test(personalData.phone)) {
-        setPersonalMessage({ type: 'error', text: 'Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)' });
-        return;
-      }
-    }
-
-    // 2. Date of Birth validation (valid date, year >= 1950, not in the future)
-    if (personalData.dateOfBirth) {
-      const dob = new Date(personalData.dateOfBirth);
-      if (isNaN(dob.getTime())) {
-        setPersonalMessage({ type: 'error', text: 'Ngày sinh không hợp lệ' });
-        return;
-      }
-      const year = dob.getFullYear();
-      if (year < 1950) {
-        setPersonalMessage({ type: 'error', text: 'Năm sinh không được trước năm 1950' });
-        return;
-      }
-      if (dob > new Date()) {
-        setPersonalMessage({ type: 'error', text: 'Ngày sinh không được ở tương lai' });
-        return;
-      }
-    }
-
-    setSavingPersonal(true);
-    setPersonalMessage(null);
-    
-    try {
-      await userService.updateProfile(personalData);
-      await refreshProfile();
-      setPersonalMessage({ type: 'success', text: 'Cập nhật thông tin cá nhân thành công!' });
-    } catch (err: any) {
-      setPersonalMessage({ type: 'error', text: err.message || 'Lỗi khi cập nhật thông tin.' });
-    } finally {
-      setSavingPersonal(false);
     }
   };
 
@@ -223,45 +141,23 @@ const GuideDashboardPage: React.FC = () => {
               <h4>Các phần còn thiếu cần bổ sung (Nhấp để đi đến thiết lập):</h4>
               <div className="completeness-checklist-grid">
                 {completion.missing.map((item, idx) => {
-                  let action = () => {};
+                  let action = () => navigate('/guide/profile');
                   let icon = "📝";
                   if (item === 'Họ và tên') {
-                    action = () => {
-                      const input = document.getElementsByName('fullName')[0];
-                      if (input) {
-                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        (input as HTMLInputElement).focus();
-                      }
-                    };
                     icon = "👤";
                   } else if (item === 'Ảnh đại diện') {
-                    action = () => {
-                      if (fileInputRef.current) fileInputRef.current.click();
-                    };
                     icon = "🖼️";
                   } else if (item === 'Số điện thoại') {
-                    action = () => {
-                      const input = document.getElementsByName('phone')[0];
-                      if (input) {
-                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        (input as HTMLInputElement).focus();
-                      }
-                    };
                     icon = "📞";
                   } else if (item === 'Giới thiệu bản thân (tối thiểu 20 ký tự)') {
-                    action = () => navigate('/guide/profile');
                     icon = "✍️";
                   } else if (item === 'Số năm kinh nghiệm') {
-                    action = () => navigate('/guide/profile');
                     icon = "💼";
                   } else if (item === 'Tỉnh thành hoạt động chính') {
-                    action = () => navigate('/guide/profile');
                     icon = "📍";
                   } else if (item === 'Ngôn ngữ thông thạo') {
-                    action = () => navigate('/guide/profile');
                     icon = "🗣️";
                   } else if (item === 'Xác minh danh tính') {
-                    action = () => navigate('/guide/verification');
                     icon = "🪪";
                   }
                   
@@ -304,87 +200,7 @@ const GuideDashboardPage: React.FC = () => {
 
         <div className="guide-dashboard-layout">
           <div className="guide-dashboard-main">
-            {/* Personal Information Section merged from ProfilePage */}
-            <section className="dashboard-personal-section">
-              <h2 className="guide-dashboard-section-title">
-                <span style={{ marginRight: '8px' }}>👤</span> Thông tin cá nhân
-              </h2>
-              <Card className="personal-info-card">
-                <form onSubmit={handleSavePersonal}>
-                  <div className="personal-header-row">
-                    <div className="personal-avatar-edit" onClick={handleAvatarClick}>
-                      <img src={personalData.avatarUrl || DEFAULT_AVATAR} alt="Avatar" />
-                      <div className="avatar-overlay">📷</div>
-                      {isUploading && <div className="avatar-spinner"></div>}
-                    </div>
-                    <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleAvatarChange} accept="image/*" />
-                    
-                    <div className="personal-basic-info">
-                      <div className="info-grid">
-                        <Input
-                          label="Họ và tên"
-                          name="fullName"
-                          value={personalData.fullName}
-                          onChange={handlePersonalChange}
-                          fullWidth
-                          required
-                        />
-                        <Input
-                          label="Số điện thoại"
-                          name="phone"
-                          value={personalData.phone}
-                          onChange={handlePersonalChange}
-                          fullWidth
-                          required
-                        />
-                      </div>
-                      
-                      <div className="info-grid">
-                        <Input
-                          label="Ngày sinh"
-                          name="dateOfBirth"
-                          type="date"
-                          value={personalData.dateOfBirth}
-                          onChange={handlePersonalChange}
-                          fullWidth
-                          required
-                        />
-                        <div className="tc-input-container tc-input--full-width">
-                          <label className="tc-input-label">Giới tính</label>
-                          <select 
-                            name="gender" 
-                            value={personalData.gender} 
-                            onChange={handlePersonalChange}
-                            className="tc-input-field"
-                            style={{ width: '100%', outline: 'none' }}
-                            required
-                          >
-                            <option value="">Chọn giới tính</option>
-                            <option value="male">Nam</option>
-                            <option value="female">Nữ</option>
-                            <option value="other">Khác</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {personalMessage && (
-                    <div className={`dashboard-message ${personalMessage.type}`} style={{ marginTop: '16px' }}>
-                      {personalMessage.text}
-                    </div>
-                  )}
-
-                  <div className="personal-actions" style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button type="submit" isLoading={savingPersonal}>
-                      Lưu thông tin cá nhân
-                    </Button>
-                  </div>
-                </form>
-              </Card>
-            </section>
-
-            <section style={{ marginTop: '32px' }}>
+            <section style={{ marginTop: '0px' }}>
               <h2 className="guide-dashboard-section-title">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
@@ -402,7 +218,7 @@ const GuideDashboardPage: React.FC = () => {
                   <div style={{ fontWeight: 600 }}>Quản lý yêu cầu</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Duyệt yêu cầu tham gia từ khách</div>
                 </Card>
-                <Card className="guide-quick-link-card" onClick={() => navigate('/guide/verification')}>
+                <Card className="guide-quick-link-card" onClick={() => navigate('/guide/profile')}>
                   <div className="guide-quick-link-icon">✅</div>
                   <div style={{ fontWeight: 600 }}>Xác minh tài khoản</div>
                   <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>Gửi hồ sơ và xem trạng thái xác minh</div>

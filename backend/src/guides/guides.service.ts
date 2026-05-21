@@ -124,7 +124,8 @@ export class GuidesService {
         tours: {
           where: { 
             visibility_status: 'visible',
-            business_status: 'published'
+            business_status: 'published',
+            deleted_at: null
           },
           include: {
             tour_images: {
@@ -132,6 +133,19 @@ export class GuidesService {
             },
             tour_categories: {
               select: { name: true }
+            },
+            tour_schedules: {
+              where: {
+                start_date: { gte: new Date() },
+                status: 'available'
+              },
+              include: {
+                tour_requests: {
+                  where: { status: { in: ['approved', 'paid'] } },
+                  select: { participant_count: true }
+                }
+              },
+              orderBy: { start_date: 'asc' }
             }
           },
           orderBy: { created_at: 'desc' }
@@ -446,15 +460,40 @@ export class GuidesService {
       } : null,
       familiarProvinces: g.familiar_provinces || '',
       region: g.region || '',
-      tours: isComplete ? (g.tours || []).map((t: any) => ({
-        id: t.id,
-        title: t.title,
-        price: Number(t.price),
-        province: t.province,
-        image: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
-        category: t.tour_categories?.name || 'Chưa phân loại',
-        duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
-      })) : [],
+      tours: isComplete ? (g.tours || []).map((t: any) => {
+        const nextAvailableSchedule = (t.tour_schedules || []).find((s: any) => {
+          const bookedCount = (s.tour_requests || []).reduce((sum: number, req: any) => sum + req.participant_count, 0);
+          return bookedCount < s.max_participants;
+        });
+
+        const bookedCount = nextAvailableSchedule
+          ? (nextAvailableSchedule.tour_requests || []).reduce((sum: number, req: any) => sum + req.participant_count, 0)
+          : 0;
+
+        const remainingSlots = nextAvailableSchedule
+          ? Math.max(0, nextAvailableSchedule.max_participants - bookedCount)
+          : t.max_participants;
+
+        const price = nextAvailableSchedule ? Number(nextAvailableSchedule.price) : Number(t.price);
+        const startDate = nextAvailableSchedule ? nextAvailableSchedule.start_date : t.start_date;
+        const maxParticipants = nextAvailableSchedule ? nextAvailableSchedule.max_participants : t.max_participants;
+
+        return {
+          id: t.id,
+          title: t.title,
+          price: price,
+          province: t.province,
+          image: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+          category: t.tour_categories?.name || 'Chưa phân loại',
+          duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+          startDate: startDate,
+          endDate: t.end_date,
+          numDays: t.num_days,
+          numNights: t.num_nights,
+          maxParticipants: maxParticipants,
+          remainingSlots: remainingSlots,
+        };
+      }) : [],
     };
   }
 }

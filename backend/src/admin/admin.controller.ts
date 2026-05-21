@@ -1,26 +1,26 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  Query, 
-  UseGuards, 
-  Req 
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
-import { 
-  UpdateUserStatusDto, 
-  AssignRoleDto, 
-  ModerationDto, 
-  ProcessReportDto, 
-  ProcessVerificationDto 
+import {
+  UpdateUserStatusDto,
+  AssignRoleDto,
+  ModerationDto,
+  ProcessReportDto,
+  ProcessVerificationDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -58,7 +58,6 @@ export class AdminController {
     return this.adminService.getStatisticsRevenue();
   }
 
-
   // User Management
   @Get('users')
   @Roles(Role.SYSTEM_ADMIN)
@@ -80,19 +79,31 @@ export class AdminController {
 
   @Patch('users/:id/status')
   @Roles(Role.SYSTEM_ADMIN)
-  updateUserStatus(@Param('id') id: string, @Body() dto: UpdateUserStatusDto, @Req() req: any) {
+  updateUserStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateUserStatusDto,
+    @Req() req: any,
+  ) {
     return this.adminService.updateUserStatus(id, dto, req.user.id);
   }
 
   @Post('users/:id/roles')
   @Roles(Role.SYSTEM_ADMIN)
-  assignRole(@Param('id') id: string, @Body() dto: AssignRoleDto, @Req() req: any) {
+  assignRole(
+    @Param('id') id: string,
+    @Body() dto: AssignRoleDto,
+    @Req() req: any,
+  ) {
     return this.adminService.assignRole(id, dto, req.user.id);
   }
 
   @Delete('users/:id/roles/:role')
   @Roles(Role.SYSTEM_ADMIN)
-  revokeRole(@Param('id') id: string, @Param('role') role: string, @Req() req: any) {
+  revokeRole(
+    @Param('id') id: string,
+    @Param('role') role: string,
+    @Req() req: any,
+  ) {
     return this.adminService.revokeRole(id, role, req.user.id);
   }
 
@@ -115,20 +126,32 @@ export class AdminController {
 
   @Patch('reports/:id')
   @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
-  processReport(@Param('id') id: string, @Body() dto: ProcessReportDto, @Req() req: any) {
+  processReport(
+    @Param('id') id: string,
+    @Body() dto: ProcessReportDto,
+    @Req() req: any,
+  ) {
     return this.adminService.processReport(id, dto, req.user.id);
   }
 
   // Moderation
   @Patch('tours/:id/moderation')
   @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
-  moderateTour(@Param('id') id: string, @Body() dto: ModerationDto, @Req() req: any) {
+  moderateTour(
+    @Param('id') id: string,
+    @Body() dto: ModerationDto,
+    @Req() req: any,
+  ) {
     return this.adminService.moderateTour(id, dto, req.user.id);
   }
 
   @Patch('companion-posts/:id/moderation')
   @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
-  moderateCompanionPost(@Param('id') id: string, @Body() dto: ModerationDto, @Req() req: any) {
+  moderateCompanionPost(
+    @Param('id') id: string,
+    @Body() dto: ModerationDto,
+    @Req() req: any,
+  ) {
     return this.adminService.moderateCompanionPost(id, dto, req.user.id);
   }
 
@@ -175,7 +198,11 @@ export class AdminController {
 
   @Patch('guides/verification/:id')
   @Roles(Role.SYSTEM_ADMIN)
-  processVerification(@Param('id') id: string, @Body() dto: ProcessVerificationDto, @Req() req: any) {
+  processVerification(
+    @Param('id') id: string,
+    @Body() dto: ProcessVerificationDto,
+    @Req() req: any,
+  ) {
     return this.adminService.processVerification(id, dto, req.user.id);
   }
 

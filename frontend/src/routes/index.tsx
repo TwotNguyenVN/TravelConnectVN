@@ -122,7 +122,6 @@ export const router = createBrowserRouter([
       { index: true, element: <GuideDashboardPage /> },
       { path: 'dashboard', element: <GuideDashboardPage /> },
       { path: 'profile', element: <GuideProfilePage /> },
-      { path: 'verification', element: <GuideVerificationPage /> },
       { path: 'tours', element: <MyToursPage /> },
       { path: 'tours/create', element: <TourFormPage /> },
       { path: 'tours/edit/:id', element: <TourManagementPage /> },
