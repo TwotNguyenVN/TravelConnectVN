@@ -55,14 +55,15 @@ artifacts/
 scratch/
 tree_structure*.txt
 
-# Keep documentation (Removed the general *.md ignore)
+# Keep documentation
 !README.md
-!CLAUDE.md
 
 # Project Docs & Reports
 BAOCAO/
 SESSION_SPRINT/
 UML/
+docs/
+CLAUDE.md
 
 # AI Agent Configs & Leftovers
 agents/
