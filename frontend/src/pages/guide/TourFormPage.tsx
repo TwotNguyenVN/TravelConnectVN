@@ -403,6 +403,10 @@ const TourFormPage: React.FC = () => {
         toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Tỉnh thành)");
         return false;
       }
+      if (formData.price === undefined || formData.price === null || formData.price <= 0) {
+        toast.warning("Vui lòng nhập giá tour cơ bản lớn hơn 0");
+        return false;
+      }
       if (formData.maxParticipants < 1 || formData.maxParticipants > 20) {
         toast.warning("Số lượng khách tối đa phải từ 1 đến 20 người");
         return false;
@@ -987,6 +991,23 @@ const TourFormPage: React.FC = () => {
                     min="1"
                     max={20}
                     required
+                  />
+                </div>
+
+                <div className="tc-form-group">
+                  <label>
+                    Giá tour cơ bản (VNĐ) <span>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    className="tc-form-input"
+                    value={formData.price || ""}
+                    onChange={handleBasicChange}
+                    placeholder="VD: 500000"
+                    min="0"
+                    required
+                    disabled={isPublished}
                   />
                 </div>
 

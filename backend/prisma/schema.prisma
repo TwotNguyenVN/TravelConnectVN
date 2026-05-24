@@ -1177,6 +1177,7 @@ model tours {
   tour_schedules           tour_schedules[]
   tour_categories          tour_categories?      @relation(fields: [category_id], references: [id], onUpdate: NoAction)
   guide_profiles           guide_profiles        @relation(fields: [guide_profile_id], references: [id], onUpdate: NoAction)
+  tour_route               tour_routes?
 
   @@index([category_id], map: "idx_tours_category")
   @@index([created_at(sort: Desc)], map: "idx_tours_created_at")
@@ -1437,4 +1438,18 @@ enum one_time_token_type {
   phone_change_token
 
   @@schema("auth")
+}
+
+model tour_routes {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tour_id        String    @unique @db.Uuid
+  start_province String    @map("start_province")
+  end_province   String    @map("end_province")
+  note           String?   @map("note") // Ghi chú lưu ý cho hướng dẫn viên. Nếu là tour trong 1 tỉnh thì 2 điểm giống nhau
+  created_at     DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updated_at     DateTime  @default(now()) @db.Timestamptz(6) @map("updated_at")
+
+  tour           tours     @relation(fields: [tour_id], references: [id], onDelete: Cascade)
+
+  @@schema("public")
 }

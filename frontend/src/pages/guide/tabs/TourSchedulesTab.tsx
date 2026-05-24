@@ -34,7 +34,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
       const res = await tourService.getTourDetailForGuide(tourId);
       const data = res.data || res;
       setTour(data);
-      if (data.price) setPrice(data.price);
+      if (data.price) setPrice(Number(data.price));
       if (data.max_participants || data.maxParticipants) {
         setMaxParticipants(data.max_participants || data.maxParticipants);
       }
@@ -53,7 +53,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     
     setSelectedDate(date);
     setEditingSchedule(null);
-    setPrice(tour?.price || 0);
+    setPrice(tour?.price ? Number(tour.price) : 0);
     setMaxParticipants(tour?.max_participants || tour?.maxParticipants || 10);
     setIsModalOpen(true);
   };

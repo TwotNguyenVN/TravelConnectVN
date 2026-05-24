@@ -161,13 +161,16 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
       return;
     }
 
-    if (dayData.day && !dayData.isPast) {
+    // Cho phép click nếu ngày trong tương lai HOẶC ngày đó có lịch khởi hành (kể cả trong quá khứ/đã hoàn thành)
+    if (dayData.day && (!dayData.isPast || dayData.schedule)) {
       onDateClick(dayData.dateObj, dayData.schedule);
     }
   };
 
   const getScheduleStatusClass = (schedule: Schedule) => {
     if (!schedule) return "";
+    if (schedule.status === 'cancelled') return "tc-day--cancelled";
+    if (schedule.status === 'ongoing' || schedule.status === 'in_progress') return "tc-day--ongoing";
     if (schedule.status === 'full') return "tc-day--full-manual";
     if (schedule.status === 'completed') return "tc-day--completed";
     
@@ -219,9 +222,9 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
           {calendarDays.map((dayData, idx) => (
             <div
               key={idx}
-              className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${dayData.schedule ? `tc-day--scheduled ${getScheduleStatusClass(dayData.schedule)}` : ""} ${dayData.isPast ? "tc-day--past" : "tc-day--clickable"}`}
+              className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${dayData.schedule ? `tc-day--scheduled ${getScheduleStatusClass(dayData.schedule)}` : ""} ${(dayData.isPast && !dayData.schedule) ? "tc-day--past" : "tc-day--clickable"}`}
               onClick={() => handleDayClick(dayData)}
-              title={dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch"}
+              title={dayData.schedule ? "Click để xem chi tiết lịch trình" : (dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch")}
             >
               {dayData.day && (
                 <>
@@ -233,6 +236,19 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="20 6 9 17 4 12"></polyline>
                           </svg>
+                        </div>
+                      )}
+                      {dayData.schedule.status === 'cancelled' && (
+                        <div className="tc-day-cancelled-icon" title="Đã hủy">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                          </svg>
+                        </div>
+                      )}
+                      {(dayData.schedule.status === 'ongoing' || dayData.schedule.status === 'in_progress') && (
+                        <div className="tc-day-ongoing-icon" title="Đang diễn ra">
+                          <span className="tc-ongoing-pulse"></span>
                         </div>
                       )}
                       {dayData.schedule.status === 'full' && (
@@ -275,6 +291,14 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                 <rect x="15" y="4" width="4" height="16"></rect>
               </svg>
             </span> Tạm ngưng
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot" style={{ backgroundColor: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: 'bold' }}>✕</span> Đã hủy
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+              <span className="tc-ongoing-dot-pulse"></span>
+            </span> Đang diễn ra
           </div>
         </div>
 
