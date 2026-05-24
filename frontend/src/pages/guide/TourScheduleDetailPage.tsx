@@ -274,6 +274,7 @@ export const TourScheduleDetailPage: React.FC = () => {
                   onChange={(e) => setPrice(Number(e.target.value))} 
                   min="0"
                   className={price > Number(schedule.price) ? "tc-input-error" : ""}
+                  disabled={schedule.status === 'completed'}
                 />
                 {price > Number(schedule.price) && (
                   <span className="tc-error-text">Giá mới không được cao hơn giá hiện tại ({Number(schedule.price).toLocaleString()} đ)</span>
@@ -288,6 +289,7 @@ export const TourScheduleDetailPage: React.FC = () => {
                   onChange={(e) => setMaxParticipants(Number(e.target.value))} 
                   min="1"
                   max="50"
+                  disabled={schedule.status === 'completed'}
                 />
               </div>
               <Button 
@@ -295,6 +297,7 @@ export const TourScheduleDetailPage: React.FC = () => {
                 onClick={handleUpdateSchedule} 
                 disabled={
                   isSaving || 
+                  schedule.status === 'completed' ||
                   price > Number(schedule.price) || 
                   (maxParticipants === (schedule.max_participants ?? schedule.maxParticipants) && price === Number(schedule.price))
                 }

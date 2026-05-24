@@ -166,6 +166,85 @@
   border: 1px solid #bbf7d0 !important;
 }
 
+.tc-day--cancelled {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fee2e2 !important;
+  color: #94a3b8 !important;
+}
+
+.tc-day--cancelled .tc-day-price {
+  text-decoration: line-through;
+  color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.tc-day-cancelled-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.tc-day--ongoing {
+  background-color: #faf5ff !important;
+  border: 1px solid #e9d5ff !important;
+}
+
+.tc-day--ongoing .tc-day-number {
+  color: #7c3aed !important;
+}
+
+.tc-day-ongoing-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #a855f7;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.tc-ongoing-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+  animation: tc-pulse-anim 1.5s infinite ease-in-out;
+}
+
+.tc-ongoing-dot-pulse {
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+  animation: tc-pulse-anim 1.5s infinite ease-in-out;
+  display: inline-block;
+}
+
+@keyframes tc-pulse-anim {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.5; }
+}
+
 /* Header improvements */
 .tc-guide-calendar .tc-calendar-header h2 {
   font-size: 1.6rem;
