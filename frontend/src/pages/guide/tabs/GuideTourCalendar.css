@@ -47,41 +47,44 @@
 }
 
 /* Status Colors */
-/* Status Colors */
 .tc-guide-calendar .tc-day--empty {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #f0f7ff;
+  border: 1px solid #bfdbfe;
+  color: #1e293b;
 }
 .tc-guide-calendar .tc-day--empty .tc-day-number {
-  color: #1e293b !important;
+  color: #2563eb;
 }
 .tc-guide-calendar .tc-day--empty:hover {
-  background-color: #f8fafc !important;
-  box-shadow: inset 0 0 0 2px var(--tc-primary) !important;
+  background-color: #e0f2fe;
+  border-color: #3b82f6;
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.2);
 }
 
 .tc-guide-calendar .tc-day--has-guests {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #fff7ed;
+  border: 1px solid #fed7aa;
 }
 .tc-guide-calendar .tc-day--has-guests .tc-day-number {
-  color: #1e293b !important;
+  color: #ea580c;
 }
 .tc-guide-calendar .tc-day--has-guests:hover {
-  background-color: #f8fafc !important;
-  box-shadow: inset 0 0 0 2px var(--tc-primary) !important;
+  background-color: #ffedd5;
+  border-color: #f97316;
+  box-shadow: 0 10px 15px -3px rgba(249, 115, 22, 0.2);
 }
 
 .tc-guide-calendar .tc-day--full {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
 }
 .tc-guide-calendar .tc-day--full .tc-day-number {
-  color: #1e293b !important;
+  color: #16a34a;
 }
 .tc-guide-calendar .tc-day--full:hover {
-  background-color: #f8fafc !important;
-  box-shadow: inset 0 0 0 2px var(--tc-primary) !important;
+  background-color: #dcfce7;
+  border-color: #22c55e;
+  box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.2);
 }
 
 .tc-guide-calendar .tc-day--scheduled {
@@ -161,18 +164,18 @@
 }
 
 .tc-day--full-manual {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #fff7ed !important;
+  border: 1px solid #fdba74 !important;
 }
 
 .tc-day--completed {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
 }
 
 .tc-day--cancelled {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #fef2f2 !important;
+  border: 1px solid #fee2e2 !important;
   color: #94a3b8 !important;
 }
 
@@ -201,22 +204,22 @@
 }
 
 .tc-day--ongoing {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #faf5ff !important;
+  border: 1px solid #e9d5ff !important;
 }
 
 .tc-day--ongoing .tc-day-number {
-  color: #1e293b !important;
+  color: #7c3aed !important;
 }
 
 .tc-day--expired {
-  background-color: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
+  background-color: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
   color: #94a3b8 !important;
 }
 
 .tc-day--expired .tc-day-number {
-  color: #1e293b !important;
+  color: #64748b !important;
 }
 
 .tc-day-ongoing-icon {
@@ -365,52 +368,54 @@
 }
 
 .tc-calendar-schedule-pill.status-empty {
-  border-left: 4px solid #3b82f6 !important;
-  background-color: #e0f2fe !important;
-  border-color: #bae6fd !important;
+  border-left: 3px solid #3b82f6;
+  background-color: #eff6ff;
+  border-color: #dbeafe;
 }
 
 .tc-calendar-schedule-pill.status-has-guests {
-  border-left: 4px solid #f97316 !important;
-  background-color: #ffedd5 !important;
-  border-color: #fed7aa !important;
+  border-left: 3px solid #f97316;
+  background-color: #fff7ed;
+  border-color: #ffedd5;
 }
 
 .tc-calendar-schedule-pill.status-full {
-  border-left: 4px solid #16a34a !important;
-  background-color: #dcfce7 !important;
-  border-color: #bbf7d0 !important;
+  border-left: 3px solid #16a34a;
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
 }
 
 .tc-calendar-schedule-pill.status-completed {
-  border-left: 4px solid #22c55e !important;
-  background-color: #dcfce7 !important;
-  border-color: #bbf7d0 !important;
+  border-left: 3px solid #22c55e;
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
 }
 
 .tc-calendar-schedule-pill.status-cancelled {
-  border-left: 4px solid #ef4444 !important;
-  background-color: #fee2e2 !important;
-  border-color: #fecaca !important;
+  border-left: 3px solid #ef4444;
+  background-color: #fef2f2;
+  border-color: #fee2e2;
   opacity: 0.8;
 }
+.tc-calendar-schedule-pill.status-cancelled .pill-tour-title { color: #dc2626; text-decoration: line-through; }
+.tc-calendar-schedule-pill.status-cancelled .pill-price { color: #dc2626; }
 
 .tc-calendar-schedule-pill.status-ongoing {
-  border-left: 4px solid #a855f7 !important;
-  background-color: #f3e8ff !important;
-  border-color: #e9d5ff !important;
+  border-left: 3px solid #a855f7;
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
 }
 
 .tc-calendar-schedule-pill.status-paused {
-  border-left: 4px solid #d97706 !important;
-  background-color: #fef3c7 !important;
-  border-color: #fde68a !important;
+  border-left: 3px solid #ea580c;
+  background-color: #fffbeb;
+  border-color: #fef3c7;
 }
 
 .tc-calendar-schedule-pill.status-expired {
-  border-left: 4px solid #64748b !important;
-  background-color: #f1f5f9 !important;
-  border-color: #e2e8f0 !important;
+  border-left: 3px solid #64748b;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
   opacity: 0.85;
 }
 .tc-calendar-schedule-pill.status-expired .pill-tour-title { color: #475569; }
