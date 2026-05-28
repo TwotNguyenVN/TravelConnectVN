@@ -208,6 +208,52 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     return "tc-day--full";
   };
 
+  const renderDayStatusIcon = (schedule: Schedule) => {
+    if (!schedule) return null;
+    const status = getScheduleStatus(schedule);
+
+    if (status === 'cancelled') {
+      return <div className="tc-day-cancelled-icon" title="Đã hủy">✕</div>;
+    }
+    if (status === 'completed') {
+      return <div className="tc-day-completed-tick" title="Đã hoàn thành">✓</div>;
+    }
+    if (status === 'ongoing') {
+      return (
+        <div className="tc-day-ongoing-icon" title="Đang diễn ra">
+          <span className="tc-ongoing-pulse"></span>
+        </div>
+      );
+    }
+    if (status === 'paused') {
+      return (
+        <div className="tc-day-paused-icon" title="Tạm ngưng">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="5" y="4" width="4" height="16"></rect>
+            <rect x="15" y="4" width="4" height="16"></rect>
+          </svg>
+        </div>
+      );
+    }
+    if (status === 'expired') {
+      return <div className="tc-day-expired-icon" title="Quá hạn">⌛</div>;
+    }
+    if (status === 'full') {
+      return <div className="tc-day-full-icon" title="Đã đủ người">🔒</div>;
+    }
+
+    const current = schedule.current_participants || 0;
+    const max = schedule.max_participants;
+    
+    if (current === 0) {
+      return <div className="tc-day-empty-icon" title="Chưa có khách">👤</div>;
+    }
+    if (current < max) {
+      return <div className="tc-day-has-guests-icon" title="Đang có khách">👥</div>;
+    }
+    return <div className="tc-day-full-icon" title="Đã đủ người">🔒</div>;
+  };
+
   return (
     <div className="tc-tour-calendar tc-guide-calendar">
       {/* Sidebar chọn tháng */}
@@ -260,6 +306,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                 {dayData.day && (
                   <>
                     <span className="tc-day-number">{dayData.day}</span>
+                    {hasSchedules && primarySchedule && renderDayStatusIcon(primarySchedule)}
                     {hasSchedules && (
                       <div className="tc-day-schedules-list">
                         {dayData.schedules.map((sch: any) => {

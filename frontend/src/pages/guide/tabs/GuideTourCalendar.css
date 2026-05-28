@@ -402,3 +402,80 @@
 .pill-slots {
   font-weight: 500;
 }
+
+/* Status Icons on the Top-Right Corner of Daily Cells */
+.tc-day-expired-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #64748b;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.tc-day-full-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #16a34a;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.tc-day-has-guests-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f97316;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.tc-day-empty-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #3b82f6;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 9px;
+  font-weight: bold;
+}
