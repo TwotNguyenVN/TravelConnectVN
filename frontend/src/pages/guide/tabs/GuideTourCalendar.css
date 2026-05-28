@@ -1,5 +1,5 @@
 .tc-guide-calendar {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
 }
 
@@ -292,4 +292,82 @@
   color: #94a3b8;
   border-bottom-left-radius: var(--tc-radius-lg);
   border-bottom-right-radius: var(--tc-radius-lg);
+}
+
+/* Custom Multi-Schedule Pill styles */
+.tc-day-schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+
+.tc-calendar-schedule-pill {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background-color: var(--tc-bg-card);
+  font-size: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+}
+
+.tc-calendar-schedule-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--tc-shadow-sm);
+  border-color: var(--tc-primary-light);
+}
+
+.tc-calendar-schedule-pill.status-available {
+  border-left: 3px solid #22c55e;
+  background-color: rgba(34, 197, 94, 0.03);
+}
+
+.tc-calendar-schedule-pill.status-completed {
+  border-left: 3px solid #3b82f6;
+  background-color: rgba(59, 130, 246, 0.03);
+}
+
+.tc-calendar-schedule-pill.status-cancelled {
+  border-left: 3px solid #ef4444;
+  background-color: rgba(239, 68, 68, 0.03);
+  opacity: 0.75;
+}
+
+.pill-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+}
+
+.pill-tour-title {
+  font-weight: 700;
+  color: var(--tc-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+}
+
+.pill-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--tc-text-muted);
+}
+
+.pill-price {
+  font-weight: 600;
+  color: var(--tc-primary);
+}
+
+.pill-slots {
+  font-weight: 500;
 }
