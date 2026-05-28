@@ -371,32 +371,24 @@
   background-color: #eff6ff;
   border-color: #dbeafe;
 }
-.tc-calendar-schedule-pill.status-empty .pill-tour-title { color: #2563eb; }
-.tc-calendar-schedule-pill.status-empty .pill-price { color: #2563eb; }
 
 .tc-calendar-schedule-pill.status-has-guests {
   border-left: 3px solid #f97316;
   background-color: #fff7ed;
   border-color: #ffedd5;
 }
-.tc-calendar-schedule-pill.status-has-guests .pill-tour-title { color: #ea580c; }
-.tc-calendar-schedule-pill.status-has-guests .pill-price { color: #ea580c; }
 
 .tc-calendar-schedule-pill.status-full {
   border-left: 3px solid #16a34a;
   background-color: #f0fdf4;
   border-color: #dcfce7;
 }
-.tc-calendar-schedule-pill.status-full .pill-tour-title { color: #16a34a; }
-.tc-calendar-schedule-pill.status-full .pill-price { color: #16a34a; }
 
 .tc-calendar-schedule-pill.status-completed {
   border-left: 3px solid #22c55e;
   background-color: #f0fdf4;
   border-color: #dcfce7;
 }
-.tc-calendar-schedule-pill.status-completed .pill-tour-title { color: #15803d; }
-.tc-calendar-schedule-pill.status-completed .pill-price { color: #15803d; }
 
 .tc-calendar-schedule-pill.status-cancelled {
   border-left: 3px solid #ef4444;
@@ -412,16 +404,12 @@
   background-color: #faf5ff;
   border-color: #e9d5ff;
 }
-.tc-calendar-schedule-pill.status-ongoing .pill-tour-title { color: #7c3aed; }
-.tc-calendar-schedule-pill.status-ongoing .pill-price { color: #7c3aed; }
 
 .tc-calendar-schedule-pill.status-paused {
   border-left: 3px solid #ea580c;
   background-color: #fffbeb;
   border-color: #fef3c7;
 }
-.tc-calendar-schedule-pill.status-paused .pill-tour-title { color: #d97706; }
-.tc-calendar-schedule-pill.status-paused .pill-price { color: #d97706; }
 
 .tc-calendar-schedule-pill.status-expired {
   border-left: 3px solid #64748b;
