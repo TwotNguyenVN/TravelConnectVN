@@ -296,12 +296,32 @@
   border-color: var(--tc-primary);
 }
 
+.weekly-schedule-card.status-empty {
+  border-left-color: #3b82f6;
+}
+
+.weekly-schedule-card.status-has-guests {
+  border-left-color: #f97316;
+}
+
+.weekly-schedule-card.status-full {
+  border-left-color: #16a34a;
+}
+
+.weekly-schedule-card.status-completed {
+  border-left-color: #22c55e;
+}
+
 .weekly-schedule-card.status-cancelled {
   border-left-color: #ef4444;
 }
 
-.weekly-schedule-card.status-completed {
-  border-left-color: #3b82f6;
+.weekly-schedule-card.status-ongoing {
+  border-left-color: #a855f7;
+}
+
+.weekly-schedule-card.status-paused {
+  border-left-color: #ea580c;
 }
 
 .weekly-schedule-card.status-expired {
@@ -340,16 +360,27 @@
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.weekly-sch-image .status-badge.status-available {
-  background-color: #22c55e;
+.weekly-sch-image .status-badge.status-empty {
+  background-color: #3b82f6;
+}
+.weekly-sch-image .status-badge.status-has-guests {
+  background-color: #f97316;
+}
+.weekly-sch-image .status-badge.status-full {
+  background-color: #16a34a;
 }
 .weekly-sch-image .status-badge.status-completed {
-  background-color: #3b82f6;
+  background-color: #22c55e;
 }
 .weekly-sch-image .status-badge.status-cancelled {
   background-color: #ef4444;
 }
-
+.weekly-sch-image .status-badge.status-ongoing {
+  background-color: #a855f7;
+}
+.weekly-sch-image .status-badge.status-paused {
+  background-color: #ea580c;
+}
 .weekly-sch-image .status-badge.status-expired {
   background-color: #64748b;
 }
@@ -404,5 +435,17 @@
   height: 100%;
   background: linear-gradient(90deg, var(--tc-primary), #3b82f6);
   border-radius: 2px;
+}
+
+.weekly-calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  border-top: 1px solid var(--tc-border);
+  background: var(--tc-bg-card);
+  margin-top: 24px;
+  border-radius: var(--tc-radius-md);
+  flex-wrap: wrap;
 }
 

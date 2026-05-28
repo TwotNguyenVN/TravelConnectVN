@@ -94,9 +94,11 @@ const GuideSchedulesPage: React.FC = () => {
   };
 
   const getScheduleStatus = (sch: CombinedSchedule) => {
-    if (!sch) return 'available';
+    if (!sch) return 'empty';
     if (sch.status === 'cancelled') return 'cancelled';
     if (sch.status === 'completed') return 'completed';
+    if (sch.status === 'ongoing' || sch.status === 'in_progress') return 'ongoing';
+    if (sch.status === 'paused') return 'paused';
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -104,18 +106,26 @@ const GuideSchedulesPage: React.FC = () => {
     startDate.setHours(0, 0, 0, 0);
 
     const current = sch.current_participants || 0;
+    const max = sch.max_participants;
 
     if (startDate < today && current === 0) {
       return 'expired';
     }
-    
-    return sch.status || 'available';
+
+    if (current === 0) return 'empty';
+    if (current < max) return 'has-guests';
+    return 'full';
   };
 
   const getStatusLabel = (status: string) => {
     if (status === 'cancelled') return 'Đã hủy';
     if (status === 'completed') return 'Đã hoàn thành';
     if (status === 'expired') return 'Quá hạn';
+    if (status === 'ongoing') return 'Đang diễn ra';
+    if (status === 'paused') return 'Tạm ngưng';
+    if (status === 'empty') return 'Chưa có khách';
+    if (status === 'has-guests') return 'Đang có khách';
+    if (status === 'full') return 'Đã đủ người';
     return 'Hoạt động';
   };
 
@@ -277,6 +287,40 @@ const GuideSchedulesPage: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+            
+            <div className="weekly-calendar-legend">
+              <div className="tc-legend-item">
+                <span className="tc-dot tc-dot--empty"></span> Chưa có khách
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot tc-dot--has-guests"></span> Đang có khách
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot tc-dot--full"></span> Đã đủ người
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot" style={{ backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>✓</span> Đã hoàn thành
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot" style={{ backgroundColor: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+                  <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="5" y="4" width="4" height="16"></rect>
+                    <rect x="15" y="4" width="4" height="16"></rect>
+                  </svg>
+                </span> Tạm ngưng
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot" style={{ backgroundColor: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: 'bold' }}>✕</span> Đã hủy
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+                  <span className="tc-ongoing-dot-pulse"></span>
+                </span> Đang diễn ra
+              </div>
+              <div className="tc-legend-item">
+                <span className="tc-dot tc-dot--expired" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px' }}>⌛</span> Quá hạn
+              </div>
             </div>
           </div>
         )}
