@@ -79,7 +79,7 @@ const GuideSchedulesPage: React.FC = () => {
     fetchAllSchedules();
   }, []);
 
-  const handleDateClick = (date: Date, schedule?: any) => {
+  const handleDateClick = (date: Date, _schedule?: any) => {
     // Tìm tất cả lịch trình trong ngày này
     const dateString = date.toISOString().split('T')[0];
     const daySchedules = schedules.filter(s => {
@@ -93,9 +93,39 @@ const GuideSchedulesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const getScheduleStatus = (sch: CombinedSchedule) => {
+    if (!sch) return 'empty';
+    if (sch.status === 'cancelled') return 'cancelled';
+    if (sch.status === 'completed') return 'completed';
+    if (sch.status === 'ongoing' || sch.status === 'in_progress') return 'ongoing';
+    if (sch.status === 'paused') return 'paused';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(sch.start_date);
+    startDate.setHours(0, 0, 0, 0);
+
+    const current = sch.current_participants || 0;
+    const max = sch.max_participants;
+
+    if (startDate < today && current === 0) {
+      return 'expired';
+    }
+
+    if (current === 0) return 'empty';
+    if (current < max) return 'has-guests';
+    return 'full';
+  };
+
   const getStatusLabel = (status: string) => {
     if (status === 'cancelled') return 'Đã hủy';
     if (status === 'completed') return 'Đã hoàn thành';
+    if (status === 'expired') return 'Quá hạn';
+    if (status === 'ongoing') return 'Đang diễn ra';
+    if (status === 'paused') return 'Tạm ngưng';
+    if (status === 'empty') return 'Chưa có khách';
+    if (status === 'has-guests') return 'Đang có khách';
+    if (status === 'full') return 'Đã đủ người';
     return 'Hoạt động';
   };
 
@@ -223,18 +253,19 @@ const GuideSchedulesPage: React.FC = () => {
                       ) : (
                         daySchedules.map(sch => {
                           const fillPercent = Math.min(100, Math.round(((sch.current_participants || 0) / sch.max_participants) * 100));
+                          const computedStatus = getScheduleStatus(sch);
                           return (
                             <div 
                               key={sch.id} 
-                              className={`weekly-schedule-card status-${sch.status}`}
+                              className={`weekly-schedule-card status-${computedStatus}`}
                               onClick={() => handleDateClick(day)}
                               title={`${sch.tourTitle} - Click để xem chi tiết`}
                             >
                               {sch.tourCover && (
                                 <div className="weekly-sch-image">
                                   <img src={sch.tourCover} alt={sch.tourTitle} />
-                                  <span className={`status-badge status-${sch.status}`}>
-                                    {getStatusLabel(sch.status)}
+                                  <span className={`status-badge status-${computedStatus}`}>
+                                    {getStatusLabel(computedStatus)}
                                   </span>
                                 </div>
                               )}
@@ -256,6 +287,40 @@ const GuideSchedulesPage: React.FC = () => {
                   </div>
                 );
               })}
+            </div>
+            
+            <div className="weekly-calendar-legend">
+              <div className="tc-legend-item status-empty">
+                <span className="tc-dot tc-dot--empty"></span> Chưa có khách
+              </div>
+              <div className="tc-legend-item status-has-guests">
+                <span className="tc-dot tc-dot--has-guests"></span> Đang có khách
+              </div>
+              <div className="tc-legend-item status-full">
+                <span className="tc-dot tc-dot--full"></span> Đã đủ người
+              </div>
+              <div className="tc-legend-item status-completed">
+                <span className="tc-dot" style={{ backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>✓</span> Đã hoàn thành
+              </div>
+              <div className="tc-legend-item status-paused">
+                <span className="tc-dot" style={{ backgroundColor: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+                  <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="5" y="4" width="4" height="16"></rect>
+                    <rect x="15" y="4" width="4" height="16"></rect>
+                  </svg>
+                </span> Tạm ngưng
+              </div>
+              <div className="tc-legend-item status-cancelled">
+                <span className="tc-dot" style={{ backgroundColor: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: 'bold' }}>✕</span> Đã hủy
+              </div>
+              <div className="tc-legend-item status-ongoing">
+                <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
+                  <span className="tc-ongoing-dot-pulse"></span>
+                </span> Đang diễn ra
+              </div>
+              <div className="tc-legend-item status-expired">
+                <span className="tc-dot tc-dot--expired" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px' }}>⌛</span> Quá hạn
+              </div>
             </div>
           </div>
         )}
@@ -281,14 +346,16 @@ const GuideSchedulesPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            selectedSchedules.map(sch => (
-              <div key={sch.id} className="day-schedule-item-card">
-                <div className="schedule-item-header">
-                  <h4 className="tour-title">{sch.tourTitle}</h4>
-                  <span className={`status-tag status-${sch.status}`}>
-                    {getStatusLabel(sch.status)}
-                  </span>
-                </div>
+            selectedSchedules.map(sch => {
+              const computedStatus = getScheduleStatus(sch);
+              return (
+                <div key={sch.id} className="day-schedule-item-card">
+                  <div className="schedule-item-header">
+                    <h4 className="tour-title">{sch.tourTitle}</h4>
+                    <span className={`status-tag status-${computedStatus}`}>
+                      {getStatusLabel(computedStatus)}
+                    </span>
+                  </div>
                 <div className="schedule-item-details">
                   <div className="detail-row">
                     <span className="label">Giá tour:</span>
@@ -310,7 +377,8 @@ const GuideSchedulesPage: React.FC = () => {
                   </Button>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </Modal>

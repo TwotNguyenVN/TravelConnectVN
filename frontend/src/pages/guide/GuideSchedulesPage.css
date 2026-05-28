@@ -62,19 +62,44 @@
   white-space: nowrap;
 }
 
-.status-tag.status-available {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+.status-tag.status-empty {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+.status-tag.status-has-guests {
+  background-color: rgba(249, 115, 22, 0.1);
+  color: #f97316;
+}
+
+.status-tag.status-full {
+  background-color: rgba(22, 163, 74, 0.1);
+  color: #16a34a;
 }
 
 .status-tag.status-completed {
-  background-color: rgba(59, 130, 246, 0.1);
-  color: #3b82f6;
+  background-color: rgba(34, 197, 94, 0.1);
+  color: #22c55e;
 }
 
 .status-tag.status-cancelled {
   background-color: rgba(239, 68, 68, 0.1);
   color: #ef4444;
+}
+
+.status-tag.status-ongoing {
+  background-color: rgba(168, 85, 247, 0.1);
+  color: #a855f7;
+}
+
+.status-tag.status-paused {
+  background-color: rgba(234, 88, 12, 0.1);
+  color: #ea580c;
+}
+
+.status-tag.status-expired {
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #64748b;
 }
 
 .schedule-item-details {
@@ -127,7 +152,7 @@
 .view-mode-btn {
   padding: 8px 16px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   border-radius: var(--tc-radius-sm);
   background: transparent;
   border: none;
@@ -136,10 +161,15 @@
   transition: all 0.2s ease;
 }
 
-.view-mode-btn.active {
-  background-color: var(--tc-bg-card);
+.view-mode-btn:hover:not(.active) {
   color: var(--tc-primary);
-  box-shadow: var(--tc-shadow-sm);
+  background-color: rgba(0, 108, 228, 0.04);
+}
+
+.view-mode-btn.active {
+  background-color: var(--tc-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.15);
   font-weight: 600;
 }
 
@@ -215,7 +245,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #f0f7ff;
+  color: var(--tc-primary);
   border-top-left-radius: calc(var(--tc-radius-md) - 1px);
   border-top-right-radius: calc(var(--tc-radius-md) - 1px);
 }
@@ -285,12 +316,38 @@
   border-color: var(--tc-primary);
 }
 
+.weekly-schedule-card.status-empty {
+  border-left-color: #3b82f6;
+}
+
+.weekly-schedule-card.status-has-guests {
+  border-left-color: #f97316;
+}
+
+.weekly-schedule-card.status-full {
+  border-left-color: #16a34a;
+}
+
+.weekly-schedule-card.status-completed {
+  border-left-color: #22c55e;
+}
+
 .weekly-schedule-card.status-cancelled {
   border-left-color: #ef4444;
 }
 
-.weekly-schedule-card.status-completed {
-  border-left-color: #3b82f6;
+.weekly-schedule-card.status-ongoing {
+  border-left-color: #a855f7;
+}
+
+.weekly-schedule-card.status-paused {
+  border-left-color: #ea580c;
+}
+
+.weekly-schedule-card.status-expired {
+  border-left-color: #64748b;
+  background-color: #f8fafc;
+  opacity: 0.85;
 }
 
 .weekly-sch-image {
@@ -317,20 +374,51 @@
   right: 6px;
   font-size: 0.65rem;
   font-weight: 700;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: 4px;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.04);
 }
 
-.weekly-sch-image .status-badge.status-available {
-  background-color: #22c55e;
+.weekly-sch-image .status-badge.status-empty {
+  color: #2563eb !important;
+  background-color: #eff6ff !important;
+  border-color: #dbeafe !important;
+}
+.weekly-sch-image .status-badge.status-has-guests {
+  color: #ea580c !important;
+  background-color: #fff7ed !important;
+  border-color: #ffedd5 !important;
+}
+.weekly-sch-image .status-badge.status-full {
+  color: #16a34a !important;
+  background-color: #f0fdf4 !important;
+  border-color: #dcfce7 !important;
 }
 .weekly-sch-image .status-badge.status-completed {
-  background-color: #3b82f6;
+  color: #15803d !important;
+  background-color: #f0fdf4 !important;
+  border-color: #dcfce7 !important;
 }
 .weekly-sch-image .status-badge.status-cancelled {
-  background-color: #ef4444;
+  color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+  border-color: #fee2e2 !important;
+}
+.weekly-sch-image .status-badge.status-ongoing {
+  color: #7c3aed !important;
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
+}
+.weekly-sch-image .status-badge.status-paused {
+  color: #d97706 !important;
+  background-color: #fffbeb !important;
+  border-color: #fef3c7 !important;
+}
+.weekly-sch-image .status-badge.status-expired {
+  color: #475569 !important;
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
 
 .weekly-sch-body {
@@ -383,5 +471,17 @@
   height: 100%;
   background: linear-gradient(90deg, var(--tc-primary), #3b82f6);
   border-radius: 2px;
+}
+
+.weekly-calendar-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding: 16px;
+  border-top: 1px solid var(--tc-border);
+  background: var(--tc-bg-card);
+  margin-top: 24px;
+  border-radius: var(--tc-radius-md);
+  flex-wrap: wrap;
 }
 

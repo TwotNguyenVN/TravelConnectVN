@@ -100,6 +100,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         day: d, 
         dateObj, 
         isOtherMonth: true,
+        schedules: [],
         isPast: dateObj < today 
       });
     }
@@ -109,7 +110,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
       const dateObj = new Date(year, month, d);
       const dateString = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
       
-      const schedule = schedules.find(s => {
+      const daySchedules = schedules.filter(s => {
         const sDate = new Date(s.start_date);
         const sYear = sDate.getFullYear();
         const sMonth = sDate.getMonth();
@@ -124,7 +125,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         day: d,
         fullDate: dateString,
         dateObj,
-        schedule,
+        schedules: daySchedules,
         isPast,
         isOtherMonth: false
       });
@@ -138,6 +139,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         day: nextMonthDay, 
         dateObj, 
         isOtherMonth: true,
+        schedules: [],
         isPast: dateObj < today 
       });
       nextMonthDay++;
@@ -161,18 +163,42 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
       return;
     }
 
-    // Cho phép click nếu ngày trong tương lai HOẶC ngày đó có lịch khởi hành (kể cả trong quá khứ/đã hoàn thành)
-    if (dayData.day && (!dayData.isPast || dayData.schedule)) {
-      onDateClick(dayData.dateObj, dayData.schedule);
+    const hasSchedules = dayData.schedules && dayData.schedules.length > 0;
+    if (dayData.day && (!dayData.isPast || hasSchedules)) {
+      onDateClick(dayData.dateObj, hasSchedules ? dayData.schedules[0] : undefined);
     }
+  };
+
+  const getScheduleStatus = (sch: Schedule) => {
+    if (!sch) return "available";
+    if (sch.status === 'cancelled') return "cancelled";
+    if (sch.status === 'completed') return "completed";
+    if (sch.status === 'ongoing' || sch.status === 'in_progress') return "ongoing";
+    if (sch.status === 'full') return "full";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(sch.start_date);
+    startDate.setHours(0, 0, 0, 0);
+
+    const current = sch.current_participants || 0;
+
+    if (startDate < today && current === 0) {
+      return "expired";
+    }
+
+    return sch.status || "available";
   };
 
   const getScheduleStatusClass = (schedule: Schedule) => {
     if (!schedule) return "";
-    if (schedule.status === 'cancelled') return "tc-day--cancelled";
-    if (schedule.status === 'ongoing' || schedule.status === 'in_progress') return "tc-day--ongoing";
-    if (schedule.status === 'full') return "tc-day--full-manual";
-    if (schedule.status === 'completed') return "tc-day--completed";
+    const status = getScheduleStatus(schedule);
+    
+    if (status === 'cancelled') return "tc-day--cancelled";
+    if (status === 'ongoing') return "tc-day--ongoing";
+    if (status === 'full') return "tc-day--full-manual";
+    if (status === 'completed') return "tc-day--completed";
+    if (status === 'expired') return "tc-day--expired";
     
     const current = schedule.current_participants || 0;
     const max = schedule.max_participants;
@@ -180,6 +206,52 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     if (current === 0) return "tc-day--empty";
     if (current < max) return "tc-day--has-guests";
     return "tc-day--full";
+  };
+
+  const renderDayStatusIcon = (schedule: Schedule) => {
+    if (!schedule) return null;
+    const status = getScheduleStatus(schedule);
+
+    if (status === 'cancelled') {
+      return <div className="tc-day-cancelled-icon" title="Đã hủy">✕</div>;
+    }
+    if (status === 'completed') {
+      return <div className="tc-day-completed-tick" title="Đã hoàn thành">✓</div>;
+    }
+    if (status === 'ongoing') {
+      return (
+        <div className="tc-day-ongoing-icon" title="Đang diễn ra">
+          <span className="tc-ongoing-pulse"></span>
+        </div>
+      );
+    }
+    if (status === 'paused') {
+      return (
+        <div className="tc-day-paused-icon" title="Tạm ngưng">
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="5" y="4" width="4" height="16"></rect>
+            <rect x="15" y="4" width="4" height="16"></rect>
+          </svg>
+        </div>
+      );
+    }
+    if (status === 'expired') {
+      return <div className="tc-day-expired-icon" title="Quá hạn">⌛</div>;
+    }
+    if (status === 'full') {
+      return <div className="tc-day-full-icon" title="Đã đủ người">🔒</div>;
+    }
+
+    const current = schedule.current_participants || 0;
+    const max = schedule.max_participants;
+    
+    if (current === 0) {
+      return <div className="tc-day-empty-icon" title="Chưa có khách">👤</div>;
+    }
+    if (current < max) {
+      return <div className="tc-day-has-guests-icon" title="Đang có khách">👥</div>;
+    }
+    return <div className="tc-day-full-icon" title="Đã đủ người">🔒</div>;
   };
 
   return (
@@ -219,72 +291,65 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
             <div key={d} className="tc-weekday">{d}</div>
           ))}
           
-          {calendarDays.map((dayData, idx) => (
-            <div
-              key={idx}
-              className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${dayData.schedule ? `tc-day--scheduled ${getScheduleStatusClass(dayData.schedule)}` : ""} ${(dayData.isPast && !dayData.schedule) ? "tc-day--past" : "tc-day--clickable"}`}
-              onClick={() => handleDayClick(dayData)}
-              title={dayData.schedule ? "Click để xem chi tiết lịch trình" : (dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch")}
-            >
-              {dayData.day && (
-                <>
-                  <span className="tc-day-number">{dayData.day}</span>
-                  {dayData.schedule && (
-                    <>
-                      {dayData.schedule.status === 'completed' && (
-                        <div className="tc-day-completed-tick" title="Đã hoàn thành">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
-                          </svg>
-                        </div>
-                      )}
-                      {dayData.schedule.status === 'cancelled' && (
-                        <div className="tc-day-cancelled-icon" title="Đã hủy">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                          </svg>
-                        </div>
-                      )}
-                      {(dayData.schedule.status === 'ongoing' || dayData.schedule.status === 'in_progress') && (
-                        <div className="tc-day-ongoing-icon" title="Đang diễn ra">
-                          <span className="tc-ongoing-pulse"></span>
-                        </div>
-                      )}
-                      {dayData.schedule.status === 'full' && (
-                        <div className="tc-day-paused-icon" title="Tạm ngưng nhận khách">
-                          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="6" y="4" width="4" height="16"></rect>
-                            <rect x="14" y="4" width="4" height="16"></rect>
-                          </svg>
-                        </div>
-                      )}
-                      <span className="tc-day-price">{formatPrice(dayData.schedule.price)}</span>
-                      <span className="tc-day-slots">
-                        {dayData.schedule.current_participants || 0}/{dayData.schedule.max_participants}
-                      </span>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          ))}
+          {calendarDays.map((dayData, idx) => {
+            const hasSchedules = dayData.schedules && dayData.schedules.length > 0;
+            const primarySchedule = hasSchedules ? dayData.schedules[0] : null;
+            const statusClass = primarySchedule ? getScheduleStatusClass(primarySchedule) : "";
+
+            return (
+              <div
+                key={idx}
+                className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${hasSchedules ? `tc-day--scheduled ${statusClass}` : ""} ${(dayData.isPast && !hasSchedules) ? "tc-day--past" : "tc-day--clickable"}`}
+                onClick={() => handleDayClick(dayData)}
+                title={hasSchedules ? "Click để xem chi tiết lịch trình" : (dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch")}
+              >
+                {dayData.day && (
+                  <>
+                    <span className="tc-day-number">{dayData.day}</span>
+                    {hasSchedules && primarySchedule && renderDayStatusIcon(primarySchedule)}
+                    {hasSchedules && (
+                      <div className="tc-day-schedules-list">
+                        {dayData.schedules.map((sch: any) => {
+                          const computedStatus = getScheduleStatus(sch);
+                          return (
+                            <div 
+                              key={sch.id} 
+                              className={`tc-calendar-schedule-pill status-${computedStatus}`}
+                              title={sch.tourTitle || "Lịch khởi hành"}
+                            >
+                              <div className="pill-text-container">
+                                {sch.tourTitle && <span className="pill-tour-title">{sch.tourTitle}</span>}
+                                <div className="pill-details">
+                                  <span className="pill-price">💵 {formatPrice(sch.price)}</span>
+                                  <span className="pill-slots">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div className="tc-calendar-legend">
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-empty">
             <span className="tc-dot tc-dot--empty"></span> Chưa có khách
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-has-guests">
             <span className="tc-dot tc-dot--has-guests"></span> Đang có khách
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-full">
             <span className="tc-dot tc-dot--full"></span> Đã đủ người
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-completed">
             <span className="tc-dot" style={{ backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>✓</span> Đã hoàn thành
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-paused">
             <span className="tc-dot" style={{ backgroundColor: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
               <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
                 <rect x="5" y="4" width="4" height="16"></rect>
@@ -292,13 +357,16 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
               </svg>
             </span> Tạm ngưng
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-cancelled">
             <span className="tc-dot" style={{ backgroundColor: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: 'bold' }}>✕</span> Đã hủy
           </div>
-          <div className="tc-legend-item">
+          <div className="tc-legend-item status-ongoing">
             <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
               <span className="tc-ongoing-dot-pulse"></span>
             </span> Đang diễn ra
+          </div>
+          <div className="tc-legend-item status-expired">
+            <span className="tc-dot tc-dot--expired" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px' }}>⌛</span> Quá hạn
           </div>
         </div>
 
