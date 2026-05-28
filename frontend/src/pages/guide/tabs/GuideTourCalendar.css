@@ -211,6 +211,16 @@
   color: #7c3aed !important;
 }
 
+.tc-day--expired {
+  background-color: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
+  color: #94a3b8 !important;
+}
+
+.tc-day--expired .tc-day-number {
+  color: #64748b !important;
+}
+
 .tc-day-ongoing-icon {
   position: absolute;
   top: 10px;
@@ -289,6 +299,10 @@
 .tc-dot--empty { background-color: #3b82f6; }
 .tc-dot--has-guests { background-color: #f97316; }
 .tc-dot--full { background-color: #22c55e; }
+.tc-dot--expired {
+  background-color: #64748b;
+  border: 1px solid #475569;
+}
 
 .tc-guide-calendar .tc-calendar-footer {
   text-align: center;
@@ -343,6 +357,15 @@
   border-left: 3px solid #ef4444;
   background-color: rgba(239, 68, 68, 0.03);
   opacity: 0.75;
+}
+
+.tc-calendar-schedule-pill.status-expired {
+  border-left: 3px solid #64748b;
+  background-color: rgba(100, 116, 139, 0.05);
+  opacity: 0.85;
+}
+.tc-calendar-schedule-pill.status-expired .pill-price {
+  color: #64748b;
 }
 
 .pill-text-container {

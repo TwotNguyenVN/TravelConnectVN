@@ -77,6 +77,11 @@
   color: #ef4444;
 }
 
+.status-tag.status-expired {
+  background-color: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+
 .schedule-item-details {
   display: flex;
   flex-direction: column;
@@ -293,6 +298,12 @@
   border-left-color: #3b82f6;
 }
 
+.weekly-schedule-card.status-expired {
+  border-left-color: #64748b;
+  background-color: #f8fafc;
+  opacity: 0.85;
+}
+
 .weekly-sch-image {
   position: relative;
   width: 100%;
@@ -331,6 +342,10 @@
 }
 .weekly-sch-image .status-badge.status-cancelled {
   background-color: #ef4444;
+}
+
+.weekly-sch-image .status-badge.status-expired {
+  background-color: #64748b;
 }
 
 .weekly-sch-body {

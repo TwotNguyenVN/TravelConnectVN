@@ -79,7 +79,7 @@ const GuideSchedulesPage: React.FC = () => {
     fetchAllSchedules();
   }, []);
 
-  const handleDateClick = (date: Date, schedule?: any) => {
+  const handleDateClick = (date: Date, _schedule?: any) => {
     // Tìm tất cả lịch trình trong ngày này
     const dateString = date.toISOString().split('T')[0];
     const daySchedules = schedules.filter(s => {
@@ -93,9 +93,29 @@ const GuideSchedulesPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const getScheduleStatus = (sch: CombinedSchedule) => {
+    if (!sch) return 'available';
+    if (sch.status === 'cancelled') return 'cancelled';
+    if (sch.status === 'completed') return 'completed';
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(sch.start_date);
+    startDate.setHours(0, 0, 0, 0);
+
+    const current = sch.current_participants || 0;
+
+    if (startDate < today && current === 0) {
+      return 'expired';
+    }
+    
+    return sch.status || 'available';
+  };
+
   const getStatusLabel = (status: string) => {
     if (status === 'cancelled') return 'Đã hủy';
     if (status === 'completed') return 'Đã hoàn thành';
+    if (status === 'expired') return 'Quá hạn';
     return 'Hoạt động';
   };
 
@@ -223,18 +243,19 @@ const GuideSchedulesPage: React.FC = () => {
                       ) : (
                         daySchedules.map(sch => {
                           const fillPercent = Math.min(100, Math.round(((sch.current_participants || 0) / sch.max_participants) * 100));
+                          const computedStatus = getScheduleStatus(sch);
                           return (
                             <div 
                               key={sch.id} 
-                              className={`weekly-schedule-card status-${sch.status}`}
+                              className={`weekly-schedule-card status-${computedStatus}`}
                               onClick={() => handleDateClick(day)}
                               title={`${sch.tourTitle} - Click để xem chi tiết`}
                             >
                               {sch.tourCover && (
                                 <div className="weekly-sch-image">
                                   <img src={sch.tourCover} alt={sch.tourTitle} />
-                                  <span className={`status-badge status-${sch.status}`}>
-                                    {getStatusLabel(sch.status)}
+                                  <span className={`status-badge status-${computedStatus}`}>
+                                    {getStatusLabel(computedStatus)}
                                   </span>
                                 </div>
                               )}
@@ -281,14 +302,16 @@ const GuideSchedulesPage: React.FC = () => {
               </div>
             </div>
           ) : (
-            selectedSchedules.map(sch => (
-              <div key={sch.id} className="day-schedule-item-card">
-                <div className="schedule-item-header">
-                  <h4 className="tour-title">{sch.tourTitle}</h4>
-                  <span className={`status-tag status-${sch.status}`}>
-                    {getStatusLabel(sch.status)}
-                  </span>
-                </div>
+            selectedSchedules.map(sch => {
+              const computedStatus = getScheduleStatus(sch);
+              return (
+                <div key={sch.id} className="day-schedule-item-card">
+                  <div className="schedule-item-header">
+                    <h4 className="tour-title">{sch.tourTitle}</h4>
+                    <span className={`status-tag status-${computedStatus}`}>
+                      {getStatusLabel(computedStatus)}
+                    </span>
+                  </div>
                 <div className="schedule-item-details">
                   <div className="detail-row">
                     <span className="label">Giá tour:</span>
@@ -310,7 +333,8 @@ const GuideSchedulesPage: React.FC = () => {
                   </Button>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
       </Modal>

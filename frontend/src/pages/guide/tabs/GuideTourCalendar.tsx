@@ -169,12 +169,36 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     }
   };
 
+  const getScheduleStatus = (sch: Schedule) => {
+    if (!sch) return "available";
+    if (sch.status === 'cancelled') return "cancelled";
+    if (sch.status === 'completed') return "completed";
+    if (sch.status === 'ongoing' || sch.status === 'in_progress') return "ongoing";
+    if (sch.status === 'full') return "full";
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(sch.start_date);
+    startDate.setHours(0, 0, 0, 0);
+
+    const current = sch.current_participants || 0;
+
+    if (startDate < today && current === 0) {
+      return "expired";
+    }
+
+    return sch.status || "available";
+  };
+
   const getScheduleStatusClass = (schedule: Schedule) => {
     if (!schedule) return "";
-    if (schedule.status === 'cancelled') return "tc-day--cancelled";
-    if (schedule.status === 'ongoing' || schedule.status === 'in_progress') return "tc-day--ongoing";
-    if (schedule.status === 'full') return "tc-day--full-manual";
-    if (schedule.status === 'completed') return "tc-day--completed";
+    const status = getScheduleStatus(schedule);
+    
+    if (status === 'cancelled') return "tc-day--cancelled";
+    if (status === 'ongoing') return "tc-day--ongoing";
+    if (status === 'full') return "tc-day--full-manual";
+    if (status === 'completed') return "tc-day--completed";
+    if (status === 'expired') return "tc-day--expired";
     
     const current = schedule.current_participants || 0;
     const max = schedule.max_participants;
@@ -238,21 +262,24 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                     <span className="tc-day-number">{dayData.day}</span>
                     {hasSchedules && (
                       <div className="tc-day-schedules-list">
-                        {dayData.schedules.map((sch: any) => (
-                          <div 
-                            key={sch.id} 
-                            className={`tc-calendar-schedule-pill status-${sch.status}`}
-                            title={sch.tourTitle || "Lịch khởi hành"}
-                          >
-                            <div className="pill-text-container">
-                              {sch.tourTitle && <span className="pill-tour-title">{sch.tourTitle}</span>}
-                              <div className="pill-details">
-                                <span className="pill-price">💵 {formatPrice(sch.price)}</span>
-                                <span className="pill-slots">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                        {dayData.schedules.map((sch: any) => {
+                          const computedStatus = getScheduleStatus(sch);
+                          return (
+                            <div 
+                              key={sch.id} 
+                              className={`tc-calendar-schedule-pill status-${computedStatus}`}
+                              title={sch.tourTitle || "Lịch khởi hành"}
+                            >
+                              <div className="pill-text-container">
+                                {sch.tourTitle && <span className="pill-tour-title">{sch.tourTitle}</span>}
+                                <div className="pill-details">
+                                  <span className="pill-price">💵 {formatPrice(sch.price)}</span>
+                                  <span className="pill-slots">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </>
@@ -290,6 +317,9 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
             <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
               <span className="tc-ongoing-dot-pulse"></span>
             </span> Đang diễn ra
+          </div>
+          <div className="tc-legend-item">
+            <span className="tc-dot tc-dot--expired" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px' }}>⌛</span> Quá hạn
           </div>
         </div>
 
