@@ -141,10 +141,15 @@
   transition: all 0.2s ease;
 }
 
-.view-mode-btn.active {
-  background-color: var(--tc-bg-card);
+.view-mode-btn:hover:not(.active) {
   color: var(--tc-primary);
-  box-shadow: var(--tc-shadow-sm);
+  background-color: rgba(0, 108, 228, 0.04);
+}
+
+.view-mode-btn.active {
+  background-color: var(--tc-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.15);
   font-weight: 600;
 }
 
