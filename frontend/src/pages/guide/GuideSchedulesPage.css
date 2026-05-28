@@ -381,44 +381,44 @@
 }
 
 .weekly-sch-image .status-badge.status-empty {
-  color: #2563eb;
-  background-color: #eff6ff;
-  border-color: #dbeafe;
+  color: #2563eb !important;
+  background-color: #eff6ff !important;
+  border-color: #dbeafe !important;
 }
 .weekly-sch-image .status-badge.status-has-guests {
-  color: #ea580c;
-  background-color: #fff7ed;
-  border-color: #ffedd5;
+  color: #ea580c !important;
+  background-color: #fff7ed !important;
+  border-color: #ffedd5 !important;
 }
 .weekly-sch-image .status-badge.status-full {
-  color: #16a34a;
-  background-color: #f0fdf4;
-  border-color: #dcfce7;
+  color: #16a34a !important;
+  background-color: #f0fdf4 !important;
+  border-color: #dcfce7 !important;
 }
 .weekly-sch-image .status-badge.status-completed {
-  color: #15803d;
-  background-color: #f0fdf4;
-  border-color: #dcfce7;
+  color: #15803d !important;
+  background-color: #f0fdf4 !important;
+  border-color: #dcfce7 !important;
 }
 .weekly-sch-image .status-badge.status-cancelled {
-  color: #dc2626;
-  background-color: #fef2f2;
-  border-color: #fee2e2;
+  color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+  border-color: #fee2e2 !important;
 }
 .weekly-sch-image .status-badge.status-ongoing {
-  color: #7c3aed;
-  background-color: #faf5ff;
-  border-color: #e9d5ff;
+  color: #7c3aed !important;
+  background-color: #faf5ff !important;
+  border-color: #e9d5ff !important;
 }
 .weekly-sch-image .status-badge.status-paused {
-  color: #d97706;
-  background-color: #fffbeb;
-  border-color: #fef3c7;
+  color: #d97706 !important;
+  background-color: #fffbeb !important;
+  border-color: #fef3c7 !important;
 }
 .weekly-sch-image .status-badge.status-expired {
-  color: #475569;
-  background-color: #f8fafc;
-  border-color: #e2e8f0;
+  color: #475569 !important;
+  background-color: #f8fafc !important;
+  border-color: #e2e8f0 !important;
 }
 
 .weekly-sch-body {
