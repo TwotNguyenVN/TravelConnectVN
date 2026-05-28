@@ -270,6 +270,21 @@
 .tc-guide-calendar .tc-month-btn {
   font-size: 15px;
   margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.tc-guide-calendar .tc-month-btn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0056b3;
+}
+
+.tc-guide-calendar .tc-month-btn--active {
+  background-color: #006ce4 !important;
+  border-color: #006ce4 !important;
+  color: #ffffff !important;
 }
 
 .tc-calendar-legend {
