@@ -22,9 +22,14 @@ export const AppSidebar: React.FC = () => {
         <div className="nav-group-title">Trung tâm điều khiển</div>
         <nav className="nav-list">
           {isGuide ? (
-            <NavLink to="/guide" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-              📊 Dashboard Tổng hợp
-            </NavLink>
+            <>
+              <NavLink to="/guide" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                📊 Dashboard Tổng hợp
+              </NavLink>
+              <NavLink to="/guide/schedules" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+                📅 Lịch trình
+              </NavLink>
+            </>
           ) : (
             <NavLink to="/user" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               👤 Hồ sơ của tôi
