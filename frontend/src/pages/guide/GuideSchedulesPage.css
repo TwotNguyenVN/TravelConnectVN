@@ -225,7 +225,8 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: #f0f7ff;
+  color: var(--tc-primary);
   border-top-left-radius: calc(var(--tc-radius-md) - 1px);
   border-top-right-radius: calc(var(--tc-radius-md) - 1px);
 }
