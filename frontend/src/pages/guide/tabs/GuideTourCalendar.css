@@ -1,6 +1,11 @@
 .tc-guide-calendar {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
+}
+
+.tc-guide-calendar .tc-calendar-main {
+  min-width: 0;
+  flex: 1;
 }
 
 .tc-guide-calendar .tc-calendar-sidebar {
@@ -14,6 +19,7 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
+  min-width: 0;
 }
 
 .tc-guide-calendar .tc-day-number {
@@ -44,6 +50,7 @@
 .tc-guide-calendar .tc-day--empty {
   background-color: #f0f7ff;
   border: 1px solid #bfdbfe;
+  color: #1e293b;
 }
 .tc-guide-calendar .tc-day--empty .tc-day-number {
   color: #2563eb;
@@ -166,6 +173,95 @@
   border: 1px solid #bbf7d0 !important;
 }
 
+.tc-day--cancelled {
+  background-color: #fef2f2 !important;
+  border: 1px solid #fee2e2 !important;
+  color: #94a3b8 !important;
+}
+
+.tc-day--cancelled .tc-day-price {
+  text-decoration: line-through;
+  color: #cbd5e1 !important;
+  background-color: #f1f5f9 !important;
+  border-color: #e2e8f0 !important;
+}
+
+.tc-day-cancelled-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ef4444;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.tc-day--ongoing {
+  background-color: #faf5ff !important;
+  border: 1px solid #e9d5ff !important;
+}
+
+.tc-day--ongoing .tc-day-number {
+  color: #7c3aed !important;
+}
+
+.tc-day--expired {
+  background-color: #f8fafc !important;
+  border: 1px dashed #cbd5e1 !important;
+  color: #94a3b8 !important;
+}
+
+.tc-day--expired .tc-day-number {
+  color: #64748b !important;
+}
+
+.tc-day-ongoing-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #a855f7;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.4);
+  z-index: 10;
+  border: 2px solid white;
+}
+
+.tc-ongoing-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: white;
+  border-radius: 50%;
+  animation: tc-pulse-anim 1.5s infinite ease-in-out;
+}
+
+.tc-ongoing-dot-pulse {
+  width: 4px;
+  height: 4px;
+  background-color: white;
+  border-radius: 50%;
+  animation: tc-pulse-anim 1.5s infinite ease-in-out;
+  display: inline-block;
+}
+
+@keyframes tc-pulse-anim {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(0.8); opacity: 0.5; }
+}
+
 /* Header improvements */
 .tc-guide-calendar .tc-calendar-header h2 {
   font-size: 1.6rem;
@@ -175,6 +271,21 @@
 .tc-guide-calendar .tc-month-btn {
   font-size: 15px;
   margin-bottom: 4px;
+  border: 1px solid #e2e8f0;
+  background-color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.tc-guide-calendar .tc-month-btn:hover {
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+  color: #0056b3;
+}
+
+.tc-guide-calendar .tc-month-btn--active {
+  background-color: #006ce4 !important;
+  border-color: #006ce4 !important;
+  color: #ffffff !important;
 }
 
 .tc-calendar-legend {
@@ -191,9 +302,17 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: #64748b;
-  font-weight: 500;
+  font-weight: 600;
 }
+
+.tc-legend-item.status-empty { color: #2563eb; }
+.tc-legend-item.status-has-guests { color: #ea580c; }
+.tc-legend-item.status-full { color: #16a34a; }
+.tc-legend-item.status-completed { color: #15803d; }
+.tc-legend-item.status-paused { color: #d97706; }
+.tc-legend-item.status-cancelled { color: #dc2626; }
+.tc-legend-item.status-ongoing { color: #7c3aed; }
+.tc-legend-item.status-expired { color: #475569; }
 
 .tc-dot {
   width: 10px;
@@ -204,6 +323,10 @@
 .tc-dot--empty { background-color: #3b82f6; }
 .tc-dot--has-guests { background-color: #f97316; }
 .tc-dot--full { background-color: #22c55e; }
+.tc-dot--expired {
+  background-color: #64748b;
+  border: 1px solid #475569;
+}
 
 .tc-guide-calendar .tc-calendar-footer {
   text-align: center;
@@ -213,4 +336,199 @@
   color: #94a3b8;
   border-bottom-left-radius: var(--tc-radius-lg);
   border-bottom-right-radius: var(--tc-radius-lg);
+}
+
+/* Custom Multi-Schedule Pill styles */
+.tc-day-schedules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+
+.tc-calendar-schedule-pill {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--tc-border);
+  background-color: var(--tc-bg-card);
+  font-size: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  min-width: 0;
+}
+
+.tc-calendar-schedule-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--tc-shadow-sm);
+  border-color: var(--tc-primary-light);
+}
+
+.tc-calendar-schedule-pill.status-empty {
+  border-left: 3px solid #3b82f6;
+  background-color: #eff6ff;
+  border-color: #dbeafe;
+}
+
+.tc-calendar-schedule-pill.status-has-guests {
+  border-left: 3px solid #f97316;
+  background-color: #fff7ed;
+  border-color: #ffedd5;
+}
+
+.tc-calendar-schedule-pill.status-full {
+  border-left: 3px solid #16a34a;
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
+}
+
+.tc-calendar-schedule-pill.status-completed {
+  border-left: 3px solid #22c55e;
+  background-color: #f0fdf4;
+  border-color: #dcfce7;
+}
+
+.tc-calendar-schedule-pill.status-cancelled {
+  border-left: 3px solid #ef4444;
+  background-color: #fef2f2;
+  border-color: #fee2e2;
+  opacity: 0.8;
+}
+.tc-calendar-schedule-pill.status-cancelled .pill-tour-title { color: #dc2626; text-decoration: line-through; }
+.tc-calendar-schedule-pill.status-cancelled .pill-price { color: #dc2626; }
+
+.tc-calendar-schedule-pill.status-ongoing {
+  border-left: 3px solid #a855f7;
+  background-color: #faf5ff;
+  border-color: #e9d5ff;
+}
+
+.tc-calendar-schedule-pill.status-paused {
+  border-left: 3px solid #ea580c;
+  background-color: #fffbeb;
+  border-color: #fef3c7;
+}
+
+.tc-calendar-schedule-pill.status-expired {
+  border-left: 3px solid #64748b;
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.85;
+}
+.tc-calendar-schedule-pill.status-expired .pill-tour-title { color: #475569; }
+.tc-calendar-schedule-pill.status-expired .pill-price { color: #475569; }
+
+.pill-text-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  min-width: 0;
+}
+
+.pill-tour-title {
+  font-weight: 700;
+  color: var(--tc-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  font-size: 0.75rem;
+  margin-bottom: 2px;
+}
+
+.pill-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--tc-text-muted);
+}
+
+.pill-price {
+  font-weight: 600;
+  color: var(--tc-primary);
+}
+
+.pill-slots {
+  font-weight: 500;
+}
+
+/* Status Icons on the Top-Right Corner of Daily Cells */
+.tc-day-expired-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #64748b;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(100, 116, 139, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.tc-day-full-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #16a34a;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.tc-day-has-guests-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #f97316;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(249, 115, 22, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 9px;
+  font-weight: bold;
+}
+
+.tc-day-empty-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #3b82f6;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+  z-index: 10;
+  border: 1.5px solid white;
+  font-size: 9px;
+  font-weight: bold;
 }

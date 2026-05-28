@@ -65,6 +65,8 @@ const AiChatPage: React.FC = () => {
     }
   }, [inputText]);
 
+  const isNewChat = currentSessionId === null || (messages.length === 0 && !loadingMessages);
+
   const fetchSessions = async () => {
     if (!user) return;
     try {
@@ -279,11 +281,23 @@ const AiChatPage: React.FC = () => {
         <aside className="ai-chat-sidebar">
           <div className="sidebar-header">
             <div className="brand">
-              <div className="brand-icon">✨</div>
-              <span>Travel Assistant</span>
+              <div className="brand-icon">
+                <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/Avt_VinaGuide_AI.png" alt="VinaGuide" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+              </div>
+              <span>VinaGuide AI</span>
             </div>
-            <button className="new-chat-btn" onClick={handleCreateSession} title="Cuộc trò chuyện mới">
-              <i className="bi bi-plus-lg"></i>
+            <button 
+              className="new-chat-btn" 
+              onClick={() => {
+                if (!isNewChat) setCurrentSessionId(null);
+              }} 
+              title="Cuộc trò chuyện mới"
+              disabled={isNewChat}
+              style={{ opacity: isNewChat ? 0.5 : 1, cursor: isNewChat ? 'not-allowed' : 'pointer' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+              </svg>
             </button>
           </div>
 
@@ -366,8 +380,8 @@ const AiChatPage: React.FC = () => {
                 <i className={`bi ${sidebarOpen ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'}`}></i>
               </button>
               <div className="header-title">
-                <h4>Gemini 1.5 Pro</h4>
-                <span className="model-badge">AI Travel Assistant</span>
+                <h4>VinaGuide AI</h4>
+                <span className="model-badge">Trợ lý Du lịch thông minh</span>
               </div>
             </div>
             <div className="header-actions">
@@ -382,7 +396,12 @@ const AiChatPage: React.FC = () => {
                   <i className="bi bi-arrow-clockwise me-1"></i> Làm lại câu cuối
                 </Button>
               )}
-              <Button variant="outline" size="small" onClick={() => setCurrentSessionId(null)}>
+              <Button 
+                variant="outline" 
+                size="small" 
+                onClick={() => setCurrentSessionId(null)}
+                disabled={isNewChat}
+              >
                 Hội thoại mới
               </Button>
             </div>
@@ -393,12 +412,12 @@ const AiChatPage: React.FC = () => {
               <div className="welcome-hero">
                 <div className="hero-visual">
                   <div className="gemini-logo-wrapper">
-                    <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-gemini-icon.png" alt="Gemini" />
+                    <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/Avt_VinaGuide_AI.png" alt="VinaGuide AI" style={{ borderRadius: '50%', objectFit: 'cover' }} />
                     <div className="pulse-ring"></div>
                   </div>
                 </div>
                 <h2>Xin chào, {profile?.full_name || 'bạn'}! 👋</h2>
-                <p>Tôi là trợ lý du lịch AI thông minh của TravelConnectVN. Hãy cho tôi biết nhu cầu của bạn, tôi sẽ lên lịch trình, đề xuất các tour tuyệt vời hoặc tìm kiếm bạn đồng hành hoàn hảo cho bạn!</p>
+                <p>Tôi là <strong>VinaGuide AI</strong> - trợ lý du lịch thông minh của TravelConnectVN. Hãy cho tôi biết nhu cầu của bạn, tôi sẽ lên lịch trình, đề xuất các tour tuyệt vời hoặc tìm kiếm bạn đồng hành hoàn hảo cho bạn!</p>
                 
                 <div className="suggestion-grid">
                   {[
@@ -407,7 +426,12 @@ const AiChatPage: React.FC = () => {
                     { label: '🏮 Cẩm nang Hội An', text: 'Tóm tắt các điểm check-in hấp dẫn, món ăn ngon và hoạt động về đêm tại phố cổ Hội An.' },
                     { label: '🍲 Bản đồ ăn uống Hà Nội', text: 'Liệt kê danh sách các món ăn đặc sản không thể bỏ lỡ tại Hà Nội kèm địa chỉ nổi tiếng.' }
                   ].map((item, idx) => (
-                    <button key={idx} className="suggestion-pill" onClick={() => handleSendMessage(undefined, item.text)}>
+                    <button key={idx} className="suggestion-pill" onClick={() => {
+                      setInputText(item.text);
+                      if (textareaRef.current) {
+                        textareaRef.current.focus();
+                      }
+                    }}>
                       <div className="suggestion-pill-content">
                         <strong>{item.label}</strong>
                         <span>{item.text.substring(0, 50)}...</span>
@@ -429,7 +453,7 @@ const AiChatPage: React.FC = () => {
                             {m.sender_type === 'user' ? (
                               <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="U" />
                             ) : (
-                              <span className="ai-icon">✨</span>
+                              <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/Avt_VinaGuide_AI.png" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                             )}
                           </div>
                           <div className="message-content-wrapper">
@@ -471,7 +495,7 @@ const AiChatPage: React.FC = () => {
                       <div className="chat-message assistant typing">
                         <div className="message-container">
                           <div className="avatar-circle">
-                            <span className="ai-icon">✨</span>
+                            <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/Avt_VinaGuide_AI.png" alt="AI" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                           </div>
                           <div className="message-content-wrapper">
                             <div className="message-bubble">
@@ -510,7 +534,9 @@ const AiChatPage: React.FC = () => {
                 {sending ? (
                   <div className="spinner-border spinner-border-sm text-light" role="status"></div>
                 ) : (
-                  <i className="bi bi-arrow-up-short"></i>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                    <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
+                  </svg>
                 )}
               </button>
             </form>
