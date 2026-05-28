@@ -3,6 +3,11 @@
   width: 100%;
 }
 
+.tc-guide-calendar .tc-calendar-main {
+  min-width: 0;
+  flex: 1;
+}
+
 .tc-guide-calendar .tc-calendar-sidebar {
   width: 110px;
 }
@@ -14,6 +19,7 @@
   justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
+  min-width: 0;
 }
 
 .tc-guide-calendar .tc-day-number {
@@ -314,6 +320,7 @@
   width: 100%;
   box-sizing: border-box;
   display: block;
+  min-width: 0;
 }
 
 .tc-calendar-schedule-pill:hover {
@@ -343,6 +350,7 @@
   flex-direction: column;
   gap: 2px;
   text-align: left;
+  min-width: 0;
 }
 
 .pill-tour-title {
