@@ -290,19 +290,19 @@ const GuideSchedulesPage: React.FC = () => {
             </div>
             
             <div className="weekly-calendar-legend">
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-empty">
                 <span className="tc-dot tc-dot--empty"></span> Chưa có khách
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-has-guests">
                 <span className="tc-dot tc-dot--has-guests"></span> Đang có khách
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-full">
                 <span className="tc-dot tc-dot--full"></span> Đã đủ người
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-completed">
                 <span className="tc-dot" style={{ backgroundColor: '#22c55e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>✓</span> Đã hoàn thành
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-paused">
                 <span className="tc-dot" style={{ backgroundColor: '#f97316', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
                   <svg width="6" height="6" viewBox="0 0 24 24" fill="currentColor">
                     <rect x="5" y="4" width="4" height="16"></rect>
@@ -310,15 +310,15 @@ const GuideSchedulesPage: React.FC = () => {
                   </svg>
                 </span> Tạm ngưng
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-cancelled">
                 <span className="tc-dot" style={{ backgroundColor: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px', fontWeight: 'bold' }}>✕</span> Đã hủy
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-ongoing">
                 <span className="tc-dot" style={{ backgroundColor: '#a855f7', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '8px' }}>
                   <span className="tc-ongoing-dot-pulse"></span>
                 </span> Đang diễn ra
               </div>
-              <div className="tc-legend-item">
+              <div className="tc-legend-item status-expired">
                 <span className="tc-dot tc-dot--expired" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '10px' }}>⌛</span> Quá hạn
               </div>
             </div>
