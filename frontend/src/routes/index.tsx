@@ -25,6 +25,7 @@ import FavoritesPage from '../pages/user/FavoritesPage';
 
 
 import GuideDashboardPage from '../pages/guide/GuideDashboardPage';
+import GuideSchedulesPage from '../pages/guide/GuideSchedulesPage';
 import GuideProfilePage from '../pages/guide/GuideProfilePage';
 import GuideListPage from '../pages/public/GuideListPage';
 import GuideDetailPage from '../pages/public/GuideDetailPage';
@@ -121,6 +122,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <GuideDashboardPage /> },
       { path: 'dashboard', element: <GuideDashboardPage /> },
+      { path: 'schedules', element: <GuideSchedulesPage /> },
       { path: 'profile', element: <GuideProfilePage /> },
       { path: 'tours', element: <MyToursPage /> },
       { path: 'tours/create', element: <TourFormPage /> },
