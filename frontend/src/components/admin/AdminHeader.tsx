@@ -59,7 +59,7 @@ export const AdminHeader: React.FC = () => {
       padding: '0 var(--tc-spacing-5)',
       position: 'sticky',
       top: 0,
-      zIndex: 10,
+      zIndex: 100,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-5)' }}>
         {/* Notification Bell */}
