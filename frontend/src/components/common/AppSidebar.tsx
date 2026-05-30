@@ -7,8 +7,6 @@ export const AppSidebar: React.FC = () => {
   const { roles } = useAuth();
   const isGuide = roles.includes('GUIDE');
   const location = useLocation();
-  const searchParams = new URLSearchParams(location.search);
-  const currentTab = searchParams.get('tab') || 'personal';
 
   return (
     <aside className="user-sidebar">
@@ -22,14 +20,9 @@ export const AppSidebar: React.FC = () => {
         <div className="nav-group-title">Trung tâm điều khiển</div>
         <nav className="nav-list">
           {isGuide ? (
-            <>
-              <NavLink to="/guide" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                📊 Dashboard Tổng hợp
-              </NavLink>
-              <NavLink to="/guide/schedules" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
-                📅 Lịch trình
-              </NavLink>
-            </>
+            <NavLink to="/guide" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              📊 Dashboard Tổng hợp
+            </NavLink>
           ) : (
             <NavLink to="/user" end className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               👤 Hồ sơ của tôi
@@ -62,6 +55,12 @@ export const AppSidebar: React.FC = () => {
             </NavLink>
             <NavLink to="/guide/tours" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               🎒 Quản lý Tour
+            </NavLink>
+            <NavLink to="/guide/schedules" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              📅 Lịch trình
+            </NavLink>
+            <NavLink to="/guide/active-tour" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              🚩 Tour đang diễn ra
             </NavLink>
             <NavLink to="/guide/tour-requests" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               📥 Yêu cầu từ khách
