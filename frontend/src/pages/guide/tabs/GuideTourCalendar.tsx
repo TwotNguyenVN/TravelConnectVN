@@ -14,9 +14,10 @@ interface Schedule {
 interface GuideTourCalendarProps {
   schedules: Schedule[];
   onDateClick: (date: Date, schedule?: Schedule) => void;
+  onCreateSchedule?: (date: Date) => void;
 }
 
-const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDateClick }) => {
+const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDateClick, onCreateSchedule }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   // Tự động chuyển đến tháng có lịch đầu tiên nếu tháng hiện tại không có lịch
@@ -164,8 +165,16 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     }
 
     const hasSchedules = dayData.schedules && dayData.schedules.length > 0;
-    if (dayData.day && (!dayData.isPast || hasSchedules)) {
-      onDateClick(dayData.dateObj, hasSchedules ? dayData.schedules[0] : undefined);
+
+    // Future empty day → trigger create schedule flow
+    if (dayData.day && !dayData.isPast && !hasSchedules) {
+      onCreateSchedule?.(dayData.dateObj);
+      return;
+    }
+
+    // Day with schedules or past scheduled day → view detail
+    if (dayData.day && hasSchedules) {
+      onDateClick(dayData.dateObj, dayData.schedules[0]);
     }
   };
 
@@ -301,7 +310,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                 key={idx}
                 className={`tc-day ${dayData.isOtherMonth ? "tc-day--other-month" : ""} ${hasSchedules ? `tc-day--scheduled ${statusClass}` : ""} ${(dayData.isPast && !hasSchedules) ? "tc-day--past" : "tc-day--clickable"}`}
                 onClick={() => handleDayClick(dayData)}
-                title={hasSchedules ? "Click để xem chi tiết lịch trình" : (dayData.isPast ? "Không thể thao tác trên ngày trong quá khứ" : "Click để cấu hình lịch")}
+                title={hasSchedules ? "Click để xem chi tiết lịch trình" : (dayData.isPast ? "Ngày đã qua" : "Click để tạo lịch khởi hành cho ngày này")}
               >
                 {dayData.day && (
                   <>

@@ -485,3 +485,286 @@
   flex-wrap: wrap;
 }
 
+/* ===================================
+   CREATE SCHEDULE FLOW STYLES
+   =================================== */
+
+/* Weekly empty day - clickable variant */
+.weekly-empty-day--clickable {
+  cursor: pointer;
+  border-color: var(--tc-primary-light);
+  background-color: #f0f7ff;
+  color: var(--tc-primary);
+  transition: all 0.2s ease;
+}
+
+.weekly-empty-day--clickable:hover {
+  background-color: #dbeafe;
+  border-color: var(--tc-primary);
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.15);
+  transform: translateY(-2px);
+}
+
+/* === Create schedule step container === */
+.create-schedule-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-4);
+}
+
+.create-step-description {
+  color: var(--tc-text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+  padding: var(--tc-spacing-3);
+  background: var(--tc-bg-subtle);
+  border-radius: var(--tc-radius-md);
+  border-left: 3px solid var(--tc-primary);
+}
+
+/* === Tour options list === */
+.tour-options-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-2);
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.tour-option-card {
+  display: flex;
+  align-items: center;
+  gap: var(--tc-spacing-3);
+  padding: var(--tc-spacing-3);
+  border: 1px solid var(--tc-border);
+  border-radius: var(--tc-radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: var(--tc-bg-card);
+}
+
+.tour-option-card:hover {
+  border-color: var(--tc-primary);
+  background: #f0f7ff;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(0, 108, 228, 0.1);
+}
+
+.tour-option-cover {
+  width: 60px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: var(--tc-radius-sm);
+  flex-shrink: 0;
+}
+
+.tour-option-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tour-option-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--tc-text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tour-option-price {
+  font-size: 0.8rem;
+  color: var(--tc-text-muted);
+  margin-top: 2px;
+}
+
+.tour-option-price strong {
+  color: var(--tc-primary);
+}
+
+.tour-option-arrow {
+  font-size: 1.4rem;
+  color: var(--tc-primary);
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+/* === No tours prompt === */
+.no-tours-prompt {
+  text-align: center;
+  padding: var(--tc-spacing-6);
+  color: var(--tc-text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tc-spacing-3);
+}
+
+/* === Selected tour preview (step 2) === */
+.selected-tour-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--tc-spacing-3);
+  padding: var(--tc-spacing-3);
+  background: linear-gradient(135deg, #f0f7ff, #e0f2fe);
+  border: 1px solid #bfdbfe;
+  border-radius: var(--tc-radius-md);
+}
+
+.selected-tour-cover {
+  width: 72px;
+  height: 54px;
+  object-fit: cover;
+  border-radius: var(--tc-radius-sm);
+  flex-shrink: 0;
+  box-shadow: var(--tc-shadow-sm);
+}
+
+.selected-tour-name {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--tc-text-main);
+  margin-bottom: 4px;
+}
+
+.selected-tour-meta {
+  font-size: 0.85rem;
+  color: var(--tc-text-secondary);
+}
+
+/* === Configure form === */
+.configure-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-4);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tc-spacing-2);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tc-text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tc-spacing-2);
+}
+
+.form-label-hint {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--tc-text-muted);
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--tc-border);
+  border-radius: var(--tc-radius-md);
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--tc-text-main);
+  background: var(--tc-bg-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--tc-primary);
+  box-shadow: 0 0 0 3px rgba(0, 108, 228, 0.12);
+}
+
+.price-diff {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  width: fit-content;
+}
+
+.price-diff--up {
+  color: #16a34a;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.price-diff--down {
+  color: #dc2626;
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+}
+
+/* === Confirm step === */
+.create-schedule-confirm {
+  align-items: center;
+  text-align: center;
+}
+
+.confirm-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.confirm-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--tc-text-main);
+}
+
+.confirm-details {
+  width: 100%;
+  background: var(--tc-bg-subtle);
+  border: 1px solid var(--tc-border);
+  border-radius: var(--tc-radius-md);
+  overflow: hidden;
+}
+
+.confirm-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--tc-spacing-3);
+  padding: var(--tc-spacing-3) var(--tc-spacing-4);
+  border-bottom: 1px solid var(--tc-border);
+  text-align: left;
+}
+
+.confirm-row:last-child {
+  border-bottom: none;
+}
+
+.confirm-label {
+  font-size: 0.875rem;
+  color: var(--tc-text-muted);
+  width: 160px;
+  flex-shrink: 0;
+}
+
+.confirm-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--tc-text-main);
+  flex: 1;
+}
+
+.confirm-value--price {
+  color: var(--tc-primary);
+  font-size: 1rem;
+}
+
+/* === Step footer (navigation buttons) === */
+.create-step-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--tc-spacing-3);
+  padding-top: var(--tc-spacing-2);
+  border-top: 1px solid var(--tc-border);
+  margin-top: var(--tc-spacing-2);
+}
