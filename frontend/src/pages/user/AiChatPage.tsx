@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import aiChatService, { type AiMessage, type AiSession } from '../../services/aiChatService';
+import tourRequestService from '../../services/tourRequestService';
 import { Button, LoadingBlock } from '../../components/common';
 import { DEFAULT_AVATAR } from '../../constants/images';
 import ReactMarkdown from 'react-markdown';
@@ -25,10 +26,11 @@ const AiChatPage: React.FC = () => {
   const [editTitleText, setEditTitleText] = useState('');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [upcomingTour, setUpcomingTour] = useState<any>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const streamingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const streamingIntervalRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -36,6 +38,30 @@ const AiChatPage: React.FC = () => {
 
   useEffect(() => {
     fetchSessions();
+    
+    const fetchUpcomingTour = async () => {
+      try {
+        const res = await tourRequestService.getMyRequests({ limit: 20 });
+        if (res.success && res.data?.data) {
+          const tours = res.data.data;
+          const upcoming = tours.find((t: any) => 
+            ['paid', 'approved'].includes(t.status) && 
+            new Date(t.startDate).getTime() > Date.now()
+          ) || tours.find((t: any) => ['paid', 'approved', 'completed'].includes(t.status));
+          
+          if (upcoming) {
+            setUpcomingTour(upcoming);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching upcoming tour for AI assistant:', error);
+      }
+    };
+
+    if (user) {
+      fetchUpcomingTour();
+    }
+
     return () => {
       if (streamingIntervalRef.current) clearInterval(streamingIntervalRef.current);
     };
@@ -96,18 +122,7 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const handleCreateSession = async () => {
-    try {
-      const res = await aiChatService.createSession();
-      if (res.success && res.data) {
-        setSessions([res.data, ...sessions]);
-        setCurrentSessionId(res.data.id);
-        toast.success('Đã khởi tạo hội thoại mới');
-      }
-    } catch (error) {
-      toast.error('Không thể tạo phiên chat mới');
-    }
-  };
+
 
   const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
     e.stopPropagation();
@@ -349,7 +364,7 @@ const AiChatPage: React.FC = () => {
                       </button>
                       <button 
                         className="session-action-btn delete-btn"
-                        onClick={(e) => handleDeleteSession(e, s)}
+                        onClick={(e) => handleDeleteSession(e, s.id)}
                         title="Xóa cuộc trò chuyện"
                       >
                         <i className="bi bi-trash"></i>
@@ -418,6 +433,40 @@ const AiChatPage: React.FC = () => {
                 </div>
                 <h2>Xin chào, {profile?.full_name || 'bạn'}! 👋</h2>
                 <p>Tôi là <strong>VinaGuide AI</strong> - trợ lý du lịch thông minh của TravelConnectVN. Hãy cho tôi biết nhu cầu của bạn, tôi sẽ lên lịch trình, đề xuất các tour tuyệt vời hoặc tìm kiếm bạn đồng hành hoàn hảo cho bạn!</p>
+                
+                {upcomingTour && (
+                  <div className="tc-ai-context-card">
+                    <div className="tc-context-badge">✈️ CHUYẾN ĐI CỦA BẠN</div>
+                    <h3>{upcomingTour.tourTitle}</h3>
+                    <p>Khởi hành: <strong>{new Date(upcomingTour.startDate).toLocaleDateString('vi-VN')}</strong> | Hướng dẫn viên: <strong>{upcomingTour.guideName || 'Đối tác'}</strong></p>
+                    <div className="tc-context-actions">
+                      <button 
+                        type="button"
+                        className="tc-context-btn"
+                        onClick={() => handleSendMessage(undefined, `Tôi có chuyến đi sắp tới '${upcomingTour.tourTitle}' khởi hành vào ngày ${new Date(upcomingTour.startDate).toLocaleDateString('vi-VN')}. Hãy gợi ý chi tiết danh sách hành lý cần chuẩn bị và thời tiết tại điểm đến.`)}
+                        disabled={sending}
+                      >
+                        🎒 Chuẩn bị hành lý & Thời tiết
+                      </button>
+                      <button 
+                        type="button"
+                        className="tc-context-btn"
+                        onClick={() => handleSendMessage(undefined, `Tôi tham gia tour '${upcomingTour.tourTitle}'. Hãy đề xuất các địa điểm ăn uống, quán ngon nổi tiếng xung quanh hành trình tour này.`)}
+                        disabled={sending}
+                      >
+                        🍲 Địa điểm ăn uống quanh đây
+                      </button>
+                      <button 
+                        type="button"
+                        className="tc-context-btn"
+                        onClick={() => handleSendMessage(undefined, `Tôi sẽ đi tour '${upcomingTour.tourTitle}'. Hãy gợi ý các hoạt động vui chơi giải trí, trải nghiệm thú vị ngoài giờ hoặc địa điểm check-in độc đáo.`)}
+                        disabled={sending}
+                      >
+                        📸 Hoạt động tự do & Check-in
+                      </button>
+                    </div>
+                  </div>
+                )}
                 
                 <div className="suggestion-grid">
                   {[

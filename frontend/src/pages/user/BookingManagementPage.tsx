@@ -5,6 +5,7 @@ import { useToast } from '../../contexts/ToastContext';
 import tourRequestService from '../../services/tourRequestService';
 import { companionService } from '../../services/companionService';
 import { paymentService } from '../../services/paymentService';
+import chatService from '../../services/chatService';
 import { DEFAULT_AVATAR } from '../../constants/images';
 import './BookingManagementPage.css';
 
@@ -16,6 +17,7 @@ interface NormalizedActivity {
   image?: string;
   startDate?: string;
   guideId: string;
+  guideUserId: string;
   guideName: string;
   guideAvatar?: string;
   participants: number;
@@ -27,6 +29,8 @@ interface NormalizedActivity {
   responseNote?: string;
   cancellationNote?: string;
   entityId: string; // tourId or postId
+  hasTourReview?: boolean;
+  hasGuideReview?: boolean;
 }
 
 export const BookingManagementPage: React.FC = () => {
@@ -69,6 +73,7 @@ export const BookingManagementPage: React.FC = () => {
           image: req.tourImage || 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?auto=format&fit=crop&q=80&w=400',
           startDate: req.startDate,
           guideId: req.guideId,
+          guideUserId: req.guideUserId || '',
           guideName: req.guideName || 'Hướng dẫn viên',
           guideAvatar: req.guideAvatar,
           participants: req.participantCount,
@@ -86,7 +91,9 @@ export const BookingManagementPage: React.FC = () => {
           })),
           responseNote: req.responseNote,
           cancellationNote: req.cancellationNote,
-          entityId: req.tourId
+          entityId: req.tourId,
+          hasTourReview: req.hasTourReview,
+          hasGuideReview: req.hasGuideReview
         };
       });
 
@@ -103,6 +110,7 @@ export const BookingManagementPage: React.FC = () => {
           image: coverImage || 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&q=80&w=400',
           startDate: req.companion_posts?.start_date,
           guideId: req.companion_posts?.users?.id || req.companion_posts?.user_id,
+          guideUserId: req.companion_posts?.users?.id || req.companion_posts?.user_id,
           guideName: req.companion_posts?.users?.full_name || 'Chủ bài',
           guideAvatar: req.companion_posts?.users?.avatar_url,
           participants: 1, // Current user
@@ -144,17 +152,59 @@ export const BookingManagementPage: React.FC = () => {
     }
   };
 
-  const handleCancelTour = async (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn hủy yêu cầu đặt tour này?')) {
+  const handleCancelTour = async (activity: NormalizedActivity) => {
+    const hasPaid = activity.amountPaid && activity.amountPaid > 0;
+    let confirmMsg = 'Bạn có chắc chắn muốn hủy yêu cầu đặt tour này?';
+    
+    if (hasPaid) {
+      confirmMsg = `Bạn đã thanh toán ${activity.amountPaid?.toLocaleString()}đ cho tour này.
+
+Theo chính sách hoàn tiền:
+- Hủy trước ngày khởi hành 3 ngày: Hoàn 100% số tiền đã trả.
+- Hủy trước ngày khởi hành 1-2 ngày: Hoàn 50% số tiền đã trả.
+- Hủy trong ngày khởi hành: Không hoàn tiền.
+
+Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc chắn muốn hủy đặt tour?`;
+    }
+
+    if (window.confirm(confirmMsg)) {
       try {
-        const response = await tourRequestService.cancelRequest(id, { reason: 'Người dùng hủy từ trang quản lý' });
+        const response = await tourRequestService.cancelRequest(activity.originalId, 'Người dùng hủy từ trang quản lý');
         if (response.success) {
-          toast.success('Đã hủy yêu cầu đặt tour');
+          toast.success(hasPaid ? 'Đã hủy đặt tour và gửi yêu cầu hoàn tiền thành công!' : 'Đã hủy đặt tour thành công.');
           fetchData();
         }
       } catch (error) {
-        toast.error('Có lỗi xảy ra khi hủy yêu cầu');
+        toast.error('Có lỗi xảy ra khi hủy đặt tour');
       }
+    }
+  };
+
+  const handleOpenGroupChat = async (companionPostId: string) => {
+    try {
+      const res = await chatService.createGroupCompanion(companionPostId);
+      if (res.success && res.data) {
+        navigate('/user/messages', { state: { conversationId: res.data.id } });
+      } else {
+        toast.error('Không thể mở nhóm chat.');
+      }
+    } catch (err: any) {
+      console.error('Error opening group chat:', err);
+      toast.error('Có lỗi xảy ra khi tạo nhóm chat. Vui lòng thử lại sau.');
+    }
+  };
+
+  const handleOpenDirectChat = async (userId: string) => {
+    try {
+      const res = await chatService.createDirect(userId);
+      if (res.success && res.data) {
+        navigate('/user/messages', { state: { conversationId: res.data.id } });
+      } else {
+        toast.error('Không thể mở cuộc trò chuyện.');
+      }
+    } catch (err: any) {
+      console.error('Error opening direct chat:', err);
+      toast.error('Có lỗi xảy ra khi bắt đầu cuộc trò chuyện.');
     }
   };
 
@@ -286,7 +336,7 @@ export const BookingManagementPage: React.FC = () => {
 
             return (
               <Card key={activity.id} className={`tc-booking-card ${activity.status} ${activity.type}`}>
-                <div className="tc-card-main">
+                <div className={`tc-card-main ${activity.type}`}>
                   <div className="tc-image-column">
                     <div className="tc-booking-tags">
                       <Badge variant={activity.type === 'tour' ? 'primary' : 'secondary'}>
@@ -403,6 +453,14 @@ export const BookingManagementPage: React.FC = () => {
                     <div className="tc-card-actions">
                       {activity.type === 'tour' ? (
                         <>
+                          {activity.totalPrice && (
+                            <div className="tc-payment-inline-badge">
+                              <span>Đã thanh toán:</span>
+                              <strong>{activity.amountPaid?.toLocaleString()}đ</strong>
+                              <span className="tc-percent-pill">{payPercent}%</span>
+                            </div>
+                          )}
+
                           {(activity.status === 'pending' || activity.status === 'approved') && (
                             <Button variant="primary" fullWidth onClick={() => handlePayment(activity.originalId)}>
                               Thanh toán ngay
@@ -414,7 +472,7 @@ export const BookingManagementPage: React.FC = () => {
                             </Button>
                           )}
                           {(activity.status === 'pending' || activity.status === 'approved') && (
-                            <Button variant="outline" fullWidth onClick={() => handleCancelTour(activity.originalId)}>
+                            <Button variant="outline" fullWidth onClick={() => handleCancelTour(activity)}>
                               Hủy đặt tour
                             </Button>
                           )}
@@ -425,31 +483,78 @@ export const BookingManagementPage: React.FC = () => {
                                   Hoàn tất thanh toán
                                 </Button>
                               )}
-                              <Button variant="outline" fullWidth onClick={() => navigate(`/tours/${activity.entityId}`)}>
-                                Xem chi tiết tour
-                              </Button>
                             </>
                           )}
+
+                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && (
+                            <Button 
+                              variant="outline" 
+                              fullWidth 
+                              onClick={() => navigate(`/tours/${activity.entityId}/map`)}
+                              className="tc-btn-map"
+                            >
+                              🗺️ Bản đồ lịch trình
+                            </Button>
+                          )}
+
+                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && activity.guideUserId && (
+                            <Button 
+                              variant="outline" 
+                              fullWidth 
+                              onClick={() => handleOpenDirectChat(activity.guideUserId)}
+                              className="tc-btn-chat"
+                            >
+                              💬 Nhắn tin hướng dẫn viên
+                            </Button>
+                          )}
+
+                          <Button variant="outline" fullWidth onClick={() => navigate(`/tours/${activity.entityId}`)}>
+                            Xem chi tiết tour
+                          </Button>
+
                           {(activity.status === 'completed' || activity.status === 'finished') && (
                             <div className="tc-review-container">
                               <span className="tc-review-prompt">Chuyến đi đã kết thúc, hãy chia sẻ cảm nhận của bạn!</span>
                               <div className="tc-review-actions">
-                                <Button 
-                                  variant="primary" 
-                                  fullWidth 
-                                  onClick={() => handleReviewTour(activity)}
-                                  className="tc-btn-review"
-                                >
-                                  ⭐ Đánh giá Tour
-                                </Button>
-                                <Button 
-                                  variant="outline" 
-                                  fullWidth 
-                                  onClick={() => handleReviewGuide(activity)}
-                                  className="tc-btn-review"
-                                >
-                                  👨‍💼 Đánh giá HDV
-                                </Button>
+                                {activity.hasTourReview ? (
+                                  <Button 
+                                    variant="secondary" 
+                                    fullWidth 
+                                    disabled
+                                    className="tc-btn-review"
+                                  >
+                                    ✓ Đã đánh giá Tour
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="primary" 
+                                    fullWidth 
+                                    onClick={() => handleReviewTour(activity)}
+                                    className="tc-btn-review"
+                                  >
+                                    ⭐ Đánh giá Tour
+                                  </Button>
+                                )}
+                                
+                                {activity.hasGuideReview ? (
+                                  <Button 
+                                    variant="secondary" 
+                                    fullWidth 
+                                    disabled
+                                    className="tc-btn-review"
+                                  >
+                                    ✓ Đã đánh giá HDV
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    fullWidth 
+                                    onClick={() => handleReviewGuide(activity)}
+                                    className="tc-btn-review"
+                                  >
+                                    👨‍💼 Đánh giá HDV
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           )}
@@ -461,13 +566,36 @@ export const BookingManagementPage: React.FC = () => {
                               Hủy yêu cầu
                             </Button>
                           )}
+                          
+                          {activity.status === 'approved' && (
+                            <div className="tc-chat-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                              <Button 
+                                variant="primary" 
+                                fullWidth 
+                                onClick={() => handleOpenDirectChat(activity.guideId)}
+                                className="tc-btn-chat"
+                              >
+                                💬 Nhắn tin chủ bài
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                fullWidth 
+                                onClick={() => handleOpenGroupChat(activity.entityId)}
+                                className="tc-btn-chat"
+                              >
+                                👥 Nhóm chat chuyến đi
+                              </Button>
+                            </div>
+                          )}
+
                           <Button variant="outline" fullWidth onClick={() => navigate(`/companions/${activity.entityId}`)}>
                             Xem bài viết
                           </Button>
+                          
                           {(activity.status === 'completed' || activity.status === 'finished') && (
-                            <Button variant="primary" fullWidth onClick={() => handleReviewGuide(activity)}>
-                              Đánh giá chủ bài
-                            </Button>
+                            <div className="tc-companion-completed-badge" style={{ textAlign: 'center', padding: '12px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', color: '#16a34a', fontSize: '0.85rem', fontWeight: '600' }}>
+                              ✓ Đã hoàn thành chuyến đi đồng hành!
+                            </div>
                           )}
                         </>
                       )}
@@ -502,8 +630,8 @@ export const BookingManagementPage: React.FC = () => {
                           <span className="tc-tx-amount">{tx.amount.toLocaleString()}đ</span>
                           <span className="tc-tx-method">{tx.method.toUpperCase()}</span>
                           <span>
-                            <Badge variant={tx.status === 'paid' ? 'success' : tx.status === 'cancelled' ? 'danger' : 'warning'}>
-                              {tx.status === 'paid' ? 'Thành công' : tx.status === 'cancelled' ? 'Đã hủy' : 'Đang chờ'}
+                            <Badge variant={tx.status === 'paid' ? 'success' : tx.status === 'refunded' ? 'secondary' : tx.status === 'cancelled' ? 'danger' : 'warning'}>
+                              {tx.status === 'paid' ? 'Thành công' : tx.status === 'refunded' ? 'Đã hoàn tiền' : tx.status === 'cancelled' ? 'Đã hủy' : 'Đang chờ'}
                             </Badge>
                           </span>
                         </div>

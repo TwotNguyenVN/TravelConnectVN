@@ -174,6 +174,7 @@ export class TourRequestsService {
           tourImage: req.tours.tour_images.find(img => img.is_cover)?.image_url || req.tours.tour_images[0]?.image_url,
           startDate: req.tour_schedules?.start_date,
           guideId: req.tours.guide_profiles.id, // Using profile ID for navigation
+          guideUserId: req.tours.guide_profiles.user_id,
           guideName: req.tours.guide_profiles.users?.full_name,
           guideAvatar: req.tours.guide_profiles.avatar_url || req.tours.guide_profiles.users?.avatar_url,
           participantCount: req.participant_count,
