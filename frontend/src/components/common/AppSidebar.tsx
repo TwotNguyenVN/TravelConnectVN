@@ -65,6 +65,9 @@ export const AppSidebar: React.FC = () => {
             <NavLink to="/guide/tour-requests" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
               📥 Yêu cầu từ khách
             </NavLink>
+            <NavLink to="/guide/income" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+              💰 Thống kê thu nhập
+            </NavLink>
           </nav>
         </div>
       )}

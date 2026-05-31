@@ -47,6 +47,9 @@ const GuideProfilePage: React.FC = () => {
   const [familiarSearch, setFamiliarSearch] = useState("");
   const [showFamiliarSuggestions, setShowFamiliarSuggestions] = useState(false);
 
+  // Active Tab state
+  const [activeTab, setActiveTab] = useState<'personal' | 'professional' | 'verification'>('personal');
+
   // Custom Dropdown States
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
   const [showRegionDropdown, setShowRegionDropdown] = useState(false);
@@ -585,441 +588,489 @@ const GuideProfilePage: React.FC = () => {
         </div>
       </div>
 
+      {/* Profile Tabs Navigation */}
+      <div className="profile-tabs-nav">
+        <button
+          type="button"
+          className={`tab-nav-btn ${activeTab === "personal" ? "active" : ""}`}
+          onClick={() => setActiveTab("personal")}
+        >
+          👤 Thông tin cá nhân
+        </button>
+        <button
+          type="button"
+          className={`tab-nav-btn ${activeTab === "professional" ? "active" : ""}`}
+          onClick={() => setActiveTab("professional")}
+        >
+          💼 Hồ sơ nghiệp vụ
+        </button>
+        <button
+          type="button"
+          className={`tab-nav-btn ${activeTab === "verification" ? "active" : ""}`}
+          onClick={() => setActiveTab("verification")}
+        >
+          🛡️ Xác minh &amp; Giấy phép
+        </button>
+      </div>
+
       <div
         className="guide-profile-sections"
         style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "30px",
-          marginTop: "20px",
+          marginTop: "10px",
         }}
       >
-        <form className="guide-profile-form" onSubmit={handleSave}>
-          <div className="form-section">
-            <h3>Thông tin chung</h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-            >
-              <div className="info-grid">
-                <Input
-                  label="Họ và tên"
-                  name="fullName"
-                  value={personalData.fullName}
-                  onChange={handlePersonalChange}
-                  fullWidth
-                  required
-                />
-                <Input
-                  label="Số điện thoại"
-                  name="phone"
-                  value={personalData.phone}
-                  onChange={handlePersonalChange}
-                  fullWidth
-                  required
-                />
-              </div>
-
-              <div className="info-grid">
-                <Input
-                  label="Ngày sinh"
-                  name="dateOfBirth"
-                  type="date"
-                  value={personalData.dateOfBirth}
-                  onChange={handlePersonalChange}
-                  fullWidth
-                  required
-                />
-                <div ref={genderDropdownRef} className="tc-input-container tc-input--full-width" style={{ position: "relative" }}>
-                  <label className="tc-input-label">Giới tính</label>
-                  <div 
-                    className="tc-input-field"
-                    onClick={() => setShowGenderDropdown(!showGenderDropdown)}
-                    style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", backgroundColor: "var(--color-bg-white)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
-                  >
-                    <span>
-                      {personalData.gender === "male" ? "Nam" : personalData.gender === "female" ? "Nữ" : personalData.gender === "other" ? "Khác" : "Chọn giới tính"}
-                    </span>
-                    <span style={{ fontSize: "12px", opacity: 0.6 }}>▼</span>
-                  </div>
-                  
-                  {showGenderDropdown && (
-                    <div className="province-suggestions-list" style={{ marginTop: "8px", position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10 }}>
-                      {[
-                        { value: "male", label: "Nam" },
-                        { value: "female", label: "Nữ" },
-                        { value: "other", label: "Khác" }
-                      ].map((opt) => (
-                        <div
-                          key={opt.value}
-                          className="suggestion-item"
-                          onClick={() => {
-                            setPersonalData(prev => ({ ...prev, gender: opt.value }));
-                            setShowGenderDropdown(false);
-                          }}
-                        >
-                          {opt.label}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div ref={regionDropdownRef} className="tc-input-container tc-input-container--full-width" style={{ position: "relative" }}>
-                <label className="tc-input-label">Khu vực (Miền)</label>
-                <div 
-                  className="tc-input-field"
-                  onClick={() => setShowRegionDropdown(!showRegionDropdown)}
-                  style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", backgroundColor: "var(--color-bg-white)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+        <div 
+          className="animate-up" 
+          style={{ display: activeTab !== "verification" ? "block" : "none" }}
+        >
+          <form className="guide-profile-form" onSubmit={handleSave}>
+            {activeTab === "personal" && (
+              <div className="form-section">
+                <h3>Thông tin chung &amp; Liên hệ</h3>
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: "20px" }}
                 >
-                  <span>{profile.region || "Chọn miền"}</span>
-                  <span style={{ fontSize: "12px", opacity: 0.6 }}>▼</span>
+                  <div className="info-grid">
+                    <Input
+                      label="Họ và tên"
+                      name="fullName"
+                      value={personalData.fullName}
+                      onChange={handlePersonalChange}
+                      fullWidth
+                      required
+                    />
+                    <Input
+                      label="Số điện thoại"
+                      name="phone"
+                      value={personalData.phone}
+                      onChange={handlePersonalChange}
+                      fullWidth
+                      required
+                    />
+                  </div>
+
+                  <div className="info-grid">
+                    <Input
+                      label="Ngày sinh"
+                      name="dateOfBirth"
+                      type="date"
+                      value={personalData.dateOfBirth}
+                      onChange={handlePersonalChange}
+                      fullWidth
+                      required
+                    />
+                    <div ref={genderDropdownRef} className="tc-input-container tc-input--full-width" style={{ position: "relative" }}>
+                      <label className="tc-input-label">Giới tính</label>
+                      <div 
+                        className="tc-input-field"
+                        onClick={() => setShowGenderDropdown(!showGenderDropdown)}
+                        style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", backgroundColor: "var(--color-bg-white)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      >
+                        <span>
+                          {personalData.gender === "male" ? "Nam" : personalData.gender === "female" ? "Nữ" : personalData.gender === "other" ? "Khác" : "Chọn giới tính"}
+                        </span>
+                        <span style={{ fontSize: "12px", opacity: 0.6 }}>▼</span>
+                      </div>
+                      
+                      {showGenderDropdown && (
+                        <div className="province-suggestions-list" style={{ marginTop: "8px", position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10 }}>
+                          {[
+                            { value: "male", label: "Nam" },
+                            { value: "female", label: "Nữ" },
+                            { value: "other", label: "Khác" }
+                          ].map((opt) => (
+                            <div
+                              key={opt.value}
+                              className="suggestion-item"
+                              onClick={() => {
+                                setPersonalData(prev => ({ ...prev, gender: opt.value }));
+                                setShowGenderDropdown(false);
+                              }}
+                            >
+                              {opt.label}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                
-                {showRegionDropdown && (
-                  <div className="province-suggestions-list" style={{ marginTop: "8px", position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10 }}>
-                    {["Miền Bắc", "Miền Trung", "Miền Nam"].map((region) => (
-                      <div
-                        key={region}
-                        className="suggestion-item"
-                        onClick={() => {
-                          setProfile(prev => ({ ...prev, region }));
-                          setShowRegionDropdown(false);
+              </div>
+            )}
+
+            {activeTab === "professional" && (
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "30px" }}
+              >
+                <div className="form-section">
+                  <h3>Nghiệp vụ &amp; Địa bàn hoạt động</h3>
+                  <div
+                    style={{ display: "flex", flexDirection: "column", gap: "20px" }}
+                  >
+                    <div ref={regionDropdownRef} className="tc-input-container tc-input-container--full-width" style={{ position: "relative" }}>
+                      <label className="tc-input-label">Khu vực (Miền)</label>
+                      <div 
+                        className="tc-input-field"
+                        onClick={() => setShowRegionDropdown(!showRegionDropdown)}
+                        style={{ width: "100%", padding: "12px", borderRadius: "12px", border: "1px solid #e2e8f0", backgroundColor: "var(--color-bg-white)", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                      >
+                        <span>{profile.region || "Chọn miền"}</span>
+                        <span style={{ fontSize: "12px", opacity: 0.6 }}>▼</span>
+                      </div>
+                      
+                      {showRegionDropdown && (
+                        <div className="province-suggestions-list" style={{ marginTop: "8px", position: "absolute", top: "100%", left: 0, right: 0, zIndex: 10 }}>
+                          {["Miền Bắc", "Miền Trung", "Miền Nam"].map((region) => (
+                            <div
+                              key={region}
+                              className="suggestion-item"
+                              onClick={() => {
+                                setProfile(prev => ({ ...prev, region }));
+                                setShowRegionDropdown(false);
+                              }}
+                            >
+                              {region}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Tỉnh thành hoạt động chính */}
+                    <div
+                      ref={provinceDropdownRef}
+                      className="tc-input-container tc-input-container--full-width"
+                      style={{ position: "relative" }}
+                    >
+                      <label className="tc-input-label">
+                        Tỉnh thành hoạt động chính / Am hiểu nhất
+                      </label>
+                      <input
+                        type="text"
+                        className="tc-input-field"
+                        placeholder="Nhập tên tỉnh thành (Ví dụ: Hà Nội, Đà Nẵng...)"
+                        value={provinceSearch}
+                        onChange={(e) => {
+                          setProvinceSearch(e.target.value);
+                          setShowProvinceSuggestions(true);
+                        }}
+                        onFocus={() => setShowProvinceSuggestions(true)}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "12px",
+                          border: "1px solid #e2e8f0",
+                          backgroundColor: "var(--color-bg-white)",
+                        }}
+                        required
+                      />
+
+                      {showProvinceSuggestions && (
+                        <div className="province-suggestions-list">
+                          {provinces
+                            .filter(
+                              (p) =>
+                                (!profile.region || p.region === profile.region) &&
+                                p.name
+                                  .toLowerCase()
+                                  .includes(provinceSearch.toLowerCase()),
+                            )
+                            .slice(0, 8)
+                            .map((p) => (
+                              <div
+                                key={p.id}
+                                className="suggestion-item"
+                                onClick={() => {
+                                  setProfile((prev) => ({
+                                    ...prev,
+                                    homeProvinceId: p.id,
+                                    workingArea: p.name,
+                                  }));
+                                  setProvinceSearch(p.name);
+                                  setShowProvinceSuggestions(false);
+                                }}
+                              >
+                                {p.name}
+                              </div>
+                            ))}
+                          {provinces.filter(
+                            (p) =>
+                              (!profile.region || p.region === profile.region) &&
+                              p.name
+                                .toLowerCase()
+                                .includes(provinceSearch.toLowerCase()),
+                          ).length === 0 && (
+                            <div className="suggestion-item no-results">
+                              Không tìm thấy tỉnh thành
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Các tỉnh thành lân cận */}
+                    <div
+                      ref={familiarDropdownRef}
+                      className="tc-input-container tc-input-container--full-width"
+                      style={{ position: "relative" }}
+                    >
+                      <label className="tc-input-label">
+                        Các tỉnh thành lân cận am hiểu khác (Chọn nhiều)
+                      </label>
+
+                      {/* Selected Familiar Provinces Tags */}
+                      <div className="selected-tags-container">
+                        {profile.familiarProvinces &&
+                          profile.familiarProvinces
+                            .split(",")
+                            .map((s) => s.trim())
+                            .filter((s) => s !== "")
+                            .map((name, idx) => (
+                              <div key={idx} className="tag-chip">
+                                <span>{name}</span>
+                                <button
+                                  type="button"
+                                  className="tag-remove"
+                                  onClick={() => removeFamiliarProvince(name)}
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            ))}
+                      </div>
+
+                      <input
+                        type="text"
+                        className="tc-input-field"
+                        placeholder="Tìm và chọn các tỉnh thành khác..."
+                        value={familiarSearch}
+                        onChange={(e) => {
+                          setFamiliarSearch(e.target.value);
+                          setShowFamiliarSuggestions(true);
+                        }}
+                        onFocus={() => setShowFamiliarSuggestions(true)}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "12px",
+                          border: "1px solid #e2e8f0",
+                          backgroundColor: "var(--color-bg-white)",
+                        }}
+                      />
+
+                      {showFamiliarSuggestions && (
+                        <div className="province-suggestions-list">
+                          {provinces
+                            .filter(
+                              (p) =>
+                                (!profile.region || p.region === profile.region) &&
+                                p.id !== profile.homeProvinceId &&
+                                p.name
+                                  .toLowerCase()
+                                  .includes(familiarSearch.toLowerCase()) &&
+                                !(profile.familiarProvinces || "")
+                                  .split(",")
+                                  .map((s) => s.trim())
+                                  .includes(p.name),
+                            )
+                            .slice(0, 8)
+                            .map((p) => (
+                              <div
+                                key={p.id}
+                                className="suggestion-item"
+                                onClick={() => {
+                                  toggleFamiliarProvince(p.name);
+                                  setShowFamiliarSuggestions(false);
+                                }}
+                              >
+                                {p.name}
+                              </div>
+                            ))}
+                          {provinces.filter(
+                            (p) =>
+                              (!profile.region || p.region === profile.region) &&
+                              p.id !== profile.homeProvinceId &&
+                              p.name
+                                .toLowerCase()
+                                .includes(familiarSearch.toLowerCase()) &&
+                              !(profile.familiarProvinces || "")
+                                .split(",")
+                                .map((s) => s.trim())
+                                .includes(p.name),
+                          ).length === 0 && (
+                            <div className="suggestion-item no-results">
+                              Không còn tỉnh thành nào phù hợp
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      <p
+                        className="tc-input-helper-text"
+                        style={{
+                          marginTop: "8px",
+                          fontSize: "12px",
+                          color: "var(--color-text-muted)",
                         }}
                       >
-                        {region}
+                        {profile.region
+                          ? `Gợi ý: Đang lọc các tỉnh thuộc ${profile.region}`
+                          : "Gợi ý: Chọn miền ở trên để lọc tỉnh thành theo khu vực"}
+                      </p>
+                    </div>
+
+                    <Input
+                      label="Số năm kinh nghiệm"
+                      name="yearsOfExperience"
+                      type="number"
+                      value={profile.yearsOfExperience}
+                      onChange={handleProfileChange}
+                      fullWidth
+                      required
+                      min={0}
+                    />
+
+                    <div className="tc-input-container tc-input-container--full-width">
+                      <label className="tc-input-label">Giới thiệu bản thân</label>
+                      <textarea
+                        className="tc-input-field"
+                        name="bio"
+                        value={profile.bio}
+                        onChange={handleProfileChange}
+                        placeholder="Chia sẻ về kinh nghiệm, phong cách dẫn tour và lý do khách hàng nên chọn bạn..."
+                        rows={5}
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          borderRadius: "12px",
+                          border: "1px solid #e2e8f0",
+                          fontFamily: "inherit",
+                          fontSize: "14px",
+                          resize: "vertical",
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-section">
+                  <h3>Ngôn ngữ thông thạo</h3>
+                  <div className="checkbox-grid">
+                    {selectedLangs.map((lang) => (
+                      <div
+                        key={lang.id}
+                        className="checkbox-item active"
+                        onClick={() =>
+                          setSelectedLanguages((prev) =>
+                            prev.filter((id) => id !== lang.id),
+                          )
+                        }
+                      >
+                        <span>{lang.name}</span>
+                      </div>
+                    ))}
+
+                    {selectedLangs.length > 0 && unselectedLangs.length > 0 && (
+                      <div className="grid-separator">
+                        <span>Lựa chọn khác</span>
+                      </div>
+                    )}
+
+                    {unselectedLangs.map((lang) => (
+                      <div
+                        key={lang.id}
+                        className="checkbox-item"
+                        onClick={() =>
+                          setSelectedLanguages((prev) => [...prev, lang.id])
+                        }
+                      >
+                        <span>{lang.name}</span>
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+                  <div style={{ marginTop: "15px" }}>
+                    <Input
+                      label="Ngôn ngữ khác"
+                      name="otherLanguages"
+                      value={profile.otherLanguages || ""}
+                      onChange={handleProfileChange}
+                      placeholder="Ví dụ: Tiếng Lào, Tiếng Khmer..."
+                      fullWidth
+                    />
+                  </div>
+                </div>
 
-              {/* Tỉnh thành hoạt động chính - hiển thị luôn */}
-              <div
-                ref={provinceDropdownRef}
-                className="tc-input-container tc-input-container--full-width"
-                style={{ position: "relative" }}
-              >
-                <label className="tc-input-label">
-                  Tỉnh thành hoạt động chính / Am hiểu nhất
-                </label>
-                <input
-                  type="text"
-                  className="tc-input-field"
-                  placeholder="Nhập tên tỉnh thành (Ví dụ: Hà Nội, Đà Nẵng...)"
-                  value={provinceSearch}
-                  onChange={(e) => {
-                    setProvinceSearch(e.target.value);
-                    setShowProvinceSuggestions(true);
-                  }}
-                  onFocus={() => setShowProvinceSuggestions(true)}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "12px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "var(--color-bg-white)",
-                  }}
-                  required
-                />
+                <div className="form-section">
+                  <h3>Kỹ năng &amp; Chuyên môn</h3>
+                  <div className="checkbox-grid">
+                    {selectedSks.map((skill) => (
+                      <div
+                        key={skill.id}
+                        className="checkbox-item active"
+                        onClick={() =>
+                          setSelectedSkills((prev) =>
+                            prev.filter((id) => id !== skill.id),
+                          )
+                        }
+                      >
+                        <span>{skill.name}</span>
+                      </div>
+                    ))}
 
-                {showProvinceSuggestions && (
-                  <div className="province-suggestions-list">
-                    {provinces
-                      .filter(
-                        (p) =>
-                          (!profile.region || p.region === profile.region) &&
-                          p.name
-                            .toLowerCase()
-                            .includes(provinceSearch.toLowerCase()),
-                      )
-                      .slice(0, 8)
-                      .map((p) => (
-                        <div
-                          key={p.id}
-                          className="suggestion-item"
-                          onClick={() => {
-                            setProfile((prev) => ({
-                              ...prev,
-                              homeProvinceId: p.id,
-                              workingArea: p.name,
-                            }));
-                            setProvinceSearch(p.name);
-                            setShowProvinceSuggestions(false);
-                          }}
-                        >
-                          {p.name}
-                        </div>
-                      ))}
-                    {provinces.filter(
-                      (p) =>
-                        (!profile.region || p.region === profile.region) &&
-                        p.name
-                          .toLowerCase()
-                          .includes(provinceSearch.toLowerCase()),
-                    ).length === 0 && (
-                      <div className="suggestion-item no-results">
-                        Không tìm thấy tỉnh thành
+                    {selectedSks.length > 0 && unselectedSks.length > 0 && (
+                      <div className="grid-separator">
+                        <span>Gợi ý kỹ năng khác</span>
                       </div>
                     )}
-                  </div>
-                )}
-              </div>
 
-              {/* Các tỉnh thành lân cận - hiển thị luôn */}
-              <div
-                ref={familiarDropdownRef}
-                className="tc-input-container tc-input-container--full-width"
-                style={{ position: "relative" }}
-              >
-                <label className="tc-input-label">
-                  Các tỉnh thành lân cận am hiểu khác (Chọn nhiều)
-                </label>
-
-                {/* Selected Familiar Provinces Tags */}
-                <div className="selected-tags-container">
-                  {profile.familiarProvinces &&
-                    profile.familiarProvinces
-                      .split(",")
-                      .map((s) => s.trim())
-                      .filter((s) => s !== "")
-                      .map((name, idx) => (
-                        <div key={idx} className="tag-chip">
-                          <span>{name}</span>
-                          <button
-                            type="button"
-                            className="tag-remove"
-                            onClick={() => removeFamiliarProvince(name)}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
-                </div>
-
-                <input
-                  type="text"
-                  className="tc-input-field"
-                  placeholder="Tìm và chọn các tỉnh thành khác..."
-                  value={familiarSearch}
-                  onChange={(e) => {
-                    setFamiliarSearch(e.target.value);
-                    setShowFamiliarSuggestions(true);
-                  }}
-                  onFocus={() => setShowFamiliarSuggestions(true)}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "12px",
-                    border: "1px solid #e2e8f0",
-                    backgroundColor: "var(--color-bg-white)",
-                  }}
-                />
-
-                {showFamiliarSuggestions && (
-                  <div className="province-suggestions-list">
-                    {provinces
-                      .filter(
-                        (p) =>
-                          (!profile.region || p.region === profile.region) &&
-                          p.id !== profile.homeProvinceId &&
-                          p.name
-                            .toLowerCase()
-                            .includes(familiarSearch.toLowerCase()) &&
-                          !(profile.familiarProvinces || "")
-                            .split(",")
-                            .map((s) => s.trim())
-                            .includes(p.name),
-                      )
-                      .slice(0, 8)
-                      .map((p) => (
-                        <div
-                          key={p.id}
-                          className="suggestion-item"
-                          onClick={() => {
-                            toggleFamiliarProvince(p.name);
-                            setShowFamiliarSuggestions(false);
-                          }}
-                        >
-                          {p.name}
-                        </div>
-                      ))}
-                    {provinces.filter(
-                      (p) =>
-                        (!profile.region || p.region === profile.region) &&
-                        p.id !== profile.homeProvinceId &&
-                        p.name
-                          .toLowerCase()
-                          .includes(familiarSearch.toLowerCase()) &&
-                        !(profile.familiarProvinces || "")
-                          .split(",")
-                          .map((s) => s.trim())
-                          .includes(p.name),
-                    ).length === 0 && (
-                      <div className="suggestion-item no-results">
-                        Không còn tỉnh thành nào phù hợp
+                    {unselectedSks.map((skill) => (
+                      <div
+                        key={skill.id}
+                        className="checkbox-item"
+                        onClick={() =>
+                          setSelectedSkills((prev) => [...prev, skill.id])
+                        }
+                      >
+                        <span>{skill.name}</span>
                       </div>
-                    )}
+                    ))}
                   </div>
-                )}
-                <p
-                  className="tc-input-helper-text"
-                  style={{
-                    marginTop: "8px",
-                    fontSize: "12px",
-                    color: "var(--color-text-muted)",
-                  }}
-                >
-                  {profile.region
-                    ? `Gợi ý: Đang lọc các tỉnh thuộc ${profile.region}`
-                    : "Gợi ý: Chọn miền ở trên để lọc tỉnh thành theo khu vực"}
-                </p>
+                  <div style={{ marginTop: "15px" }}>
+                    <Input
+                      label="Kỹ năng khác"
+                      name="otherSkills"
+                      value={profile.otherSkills || ""}
+                      onChange={handleProfileChange}
+                      placeholder="Ví dụ: Nhảy hiện đại, Quay phim flycam..."
+                      fullWidth
+                    />
+                  </div>
+                </div>
               </div>
+            )}
 
-              <Input
-                label="Số năm kinh nghiệm"
-                name="yearsOfExperience"
-                type="number"
-                value={profile.yearsOfExperience}
-                onChange={handleProfileChange}
-                fullWidth
-                required
-                min={0}
-              />
-
-              <div className="tc-input-container tc-input-container--full-width">
-                <label className="tc-input-label">Giới thiệu bản thân</label>
-                <textarea
-                  className="tc-input-field"
-                  name="bio"
-                  value={profile.bio}
-                  onChange={handleProfileChange}
-                  placeholder="Chia sẻ về kinh nghiệm, phong cách dẫn tour và lý do khách hàng nên chọn bạn..."
-                  rows={5}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "12px",
-                    border: "1px solid #e2e8f0",
-                    fontFamily: "inherit",
-                    fontSize: "14px",
-                    resize: "vertical",
-                  }}
-                  required
-                />
-              </div>
+            <div className="form-actions">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fetchData()}
+                disabled={saving}
+              >
+                Hủy thay đổi
+              </Button>
+              <Button type="submit" isLoading={saving}>
+                Lưu hồ sơ
+              </Button>
             </div>
-          </div>
+          </form>
+        </div>
 
-          <div className="form-section">
-            <h3>Ngôn ngữ thông thạo</h3>
-            <div className="checkbox-grid">
-              {selectedLangs.map((lang) => (
-                <div
-                  key={lang.id}
-                  className="checkbox-item active"
-                  onClick={() =>
-                    setSelectedLanguages((prev) =>
-                      prev.filter((id) => id !== lang.id),
-                    )
-                  }
-                >
-                  <span>{lang.name}</span>
-                </div>
-              ))}
-
-              {selectedLangs.length > 0 && unselectedLangs.length > 0 && (
-                <div className="grid-separator">
-                  <span>Lựa chọn khác</span>
-                </div>
-              )}
-
-              {unselectedLangs.map((lang) => (
-                <div
-                  key={lang.id}
-                  className="checkbox-item"
-                  onClick={() =>
-                    setSelectedLanguages((prev) => [...prev, lang.id])
-                  }
-                >
-                  <span>{lang.name}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: "15px" }}>
-              <Input
-                label="Ngôn ngữ khác"
-                name="otherLanguages"
-                value={profile.otherLanguages || ""}
-                onChange={handleProfileChange}
-                placeholder="Ví dụ: Tiếng Lào, Tiếng Khmer..."
-                fullWidth
-              />
-            </div>
-          </div>
-
-          <div className="form-section">
-            <h3>Kỹ năng & Chuyên môn</h3>
-            <div className="checkbox-grid">
-              {selectedSks.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="checkbox-item active"
-                  onClick={() =>
-                    setSelectedSkills((prev) =>
-                      prev.filter((id) => id !== skill.id),
-                    )
-                  }
-                >
-                  <span>{skill.name}</span>
-                </div>
-              ))}
-
-              {selectedSks.length > 0 && unselectedSks.length > 0 && (
-                <div className="grid-separator">
-                  <span>Gợi ý kỹ năng khác</span>
-                </div>
-              )}
-
-              {unselectedSks.map((skill) => (
-                <div
-                  key={skill.id}
-                  className="checkbox-item"
-                  onClick={() =>
-                    setSelectedSkills((prev) => [...prev, skill.id])
-                  }
-                >
-                  <span>{skill.name}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ marginTop: "15px" }}>
-              <Input
-                label="Kỹ năng khác"
-                name="otherSkills"
-                value={profile.otherSkills || ""}
-                onChange={handleProfileChange}
-                placeholder="Ví dụ: Nhảy hiện đại, Quay phim flycam..."
-                fullWidth
-              />
-            </div>
-          </div>
-
-          <div className="form-actions">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => fetchData()}
-              disabled={saving}
-            >
-              Hủy thay đổi
-            </Button>
-            <Button type="submit" isLoading={saving}>
-              Lưu hồ sơ
-            </Button>
-          </div>
-        </form>
-
-        <GuideVerificationPage isEmbedded={true} />
+        <div 
+          className="animate-up"
+          style={{ display: activeTab === "verification" ? "block" : "none" }}
+        >
+          <GuideVerificationPage isEmbedded={true} />
+        </div>
       </div>
 
       {/* Cover Selection Modal */}

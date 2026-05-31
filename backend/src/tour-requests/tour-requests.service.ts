@@ -152,7 +152,8 @@ export class TourRequestsService {
     return {
       data: requests.map((req) => {
         const lastPaidTransaction = req.payment_transactions[0];
-        const totalPrice = Number(req.tours.price) * req.participant_count;
+        const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
+        const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
         if (lastPaidTransaction) {
@@ -181,7 +182,7 @@ export class TourRequestsService {
           processedAt: req.processed_at,
           responseNote: req.response_note,
           cancellationNote: req.cancellation_note,
-          tourPrice: Number(req.tours.price),
+          tourPrice: price,
           totalPrice: totalPrice,
           paymentStatus: paymentStatus,
           hasTourReview: !!req.tour_reviews,
@@ -212,7 +213,6 @@ export class TourRequestsService {
       tours: {
         guide_profile_id: guideProfile.id,
       },
-      status: 'paid', // Chỉ hiển thị các yêu cầu đã thanh toán
     };
     if (status) where.status = status;
     if (tourId) where.tour_id = tourId;
@@ -252,7 +252,8 @@ export class TourRequestsService {
     return {
       data: requests.map((req) => {
         const lastPaidTransaction = req.payment_transactions[0];
-        const totalPrice = Number(req.tours.price) * req.participant_count;
+        const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
+        const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
         if (lastPaidTransaction) {
