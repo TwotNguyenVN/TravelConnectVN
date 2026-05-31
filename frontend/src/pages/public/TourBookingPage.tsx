@@ -35,9 +35,9 @@ const TourBookingPage: React.FC = () => {
 
   // Contact Info State
   const [contactInfo, setContactInfo] = useState({
-    fullName: user?.full_name || '',
+    fullName: user?.user_metadata?.full_name || '',
     email: user?.email || '',
-    phone: user?.phone || '',
+    phone: user?.user_metadata?.phone || '',
     notes: ''
   });
 
@@ -46,10 +46,10 @@ const TourBookingPage: React.FC = () => {
   const [passengers, setPassengers] = useState<Passenger[]>(
     Array.from({ length: initialParticipants }).map((_, i) => ({
       id: i,
-      fullName: i === 0 && user?.full_name ? user.full_name : '',
+      fullName: i === 0 && user?.user_metadata?.full_name ? user.user_metadata.full_name : '',
       gender: 'male',
       birthDate: '',
-      phone: i === 0 && user?.phone ? user.phone : ''
+      phone: i === 0 && user?.user_metadata?.phone ? user.user_metadata.phone : ''
     }))
   );
 
@@ -165,9 +165,9 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
       // 1. Create Tour Request
       const requestRes = await tourRequestService.createRequest({
         tourId: tour.id,
-        scheduleId: schedule?.id,
         participantCount: participantCount,
-        note: noteText
+        note: noteText,
+        ...(schedule?.id ? { scheduleId: schedule.id } : {})
       });
 
       if (!requestRes.success || !requestRes.data) {
@@ -377,7 +377,9 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
                     <span className="icon">🕒</span>
                     <div className="info">
                       <span className="label">Thời gian</span>
-                      <span className="value">{tour.numDays} ngày {tour.numNights} đêm</span>
+                      <span className="value">
+                        {tour.numDays === 1 && tour.numNights === 0 ? "Trong Ngày" : `${tour.numDays} ngày ${tour.numNights} đêm`}
+                      </span>
                     </div>
                   </div>
                   <div className="tc-summary-row">
