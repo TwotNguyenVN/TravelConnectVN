@@ -50,6 +50,22 @@ export class TourRequestsService {
       );
     }
 
+    // 2.5. Kiểm tra người dùng đã có yêu cầu đặt tour đang chờ hoặc đang hoạt động
+    const existingRequest = await this.prisma.tour_requests.findFirst({
+      where: {
+        tour_id: tourId,
+        schedule_id: scheduleId || null,
+        user_id: userId,
+        status: { in: ['pending', 'approved', 'paid'] },
+      },
+    });
+
+    if (existingRequest) {
+      throw new BadRequestException(
+        'Bạn đã có yêu cầu đặt tour đang chờ hoặc hoạt động cho chuyến này',
+      );
+    }
+
     // 3. Kiểm tra số lượng chỗ còn lại
     let maxParticipants = tour.max_participants;
     let schedule: any = null;
@@ -304,7 +320,10 @@ export class TourRequestsService {
   ) {
     const request = await this.prisma.tour_requests.findUnique({
       where: { id: requestId },
-      include: { tours: { include: { guide_profiles: true } } },
+      include: { 
+        tours: { include: { guide_profiles: true } },
+        tour_schedules: true
+      },
     });
 
     if (!request) {
@@ -315,20 +334,76 @@ export class TourRequestsService {
       throw new ForbiddenException('Bạn không có quyền hủy yêu cầu này');
     }
 
-    if (request.status !== 'pending' && request.status !== 'approved') {
+    if (request.status !== 'pending' && request.status !== 'approved' && request.status !== 'paid') {
       throw new BadRequestException(
-        'Chỉ có thể hủy yêu cầu đang chờ hoặc đã được duyệt (nếu chưa thanh toán)',
+        'Chỉ có thể hủy yêu cầu đang chờ, đã duyệt hoặc đã thanh toán',
       );
+    }
+
+    let nextStatus = 'cancelled_by_user';
+    let refundAmount = 0;
+    const hasPaid = request.status === 'paid';
+
+    if (hasPaid) {
+      // Calculate amount paid from database transactions
+      const paidTransactions = await this.prisma.payment_transactions.findMany({
+        where: {
+          tour_request_id: requestId,
+          status: 'paid',
+        },
+      });
+      const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+
+      if (totalPaid > 0) {
+        // Calculate days to start date
+        const startDateVal = request.tour_schedules?.start_date || request.tours.start_date;
+        if (startDateVal) {
+          const start = new Date(startDateVal);
+          const now = new Date();
+          
+          // Clear time for calculation
+          start.setHours(0, 0, 0, 0);
+          now.setHours(0, 0, 0, 0);
+          
+          const diffTime = start.getTime() - now.getTime();
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+          if (diffDays >= 3) {
+            refundAmount = totalPaid; // 100% refund
+            nextStatus = 'refund_pending';
+          } else if (diffDays >= 1) {
+            refundAmount = totalPaid * 0.5; // 50% refund
+            nextStatus = 'refund_pending';
+          } else {
+            refundAmount = 0; // 0% refund
+            nextStatus = 'cancelled_by_user';
+          }
+        }
+      }
     }
 
     const updatedRequest = await this.prisma.tour_requests.update({
       where: { id: requestId },
       data: {
-        status: 'cancelled_by_user',
+        status: nextStatus,
         cancelled_at: new Date(),
-        cancellation_note: dto.reason || 'Người dùng đã hủy yêu cầu',
+        cancellation_note: dto.reason || (nextStatus === 'refund_pending' ? `Người dùng hủy - Đang chờ hoàn tiền ${refundAmount.toLocaleString()}đ` : 'Người dùng đã hủy yêu cầu'),
       },
     });
+
+    // If refund is pending, create a refund transaction record in payment_transactions
+    if (refundAmount > 0) {
+      await this.prisma.payment_transactions.create({
+        data: {
+          tour_request_id: requestId,
+          user_id: userId,
+          amount: -refundAmount, // negative amount to represent refund
+          payment_method: 'vnpay',
+          status: 'refund_pending',
+          transaction_code: `REFUND-${requestId.substring(0, 8)}-${Date.now()}`,
+        },
+      });
+    }
 
     // 4. Ghi log hoạt động
     await this.activityLogsService.log(
@@ -336,21 +411,18 @@ export class TourRequestsService {
       'tour_request.cancelled',
       'TOUR_REQUEST',
       requestId,
-      { tour_title: request.tours.title },
+      { tour_title: request.tours.title, refund_amount: refundAmount },
     );
 
     // Thông báo cho Guide
-
     await this.notificationsService.create({
       user_id: request.tours.guide_profiles.user_id,
       title: 'Yêu cầu tham gia tour bị hủy',
-      content: `Người dùng đã hủy yêu cầu tham gia tour "${request.tours.title}".`,
+      content: `Người dùng đã hủy yêu cầu tham gia tour "${request.tours.title}".${refundAmount > 0 ? ` (Chờ hoàn tiền: ${refundAmount.toLocaleString()} đ)` : ''}`,
       type: 'tour_request',
       entity_type: 'TOUR_REQUEST',
       entity_id: requestId,
     });
-
-
 
     return updatedRequest;
   }
