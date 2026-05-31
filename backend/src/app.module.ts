@@ -25,8 +25,7 @@ import { RecommendationsModule } from './recommendations/recommendations.module'
 import { AccommodationsModule } from './accommodations/accommodations.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AiChatModule } from './ai-chat/ai-chat.module';
-
-
+import { TripExpensesModule } from './trip-expenses/trip-expenses.module';
 
 @Module({
   imports: [
@@ -57,6 +56,7 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
     AccommodationsModule,
     PaymentsModule,
     AiChatModule,
+    TripExpensesModule,
   ],
 
 

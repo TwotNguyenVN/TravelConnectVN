@@ -25,6 +25,7 @@
   margin-bottom: 8px;
   background: linear-gradient(135deg, #1e293b 0%, #3b82f6 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -465,4 +466,66 @@
     border-left: none;
     border-top: 1px solid #e2e8f0;
   }
+}
+
+/* Custom premium badge and layout overrides */
+.tc-card-main.companion {
+  grid-template-columns: 380px 1fr;
+}
+
+@media (max-width: 1100px) {
+  .tc-card-main.companion {
+    grid-template-columns: 260px 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .tc-card-main.companion {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tc-payment-inline-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.tc-payment-inline-badge strong {
+  color: #1e293b;
+  margin-left: auto;
+  margin-right: 8px;
+  font-size: 0.9rem;
+}
+
+.tc-percent-pill {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+}
+
+.tc-btn-map {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+
+.tc-btn-map:hover {
+  background: #ecfdf5 !important;
+  border-color: #059669 !important;
+  color: #059669 !important;
+}
+
+.tc-btn-chat {
+  font-weight: 700 !important;
 }
