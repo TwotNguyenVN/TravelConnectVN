@@ -5,14 +5,14 @@ import './UserLayout.css';
 
 export function UserLayout() {
   const location = useLocation();
-  const isAiAssistant = location.pathname === '/user/ai-assistant';
+  const isFullHeightPage = ['/user/ai-assistant', '/user/messages'].includes(location.pathname);
 
   return (
-    <div className={`user-layout ${isAiAssistant ? 'user-layout-no-scroll' : ''}`}>
+    <div className="user-layout">
       <AppSidebar />
 
-      <main className={`user-main ${isAiAssistant ? 'user-main-no-scroll' : ''}`}>
-        {!isAiAssistant && (
+      <main className={`user-main ${isFullHeightPage ? 'user-main-full-height' : ''}`}>
+        {!isFullHeightPage && (
           <header className="user-header">
             <h2>Dashboard người dùng</h2>
             <div className="user-header-actions">
@@ -20,7 +20,7 @@ export function UserLayout() {
             </div>
           </header>
         )}
-        <div className={`user-content ${isAiAssistant ? 'user-content-no-scroll' : ''}`}>
+        <div className={`user-content ${isFullHeightPage ? 'user-content-full-height' : ''}`}>
           <Outlet />
         </div>
       </main>
