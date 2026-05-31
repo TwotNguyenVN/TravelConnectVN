@@ -622,8 +622,8 @@
 }
 
 .chat-message.user .message-bubble-actions {
-  left: 12px;
-  right: auto;
+  right: 12px;
+  left: auto;
 }
 
 .message-bubble:hover .message-bubble-actions {
