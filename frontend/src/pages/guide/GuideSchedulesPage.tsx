@@ -116,12 +116,20 @@ const GuideSchedulesPage: React.FC = () => {
     fetchAllSchedules();
   }, []);
 
+// Helper to format date in YYYY-MM-DD using local timezone
+const formatDateLocal = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
   // --- View schedule detail handler (existing) ---
   const handleDateClick = (date: Date, _schedule?: any) => {
-    const dateString = date.toISOString().split('T')[0];
+    const dateString = formatDateLocal(date);
     const daySchedules = schedules.filter(s => {
       const sDate = new Date(s.start_date);
-      const sDateString = sDate.toISOString().split('T')[0];
+      const sDateString = formatDateLocal(sDate);
       return sDateString === dateString;
     });
     setSelectedDate(date);
@@ -162,7 +170,7 @@ const GuideSchedulesPage: React.FC = () => {
     if (!selectedTour || !createDate) return;
     try {
       setIsCreating(true);
-      const startDate = createDate.toISOString().split('T')[0];
+      const startDate = formatDateLocal(createDate);
       await tourService.createTourSchedule(selectedTour.id, {
         startDate,
         price: createPrice,
@@ -326,10 +334,10 @@ const GuideSchedulesPage: React.FC = () => {
 
             <div className="weekly-grid">
               {weekDays.map((day, idx) => {
-                const dateString = day.toISOString().split('T')[0];
+                const dateString = formatDateLocal(day);
                 const daySchedules = schedules.filter(s => {
                   const sDate = new Date(s.start_date);
-                  const sDateString = sDate.toISOString().split('T')[0];
+                  const sDateString = formatDateLocal(sDate);
                   return sDateString === dateString;
                 });
 
@@ -477,7 +485,7 @@ const GuideSchedulesPage: React.FC = () => {
                       variant="outline"
                       size="small"
                       fullWidth
-                      onClick={() => navigate(`/guide/tours/edit/${sch.tourId}?tab=schedules`)}
+                      onClick={() => navigate(`/guide/tours/${sch.tourId}/schedules/${sch.id}`)}
                     >
                       Quản lý &amp; Cập nhật
                     </Button>
