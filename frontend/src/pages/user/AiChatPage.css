@@ -1042,3 +1042,96 @@
 @keyframes ai-spin {
   to { transform: rotate(360deg); }
 }
+
+/* Inline Message Editing System */
+.message-bubble.editing {
+  background: #2a2b36 !important;
+  color: #ececf1 !important;
+  border-radius: 16px !important;
+  padding: 14px 16px !important;
+  width: 100%;
+  max-width: 100% !important;
+  box-shadow: var(--ai-shadow-lg) !important;
+}
+
+.message-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.message-edit-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: inherit;
+  font-family: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.message-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.message-edit-btn {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--ai-transition);
+  border: 1px solid transparent;
+}
+
+.message-edit-btn.cancel {
+  background: #202123;
+  color: #ececf1;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.message-edit-btn.cancel:hover {
+  background: #343541;
+}
+
+.message-edit-btn.submit {
+  background: #ffffff;
+  color: #202123;
+}
+
+.message-edit-btn.submit:hover:not(:disabled) {
+  background: #ececf1;
+}
+
+.message-edit-btn.submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Stop button animations and overrides */
+.send-circle-btn.stop-btn {
+  background: #ef4444 !important; /* Premium red stop button */
+  color: white !important;
+  animation: stop-btn-pulse 1.5s infinite;
+}
+
+.send-circle-btn.stop-btn:hover {
+  background: #dc2626 !important;
+}
+
+.send-circle-btn.stop-btn .stop-icon {
+  width: 12px;
+  height: 12px;
+}
+
+@keyframes stop-btn-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}

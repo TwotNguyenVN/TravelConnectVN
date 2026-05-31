@@ -34,8 +34,8 @@ const aiChatService = {
     return await api.get(`/ai-chat/sessions/${sessionId}/messages`);
   },
 
-  sendMessage: async (sessionId: string, content: string): Promise<ApiResponse<AiMessage>> => {
-    return await api.post(`/ai-chat/sessions/${sessionId}/messages`, { content });
+  sendMessage: async (sessionId: string, content: string, signal?: AbortSignal): Promise<ApiResponse<AiMessage>> => {
+    return await api.post(`/ai-chat/sessions/${sessionId}/messages`, { content }, { signal });
   },
 
   deleteSession: async (sessionId: string): Promise<ApiResponse<any>> => {

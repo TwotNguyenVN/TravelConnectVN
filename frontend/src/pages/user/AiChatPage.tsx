@@ -7,6 +7,7 @@ import { Button, LoadingBlock } from '../../components/common';
 import { DEFAULT_AVATAR } from '../../constants/images';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import axios from 'axios';
 import './AiChatPage.css';
 
 // Helper to replace <br> tags with actual JSX <br /> elements in rendered Markdown nodes
@@ -53,6 +54,11 @@ const AiChatPage: React.FC = () => {
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [upcomingTour, setUpcomingTour] = useState<any>(null);
+  
+  // States and refs for message editing and aborting
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const abortControllerRef = useRef<AbortController | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -202,10 +208,10 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async (e?: React.FormEvent, directText?: string) => {
+  const handleSendMessage = async (e?: React.FormEvent, directText?: string, isRegenerate = false) => {
     if (e) e.preventDefault();
     const textToSend = directText || inputText;
-    if (!textToSend.trim() || sending) return;
+    if (!textToSend.trim() || (sending && !isRegenerate)) return;
 
     let sessionId = currentSessionId;
     if (!sessionId) {
@@ -226,19 +232,27 @@ const AiChatPage: React.FC = () => {
     if (!directText) setInputText('');
     setSending(true);
 
-    // Optimistic update of User Message
-    const tempUserMessage: AiMessage = {
-      id: `user-${Date.now()}`,
-      session_id: sessionId!,
-      sender_type: 'user',
-      content: userMessage,
-      model_name: null,
-      created_at: new Date().toISOString(),
-    };
-    setMessages(prev => [...prev, tempUserMessage]);
+    if (!isRegenerate) {
+      // Optimistic update of User Message
+      const tempUserMessage: AiMessage = {
+        id: `user-${Date.now()}`,
+        session_id: sessionId!,
+        sender_type: 'user',
+        content: userMessage,
+        model_name: null,
+        created_at: new Date().toISOString(),
+      };
+      setMessages(prev => [...prev, tempUserMessage]);
+    }
+
+    // Cancel any ongoing request before sending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
 
     try {
-      const res = await aiChatService.sendMessage(sessionId!, userMessage);
+      const res = await aiChatService.sendMessage(sessionId!, userMessage, abortControllerRef.current.signal);
       if (res.success && res.data) {
         const aiMsg = res.data;
         
@@ -267,10 +281,46 @@ const AiChatPage: React.FC = () => {
           }
         }, 15);
       }
-    } catch (error) {
-      toast.error('Lỗi khi gửi tin nhắn');
-      setSending(false);
+    } catch (error: any) {
+      if (axios.isCancel(error) || error.name === 'CanceledError' || error.message === 'canceled') {
+        console.log('Gemini request canceled by user');
+      } else {
+        toast.error('Lỗi khi gửi tin nhắn');
+        setSending(false);
+      }
     }
+  };
+
+  const handleStopGeneration = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    if (streamingIntervalRef.current) {
+      clearInterval(streamingIntervalRef.current);
+      streamingIntervalRef.current = null;
+    }
+    setSending(false);
+    toast.info('Đã dừng phản hồi từ AI');
+  };
+
+  const handleStartEditMessage = (messageId: string, content: string) => {
+    setEditingMessageId(messageId);
+    setEditingText(content);
+  };
+
+  const handleSaveAndResendMessage = async (messageId: string) => {
+    if (!editingText.trim() || sending) return;
+    const msgIndex = messages.findIndex(m => m.id === messageId);
+    if (msgIndex === -1) return;
+
+    // Discard all messages in state after this user message
+    const updatedMessages = messages.slice(0, msgIndex);
+    setMessages(updatedMessages);
+    setEditingMessageId(null);
+
+    // Send the edited content as a new query
+    handleSendMessage(undefined, editingText);
   };
 
   const handleCopyToClipboard = (e: React.MouseEvent, messageId: string, content: string) => {
@@ -302,7 +352,7 @@ const AiChatPage: React.FC = () => {
       return copy;
     });
 
-    handleSendMessage(undefined, lastUserMsg.content);
+    handleSendMessage(undefined, lastUserMsg.content, true);
   };
 
   const formatDate = (dateStr?: string) => {
@@ -541,21 +591,50 @@ const AiChatPage: React.FC = () => {
                             )}
                           </div>
                           <div className="message-content-wrapper">
-                            <div className="message-bubble">
-                              <div className="markdown-body">
-                                <ReactMarkdown 
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    td: ({ children }) => <td>{replaceBr(children)}</td>,
-                                    th: ({ children }) => <th>{replaceBr(children)}</th>,
-                                    p: ({ children }) => <p>{replaceBr(children)}</p>,
-                                    li: ({ children }) => <li>{replaceBr(children)}</li>,
-                                    span: ({ children }) => <span>{replaceBr(children)}</span>,
-                                  }}
-                                >
-                                  {m.content}
-                                </ReactMarkdown>
-                              </div>
+                            <div className={`message-bubble ${editingMessageId === m.id ? 'editing' : ''}`}>
+                              {editingMessageId === m.id ? (
+                                <div className="message-edit-container">
+                                  <textarea
+                                    value={editingText}
+                                    onChange={(e) => setEditingText(e.target.value)}
+                                    className="message-edit-textarea"
+                                    rows={Math.max(2, editingText.split('\n').length)}
+                                    autoFocus
+                                  />
+                                  <div className="message-edit-actions">
+                                    <button 
+                                      type="button" 
+                                      className="message-edit-btn cancel" 
+                                      onClick={() => setEditingMessageId(null)}
+                                    >
+                                      Hủy bỏ
+                                    </button>
+                                    <button 
+                                      type="button" 
+                                      className="message-edit-btn submit" 
+                                      onClick={() => handleSaveAndResendMessage(m.id)}
+                                      disabled={!editingText.trim()}
+                                    >
+                                      Gửi
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="markdown-body">
+                                  <ReactMarkdown 
+                                    remarkPlugins={[remarkGfm]}
+                                    components={{
+                                      td: ({ children }) => <td>{replaceBr(children)}</td>,
+                                      th: ({ children }) => <th>{replaceBr(children)}</th>,
+                                      p: ({ children }) => <p>{replaceBr(children)}</p>,
+                                      li: ({ children }) => <li>{replaceBr(children)}</li>,
+                                      span: ({ children }) => <span>{replaceBr(children)}</span>,
+                                    }}
+                                  >
+                                    {m.content}
+                                  </ReactMarkdown>
+                                </div>
+                              )}
                               
                               <div className="message-bubble-actions">
                                 <button 
@@ -565,6 +644,15 @@ const AiChatPage: React.FC = () => {
                                 >
                                   <i className={`fa-solid ${copiedMessageId === m.id ? 'fa-check text-success' : 'fa-copy'}`}></i>
                                 </button>
+                                {m.sender_type === 'user' && !sending && editingMessageId !== m.id && (
+                                  <button 
+                                    className="bubble-action-btn"
+                                    onClick={() => handleStartEditMessage(m.id, m.content)}
+                                    title="Chỉnh sửa tin nhắn"
+                                  >
+                                    <i className="fa-solid fa-pen"></i>
+                                  </button>
+                                )}
                                 {m.sender_type === 'assistant' && idx === messages.length - 1 && (
                                   <button 
                                     className="bubble-action-btn"
@@ -623,9 +711,16 @@ const AiChatPage: React.FC = () => {
                 }}
                 disabled={sending}
               />
-              <button type="submit" className="send-circle-btn" disabled={!inputText.trim() || sending}>
+              <button 
+                type={sending ? "button" : "submit"} 
+                className={`send-circle-btn ${sending ? 'stop-btn' : ''}`}
+                onClick={sending ? handleStopGeneration : undefined}
+                disabled={!sending && !inputText.trim()}
+              >
                 {sending ? (
-                  <div className="ai-btn-spinner"></div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="stop-icon">
+                    <rect width="12" height="12" x="2" y="2" rx="1" />
+                  </svg>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                     <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
