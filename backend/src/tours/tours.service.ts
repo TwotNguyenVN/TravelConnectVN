@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, OnApplicationBootstrap } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -98,8 +98,71 @@ async function resolveShortLink(url: string): Promise<{ lat: number, lng: number
 }
 
 @Injectable()
-export class ToursService {
+export class ToursService implements OnApplicationBootstrap {
   constructor(private readonly prisma: PrismaService) {}
+
+  onApplicationBootstrap() {
+    // Run the check immediately on startup
+    this.autoCompleteTours();
+    // Run every 12 hours
+    setInterval(() => {
+      this.autoCompleteTours();
+    }, 12 * 60 * 60 * 1000);
+  }
+
+  async autoCompleteTours() {
+    try {
+      console.log('=== Running Automated Tour Completion Check ===');
+      const now = new Date();
+
+      const activeSchedules = await this.prisma.tour_schedules.findMany({
+        where: {
+          start_date: {
+            lt: now,
+          },
+          status: {
+            in: ['available'],
+          },
+        },
+        include: {
+          tours: true,
+        },
+      });
+
+      if (!activeSchedules || activeSchedules.length === 0) {
+        console.log('No active schedules found to auto-complete.');
+        return;
+      }
+
+      console.log(`Found ${activeSchedules.length} schedules to process.`);
+
+      for (const schedule of activeSchedules) {
+        const numDays = schedule.tours?.num_days || 1;
+        const endDate = new Date(schedule.start_date);
+        endDate.setDate(endDate.getDate() + numDays);
+
+        if (endDate < now) {
+          console.log(`Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()})`);
+          await this.prisma.$transaction([
+            this.prisma.tour_schedules.update({
+              where: { id: schedule.id },
+              data: { status: 'completed' },
+            }),
+            this.prisma.tour_requests.updateMany({
+              where: {
+                schedule_id: schedule.id,
+                status: { in: ['paid', 'approved'] },
+              },
+              data: { status: 'completed' },
+            }),
+          ]);
+        }
+      }
+      console.log('=== Automated Tour Completion Check Finished ===');
+    } catch (error) {
+      console.error('Error running automated tour completion:', error);
+    }
+  }
 
   // ==========================================
   // LƯU Ý: Do lỗi cấu hình chuỗi kết nối Prisma (pooler bị từ chối truy cập),
