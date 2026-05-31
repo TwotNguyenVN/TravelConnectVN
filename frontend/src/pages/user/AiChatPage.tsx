@@ -31,6 +31,7 @@ const AiChatPage: React.FC = () => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const streamingIntervalRef = useRef<any>(null);
+  const isCreatingSessionRef = useRef(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -73,7 +74,11 @@ const AiChatPage: React.FC = () => {
         clearInterval(streamingIntervalRef.current);
         setSending(false);
       }
-      fetchMessages(currentSessionId);
+      if (isCreatingSessionRef.current) {
+        isCreatingSessionRef.current = false;
+      } else {
+        fetchMessages(currentSessionId);
+      }
     } else {
       setMessages([]);
     }
@@ -176,12 +181,14 @@ const AiChatPage: React.FC = () => {
 
     let sessionId = currentSessionId;
     if (!sessionId) {
+      isCreatingSessionRef.current = true;
       const res = await aiChatService.createSession();
       if (res.success && res.data) {
         sessionId = res.data.id;
         setSessions([res.data, ...sessions]);
         setCurrentSessionId(sessionId);
       } else {
+        isCreatingSessionRef.current = false;
         toast.error('Không thể khởi tạo phiên chat');
         return;
       }
@@ -581,7 +588,7 @@ const AiChatPage: React.FC = () => {
               />
               <button type="submit" className="send-circle-btn" disabled={!inputText.trim() || sending}>
                 {sending ? (
-                  <div className="spinner-border spinner-border-sm text-light" role="status"></div>
+                  <div className="ai-btn-spinner"></div>
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
                     <path fillRule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5a.5.5 0 0 0 .5.5z"/>
