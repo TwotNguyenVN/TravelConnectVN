@@ -2,8 +2,7 @@
 
 .guide-income-page {
   padding: 30px;
-  max-width: 1300px;
-  margin: 0 auto;
+  width: 100%;
   min-height: 100vh;
   background-color: #f8fafc;
   box-sizing: border-box;
@@ -331,3 +330,111 @@
     gap: 14px;
   }
 }
+
+/* Tab Navigation Styles */
+.income-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 2px;
+}
+
+.income-tab-btn {
+  padding: 12px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.income-tab-btn:hover {
+  color: #0f172a;
+}
+
+.income-tab-btn.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* Report Tab layout */
+.income-report-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.report-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.report-view-toggle {
+  display: flex;
+  background: #f1f5f9;
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.toggle-btn {
+  padding: 8px 20px;
+  border-radius: 9px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  background: none;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.toggle-btn.active {
+  background: white;
+  color: #0f172a;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.btn-export-excel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #107c41; /* Premium Excel Green */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0 4px 6px -1px rgba(16, 124, 65, 0.15);
+}
+
+.btn-export-excel:hover {
+  background-color: #0b592e;
+  transform: translateY(-1px);
+}
+
+.btn-export-excel:active {
+  transform: translateY(0);
+}
+
+.table-total-row td {
+  background-color: #f8fafc !important;
+  font-weight: 800 !important;
+  border-top: 2px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+

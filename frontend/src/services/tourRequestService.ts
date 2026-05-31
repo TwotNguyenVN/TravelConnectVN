@@ -30,7 +30,7 @@ export interface TourRequestQuery {
 }
 
 const tourRequestService = {
-  createRequest: async (data: { tourId: string; participantCount: number; note?: string }) => {
+  createRequest: async (data: { tourId: string; participantCount: number; note?: string; scheduleId?: string }) => {
     return api.post('/tour-requests', data);
   },
 

@@ -71,9 +71,7 @@ const GuideProfilePage: React.FC = () => {
     gender: "",
     avatarUrl: "",
   });
-  const [savingPersonal, setSavingPersonal] = useState(false);
-  const [isUploadingPersonal, setIsUploadingPersonal] = useState(false);
-  const fileInputRefPersonal = React.useRef<HTMLInputElement>(null);
+
 
   const genderDropdownRef = React.useRef<HTMLDivElement>(null);
   const regionDropdownRef = React.useRef<HTMLDivElement>(null);
@@ -167,39 +165,7 @@ const GuideProfilePage: React.FC = () => {
     setPersonalData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleAvatarClickPersonal = () => {
-    fileInputRefPersonal.current?.click();
-  };
 
-  const handleAvatarChangePersonal = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Kích thước ảnh không được vượt quá 2MB.");
-      return;
-    }
-
-    setIsUploadingPersonal(true);
-
-    try {
-      const response = await userService.updateAvatar(file);
-      if (response.success && response.data) {
-        setPersonalData((prev) => ({
-          ...prev,
-          avatarUrl: response.data.avatarUrl,
-        }));
-        await refreshProfile();
-        toast.success("Cập nhật ảnh đại diện thành công!");
-      }
-    } catch (err: any) {
-      toast.error("Lỗi khi tải ảnh lên.");
-    } finally {
-      setIsUploadingPersonal(false);
-    }
-  };
 
 
 
