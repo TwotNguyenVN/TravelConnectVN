@@ -395,14 +395,14 @@ const AiChatPage: React.FC = () => {
                         onClick={(e) => handleStartEditSession(e, s)}
                         title="Đổi tên"
                       >
-                        <i className="bi bi-pencil"></i>
+                        <i className="fa-solid fa-pen"></i>
                       </button>
                       <button 
                         className="session-action-btn delete-btn"
                         onClick={(e) => handleDeleteSession(e, s.id)}
                         title="Xóa cuộc trò chuyện"
                       >
-                        <i className="bi bi-trash"></i>
+                        <i className="fa-solid fa-trash-can"></i>
                       </button>
                     </div>
                   </div>
@@ -427,7 +427,7 @@ const AiChatPage: React.FC = () => {
           <header className="chat-header">
             <div className="header-left">
               <button className="toggle-sidebar-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <i className={`bi ${sidebarOpen ? 'bi-layout-sidebar-inset' : 'bi-layout-sidebar'}`}></i>
+                <i className={`fa-solid ${sidebarOpen ? 'fa-chevron-left' : 'fa-bars'}`}></i>
               </button>
               <div className="header-title">
                 <h4>VinaGuide AI</h4>
@@ -443,7 +443,7 @@ const AiChatPage: React.FC = () => {
                   disabled={sending || messages.length < 2}
                   className="regenerate-btn-header"
                 >
-                  <i className="bi bi-arrow-clockwise me-1"></i> Làm lại câu cuối
+                  <i className="fa-solid fa-rotate-right me-1"></i> Làm lại câu cuối
                 </Button>
               )}
               <Button 
@@ -563,7 +563,7 @@ const AiChatPage: React.FC = () => {
                                   onClick={(e) => handleCopyToClipboard(e, m.id, m.content)}
                                   title="Sao chép"
                                 >
-                                  <i className={`bi ${copiedMessageId === m.id ? 'bi-check-lg text-success' : 'bi-clipboard'}`}></i>
+                                  <i className={`fa-solid ${copiedMessageId === m.id ? 'fa-check text-success' : 'fa-copy'}`}></i>
                                 </button>
                                 {m.sender_type === 'assistant' && idx === messages.length - 1 && (
                                   <button 
@@ -572,7 +572,7 @@ const AiChatPage: React.FC = () => {
                                     disabled={sending}
                                     title="Thử lại câu hỏi này"
                                   >
-                                    <i className="bi bi-arrow-clockwise"></i>
+                                    <i className="fa-solid fa-rotate-right"></i>
                                   </button>
                                 )}
                               </div>
