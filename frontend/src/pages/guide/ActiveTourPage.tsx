@@ -39,6 +39,13 @@ export const ActiveTourPage: React.FC = () => {
   const [requests, setRequests] = useState<any[]>([]);
   const [candidateTours, setCandidateTours] = useState<CombinedSchedule[]>([]);
 
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -97,13 +104,13 @@ export const ActiveTourPage: React.FC = () => {
             setRequests(sortedData);
           }
         } else {
-          // 2. Tìm các tour sắp khởi hành (chưa hoàn thành/hủy và ngày bắt đầu là hôm nay hoặc gần đây)
-          const todayStr = new Date().toISOString().split('T')[0];
+          // 2. Tìm các tour sắp khởi hành hôm nay theo Local Timezone
+          const todayStr = formatDateLocal(new Date());
           const candidates = allSchedules
             .filter(s => {
               if (s.status === 'completed' || s.status === 'cancelled') return false;
-              const schDateStr = new Date(s.start_date).toISOString().split('T')[0];
-              return schDateStr === todayStr; // Chỉ các tour khởi hành hôm nay
+              const schDateStr = formatDateLocal(new Date(s.start_date));
+              return schDateStr === todayStr;
             })
             .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
           
@@ -205,51 +212,54 @@ export const ActiveTourPage: React.FC = () => {
   // --- TRƯỜNG HỢP: CHƯA CÓ TOUR NÀO ĐANG DIỄN RA ---
   if (!activeTour) {
     return (
-      <div className="active-tour-page">
-        <PageContainer>
-          <div className="page-header">
-            <h1 className="page-title">🚩 Tour đang diễn ra</h1>
-            <p className="page-subtitle">Xem và quản lý thông tin của tour bạn đang dẫn dắt hiện tại.</p>
-          </div>
-
+      <div className="active-tour-page active-tour-page--empty">
+        <PageContainer size="full" className="active-tour-fullscreen-container">
           <div className="no-active-tour-card animate-up">
             <div className="no-tour-illustration">🧭</div>
             <h2>Hiện tại chưa có tour nào được bắt đầu</h2>
-            <p>Trạng thái hành trình sẽ chuyển sang Đang diễn ra khi bạn kích hoạt chuyến đi.</p>
+            <p className="no-tour-lead-text">Trạng thái hành trình sẽ chuyển sang Đang diễn ra khi bạn kích hoạt chuyến đi.</p>
             
             {candidateTours.length > 0 ? (
               <div className="candidate-tours-section">
-                <h3>Các tour khởi hành hôm nay của bạn:</h3>
+                <h3 className="section-title-candidates">Các tour khởi hành hôm nay của bạn:</h3>
                 <div className="candidate-tours-grid">
-                  {candidateTours.map(tour => (
-                    <Card key={tour.id} className="candidate-tour-card">
-                      {tour.tourCover && (
-                        <div className="candidate-tour-cover">
-                          <img src={tour.tourCover} alt={tour.tourTitle} />
+                  {candidateTours.map(tour => {
+                    const isNoPassengers = (tour.current_participants || 0) === 0;
+                    return (
+                      <Card key={tour.id} className="candidate-tour-card">
+                        {tour.tourCover && (
+                          <div className="candidate-tour-cover">
+                            <img src={tour.tourCover} alt={tour.tourTitle} />
+                          </div>
+                        )}
+                        <div className="candidate-tour-content">
+                          <h4>{tour.tourTitle}</h4>
+                          <div className="candidate-tour-meta">
+                            <p>📅 Ngày khởi hành: <strong>{formatDate(tour.start_date)}</strong></p>
+                            <p>👥 Khách hàng: <strong className={isNoPassengers ? 'text-danger-custom' : 'text-success-custom'}>{tour.current_participants} / {tour.max_participants} người</strong></p>
+                            {tour.meetTime && <p>⏰ Giờ tập trung: <strong>{tour.meetTime}</strong></p>}
+                            {tour.meetPoint && <p>📍 Điểm tập trung: <strong>{tour.meetPoint}</strong></p>}
+                          </div>
+                          <div className="candidate-tour-actions">
+                            <Button 
+                              variant={isNoPassengers ? "secondary" : "primary"} 
+                              fullWidth
+                              isLoading={isSaving}
+                              disabled={isSaving || isNoPassengers}
+                              onClick={() => handleStartTour(tour.tourId, tour.id)}
+                            >
+                              {isNoPassengers ? '🔒 Chưa có người đăng ký' : '🚀 Bắt đầu Tour ngay'}
+                            </Button>
+                            {isNoPassengers && (
+                              <p className="no-passengers-warning-text">
+                                * Tour chưa có người đăng ký khởi hành, không thể bắt đầu.
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      )}
-                      <div className="candidate-tour-content">
-                        <h4>{tour.tourTitle}</h4>
-                        <div className="candidate-tour-meta">
-                          <p>📅 Ngày khởi hành: <strong>{formatDate(tour.start_date)}</strong></p>
-                          <p>👥 Khách hàng: <strong>{tour.current_participants} / {tour.max_participants} người</strong></p>
-                          {tour.meetTime && <p>⏰ Giờ tập trung: <strong>{tour.meetTime}</strong></p>}
-                          {tour.meetPoint && <p>📍 Điểm tập trung: <strong>{tour.meetPoint}</strong></p>}
-                        </div>
-                        <div className="candidate-tour-actions">
-                          <Button 
-                            variant="primary" 
-                            fullWidth
-                            isLoading={isSaving}
-                            disabled={isSaving}
-                            onClick={() => handleStartTour(tour.tourId, tour.id)}
-                          >
-                            🚀 Bắt đầu Tour ngay
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                      </Card>
+                    );
+                  })}
                 </div>
               </div>
             ) : (
