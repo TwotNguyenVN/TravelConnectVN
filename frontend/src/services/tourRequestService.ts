@@ -5,6 +5,7 @@ export interface TourRequest {
   tourId: string;
   tourTitle?: string;
   guideName?: string;
+  guideUserId?: string;
   userName?: string;
   userAvatar?: string;
   participantCount: number;

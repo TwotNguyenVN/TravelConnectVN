@@ -43,6 +43,7 @@ import CompanionDetailPage from '../pages/public/CompanionDetailPage';
 import MyCompanionPostsPage from '../pages/user/MyCompanionPostsPage';
 import CompanionFormPage from '../pages/user/CompanionFormPage';
 import CompanionRequestManagementPage from '../pages/user/CompanionRequestManagementPage';
+import CompanionManagementPage from '../pages/user/CompanionManagementPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
 import { AdminUserManagementPage } from '../pages/admin/AdminUserManagementPage';
 import { AdminReportManagementPage } from '../pages/admin/AdminReportManagementPage';
@@ -98,8 +99,8 @@ export const router = createBrowserRouter([
       { path: 'requests', element: <BookingManagementPage /> },
       { path: 'companion-posts', element: <MyCompanionPostsPage /> },
       { path: 'companion-posts/create', element: <CompanionFormPage /> },
-      { path: 'companion-posts/:id/edit', element: <CompanionFormPage /> },
-      { path: 'companion-posts/:id/requests', element: <CompanionRequestManagementPage /> },
+      { path: 'companion-posts/:id/edit', element: <CompanionManagementPage /> },
+      { path: 'companion-posts/:id/requests', element: <CompanionManagementPage /> },
       { path: 'companion-requests', element: <BookingManagementPage /> },
       { path: 'favorites', element: <FavoritesPage /> },
       { path: 'notifications', element: <NotificationsPage /> },

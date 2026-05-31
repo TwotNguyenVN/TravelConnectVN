@@ -39,11 +39,29 @@ export class PaymentsService {
 
       if (!request) throw new NotFoundException('Yêu cầu không tồn tại');
       if (request.user_id !== userId) throw new BadRequestException('Bạn không có quyền thanh toán yêu cầu này');
-      if (request.status !== 'approved' && request.status !== 'pending') throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán');
+      if (request.status !== 'approved' && request.status !== 'pending' && request.status !== 'paid') {
+        throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán');
+      }
 
-      // Tìm hoặc tạo giao dịch nội bộ
+      // Kiểm tra số tiền đã thanh toán từ trước
+      const paidTransactions = await this.prisma.payment_transactions.findMany({
+        where: {
+          tour_request_id: tourRequestId,
+          status: 'paid'
+        }
+      });
+      const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
       const totalAmount = Number(request.tours.price) * request.participant_count;
-      const amount = paymentType === 'deposit' ? Math.floor(totalAmount * 0.5) : totalAmount;
+
+      if (request.status === 'paid' && totalPaid >= totalAmount) {
+        throw new BadRequestException('Yêu cầu đặt tour này đã được thanh toán đầy đủ 100%');
+      }
+
+      // Tính số tiền cần thanh toán cho giao dịch này
+      let amount = totalAmount - totalPaid;
+      if (totalPaid === 0 && paymentType === 'deposit') {
+        amount = Math.floor(totalAmount * 0.5);
+      }
 
       // Kiểm tra xem đã có giao dịch pending cho yêu cầu này chưa
       const existingTransaction = await this.prisma.payment_transactions.findFirst({

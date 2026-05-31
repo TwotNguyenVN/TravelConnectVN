@@ -1,37 +1,15 @@
-
 import { PrismaClient } from '@prisma/client';
+import { Pool } from 'pg';
+import { PrismaPg } from '@prisma/adapter-pg';
+import * as dotenv from 'dotenv';
 
-const prisma = new PrismaClient();
+dotenv.config();
 
-async function testQuery() {
-  try {
-    console.log('Testing Tours Query...');
-    const tours = await prisma.tours.findMany({
-      take: 1,
-      include: {
-        guide_profiles: {
-          include: {
-            users: { select: { full_name: true } }
-          }
-        }
-      }
-    });
-    console.log('Tours Query Success:', JSON.stringify(tours, null, 2));
+const connectionString = process.env.DATABASE_URL;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool, { schema: 'public' });
+const prisma = new PrismaClient({ adapter });
 
-    console.log('\nTesting Companion Posts Query...');
-    const posts = await prisma.companion_posts.findMany({
-      take: 1,
-      include: {
-        users: { select: { full_name: true } }
-      }
-    });
-    console.log('Companion Posts Query Success:', JSON.stringify(posts, null, 2));
-
-  } catch (error) {
-    console.error('QUERY FAILED:', error);
-  } finally {
-    await prisma.$disconnect();
-  }
-}
-
-testQuery();
+console.log('Available models/methods in PrismaClient:', Object.keys(prisma).filter(k => !k.startsWith('$')));
+prisma.$disconnect();
+pool.end();

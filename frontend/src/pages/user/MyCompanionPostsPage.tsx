@@ -143,7 +143,7 @@ const MyCompanionPostsPage: React.FC = () => {
             <div 
               key={post.id} 
               className="tc-companion-manage-card"
-              onClick={() => navigate(`/companions/${post.id}`)}
+              onClick={() => navigate(`/user/companion-posts/${post.id}/edit`)}
               style={{ cursor: 'pointer' }}
             >
               <div className="tc-companion-manage-card__image">
