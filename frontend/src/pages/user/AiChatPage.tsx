@@ -9,6 +9,32 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import './AiChatPage.css';
 
+// Helper to replace <br> tags with actual JSX <br /> elements in rendered Markdown nodes
+const replaceBr = (node: any): any => {
+  if (typeof node === 'string') {
+    if (/<br\s*\/?>/gi.test(node)) {
+      const parts = node.split(/<br\s*\/?>/gi);
+      return parts.map((part, index) => (
+        <React.Fragment key={index}>
+          {index > 0 && <br />}
+          {part}
+        </React.Fragment>
+      ));
+    }
+    return node;
+  }
+  if (Array.isArray(node)) {
+    return node.map((child, index) => <React.Fragment key={index}>{replaceBr(child)}</React.Fragment>);
+  }
+  if (node && node.props && node.props.children) {
+    return React.cloneElement(node, {
+      ...node.props,
+      children: replaceBr(node.props.children)
+    });
+  }
+  return node;
+};
+
 const AiChatPage: React.FC = () => {
   const { user, profile } = useAuth();
   const { toast } = useToast();
@@ -517,7 +543,16 @@ const AiChatPage: React.FC = () => {
                           <div className="message-content-wrapper">
                             <div className="message-bubble">
                               <div className="markdown-body">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                <ReactMarkdown 
+                                  remarkPlugins={[remarkGfm]}
+                                  components={{
+                                    td: ({ children }) => <td>{replaceBr(children)}</td>,
+                                    th: ({ children }) => <th>{replaceBr(children)}</th>,
+                                    p: ({ children }) => <p>{replaceBr(children)}</p>,
+                                    li: ({ children }) => <li>{replaceBr(children)}</li>,
+                                    span: ({ children }) => <span>{replaceBr(children)}</span>,
+                                  }}
+                                >
                                   {m.content}
                                 </ReactMarkdown>
                               </div>
