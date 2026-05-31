@@ -1,14 +1,15 @@
 import { Outlet } from 'react-router-dom';
 import { AppSidebar } from '../components/common/AppSidebar';
 import { GuideHeader } from '../components/guide/GuideHeader';
+import './UserLayout.css';
 
 export function GuideLayout() {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: 'var(--tc-bg-subtle)' }}>
+    <div className="guide-layout">
       <AppSidebar />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div className="guide-main-container">
         <GuideHeader />
-        <main style={{ flex: 1, padding: 'var(--tc-spacing-5)', overflowY: 'auto' }}>
+        <main className="guide-main-content">
           <Outlet />
         </main>
       </div>
