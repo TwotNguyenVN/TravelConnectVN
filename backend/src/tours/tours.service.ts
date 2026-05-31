@@ -1376,6 +1376,56 @@ export class ToursService implements OnApplicationBootstrap {
           status: 'completed'
         }
       });
+    } else if (data.status === 'cancelled') {
+      // Cập nhật các yêu cầu chưa thanh toán thành bị từ chối
+      await this.prisma.tour_requests.updateMany({
+        where: {
+          schedule_id: scheduleId,
+          status: { in: ['pending', 'approved'] }
+        },
+        data: {
+          status: 'rejected',
+          response_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên',
+          cancellation_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên'
+        }
+      });
+
+      // Cập nhật các yêu cầu đã thanh toán thành chờ hoàn tiền
+      const paidRequests = await this.prisma.tour_requests.findMany({
+        where: {
+          schedule_id: scheduleId,
+          status: { in: ['paid', 'payment_pending'] }
+        }
+      });
+
+      for (const req of paidRequests) {
+        await this.prisma.tour_requests.update({
+          where: { id: req.id },
+          data: {
+            status: 'refund_pending',
+            cancellation_note: 'Lịch trình tour đã bị hủy. Đang chờ hoàn tiền.'
+          }
+        });
+        
+        // Tính tổng tiền đã thanh toán để hoàn lại
+        const paidTransactions = await this.prisma.payment_transactions.findMany({
+          where: { tour_request_id: req.id, status: 'paid' }
+        });
+        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+
+        if (totalPaid > 0) {
+          await this.prisma.payment_transactions.create({
+            data: {
+              tour_request_id: req.id,
+              user_id: req.user_id,
+              amount: -totalPaid,
+              payment_method: 'vnpay',
+              status: 'refund_pending',
+              transaction_code: `REFUND-GUIDE-${req.id.substring(0, 8)}-${Date.now()}`,
+            }
+          });
+        }
+      }
     }
 
     return updatedSchedule;

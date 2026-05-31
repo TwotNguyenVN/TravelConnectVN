@@ -458,6 +458,27 @@ export class TourRequestsService {
       );
     }
 
+    if (status === 'approved') {
+      let maxParticipants = 999;
+      if (request.schedule_id) {
+        const schedule = await this.prisma.tour_schedules.findUnique({ where: { id: request.schedule_id } });
+        if (schedule) maxParticipants = schedule.max_participants;
+      }
+
+      const existingRequests = await this.prisma.tour_requests.findMany({
+        where: {
+          tour_id: request.tour_id,
+          schedule_id: request.schedule_id,
+          status: { in: ['approved', 'paid', 'payment_pending'] },
+        },
+      });
+      const currentParticipants = existingRequests.reduce((sum, req) => sum + req.participant_count, 0);
+
+      if (currentParticipants + request.participant_count > maxParticipants) {
+        throw new BadRequestException(`Không thể duyệt. Số lượng người tham gia vượt quá giới hạn tối đa (${maxParticipants} người). Hiện đã có ${currentParticipants} người được duyệt.`);
+      }
+    }
+
     const updatedRequest = await this.prisma.tour_requests.update({
       where: { id: requestId },
       data: {
