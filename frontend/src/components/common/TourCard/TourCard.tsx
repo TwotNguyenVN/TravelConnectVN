@@ -185,7 +185,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, onClick }) => {
                 <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
               </svg>
               <span className="info-text font-semibold">
-                {(tour.numDays ?? 1)}N{(tour.numNights ?? 0)}Đ
+                {(tour.numDays === 1 && tour.numNights === 0) ? "Trong Ngày" : `${(tour.numDays ?? 1)}N${(tour.numNights ?? 0)}Đ`}
               </span>
             </div>
             

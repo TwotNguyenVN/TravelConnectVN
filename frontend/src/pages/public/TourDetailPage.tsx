@@ -1,8 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
-import tourRequestService from '../../services/tourRequestService';
 import { getTourAccommodations } from '../../services/accommodationService';
 import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
@@ -26,11 +24,10 @@ export const TourDetailPage: React.FC = () => {
   const [tour, setTour] = useState<any>(null);
   const [accommodations, setAccommodations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [participantCount, setParticipantCount] = useState(1);
-  const [bookingNote, setBookingNote] = useState('');
-  const [isBooking, setIsBooking] = useState(false);
+  const participantCount = 1;
   const [isFavorited, setIsFavorited] = useState(false);
   const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const isBooking = false;
   
   // Gallery Carousel State
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -689,7 +686,9 @@ export const TourDetailPage: React.FC = () => {
               <div className="tc-info-item">
                 <span className="tc-info-icon">🕒</span>
                 <span className="tc-info-label">Thời gian:</span>
-                <span className="tc-info-value">{tour.numDays}N{tour.numNights}Đ</span>
+                <span className="tc-info-value">
+                  {tour.numDays === 1 && tour.numNights === 0 ? "Trong Ngày" : `${tour.numDays}N${tour.numNights}Đ`}
+                </span>
               </div>
               <div className="tc-info-item">
                 <span className="tc-info-icon">👥</span>
