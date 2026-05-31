@@ -131,3 +131,26 @@
   height: 100%;
   overflow: hidden;
 }
+
+/* Guide Layout */
+.guide-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--tc-bg-subtle);
+}
+
+.guide-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.guide-main-content {
+  flex: 1;
+  padding: var(--tc-spacing-5);
+  overflow-y: auto;
+}
