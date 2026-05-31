@@ -96,6 +96,26 @@
   width: 100%;
 }
 
+.user-layout-no-scroll {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.user-main-no-scroll {
+  height: 100vh;
+  padding: 0 !important;
+  max-width: none !important;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-content-no-scroll {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+}
+
 .user-header {
   margin-bottom: var(--tc-spacing-6);
   padding-bottom: var(--tc-spacing-4);
