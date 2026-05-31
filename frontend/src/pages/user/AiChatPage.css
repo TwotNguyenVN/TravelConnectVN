@@ -1044,20 +1044,35 @@
 }
 
 /* Inline Message Editing System */
+.chat-message.editing-message {
+  width: 100%;
+}
+
+.chat-message.editing-message .message-container {
+  max-width: 90% !important;
+  width: 90% !important;
+}
+
+.chat-message.editing-message .message-content-wrapper {
+  width: 100%;
+  max-width: 750px;
+}
+
 .message-bubble.editing {
-  background: #2a2b36 !important;
-  color: #ececf1 !important;
-  border-radius: 16px !important;
-  padding: 14px 16px !important;
+  background: hsl(245, 60%, 98.5%) !important;
+  color: var(--ai-text-main) !important;
+  border-radius: 20px !important;
+  border: 1px dashed var(--ai-primary-light) !important;
+  padding: 18px 20px !important;
   width: 100%;
   max-width: 100% !important;
-  box-shadow: var(--ai-shadow-lg) !important;
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.08) !important;
 }
 
 .message-edit-container {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   width: 100%;
 }
 
@@ -1068,20 +1083,20 @@
   outline: none;
   color: inherit;
   font-family: inherit;
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.96rem;
+  line-height: 1.6;
   resize: vertical;
-  min-height: 60px;
+  min-height: 80px;
 }
 
 .message-edit-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 10px;
 }
 
 .message-edit-btn {
-  padding: 8px 16px;
+  padding: 8px 20px;
   font-size: 0.85rem;
   font-weight: 600;
   border-radius: 20px;
@@ -1091,22 +1106,25 @@
 }
 
 .message-edit-btn.cancel {
-  background: #202123;
-  color: #ececf1;
-  border-color: rgba(255, 255, 255, 0.15);
+  background: var(--ai-bg-main);
+  color: var(--ai-text-muted);
+  border-color: var(--ai-border);
 }
 
 .message-edit-btn.cancel:hover {
-  background: #343541;
+  background: var(--ai-bg-sidebar);
+  color: var(--ai-text-main);
 }
 
 .message-edit-btn.submit {
-  background: #ffffff;
-  color: #202123;
+  background: var(--ai-primary);
+  color: white;
 }
 
 .message-edit-btn.submit:hover:not(:disabled) {
-  background: #ececf1;
+  background: var(--ai-primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
 }
 
 .message-edit-btn.submit:disabled {

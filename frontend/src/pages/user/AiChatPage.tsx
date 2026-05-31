@@ -581,7 +581,7 @@ const AiChatPage: React.FC = () => {
                 ) : (
                   <>
                     {messages.map((m, idx) => (
-                      <div key={m.id} className={`chat-message ${m.sender_type}`}>
+                      <div key={m.id} className={`chat-message ${m.sender_type} ${editingMessageId === m.id ? 'editing-message' : ''}`}>
                         <div className="message-container">
                           <div className="avatar-circle">
                             {m.sender_type === 'user' ? (
