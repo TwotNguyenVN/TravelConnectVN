@@ -47,11 +47,13 @@ const AiChatPage: React.FC = () => {
           const tours = res.data.data;
           const upcoming = tours.find((t: any) => 
             ['paid', 'approved'].includes(t.status) && 
-            new Date(t.startDate).getTime() > Date.now()
-          ) || tours.find((t: any) => ['paid', 'approved', 'completed'].includes(t.status));
+            new Date(t.startDate).getTime() > Date.now() - 24 * 60 * 60 * 1000
+          );
           
           if (upcoming) {
             setUpcomingTour(upcoming);
+          } else {
+            setUpcomingTour(null);
           }
         }
       } catch (error) {
