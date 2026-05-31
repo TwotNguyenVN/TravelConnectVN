@@ -1,6 +1,6 @@
 .chat-page-container {
   display: flex;
-  height: calc(100vh - 72px);
+  height: 100%;
   background-color: #f0f2f5;
   overflow: hidden;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

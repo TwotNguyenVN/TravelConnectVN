@@ -1,6 +1,7 @@
 .user-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: var(--tc-bg-subtle);
 }
 
@@ -91,21 +92,65 @@
 
 .user-main {
   flex: 1;
-  padding: var(--tc-spacing-6);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
   max-width: 1600px;
   width: 100%;
+  overflow: hidden;
 }
 
 .user-header {
-  margin-bottom: var(--tc-spacing-6);
-  padding-bottom: var(--tc-spacing-4);
+  padding: var(--tc-spacing-6) var(--tc-spacing-6) var(--tc-spacing-4) var(--tc-spacing-6);
   border-bottom: 1px solid var(--tc-border);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .user-header h2 {
   margin: 0;
   font-size: 1.5rem;
+}
+
+.user-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--tc-spacing-6) var(--tc-spacing-6) var(--tc-spacing-6);
+}
+
+/* Full height page overrides (e.g. Chat, AI Assistant) */
+.user-main-full-height {
+  padding: 0 !important;
+  max-width: none !important;
+}
+
+.user-content-full-height {
+  padding: 0 !important;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Guide Layout */
+.guide-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--tc-bg-subtle);
+}
+
+.guide-main-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.guide-main-content {
+  flex: 1;
+  padding: var(--tc-spacing-5);
+  overflow-y: auto;
 }
