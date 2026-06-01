@@ -226,7 +226,12 @@ export const ActiveTourPage: React.FC = () => {
                   {candidateTours.map(tour => {
                     const isNoPassengers = (tour.current_participants || 0) === 0;
                     return (
-                      <Card key={tour.id} className="candidate-tour-card">
+                      <Card 
+                        key={tour.id} 
+                        className="candidate-tour-card"
+                        onClick={() => navigate(`/guide/tours/${tour.tourId}/schedules/${tour.id}`)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         {tour.tourCover && (
                           <div className="candidate-tour-cover">
                             <img src={tour.tourCover} alt={tour.tourTitle} />
@@ -246,7 +251,10 @@ export const ActiveTourPage: React.FC = () => {
                               fullWidth
                               isLoading={isSaving}
                               disabled={isSaving || isNoPassengers}
-                              onClick={() => handleStartTour(tour.tourId, tour.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartTour(tour.tourId, tour.id);
+                              }}
                             >
                               {isNoPassengers ? '🔒 Chưa có người đăng ký' : '🚀 Bắt đầu Tour ngay'}
                             </Button>
