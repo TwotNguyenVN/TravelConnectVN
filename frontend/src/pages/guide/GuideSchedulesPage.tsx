@@ -197,7 +197,11 @@ const formatDateLocal = (date: Date): string => {
   const getScheduleStatus = (sch: CombinedSchedule) => {
     if (!sch) return 'empty';
     if (sch.status === 'cancelled') return 'cancelled';
-    if (sch.status === 'completed') return 'completed';
+    if (sch.status === 'completed') {
+      const current = sch.current_participants || 0;
+      if (current === 0) return 'expired';
+      return 'completed';
+    }
     if (sch.status === 'ongoing' || sch.status === 'in_progress') return 'ongoing';
     if (sch.status === 'paused') return 'paused';
 

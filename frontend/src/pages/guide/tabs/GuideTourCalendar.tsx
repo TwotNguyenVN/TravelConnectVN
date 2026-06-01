@@ -185,7 +185,11 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
   const getScheduleStatus = (sch: Schedule) => {
     if (!sch) return "available";
     if (sch.status === 'cancelled') return "cancelled";
-    if (sch.status === 'completed') return "completed";
+    if (sch.status === 'completed') {
+      const current = sch.current_participants || 0;
+      if (current === 0) return "expired";
+      return "completed";
+    }
     if (sch.status === 'ongoing' || sch.status === 'in_progress') return "ongoing";
     if (sch.status === 'full') return "full";
 
