@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, OnApplicationBootstrap } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -98,8 +98,71 @@ async function resolveShortLink(url: string): Promise<{ lat: number, lng: number
 }
 
 @Injectable()
-export class ToursService {
+export class ToursService implements OnApplicationBootstrap {
   constructor(private readonly prisma: PrismaService) {}
+
+  onApplicationBootstrap() {
+    // Run the check immediately on startup
+    this.autoCompleteTours();
+    // Run every 12 hours
+    setInterval(() => {
+      this.autoCompleteTours();
+    }, 12 * 60 * 60 * 1000);
+  }
+
+  async autoCompleteTours() {
+    try {
+      console.log('=== Running Automated Tour Completion Check ===');
+      const now = new Date();
+
+      const activeSchedules = await this.prisma.tour_schedules.findMany({
+        where: {
+          start_date: {
+            lt: now,
+          },
+          status: {
+            in: ['available'],
+          },
+        },
+        include: {
+          tours: true,
+        },
+      });
+
+      if (!activeSchedules || activeSchedules.length === 0) {
+        console.log('No active schedules found to auto-complete.');
+        return;
+      }
+
+      console.log(`Found ${activeSchedules.length} schedules to process.`);
+
+      for (const schedule of activeSchedules) {
+        const numDays = schedule.tours?.num_days || 1;
+        const endDate = new Date(schedule.start_date);
+        endDate.setDate(endDate.getDate() + numDays);
+
+        if (endDate < now) {
+          console.log(`Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()})`);
+          await this.prisma.$transaction([
+            this.prisma.tour_schedules.update({
+              where: { id: schedule.id },
+              data: { status: 'completed' },
+            }),
+            this.prisma.tour_requests.updateMany({
+              where: {
+                schedule_id: schedule.id,
+                status: { in: ['paid', 'approved'] },
+              },
+              data: { status: 'completed' },
+            }),
+          ]);
+        }
+      }
+      console.log('=== Automated Tour Completion Check Finished ===');
+    } catch (error) {
+      console.error('Error running automated tour completion:', error);
+    }
+  }
 
   // ==========================================
   // LƯU Ý: Do lỗi cấu hình chuỗi kết nối Prisma (pooler bị từ chối truy cập),
@@ -1313,6 +1376,56 @@ export class ToursService {
           status: 'completed'
         }
       });
+    } else if (data.status === 'cancelled') {
+      // Cập nhật các yêu cầu chưa thanh toán thành bị từ chối
+      await this.prisma.tour_requests.updateMany({
+        where: {
+          schedule_id: scheduleId,
+          status: { in: ['pending', 'approved'] }
+        },
+        data: {
+          status: 'rejected',
+          response_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên',
+          cancellation_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên'
+        }
+      });
+
+      // Cập nhật các yêu cầu đã thanh toán thành chờ hoàn tiền
+      const paidRequests = await this.prisma.tour_requests.findMany({
+        where: {
+          schedule_id: scheduleId,
+          status: { in: ['paid', 'payment_pending'] }
+        }
+      });
+
+      for (const req of paidRequests) {
+        await this.prisma.tour_requests.update({
+          where: { id: req.id },
+          data: {
+            status: 'refund_pending',
+            cancellation_note: 'Lịch trình tour đã bị hủy. Đang chờ hoàn tiền.'
+          }
+        });
+        
+        // Tính tổng tiền đã thanh toán để hoàn lại
+        const paidTransactions = await this.prisma.payment_transactions.findMany({
+          where: { tour_request_id: req.id, status: 'paid' }
+        });
+        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+
+        if (totalPaid > 0) {
+          await this.prisma.payment_transactions.create({
+            data: {
+              tour_request_id: req.id,
+              user_id: req.user_id,
+              amount: -totalPaid,
+              payment_method: 'vnpay',
+              status: 'refund_pending',
+              transaction_code: `REFUND-GUIDE-${req.id.substring(0, 8)}-${Date.now()}`,
+            }
+          });
+        }
+      }
     }
 
     return updatedSchedule;
