@@ -142,11 +142,25 @@ export class ToursService implements OnApplicationBootstrap {
         endDate.setDate(endDate.getDate() + numDays);
 
         if (endDate < now) {
-          console.log(`Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()})`);
+          // Check if there are any bookings for this schedule
+          const bookingsSum = await this.prisma.tour_requests.aggregate({
+            where: {
+              schedule_id: schedule.id,
+              status: { in: ['paid', 'approved'] },
+            },
+            _sum: {
+              participant_count: true,
+            },
+          });
+          
+          const participantCount = bookingsSum._sum.participant_count || 0;
+          const targetStatus = participantCount > 0 ? 'completed' : 'expired';
+
+          console.log(`Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()}) with status ${targetStatus}`);
           await this.prisma.$transaction([
             this.prisma.tour_schedules.update({
               where: { id: schedule.id },
-              data: { status: 'completed' },
+              data: { status: targetStatus },
             }),
             this.prisma.tour_requests.updateMany({
               where: {
@@ -696,7 +710,9 @@ export class ToursService implements OnApplicationBootstrap {
         expectedMembers: p.expected_members,
         businessStatus: p.business_status,
         visibilityStatus: p.visibility_status,
-        requirements: p.requirements
+        requirements: p.requirements,
+        startDate: p.start_date,
+        endDate: p.end_date,
       };
     });
   }

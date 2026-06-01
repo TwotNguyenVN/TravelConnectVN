@@ -352,6 +352,15 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
+  const isPostExpired = (startDateStr: string) => {
+    if (!startDateStr) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(startDateStr);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate < today;
+  };
+
   if (loading) return (
     <PageContainer>
       <LoadingBlock height={400} />
@@ -436,11 +445,12 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
 
               <div className="detail-header">
                 <Badge variant={
+                  isPostExpired(post.start_date) ? 'secondary' :
                   post.business_status === 'open' ? 'success' : 
                   post.business_status === 'completed' ? 'primary' :
                   'secondary'
                 }>
-                  {getStatusLabel(post.business_status || '')}
+                  {isPostExpired(post.start_date) ? 'Đã kết thúc' : getStatusLabel(post.business_status || '')}
                 </Badge>
                 <h1 className="detail-title">{post.title}</h1>
                 <div className="detail-meta">
@@ -556,8 +566,8 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                 <div className="guest-actions">
                   <h3>Tham gia chuyến đi?</h3>
                   <p>Gửi yêu cầu để chủ bài đăng có thể duyệt bạn vào nhóm.</p>
-                  <Button variant="primary" fullWidth onClick={() => setShowRequestModal(true)} disabled={post.business_status !== 'open'}>
-                     {post.business_status === 'open' ? 'Gửi yêu cầu tham gia' : 'Đã đủ người'}
+                  <Button variant="primary" fullWidth onClick={() => setShowRequestModal(true)} disabled={post.business_status !== 'open' || isPostExpired(post.start_date)}>
+                     {isPostExpired(post.start_date) ? 'Đã kết thúc' : post.business_status === 'open' ? 'Gửi yêu cầu tham gia' : 'Đã đủ người'}
                   </Button>
                 </div>
               )}
