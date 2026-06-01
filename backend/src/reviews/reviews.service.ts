@@ -33,9 +33,9 @@ export class ReviewsService {
     }
 
     // 3. Status check
-    const validStatuses = ['approved', 'paid'];
+    const validStatuses = ['completed'];
     if (!validStatuses.includes(tourRequest.status)) {
-      throw new BadRequestException('Chỉ có thể đánh giá những tour đã được chấp nhận hoặc đã thanh toán');
+      throw new BadRequestException('Chỉ có thể đánh giá những tour đã hoàn thành');
     }
 
     // 4. Already reviewed check
@@ -142,9 +142,9 @@ export class ReviewsService {
     }
 
     // 3. Status check
-    const validStatuses = ['approved', 'paid'];
+    const validStatuses = ['completed'];
     if (!validStatuses.includes(tourRequest.status)) {
-      throw new BadRequestException('Chỉ có thể đánh giá hướng dẫn viên sau khi tour được chấp nhận hoặc đã thanh toán');
+      throw new BadRequestException('Chỉ có thể đánh giá hướng dẫn viên sau khi tour đã hoàn thành');
     }
 
     // 4. Already reviewed check

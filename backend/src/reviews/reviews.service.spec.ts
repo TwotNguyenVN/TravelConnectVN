@@ -73,7 +73,7 @@ describe('ReviewsService', () => {
       mockPrismaService.tour_requests.findUnique.mockResolvedValue({
         id: 'req-1',
         user_id: 'other-user',
-        status: 'paid',
+        status: 'completed',
         tours: { title: 'Tour Test' },
       });
 
@@ -86,7 +86,7 @@ describe('ReviewsService', () => {
       mockPrismaService.tour_requests.findUnique.mockResolvedValue({
         id: 'req-1',
         user_id: userId,
-        status: 'pending', // Not in ['approved', 'paid']
+        status: 'paid', // Not 'completed' anymore
         tours: { title: 'Tour Test' },
       });
 
@@ -99,7 +99,7 @@ describe('ReviewsService', () => {
       mockPrismaService.tour_requests.findUnique.mockResolvedValue({
         id: 'req-1',
         user_id: userId,
-        status: 'paid',
+        status: 'completed',
         tour_id: 'tour-1',
         tours: { title: 'Tour Test' },
       });
@@ -126,7 +126,7 @@ describe('ReviewsService', () => {
       mockPrismaService.tour_requests.findUnique.mockResolvedValue({
         id: 'req-1',
         user_id: userId,
-        status: 'paid',
+        status: 'completed',
         tour_id: 'tour-1',
         tours: { title: 'Tour Đà Nẵng' },
       });

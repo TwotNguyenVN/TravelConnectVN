@@ -79,6 +79,12 @@ export const GuideRequestsPage: React.FC = () => {
         return <Badge variant="danger">Bị từ chối</Badge>;
       case 'cancelled_by_user':
         return <Badge variant="secondary">Khách đã hủy</Badge>;
+      case 'cancelled_by_guide':
+        return <Badge variant="danger">Đã hủy bởi HDV</Badge>;
+      case 'refund_pending':
+        return <Badge variant="warning">Chờ hoàn tiền</Badge>;
+      case 'refunded':
+        return <Badge variant="secondary">Đã hoàn tiền</Badge>;
       case 'payment_pending':
         return <Badge variant="primary">Chờ thanh toán</Badge>;
       case 'paid':
