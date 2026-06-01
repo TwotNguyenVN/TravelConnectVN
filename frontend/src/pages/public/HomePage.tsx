@@ -71,6 +71,15 @@ export const HomePage: React.FC = () => {
     return `${(price / 1000000).toFixed(1).replace('.0', '')}tr`;
   };
 
+  const isPostExpired = (startDateStr: string) => {
+    if (!startDateStr) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(startDateStr);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate < today;
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (budgetRef.current && !budgetRef.current.contains(event.target as Node)) {
@@ -573,11 +582,13 @@ export const HomePage: React.FC = () => {
                     fontWeight: 700,
                     color: 'white',
                     backgroundColor: 
+                      isPostExpired(post.startDate) ? 'var(--tc-text-secondary)' :
                       post.businessStatus === 'open' ? 'var(--tc-success)' :
                       post.businessStatus === 'completed' ? 'var(--tc-primary)' :
                       'var(--tc-text-secondary)'
                   }}>
-                    {post.businessStatus === 'open' ? 'Đang tuyển' : 
+                    {isPostExpired(post.startDate) ? 'Đã kết thúc' :
+                     post.businessStatus === 'open' ? 'Đang tuyển' : 
                      post.businessStatus === 'closed' ? 'Đã đủ người' :
                      post.businessStatus === 'completed' ? 'Đã hoàn tất' :
                      'Đã hủy'}
@@ -667,13 +678,13 @@ export const HomePage: React.FC = () => {
                   }} title={post.authorName}>
                     {post.authorName}
                   </span>
-                  <Button 
+                   <Button 
                     variant="outline" 
                     size="small" 
                     style={{ borderRadius: '20px', padding: '4px 16px' }}
-                    disabled={post.businessStatus !== 'open'}
+                    disabled={post.businessStatus !== 'open' || isPostExpired(post.startDate)}
                   >
-                    {post.businessStatus === 'open' ? 'Tham gia' : 'Đã đủ người'}
+                    {isPostExpired(post.startDate) ? 'Đã kết thúc' : post.businessStatus === 'open' ? 'Tham gia' : 'Đã đủ người'}
                   </Button>
                 </div>
               </div>

@@ -57,6 +57,14 @@ const CompanionListPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
+  const isPostExpired = (startDateStr: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const startDate = new Date(startDateStr);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate < today;
+  };
+
   return (
     <PageContainer className="companion-list-page">
       <div className="companion-header">
@@ -111,33 +119,37 @@ const CompanionListPage: React.FC = () => {
         />
       ) : posts.length > 0 ? (
         <div className="companion-grid">
-          {posts.map(post => (
-            <Card key={post.id} className="companion-card" onClick={() => navigate(`/companions/${post.id}`)}>
-              <div className="post-image-container">
-                {post.images && post.images.length > 0 ? (
-                  <img 
-                    src={post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl} 
-                    alt={post.title} 
-                    className="post-cover"
-                  />
-                ) : (
-                  <div className="post-no-image">
-                    <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png" alt="Default" />
+          {posts.map(post => {
+            const expired = isPostExpired(post.start_date);
+            return (
+              <Card key={post.id} className="companion-card" onClick={() => navigate(`/companions/${post.id}`)}>
+                <div className="post-image-container">
+                  {post.images && post.images.length > 0 ? (
+                    <img 
+                      src={post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl} 
+                      alt={post.title} 
+                      className="post-cover"
+                    />
+                  ) : (
+                    <div className="post-no-image">
+                      <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png" alt="Default" />
+                    </div>
+                  )}
+                  <div className="post-badge-overlay">
+                    <Badge variant={
+                      expired ? 'secondary' :
+                      post.business_status === 'open' ? 'success' : 
+                      post.business_status === 'completed' ? 'primary' :
+                      'secondary'
+                    }>
+                      {expired ? 'Đã kết thúc' :
+                       post.business_status === 'open' ? 'Đang tuyển' : 
+                       post.business_status === 'closed' ? 'Đã đủ người' :
+                       post.business_status === 'completed' ? 'Đã hoàn tất' :
+                       'Đã hủy'}
+                    </Badge>
                   </div>
-                )}
-                <div className="post-badge-overlay">
-                  <Badge variant={
-                    post.business_status === 'open' ? 'success' : 
-                    post.business_status === 'completed' ? 'primary' :
-                    'secondary'
-                  }>
-                    {post.business_status === 'open' ? 'Đang tuyển' : 
-                     post.business_status === 'closed' ? 'Đã đủ người' :
-                     post.business_status === 'completed' ? 'Đã hoàn tất' :
-                     'Đã hủy'}
-                  </Badge>
                 </div>
-              </div>
 
               <div className="post-content">
                 <div className="post-header">
@@ -177,7 +189,7 @@ const CompanionListPage: React.FC = () => {
                 </div>
               </div>
             </Card>
-          ))}
+          ); })}
         </div>
       ) : (
         <EmptyState 
