@@ -45,7 +45,7 @@ export class NotificationsScheduler implements OnModuleInit {
         }
       });
 
-      const twelveHoursAgo = new Date(Date.now() - 12 * 60 * 60 * 1000);
+      const tenHoursAgo = new Date(Date.now() - 10 * 60 * 60 * 1000);
 
       for (const req of requests) {
         const schedule = req.tour_schedules;
@@ -64,7 +64,7 @@ export class NotificationsScheduler implements OnModuleInit {
             where: {
               entity_id: req.id,
               notification_type: 'payment_reminder_3d',
-              created_at: { gte: twelveHoursAgo }
+              created_at: { gte: tenHoursAgo }
             }
           });
           
@@ -87,7 +87,7 @@ export class NotificationsScheduler implements OnModuleInit {
             where: {
               entity_id: req.id,
               notification_type: 'tour_reminder_1d',
-              created_at: { gte: twelveHoursAgo }
+              created_at: { gte: tenHoursAgo }
             }
           });
           
