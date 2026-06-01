@@ -137,6 +137,25 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
+  const handleStartSchedule = async () => {
+    if (!scheduleId || !tourId) return;
+    if (totalRegistered === 0) {
+      toast.error('Chưa có khách đăng ký, không thể bắt đầu tour');
+      return;
+    }
+    if (!window.confirm('Bạn có chắc chắn muốn BẮT ĐẦU hành trình này? Trạng thái tour sẽ được cập nhật thành Đang diễn ra.')) return;
+    try {
+      setIsSaving(true);
+      await tourService.updateTourSchedule(tourId, scheduleId, { status: 'ongoing' });
+      toast.success('Bắt đầu hành trình thành công! Chúc bạn có một chuyến đi an toàn.');
+      fetchData();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi bắt đầu tour');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleToggleAccepting = async () => {
     if (!scheduleId || !tourId) return;
     
@@ -220,6 +239,12 @@ export const TourScheduleDetailPage: React.FC = () => {
 
   const totalRegistered = requests.reduce((sum, req) => sum + (req.participantCount || 0), 0);
 
+  const isScheduleToday = schedule && (schedule.start_date || schedule.startDate) ? (
+    new Date(schedule.start_date || schedule.startDate).toDateString() === new Date().toDateString()
+  ) : false;
+
+  const canStart = isScheduleToday && schedule.status !== 'ongoing' && schedule.status !== 'completed' && schedule.status !== 'cancelled';
+
   return (
     <div className="tc-schedule-detail-page">
       <div className="tc-schedule-detail-header">
@@ -228,6 +253,16 @@ export const TourScheduleDetailPage: React.FC = () => {
             ← Quay lại Lịch trình Tour
           </button>
           <div className="tc-header-actions">
+            {canStart && (
+              <Button 
+                variant="primary" 
+                onClick={handleStartSchedule}
+                disabled={isSaving || totalRegistered === 0}
+                style={{ backgroundColor: '#2e7d32', borderColor: '#2e7d32', color: '#fff' }}
+              >
+                🚀 Bắt đầu Tour
+              </Button>
+            )}
             <Button 
               variant="outline" 
               className="tc-btn-delete-schedule"
@@ -239,14 +274,14 @@ export const TourScheduleDetailPage: React.FC = () => {
             <Button 
               variant="outline" 
               onClick={handleToggleAccepting}
-              disabled={isSaving || schedule.status === 'completed'}
+              disabled={isSaving || schedule.status === 'completed' || schedule.status === 'ongoing'}
             >
               {schedule.status === 'available' ? 'Ngưng Nhận Thêm' : 'Mở Nhận Lại'}
             </Button>
             <Button 
               variant="primary" 
               onClick={handleCompleteSchedule}
-              disabled={isSaving || schedule.status === 'completed'}
+              disabled={isSaving || schedule.status === 'completed' || schedule.status !== 'ongoing'}
             >
               {schedule.status === 'completed' ? 'Đã hoàn thành' : 'Hoàn thành Tour'}
             </Button>
@@ -255,6 +290,7 @@ export const TourScheduleDetailPage: React.FC = () => {
         <h1 className="tc-schedule-detail-title">
           Chi tiết khởi hành: {formatDate(schedule.start_date || schedule.startDate)}
           {schedule.status === 'completed' && <span className="tc-status-completed-tag">Đã hoàn thành</span>}
+          {schedule.status === 'ongoing' && <span className="tc-status-ongoing-tag" style={{ marginLeft: 8, padding: '4px 8px', borderRadius: 4, backgroundColor: '#e8f5e9', color: '#2e7d32', fontSize: '14px', fontWeight: 600 }}>Đang diễn ra</span>}
           {schedule.status === 'full' && <span className="tc-status-full-tag">Ngưng nhận khách</span>}
         </h1>
         <p className="tc-schedule-detail-subtitle">{tour.title}</p>
