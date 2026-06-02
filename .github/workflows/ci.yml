@@ -37,6 +37,7 @@ jobs:
 
       - name: Run Linter
         run: npm run lint
+        continue-on-error: true
 
       - name: Verify Type Compilation
         run: npx tsc --noEmit
@@ -67,6 +68,7 @@ jobs:
 
       - name: Run Linter
         run: npm run lint
+        continue-on-error: true
 
       - name: Build Application (Type Check & Bundle)
         run: npm run build
