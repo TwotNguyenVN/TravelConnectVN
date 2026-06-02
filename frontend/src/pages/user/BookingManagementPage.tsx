@@ -102,6 +102,16 @@ export const BookingManagementPage: React.FC = () => {
         const companionImages = req.companion_posts?.images as any[] | undefined;
         const coverImage = companionImages?.find((img: any) => img.isCover)?.imageUrl || companionImages?.[0]?.imageUrl;
 
+        // Tự động chuyển trạng thái thành completed trên giao diện nếu ngày kết thúc đã qua và yêu cầu đã được duyệt
+        let status = req.status;
+        if (status === 'approved' && req.companion_posts?.end_date) {
+          const endDate = new Date(req.companion_posts.end_date);
+          const endOfTrip = new Date(endDate.getTime() + 24 * 60 * 60 * 1000);
+          if (new Date() >= endOfTrip) {
+            status = 'completed';
+          }
+        }
+
         return {
           id: `companion-${req.id}`,
           originalId: req.id,
@@ -114,7 +124,7 @@ export const BookingManagementPage: React.FC = () => {
           guideName: req.companion_posts?.users?.full_name || 'Chủ bài',
           guideAvatar: req.companion_posts?.users?.avatar_url,
           participants: 1, // Current user
-          status: req.status,
+          status: status,
           requestedAt: req.requested_at,
           transactions: [],
           responseNote: req.response_note,
