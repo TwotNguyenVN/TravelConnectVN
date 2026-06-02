@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../api/admin.api';
 import { LoadingBlock } from '../../components/common';
-import { 
+import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  PieChart, Pie, Cell, AreaChart, Area
-
+  PieChart, Pie, Cell
 } from 'recharts';
 
 interface DashboardStats {

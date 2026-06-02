@@ -39,8 +39,8 @@ export class PaymentsService {
 
       if (!request) throw new NotFoundException('Yêu cầu không tồn tại');
       if (request.user_id !== userId) throw new BadRequestException('Bạn không có quyền thanh toán yêu cầu này');
-      if (request.status !== 'approved' && request.status !== 'pending' && request.status !== 'paid') {
-        throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán');
+      if (request.status !== 'approved' && request.status !== 'paid') {
+        throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán (Yêu cầu cần được duyệt trước)');
       }
 
       // Kiểm tra số tiền đã thanh toán từ trước
@@ -184,12 +184,47 @@ export class PaymentsService {
           return { RspCode: '01', Message: 'Order not found' };
         }
 
+        // Kiểm tra số tiền thanh toán có khớp không (VNPAY Amount nhân 100 lần)
+        const vnpAmount = Number(vnp_Params['vnp_Amount']) / 100;
+        if (vnpAmount !== Number(transaction.amount)) {
+          return { RspCode: '04', Message: 'Invalid amount' };
+        }
+
         if (transaction.status === 'paid' || transaction.status === 'failed') {
           return { RspCode: '02', Message: 'Order already confirmed' };
         }
 
         const isSuccess = rspCode === '00';
         const newStatus = isSuccess ? 'paid' : 'failed';
+
+        // Kiểm tra tổng số tiền đã thanh toán sau khi giao dịch này thành công
+        const paidTransactions = await this.prisma.payment_transactions.findMany({
+          where: {
+            tour_request_id: transaction.tour_request_id,
+            status: 'paid',
+          },
+        });
+        const currentPaidSum = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+        
+        // Thêm số tiền của giao dịch hiện tại nếu nó thành công và chưa được lưu là 'paid' trong DB
+        const transactionAmount = Number(transaction.amount);
+        const totalPaid = isSuccess ? (currentPaidSum + transactionAmount) : currentPaidSum;
+
+        // Lấy thông tin tour request để so sánh tổng tiền
+        const tourRequest = await this.prisma.tour_requests.findUnique({
+          where: { id: transaction.tour_request_id },
+          include: { tours: true },
+        });
+
+        let targetStatus = 'approved'; // Giữ nguyên approved nếu chưa thanh toán đủ
+        if (tourRequest) {
+          const totalAmount = Number(tourRequest.tours.price) * tourRequest.participant_count;
+          if (totalPaid >= totalAmount) {
+            targetStatus = 'paid';
+          } else if (totalPaid > 0) {
+            targetStatus = 'partially_paid';
+          }
+        }
 
         // Cập nhật Database (Dùng transaction của Prisma để đảm bảo đồng bộ)
         await this.prisma.$transaction([
@@ -203,7 +238,7 @@ export class PaymentsService {
           ...(isSuccess ? [
             this.prisma.tour_requests.update({
               where: { id: transaction.tour_request_id },
-              data: { status: 'paid' }
+              data: { status: targetStatus }
             })
           ] : [])
         ]);

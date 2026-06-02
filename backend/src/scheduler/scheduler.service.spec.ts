@@ -22,6 +22,7 @@ describe('SchedulerService', () => {
     companion_requests: {
       findMany: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
 
@@ -176,12 +177,23 @@ describe('SchedulerService', () => {
       ];
 
       mockPrismaService.companion_posts.findMany.mockResolvedValue(mockPosts);
+      mockPrismaService.companion_requests.updateMany.mockResolvedValue({ count: 1 });
 
       await service.completeEndedCompanions();
 
       expect(mockPrismaService.companion_posts.update).toHaveBeenCalledWith({
         where: { id: 'post-1' },
         data: { business_status: 'closed' },
+      });
+
+      expect(mockPrismaService.companion_requests.updateMany).toHaveBeenCalledWith({
+        where: {
+          post_id: 'post-1',
+          status: 'pending',
+        },
+        data: expect.objectContaining({
+          status: 'rejected',
+        }),
       });
     });
   });
