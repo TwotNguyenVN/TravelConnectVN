@@ -26,6 +26,8 @@ import { AccommodationsModule } from './accommodations/accommodations.module';
 import { PaymentsModule } from './payments/payments.module';
 import { AiChatModule } from './ai-chat/ai-chat.module';
 import { TripExpensesModule } from './trip-expenses/trip-expenses.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerModule } from './scheduler/scheduler.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { TripExpensesModule } from './trip-expenses/trip-expenses.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
+    SchedulerModule,
     PrismaModule,
     SupabaseModule,
     AuthModule,
