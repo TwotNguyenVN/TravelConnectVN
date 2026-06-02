@@ -224,9 +224,33 @@ Cấu hình `.gitignore` chuẩn để tuyệt đối không push:
 4.  **Commit code ngay lập tức:**
     *   Với mỗi yêu cầu sau khi hoàn thành và chạy thử thành công, AI phải thực hiện commit code ngay lập tức với message mô tả đúng chuẩn Conventional Commits (kèm theo `<scope>` nếu liên quan đến module cụ thể).
 
-5.  **Hạn chế tự ý Merge trực tiếp trên Remote:**
-    *   AI chỉ merge các nhánh ở local khi được hướng dẫn hoặc đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR được chấp nhận.
+227: 5.  **Hạn chế tự ý Merge trực tiếp trên Remote:**
+228:     *   AI chỉ merge các nhánh ở local khi được hướng dẫn hoặc đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR được chấp nhận.
+229: 
+230: 6.  **Quy trình tự động hóa Push Git siêu nhanh (High-Efficiency Automation):**
+231:     *   Khi người dùng yêu cầu "push git", AI Assistant phải thực hiện tự động hóa theo luồng sau:
+232:         1. Nếu đang ở `develop` và có thay đổi chưa commit, tự động tạo nhánh mới `fix/<description>` hoặc `feat/<description>`.
+233:         2. Chạy `git add .` và commit thay đổi bằng cách sử dụng logic viết commit của hàm `gac` với format Conventional Commit chuẩn.
+234:         3. Đẩy nhánh mới lên remote và tạo PR vào `develop` bằng GitHub CLI (`gh pr create --title "<PR Title>" --body "Auto-generated PR by AI" --base develop`).
+235:         4. Cung cấp đường dẫn PR vừa tạo cho người dùng.
+236: 
+237: ---
+238: 
+239: ## 8. HỆ THỐNG PHÍM TẮT & TỰ ĐỘNG HÓA TERMINAL (ALIASES)
+240: 
+241: Để tối ưu hóa tốc độ làm việc, dự án cấu hình các phím tắt sau trong file `~/.zshrc`:
+242: 
+243: *   `gs` ➡️ `git status`
+244: *   `gd` ➡️ `git diff`
+245: *   `gco` ➡️ `git checkout`
+246: *   `gcb` ➡️ `git checkout -b`
+247: *   `gpull` ➡️ `git pull origin develop`
+248: *   `gpush` ➡️ `git push`
+249: *   `gac "<message>"` ➡️ Tự động chạy `git add . && git commit -m "<message>"`
+250: *   `gpr "<PR Title>"` ➡️ Đẩy nhánh hiện tại lên origin và tạo PR vào `develop` qua `gh` CLI.
+251: *   `gh pr merge --squash` ➡️ Gộp tất cả commit nhỏ thành một commit duy nhất khi merge vào `develop`.
+252: 
+253: ---
+254: 
+255: > **Khẩu quyết cần nhớ**: PR càng nhỏ và càng sớm thì càng dễ review, ít conflict, dự án hoạt động ổn định!
 
----
-
-> **Khẩu quyết cần nhớ**: PR càng nhỏ và càng sớm thì càng dễ review, ít conflict, dự án hoạt động ổn định!
