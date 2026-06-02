@@ -111,7 +111,9 @@ git push -u origin hotfix/fix-payment-crash
 *   **Tránh dùng**: `test`, `update`, `code-cua-tui`, `branch1`.
 
 ### 4.2. Viết Commit Message chuẩn Conventional Commits
-Công thức: **`<type>: <mô tả bằng tiếng Anh hoặc tiếng Việt>`**
+Công thức: **`<type>(<scope>): <mô tả bằng tiếng Anh hoặc tiếng Việt>`** (Phần `(<scope>)` là không bắt buộc nhưng khuyến khích sử dụng để phân loại khu vực thay đổi, ví dụ: `frontend`, `backend`, `auth`, `payment`, `database`).
+
+*Ví dụ:* `feat(backend): add Google OAuth login` hoặc `style(frontend): fix navbar mobile responsive alignment`.
 
 | Type | Ý nghĩa | Ví dụ |
 | :--- | :--- | :--- |
@@ -212,14 +214,18 @@ Cấu hình `.gitignore` chuẩn để tuyệt đối không push:
     *   Với mỗi yêu cầu mới, kiểm tra xem yêu cầu đó có phù hợp với nhánh hiện tại đang đứng hay không.
     *   Nếu **không phù hợp**: Thông báo cho người dùng biết, sau đó tự động:
         1. Đẩy (`git push`) nhánh hiện tại lên GitHub (nhánh tương ứng).
-        2. Chuyển về `develop` ở local và gộp (`git merge`) nhánh hiện tại vừa làm vào `develop`.
-        3. Tạo nhánh mới (`git checkout -b <type>/<ten-nhanh>`) từ nhánh `develop` phù hợp với yêu cầu mới.
+        2. Chuyển về `develop` ở local và thực hiện `git pull origin develop` để đồng bộ nhánh chính (tránh tự ý merge local vào `develop` khi chưa được duyệt PR trên remote).
+        3. Tạo nhánh mới (`git checkout -b <type>/<ten-nhanh>`) từ nhánh `develop` mới nhất để thực hiện yêu cầu mới.
 
-3.  **Commit code ngay lập tức:**
-    *   Với mỗi yêu cầu sau khi hoàn thành, AI phải thực hiện commit code ngay lập tức với message mô tả đúng chuẩn Conventional Commits.
+3.  **Xử lý Conflict (Xung đột code):**
+    *   Nếu xảy ra conflict trong quá trình rebase, merge hoặc pull, AI tuyệt đối không tự động giải quyết nếu không chắc chắn.
+    *   AI phải dừng lại, liệt kê các file bị conflict và giải thích phương án xử lý (hoặc hỏi ý kiến người dùng) trước khi thực hiện.
 
-4.  **Hạn chế tự ý Merge trực tiếp trên Remote:**
-    *   AI chỉ merge các nhánh ở local để đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR.
+4.  **Commit code ngay lập tức:**
+    *   Với mỗi yêu cầu sau khi hoàn thành và chạy thử thành công, AI phải thực hiện commit code ngay lập tức với message mô tả đúng chuẩn Conventional Commits (kèm theo `<scope>` nếu liên quan đến module cụ thể).
+
+5.  **Hạn chế tự ý Merge trực tiếp trên Remote:**
+    *   AI chỉ merge các nhánh ở local khi được hướng dẫn hoặc đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR được chấp nhận.
 
 ---
 
