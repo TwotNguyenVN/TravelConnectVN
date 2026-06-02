@@ -586,6 +586,7 @@ model companion_posts {
   reports            reports[]
   images             Json?                @default("[]")
   trip_expenses      trip_expenses[]
+  companion_reviews  companion_reviews[]
 
   @@index([destination(ops: raw("gin_trgm_ops"))], map: "idx_companion_posts_destination_trgm", type: Gin)
   @@index([destination, start_date, estimated_cost, business_status, visibility_status], map: "idx_companion_posts_public_search")
@@ -615,6 +616,7 @@ model companion_requests {
   companion_posts                                      companion_posts @relation(fields: [post_id], references: [id], onUpdate: NoAction)
   users_companion_requests_processed_by_user_idTousers public_users?   @relation("companion_requests_processed_by_user_idTousers", fields: [processed_by_user_id], references: [id], onUpdate: NoAction)
   users_companion_requests_user_idTousers              public_users    @relation("companion_requests_user_idTousers", fields: [user_id], references: [id], onUpdate: NoAction)
+  companion_reviews                                    companion_reviews?
 
   @@unique([post_id, user_id], map: "uq_active_companion_request_per_user", where: raw("(status = ANY (ARRAY['pending'::text, 'approved'::text]))"))
   @@index([post_id, status, requested_at(sort: Desc)], map: "idx_companion_requests_post_status")
@@ -1347,6 +1349,8 @@ model public_users {
   paid_expenses                                                         trip_expenses[]               @relation("paid_expenses")
   created_expenses                                                      trip_expenses[]               @relation("created_expenses")
   trip_expense_splits                                                   trip_expense_splits[]
+  companion_reviews_written                                             companion_reviews[]           @relation("companion_reviewer")
+  companion_reviews_received                                            companion_reviews[]           @relation("companion_host")
 
   @@map("users")
   @@schema("public")
@@ -1493,5 +1497,26 @@ model trip_expense_splits {
   user                   public_users      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([expense_id, user_id])
+  @@schema("public")
+}
+
+model companion_reviews {
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  post_id           String             @db.Uuid
+  request_id        String             @unique @db.Uuid
+  user_id           String             @db.Uuid // Người viết (Thành viên tham gia)
+  host_id           String             @db.Uuid // Người nhận (Chủ bài đăng)
+  rating            Int
+  comment           String?
+  visibility_status String             @default("visible")
+  created_at        DateTime           @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime           @default(now()) @db.Timestamptz(6)
+  
+  companion_posts    companion_posts    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  companion_requests companion_requests @relation(fields: [request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_reviewer     public_users       @relation("companion_reviewer", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users_host         public_users       @relation("companion_host", fields: [host_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([host_id])
   @@schema("public")
 }

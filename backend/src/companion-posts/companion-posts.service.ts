@@ -128,10 +128,38 @@ export class CompanionPostsService {
       throw new NotFoundException('Companion post not found');
     }
 
+    // Tính toán rating trung bình và số lượng đánh giá của host
+    const hostId = post.user_id;
+    const companionRatingAggregate = await this.prisma.companion_reviews.aggregate({
+      where: {
+        host_id: hostId,
+        visibility_status: 'visible'
+      },
+      _avg: {
+        rating: true
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    const companionRating = companionRatingAggregate._avg.rating ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1)) : null;
+    const companionReviewCount = companionRatingAggregate._count.id;
+
+    // Gán thông tin rating vào users object
+    const postWithRating = {
+      ...post,
+      users: post.users ? {
+        ...post.users,
+        companionRating,
+        companionReviewCount
+      } : null
+    };
+
     return {
       success: true,
       message: 'Companion post detail retrieved successfully',
-      data: post,
+      data: postWithRating,
     };
   }
 
@@ -405,6 +433,7 @@ export class CompanionPostsService {
         take,
         orderBy: { requested_at: 'desc' },
         include: {
+          companion_reviews: true,
           companion_posts: {
             include: {
               users: {

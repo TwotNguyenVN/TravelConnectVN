@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal } from '../Modal/Modal';
 import { Button } from '../Button/Button';
 import reviewService from '../../../services/reviewService';
+import { companionService } from '../../../services/companionService';
 import { useToast } from '../../../contexts/ToastContext';
 import './ReviewModal.css';
 
@@ -12,7 +13,8 @@ interface ReviewModalProps {
   tourTitle: string;
   guideName?: string;
   onSuccess?: () => void;
-  type: 'tour' | 'guide';
+  type: 'tour' | 'guide' | 'companion';
+  postId?: string;
 }
 
 const RATING_LABELS: Record<number, { text: string; emoji: string }> = {
@@ -30,7 +32,8 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   tourTitle,
   guideName,
   onSuccess,
-  type
+  type,
+  postId
 }) => {
   const { toast } = useToast();
   const [rating, setRating] = useState(5);
@@ -58,11 +61,18 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       let res: any;
       if (type === 'tour') {
         res = await reviewService.createTourReview(data);
-      } else {
+      } else if (type === 'guide') {
         res = await reviewService.createGuideReview(data);
+      } else if (type === 'companion') {
+        res = await companionService.createReview({
+          postId: postId || '',
+          requestId: tourRequestId,
+          rating,
+          comment: comment.trim()
+        });
       }
 
-      if (res.success) {
+      if (res.success || res.id) { // Backend companion review returns the created record directly
         setSubmitted(true);
         setTimeout(() => {
           setSubmitted(false);
@@ -93,7 +103,17 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={type === 'tour' ? '⭐ Đánh giá chuyến đi' : '👨‍💼 Đánh giá hướng dẫn viên'}>
+    <Modal 
+      isOpen={isOpen} 
+      onClose={handleClose} 
+      title={
+        type === 'tour' 
+          ? '⭐ Đánh giá chuyến đi' 
+          : type === 'guide' 
+            ? '👨‍💼 Đánh giá hướng dẫn viên' 
+            : '⭐ Đánh giá Bạn đồng hành'
+      }
+    >
       {submitted ? (
         <div className="rv-success-state">
           <div className="rv-success-icon">✅</div>
@@ -106,11 +126,11 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         <form onSubmit={handleSubmit} className="rv-form">
           <div className="rv-subject">
             <div className="rv-subject-icon">
-              {type === 'tour' ? '🏔️' : '🧑‍💼'}
+              {type === 'tour' ? '🏔️' : type === 'guide' ? '🧑‍💼' : '👥'}
             </div>
             <div className="rv-subject-info">
               <span className="rv-subject-label">
-                {type === 'tour' ? 'Tour' : 'Hướng dẫn viên'}
+                {type === 'tour' ? 'Tour' : type === 'guide' ? 'Hướng dẫn viên' : 'Chủ bài đăng'}
               </span>
               <span className="rv-subject-name">
                 {type === 'tour' ? tourTitle : guideName}
@@ -152,9 +172,13 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
               minLength={10}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder={type === 'tour'
-                ? 'Bạn thấy chuyến đi thế nào? Lịch trình, dịch vụ, cảnh quan có đáng trải nghiệm không?'
-                : 'Hướng dẫn viên có nhiệt tình, chuyên nghiệp không? Kiến thức có phong phú không?'}
+              placeholder={
+                type === 'tour'
+                  ? 'Bạn thấy chuyến đi thế nào? Lịch trình, dịch vụ, cảnh quan có đáng trải nghiệm không?'
+                  : type === 'guide'
+                    ? 'Hướng dẫn viên có nhiệt tình, chuyên nghiệp không? Kiến thức có phong phú không?'
+                    : 'Chủ bài đăng có thân thiện, nhiệt tình và có trách nhiệm với các thành viên trong đoàn không?'
+              }
               className="rv-textarea"
             />
             <span className="rv-char-count">
