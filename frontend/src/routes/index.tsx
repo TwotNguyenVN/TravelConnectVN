@@ -42,9 +42,9 @@ import CompanionListPage from '../pages/public/CompanionListPage';
 import CompanionDetailPage from '../pages/public/CompanionDetailPage';
 import MyCompanionPostsPage from '../pages/user/MyCompanionPostsPage';
 import CompanionFormPage from '../pages/user/CompanionFormPage';
-import CompanionRequestManagementPage from '../pages/user/CompanionRequestManagementPage';
 import CompanionManagementPage from '../pages/user/CompanionManagementPage';
 import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
+import { AdminStatisticsPage } from '../pages/admin/AdminStatisticsPage';
 import { AdminUserManagementPage } from '../pages/admin/AdminUserManagementPage';
 import { AdminReportManagementPage } from '../pages/admin/AdminReportManagementPage';
 import { AdminVerificationPage } from '../pages/admin/AdminVerificationPage';
@@ -154,7 +154,7 @@ export const router = createBrowserRouter([
       { path: 'reviews', element: <AdminReviewManagementPage /> },
       { path: 'tours', element: <AdminTourManagementPage /> },
       { path: 'activity-logs', element: <AdminActivityLogPage /> },
-      { path: 'statistics', element: <AdminDashboardPage /> },
+      { path: 'statistics', element: <AdminStatisticsPage /> },
 
     ],
   },

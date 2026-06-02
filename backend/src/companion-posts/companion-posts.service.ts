@@ -604,6 +604,20 @@ export class CompanionPostsService {
         where: { id: request.post_id },
         data: { business_status: 'closed' },
       });
+
+      // Tự động reject các requests còn lại đang ở trạng thái pending
+      await this.prisma.companion_requests.updateMany({
+        where: {
+          post_id: request.post_id,
+          status: 'pending',
+        },
+        data: {
+          status: 'rejected',
+          response_note: 'Yêu cầu bị từ chối tự động vì đoàn đã nhận đủ số lượng thành viên dự kiến.',
+          processed_at: new Date(),
+          processed_by_user_id: userId,
+        },
+      });
     }
 
     // 3. Ghi log hoạt động (Người thực hiện là owner của post)

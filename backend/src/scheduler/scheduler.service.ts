@@ -37,6 +37,7 @@ export class SchedulerService {
         status: 'pending',
       },
       include: {
+        tours: true,
         tour_schedules: true,
         payment_transactions: true,
       },
@@ -45,9 +46,10 @@ export class SchedulerService {
     let cancelledCount = 0;
 
     for (const req of pendingRequests) {
-      if (!req.tour_schedules) continue;
+      const startDateVal = req.tour_schedules?.start_date || req.tours.start_date;
+      if (!startDateVal) continue;
 
-      const scheduleStartDate = new Date(req.tour_schedules.start_date);
+      const scheduleStartDate = new Date(startDateVal);
 
       // Nếu lịch trình bắt đầu trong vòng 24 giờ tới hoặc đã qua ngày đi
       if (scheduleStartDate <= oneDayFromNow) {
@@ -116,6 +118,7 @@ export class SchedulerService {
         status: { in: ['approved', 'paid', 'payment_pending'] },
       },
       include: {
+        tours: true,
         tour_schedules: {
           include: {
             tours: true,
@@ -127,10 +130,11 @@ export class SchedulerService {
     let completedRequestsCount = 0;
 
     for (const req of paidRequests) {
-      if (!req.tour_schedules) continue;
+      const startDateVal = req.tour_schedules?.start_date || req.tours.start_date;
+      if (!startDateVal) continue;
 
-      const numDays = req.tour_schedules.tours.num_days || 1;
-      const endDate = new Date(new Date(req.tour_schedules.start_date).getTime() + numDays * 24 * 60 * 60 * 1000);
+      const numDays = req.tour_schedules?.tours.num_days || req.tours.num_days || 1;
+      const endDate = new Date(new Date(startDateVal).getTime() + numDays * 24 * 60 * 60 * 1000);
 
       if (now >= endDate) {
         await this.prisma.tour_requests.update({
@@ -166,8 +170,22 @@ export class SchedulerService {
         where: { id: post.id },
         data: { business_status: 'closed' },
       });
+
+      // B. Tự động từ chối (reject) các yêu cầu gia nhập đoàn vẫn đang ở trạng thái pending
+      await this.prisma.companion_requests.updateMany({
+        where: {
+          post_id: post.id,
+          status: 'pending',
+        },
+        data: {
+          status: 'rejected',
+          response_note: 'Yêu cầu bị từ chối tự động vì thời hạn đăng ký bài viết đồng hành đã kết thúc.',
+          processed_at: now,
+        },
+      });
+
       closedPostsCount++;
-      this.logger.log(`Đã đóng bài viết Bạn đồng hành ID: ${post.id} (${post.title})`);
+      this.logger.log(`Đã đóng bài viết Bạn đồng hành ID: ${post.id} (${post.title}) và từ chối các yêu cầu chờ duyệt.`);
     }
 
     this.logger.log(`Hoàn thành cập nhật Bạn đồng hành. Bài viết đóng: ${closedPostsCount}`);
