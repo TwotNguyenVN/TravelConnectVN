@@ -31,6 +31,7 @@ interface NormalizedActivity {
   entityId: string; // tourId or postId
   hasTourReview?: boolean;
   hasGuideReview?: boolean;
+  hasCompanionReview?: boolean;
 }
 
 export const BookingManagementPage: React.FC = () => {
@@ -43,7 +44,7 @@ export const BookingManagementPage: React.FC = () => {
   const [activities, setActivities] = useState<NormalizedActivity[]>([]);
   const [reviewModal, setReviewModal] = useState<{
     isOpen: boolean;
-    type: 'tour' | 'guide';
+    type: 'tour' | 'guide' | 'companion';
     activity: NormalizedActivity | null;
   }>({ isOpen: false, type: 'tour', activity: null });
 
@@ -128,7 +129,8 @@ export const BookingManagementPage: React.FC = () => {
           requestedAt: req.requested_at,
           transactions: [],
           responseNote: req.response_note,
-          entityId: req.post_id
+          entityId: req.post_id,
+          hasCompanionReview: req.companion_reviews !== null
         };
       });
 
@@ -270,6 +272,10 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
 
   const handleReviewGuide = (activity: NormalizedActivity) => {
     setReviewModal({ isOpen: true, type: 'guide', activity });
+  };
+
+  const handleReviewCompanion = (activity: NormalizedActivity) => {
+    setReviewModal({ isOpen: true, type: 'companion', activity });
   };
 
   const handleReviewSuccess = () => {
@@ -609,8 +615,29 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
                           </Button>
                           
                           {(activity.status === 'completed' || activity.status === 'finished') && (
-                            <div className="tc-companion-completed-badge" style={{ textAlign: 'center', padding: '12px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', color: '#16a34a', fontSize: '0.85rem', fontWeight: '600' }}>
-                              ✓ Đã hoàn thành chuyến đi đồng hành!
+                            <div className="tc-companion-completed-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                              <div className="tc-companion-completed-badge" style={{ textAlign: 'center', padding: '12px', background: '#f0fdf4', borderRadius: '12px', border: '1px solid #bbf7d0', color: '#16a34a', fontSize: '0.85rem', fontWeight: '600' }}>
+                                ✓ Đã hoàn thành chuyến đi đồng hành!
+                              </div>
+                              {activity.hasCompanionReview ? (
+                                <Button 
+                                  variant="secondary" 
+                                  fullWidth 
+                                  disabled
+                                  className="tc-btn-review"
+                                >
+                                  ✓ Đã đánh giá Bạn đồng hành
+                                </Button>
+                              ) : (
+                                <Button 
+                                  variant="primary" 
+                                  fullWidth 
+                                  onClick={() => handleReviewCompanion(activity)}
+                                  className="tc-btn-review"
+                                >
+                                  ⭐ Đánh giá Bạn đồng hành
+                                </Button>
+                              )}
                             </div>
                           )}
                         </>
@@ -669,6 +696,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
           tourTitle={reviewModal.activity.title}
           guideName={reviewModal.activity.guideName}
           type={reviewModal.type}
+          postId={reviewModal.activity.entityId}
           onSuccess={handleReviewSuccess}
         />
       )}
