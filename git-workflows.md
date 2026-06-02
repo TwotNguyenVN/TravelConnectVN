@@ -111,7 +111,9 @@ git push -u origin hotfix/fix-payment-crash
 *   **Tránh dùng**: `test`, `update`, `code-cua-tui`, `branch1`.
 
 ### 4.2. Viết Commit Message chuẩn Conventional Commits
-Công thức: **`<type>: <mô tả bằng tiếng Anh hoặc tiếng Việt>`**
+Công thức: **`<type>(<scope>): <mô tả bằng tiếng Anh hoặc tiếng Việt>`** (Phần `(<scope>)` là không bắt buộc nhưng khuyến khích sử dụng để phân loại khu vực thay đổi, ví dụ: `frontend`, `backend`, `auth`, `payment`, `database`).
+
+*Ví dụ:* `feat(backend): add Google OAuth login` hoặc `style(frontend): fix navbar mobile responsive alignment`.
 
 | Type | Ý nghĩa | Ví dụ |
 | :--- | :--- | :--- |
@@ -201,19 +203,29 @@ Cấu hình `.gitignore` chuẩn để tuyệt đối không push:
 
 ## 7. QUY ĐỊNH GIT DÀNH CHO AI ASSISTANT (ANTIGRAVITY / CLAUDE CODE)
 
-Để bảo vệ mã nguồn dự án khỏi việc tự động merge bừa bãi, AI Assistant khi làm việc trong repo này bắt buộc phải tuân theo quy trình sau:
+Để đảm bảo quy trình Git luôn nhất quán và tự động hóa an toàn, AI Assistant khi làm việc bắt buộc phải tuân theo các quy tắc sau:
 
-1.  **Mỗi yêu cầu = Một nhánh riêng**: Tách nhánh từ `develop` mới nhất trước khi làm việc.
-2.  **Không tự ý Commit/Push**: Chỉ commit và push khi người dùng ra lệnh rõ ràng (ví dụ: "push code", "đẩy lên GitHub"). Trong quá trình làm, chỉ sửa file local.
-3.  **Không tự ý Merge local**: AI tuyệt đối **không tự gộp nhánh** feature/fix vào `develop` hay `main` ở máy local. Phải đẩy code lên nhánh remote và hướng dẫn người dùng tạo Pull Request (PR) trên web GitHub để duyệt.
-4.  **Tự động giải quyết lệch code khi push**: Nếu nhánh `develop` trên GitHub có thay đổi mới trước khi AI push:
-    ```bash
-    git add . && git commit -m "feat: save progress before update"
-    git fetch origin
-    git merge origin/develop
-    # AI tự động phân tích & sửa conflict nếu xảy ra
-    git push origin feature/ten-nhanh
-    ```
+1.  **Quy trình bắt đầu phiên làm việc (Bắt đầu):**
+    *   Tự động checkout về nhánh `develop` ở local.
+    *   Thực hiện `git pull origin develop` để cập nhật mã nguồn mới nhất từ GitHub.
+    *   Chờ yêu cầu tiếp theo từ người dùng.
+
+2.  **Kiểm tra và Tách nhánh theo từng yêu cầu:**
+    *   Với mỗi yêu cầu mới, kiểm tra xem yêu cầu đó có phù hợp với nhánh hiện tại đang đứng hay không.
+    *   Nếu **không phù hợp**: Thông báo cho người dùng biết, sau đó tự động:
+        1. Đẩy (`git push`) nhánh hiện tại lên GitHub (nhánh tương ứng).
+        2. Chuyển về `develop` ở local và thực hiện `git pull origin develop` để đồng bộ nhánh chính (tránh tự ý merge local vào `develop` khi chưa được duyệt PR trên remote).
+        3. Tạo nhánh mới (`git checkout -b <type>/<ten-nhanh>`) từ nhánh `develop` mới nhất để thực hiện yêu cầu mới.
+
+3.  **Xử lý Conflict (Xung đột code):**
+    *   Nếu xảy ra conflict trong quá trình rebase, merge hoặc pull, AI tuyệt đối không tự động giải quyết nếu không chắc chắn.
+    *   AI phải dừng lại, liệt kê các file bị conflict và giải thích phương án xử lý (hoặc hỏi ý kiến người dùng) trước khi thực hiện.
+
+4.  **Commit code ngay lập tức:**
+    *   Với mỗi yêu cầu sau khi hoàn thành và chạy thử thành công, AI phải thực hiện commit code ngay lập tức với message mô tả đúng chuẩn Conventional Commits (kèm theo `<scope>` nếu liên quan đến module cụ thể).
+
+5.  **Hạn chế tự ý Merge trực tiếp trên Remote:**
+    *   AI chỉ merge các nhánh ở local khi được hướng dẫn hoặc đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR được chấp nhận.
 
 ---
 

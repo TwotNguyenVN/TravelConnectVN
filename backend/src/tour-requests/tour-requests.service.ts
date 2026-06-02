@@ -164,22 +164,21 @@ export class TourRequestsService {
       }),
       this.prisma.tour_requests.count({ where }),
     ]);
-
     return {
       data: requests.map((req) => {
-        const lastPaidTransaction = req.payment_transactions[0];
+        const paidTransactions = req.payment_transactions || [];
+        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
         const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
-        if (lastPaidTransaction) {
-          const paidAmount = Number(lastPaidTransaction.amount);
-          if (paidAmount >= totalPrice) {
+        if (totalPaid > 0) {
+          if (totalPaid >= totalPrice) {
             paymentStatus = 'Đã thanh toán 100%';
-          } else if (paidAmount >= totalPrice * 0.45) {
+          } else if (totalPaid >= totalPrice * 0.45) {
             paymentStatus = 'Đã thanh toán 50% (Cọc)';
           } else {
-            paymentStatus = `Đã thanh toán ${paidAmount.toLocaleString()} đ`;
+            paymentStatus = `Đã thanh toán ${totalPaid.toLocaleString()} đ`;
           }
         }
 
@@ -268,19 +267,19 @@ export class TourRequestsService {
 
     return {
       data: requests.map((req) => {
-        const lastPaidTransaction = req.payment_transactions[0];
+        const paidTransactions = req.payment_transactions || [];
+        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
         const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
-        if (lastPaidTransaction) {
-          const paidAmount = Number(lastPaidTransaction.amount);
-          if (paidAmount >= totalPrice) {
+        if (totalPaid > 0) {
+          if (totalPaid >= totalPrice) {
             paymentStatus = 'Đã thanh toán 100%';
-          } else if (paidAmount >= totalPrice * 0.45) {
+          } else if (totalPaid >= totalPrice * 0.45) {
             paymentStatus = 'Đã thanh toán 50% (Cọc)';
           } else {
-            paymentStatus = `Đã thanh toán ${paidAmount.toLocaleString()} đ`;
+            paymentStatus = `Đã thanh toán ${totalPaid.toLocaleString()} đ`;
           }
         }
 
@@ -527,15 +526,6 @@ export class TourRequestsService {
       tourTitle: request.tours.title,
       message: content,
     });
-
-    // 8. Log activity for Guide
-    await this.activityLogsService.log(
-      guideUserId,
-      'TOUR_REQUEST_PROCESSED',
-      'TOUR_REQUEST',
-      requestId,
-      { status, tourTitle: request.tours.title },
-    );
 
     return updatedRequest;
 

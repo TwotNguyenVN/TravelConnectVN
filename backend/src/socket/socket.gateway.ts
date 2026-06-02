@@ -21,8 +21,8 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   private logger: Logger = new Logger('SocketGateway');
 
-  // Lưu trữ mapping giữa userId và socketId
-  private userSockets: Map<string, string> = new Map();
+  // Lưu trữ mapping giữa userId và danh sách socketIds của user đó
+  private userSockets: Map<string, Set<string>> = new Map();
 
   handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
@@ -31,9 +31,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
     // Xóa mapping khi disconnect
-    for (const [userId, socketId] of this.userSockets.entries()) {
-      if (socketId === client.id) {
-        this.userSockets.delete(userId);
+    for (const [userId, socketIds] of this.userSockets.entries()) {
+      if (socketIds.has(client.id)) {
+        socketIds.delete(client.id);
+        if (socketIds.size === 0) {
+          this.userSockets.delete(userId);
+        }
         break;
       }
     }
@@ -42,7 +45,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('register')
   handleRegister(@MessageBody() data: { userId: string }, @ConnectedSocket() client: Socket) {
     this.logger.log(`User ${data.userId} registered with socket ${client.id}`);
-    this.userSockets.set(data.userId, client.id);
+    
+    if (!this.userSockets.has(data.userId)) {
+      this.userSockets.set(data.userId, new Set());
+    }
+    this.userSockets.get(data.userId)?.add(client.id);
+    
     client.join(`user_${data.userId}`);
     return { status: 'ok' };
   }

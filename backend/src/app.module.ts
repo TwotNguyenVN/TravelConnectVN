@@ -28,6 +28,8 @@ import { AiChatModule } from './ai-chat/ai-chat.module';
 import { TripExpensesModule } from './trip-expenses/trip-expenses.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 
@@ -37,6 +39,10 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000, // 1 minute
+      limit: 60,  // max 60 requests per minute
+    }]),
     ScheduleModule.forRoot(),
     SchedulerModule,
     PrismaModule,
@@ -65,10 +71,14 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     AiChatModule,
     TripExpensesModule,
   ],
-
-
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -56,6 +56,7 @@ export class RecommendationsService {
               guide_languages: true
             },
           },
+          tour_reviews: true,
         },
       });
 
@@ -83,6 +84,12 @@ export class RecommendationsService {
               return null;
             }
           }
+
+          // Tính toán rating thực tế từ tour_reviews
+          const visibleReviews = tour.tour_reviews.filter(r => r.visibility_status === 'visible');
+          const avgRating = visibleReviews.length > 0
+            ? Number((visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length).toFixed(1))
+            : 0.0;
 
           let score = 0;
           const reasons: string[] = [];
@@ -116,6 +123,12 @@ export class RecommendationsService {
             } catch (e) {}
           }
 
+          // Tiêu chí 4: Rating cao
+          if (avgRating >= 4.0) {
+            score += 2;
+            reasons.push('Tour có đánh giá tốt');
+          }
+
           const currentParticipants = nextAvailableSchedule 
             ? nextAvailableSchedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0)
             : (tour as any).tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
@@ -133,7 +146,7 @@ export class RecommendationsService {
             title: tour.title,
             cover: coverImg,
             price: tourPrice,
-            rating: 0.0,
+            rating: avgRating,
             location: tour.province,
             province: tour.province,
             startDate: nextAvailableSchedule ? nextAvailableSchedule.start_date : tour.start_date,
