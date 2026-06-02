@@ -52,6 +52,23 @@ export class UsersService {
     });
 
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+    
+    // Tính toán trung bình rating và số lượng đánh giá bạn đồng hành của host
+    const companionRatingAggregate = await this.prisma.companion_reviews.aggregate({
+      where: {
+        host_id: id,
+        visibility_status: 'visible'
+      },
+      _avg: {
+        rating: true
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    const companionRating = companionRatingAggregate._avg.rating ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1)) : null;
+    const companionReviewCount = companionRatingAggregate._count.id;
 
     // Resolve other languages names if they are IDs
     let otherLanguagesNames = user.user_preferences?.other_languages;
@@ -68,6 +85,8 @@ export class UsersService {
 
     return {
       id: user.id,
+      companionRating,
+      companionReviewCount,
       fullName: user.full_name,
       avatarUrl: user.avatar_url,
       coverUrl: user.cover_url,

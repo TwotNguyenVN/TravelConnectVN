@@ -29,6 +29,8 @@ import { TripExpensesModule } from './trip-expenses/trip-expenses.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 
+import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -49,6 +51,7 @@ import { SchedulerModule } from './scheduler/scheduler.module';
     HealthModule,
     TourRequestsModule,
     CompanionPostsModule,
+    CompanionReviewsModule,
     SocketModule,
     FavoritesModule,
     ReviewsModule,

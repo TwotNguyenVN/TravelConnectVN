@@ -100,4 +100,17 @@ export const companionService = {
   getMyRequestForPost: async (postId: string) => {
     return api.get(`/companion-posts/${postId}/my-request`);
   },
+
+  // Companion Reviews
+  createReview: async (data: { postId: string; requestId: string; rating: number; comment?: string }) => {
+    return api.post('/companion-reviews', data);
+  },
+
+  getHostReviews: async (hostId: string, params?: any) => {
+    return api.get(`/companion-reviews/host/${hostId}`, { params });
+  },
+
+  getPostReviews: async (postId: string) => {
+    return api.get(`/companion-reviews/post/${postId}`);
+  },
 };
