@@ -1,7 +1,14 @@
 import { IsString, IsEnum, IsOptional, IsUUID } from 'class-validator';
 
 export class CreateReportDto {
-  @IsEnum(['tour', 'companion_post', 'user', 'guide_profile', 'tour_review', 'guide_review'])
+  @IsEnum([
+    'tour',
+    'companion_post',
+    'user',
+    'guide_profile',
+    'tour_review',
+    'guide_review',
+  ])
   target_type: string;
 
   @IsOptional()

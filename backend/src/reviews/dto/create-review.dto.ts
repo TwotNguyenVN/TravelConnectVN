@@ -1,4 +1,11 @@
-import { IsString, IsNumber, Min, Max, IsUUID, IsNotEmpty } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  Min,
+  Max,
+  IsUUID,
+  IsNotEmpty,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTourReviewDto {

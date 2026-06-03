@@ -37,7 +37,9 @@ export class ConversationController {
    */
   @Get('unread-message-count')
   async getUnreadMessageCount(@Request() req): Promise<ApiResponse<any>> {
-    const result = await this.conversationService.getUnreadMessageCount(req.user.id);
+    const result = await this.conversationService.getUnreadMessageCount(
+      req.user.id,
+    );
     return {
       success: true,
       message: 'Lấy tổng số tin nhắn chưa đọc thành công',
@@ -53,9 +55,17 @@ export class ConversationController {
   @Post('direct')
   async createDirect(
     @Request() req,
-    @Body() body: { guideUserId: string; relatedTourId?: string; initialMessage?: string },
+    @Body()
+    body: {
+      guideUserId: string;
+      relatedTourId?: string;
+      initialMessage?: string;
+    },
   ): Promise<ApiResponse<any>> {
-    const result = await this.conversationService.createOrGetDirect(req.user.id, body);
+    const result = await this.conversationService.createOrGetDirect(
+      req.user.id,
+      body,
+    );
     return {
       success: true,
       message: 'Tạo hội thoại trực tiếp thành công',
@@ -73,7 +83,10 @@ export class ConversationController {
     @Request() req,
     @Body() body: { companionPostId: string },
   ): Promise<ApiResponse<any>> {
-    const result = await this.conversationService.createGroupCompanion(req.user.id, body);
+    const result = await this.conversationService.createGroupCompanion(
+      req.user.id,
+      body,
+    );
     return {
       success: true,
       message: 'Tạo nhóm chat bài đồng hành thành công',
@@ -90,7 +103,10 @@ export class ConversationController {
     @Request() req,
     @Param('id') id: string,
   ): Promise<ApiResponse<any>> {
-    const result = await this.conversationService.getParticipants(id, req.user.id);
+    const result = await this.conversationService.getParticipants(
+      id,
+      req.user.id,
+    );
     return {
       success: true,
       message: 'Lấy danh sách thành viên thành công',

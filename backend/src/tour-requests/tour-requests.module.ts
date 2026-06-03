@@ -8,7 +8,12 @@ import { UserActivityLogsModule } from '../user-activity-logs/user-activity-logs
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, SocketModule, UserActivityLogsModule, NotificationsModule],
+  imports: [
+    PrismaModule,
+    SocketModule,
+    UserActivityLogsModule,
+    NotificationsModule,
+  ],
   controllers: [TourRequestsController],
   providers: [TourRequestsService],
   exports: [TourRequestsService],

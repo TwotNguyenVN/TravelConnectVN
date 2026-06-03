@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, Req, UseGuards, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Req,
+  UseGuards,
+  Query,
+  Param,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import type { Request } from 'express';
@@ -12,15 +21,19 @@ export class PaymentsController {
   async createPaymentUrl(
     @Req() req: Request,
     @Body('tourRequestId') tourRequestId: string,
-    @Body('paymentType') paymentType: 'full' | 'deposit' = 'full'
+    @Body('paymentType') paymentType: 'full' | 'deposit' = 'full',
   ) {
     const userId = (req as any).user.id;
     // VNPAY cần IP Address của user thực hiện thanh toán
-    const ipAddr = req.headers['x-forwarded-for'] ||
-                   req.socket.remoteAddress || 
-                   '127.0.0.1';
+    const ipAddr =
+      req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
 
-    const data = await this.paymentsService.createPaymentUrl(userId, tourRequestId, ipAddr as string, paymentType);
+    const data = await this.paymentsService.createPaymentUrl(
+      userId,
+      tourRequestId,
+      ipAddr as string,
+      paymentType,
+    );
     return {
       success: true,
       message: 'Tạo URL thanh toán thành công',

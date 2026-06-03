@@ -61,6 +61,9 @@ import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
+import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
+import { SupportDisputePage } from '../pages/support/SupportDisputePage';
+import { SupportBroadcastPage } from '../pages/support/SupportBroadcastPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
@@ -184,8 +187,10 @@ export const router = createBrowserRouter([
       </RoleGuard>
     ),
     children: [
-      { index: true, element: <AdminReportManagementPage /> },
+      { index: true, element: <SupportDashboardPage /> },
       { path: 'reports', element: <AdminReportManagementPage /> },
+      { path: 'disputes', element: <SupportDisputePage /> },
+      { path: 'broadcast', element: <SupportBroadcastPage /> },
     ],
   },
   {

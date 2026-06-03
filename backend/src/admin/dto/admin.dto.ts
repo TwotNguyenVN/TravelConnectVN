@@ -50,3 +50,17 @@ export class ProcessVerificationDto {
   @IsString()
   result_note?: string;
 }
+
+export class CreateStaffDto {
+  @IsString()
+  email: string;
+
+  @IsString()
+  password: string;
+
+  @IsString()
+  fullName: string;
+
+  @IsEnum(['CONTENT_MODERATOR', 'SUPPORT_STAFF', 'ACCOUNTANT'])
+  roleCode: string;
+}

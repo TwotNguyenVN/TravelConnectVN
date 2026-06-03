@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanionReviewDto } from './dto/create-companion-review.dto';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
@@ -26,7 +32,9 @@ export class CompanionReviewsService {
     });
 
     if (!request) {
-      throw new NotFoundException('Yêu cầu tham gia chuyến đi đồng hành không tồn tại');
+      throw new NotFoundException(
+        'Yêu cầu tham gia chuyến đi đồng hành không tồn tại',
+      );
     }
 
     // 2. Kiểm tra quyền sở hữu (người đánh giá phải là người gửi request)
@@ -37,13 +45,17 @@ export class CompanionReviewsService {
     // 3. Kiểm tra trạng thái và thời gian kết thúc chuyến đi
     // Request phải ở trạng thái 'approved' và thời gian hiện tại đã qua end_date của bài đăng
     if (request.status !== 'approved') {
-      throw new BadRequestException('Chỉ có thể đánh giá chuyến đi đồng hành đã được chấp nhận');
+      throw new BadRequestException(
+        'Chỉ có thể đánh giá chuyến đi đồng hành đã được chấp nhận',
+      );
     }
 
     const today = new Date();
     const endDate = new Date(request.companion_posts.end_date);
     if (today < endDate) {
-      throw new BadRequestException('Chỉ có thể đánh giá sau khi chuyến đi đã kết thúc');
+      throw new BadRequestException(
+        'Chỉ có thể đánh giá sau khi chuyến đi đã kết thúc',
+      );
     }
 
     // 4. Kiểm tra xem đã đánh giá chưa (đảm bảo request_id là unique trong companion_reviews)
@@ -52,7 +64,9 @@ export class CompanionReviewsService {
     });
 
     if (existing) {
-      throw new ConflictException('Bạn đã đánh giá chuyến đi đồng hành này rồi');
+      throw new ConflictException(
+        'Bạn đã đánh giá chuyến đi đồng hành này rồi',
+      );
     }
 
     // 5. Lưu đánh giá vào database

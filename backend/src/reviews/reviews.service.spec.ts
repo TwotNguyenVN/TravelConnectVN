@@ -64,9 +64,9 @@ describe('ReviewsService', () => {
     it('should throw NotFoundException when tour request does not exist', async () => {
       mockPrismaService.tour_requests.findUnique.mockResolvedValue(null);
 
-      await expect(service.createTourReview(userId, dto))
-        .rejects
-        .toThrow(NotFoundException);
+      await expect(service.createTourReview(userId, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException when user does not own the request', async () => {
@@ -77,9 +77,9 @@ describe('ReviewsService', () => {
         tours: { title: 'Tour Test' },
       });
 
-      await expect(service.createTourReview(userId, dto))
-        .rejects
-        .toThrow(ForbiddenException);
+      await expect(service.createTourReview(userId, dto)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should throw BadRequestException when tour request has invalid status', async () => {
@@ -90,9 +90,9 @@ describe('ReviewsService', () => {
         tours: { title: 'Tour Test' },
       });
 
-      await expect(service.createTourReview(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.createTourReview(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw ConflictException when user already reviewed', async () => {
@@ -107,9 +107,9 @@ describe('ReviewsService', () => {
         id: 'existing-review',
       });
 
-      await expect(service.createTourReview(userId, dto))
-        .rejects
-        .toThrow(ConflictException);
+      await expect(service.createTourReview(userId, dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should create review successfully with valid data', async () => {

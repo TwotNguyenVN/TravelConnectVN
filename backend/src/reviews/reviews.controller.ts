@@ -11,7 +11,10 @@ import {
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ReviewsService } from './reviews.service';
-import { CreateTourReviewDto, CreateGuideReviewDto } from './dto/create-review.dto';
+import {
+  CreateTourReviewDto,
+  CreateGuideReviewDto,
+} from './dto/create-review.dto';
 
 @ApiTags('reviews')
 @Controller('reviews')
@@ -85,8 +88,12 @@ export class ReviewsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update review visibility' })
   async updateReviewVisibility(
-    @Body() body: { type: 'TOUR' | 'GUIDE', id: string, status: string }
+    @Body() body: { type: 'TOUR' | 'GUIDE'; id: string; status: string },
   ) {
-    return this.reviewsService.updateReviewVisibility(body.type, body.id, body.status);
+    return this.reviewsService.updateReviewVisibility(
+      body.type,
+      body.id,
+      body.status,
+    );
   }
 }

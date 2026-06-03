@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Body, UseGuards, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  UseGuards,
+  Req,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -28,13 +38,18 @@ export class UsersController {
   }
 
   @Post('avatar')
-  @UseInterceptors(FileInterceptor('file', {
-    limits: {
-      fileSize: 5 * 1024 * 1024, // 5MB
-    }
-  }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB
+      },
+    }),
+  )
   async updateAvatar(@Req() req, @UploadedFile() file) {
-    console.log('DEBUG - Controller received avatar upload request for user:', req.user.id);
+    console.log(
+      'DEBUG - Controller received avatar upload request for user:',
+      req.user.id,
+    );
     if (!file) {
       console.error('DEBUG - No file received in controller');
       return { success: false, message: 'Không nhận được file ảnh' };
@@ -42,7 +57,7 @@ export class UsersController {
     console.log('DEBUG - File details:', {
       originalname: file.originalname,
       mimetype: file.mimetype,
-      size: file.size
+      size: file.size,
     });
 
     try {

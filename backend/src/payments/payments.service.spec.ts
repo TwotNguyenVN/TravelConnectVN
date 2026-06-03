@@ -56,8 +56,10 @@ describe('PaymentsService', () => {
       });
 
       await expect(
-        service.createPaymentUrl('user_123', 'req_123', '127.0.0.1')
-      ).rejects.toThrow('Trạng thái yêu cầu không hợp lệ để thanh toán (Yêu cầu cần được duyệt trước)');
+        service.createPaymentUrl('user_123', 'req_123', '127.0.0.1'),
+      ).rejects.toThrow(
+        'Trạng thái yêu cầu không hợp lệ để thanh toán (Yêu cầu cần được duyệt trước)',
+      );
     });
   });
 
@@ -68,7 +70,7 @@ describe('PaymentsService', () => {
       // Do hash VNPAY sử dụng env hashsecret, ta có thể mock môi trường hoặc test trực tiếp.
       // Để đơn giản và chính xác hơn, ta sẽ thiết lập môi trường hash secret cho test và tạo checksum khớp.
       process.env.VNP_HASHSECRET = 'secret';
-      
+
       const vnp_Params = {
         vnp_TxnRef: 'tx_123',
         vnp_ResponseCode: '00',
@@ -86,10 +88,13 @@ describe('PaymentsService', () => {
 
       // Để vượt qua kiểm tra checksum (secureHash === signed), ta mock sortObject & tính toán signed
       // Hoặc đơn giản là giả lập tham số checksum khớp.
-      const signData = 'vnp_Amount=5000000&vnp_ResponseCode=00&vnp_TxnRef=tx_123';
+      const signData =
+        'vnp_Amount=5000000&vnp_ResponseCode=00&vnp_TxnRef=tx_123';
       const crypto = require('crypto');
       const hmac = crypto.createHmac('sha512', 'secret');
-      const correctHash = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+      const correctHash = hmac
+        .update(Buffer.from(signData, 'utf-8'))
+        .digest('hex');
       vnp_Params.vnp_SecureHash = correctHash;
 
       const result = await service.vnpayIpn(vnp_Params);

@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsUUID, IsOptional, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsUUID,
+  IsOptional,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCompanionRequestDto {
@@ -7,7 +13,10 @@ export class CreateCompanionRequestDto {
   @IsNotEmpty()
   postId: string;
 
-  @ApiProperty({ example: 'Hi, I would love to join your trip!', required: false })
+  @ApiProperty({
+    example: 'Hi, I would love to join your trip!',
+    required: false,
+  })
   @IsString()
   @IsOptional()
   @MaxLength(500)

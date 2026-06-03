@@ -23,14 +23,17 @@ export class NotificationsController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
   ): Promise<ApiResponse<any>> {
-    const result = await this.notificationsService.findAll(req.user.id, page, limit);
+    const result = await this.notificationsService.findAll(
+      req.user.id,
+      page,
+      limit,
+    );
     return {
       success: true,
       message: 'Lấy danh sách thông báo thành công',
       data: result,
     };
   }
-
 
   @Get('unread-count')
   async getUnreadCount(@Request() req): Promise<ApiResponse<any>> {
@@ -43,7 +46,6 @@ export class NotificationsController {
   }
 
   @Patch('read-all')
-
   async markAllAsRead(@Request() req): Promise<ApiResponse<any>> {
     await this.notificationsService.markAllAsRead(req.user.id);
     return {

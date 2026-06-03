@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
 
@@ -11,7 +16,6 @@ export class UsersService {
     private readonly supabaseService: SupabaseService,
     private readonly activityLogsService: UserActivityLogsService,
   ) {}
-
 
   async findOne(id: string) {
     try {
@@ -35,51 +39,57 @@ export class UsersService {
       where: { id },
       include: {
         guide_profiles: {
-          select: { id: true, verification_status: true }
+          select: { id: true, verification_status: true },
         },
         provinces: true,
         user_preferences: {
           include: {
-            languages: true
-          }
+            languages: true,
+          },
         },
         companion_posts: {
           where: { visibility_status: 'visible' },
           orderBy: { created_at: 'desc' },
-          take: 6
-        }
-      }
+          take: 6,
+        },
+      },
     });
 
     if (!user) throw new NotFoundException('Không tìm thấy người dùng');
-    
-    // Tính toán trung bình rating và số lượng đánh giá bạn đồng hành của host
-    const companionRatingAggregate = await this.prisma.companion_reviews.aggregate({
-      where: {
-        host_id: id,
-        visibility_status: 'visible'
-      },
-      _avg: {
-        rating: true
-      },
-      _count: {
-        id: true
-      }
-    });
 
-    const companionRating = companionRatingAggregate._avg.rating ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1)) : null;
+    // Tính toán trung bình rating và số lượng đánh giá bạn đồng hành của host
+    const companionRatingAggregate =
+      await this.prisma.companion_reviews.aggregate({
+        where: {
+          host_id: id,
+          visibility_status: 'visible',
+        },
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          id: true,
+        },
+      });
+
+    const companionRating = companionRatingAggregate._avg.rating
+      ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1))
+      : null;
     const companionReviewCount = companionRatingAggregate._count.id;
 
     // Resolve other languages names if they are IDs
     let otherLanguagesNames = user.user_preferences?.other_languages;
     if (otherLanguagesNames) {
-      const ids = otherLanguagesNames.split(',').map(id => id.trim()).filter(id => !isNaN(Number(id)));
+      const ids = otherLanguagesNames
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => !isNaN(Number(id)));
       if (ids.length > 0) {
         const languages = await this.prisma.languages.findMany({
-          where: { id: { in: ids.map(id => BigInt(id)) } },
-          select: { name: true }
+          where: { id: { in: ids.map((id) => BigInt(id)) } },
+          select: { name: true },
         });
-        otherLanguagesNames = languages.map(l => l.name).join(', ');
+        otherLanguagesNames = languages.map((l) => l.name).join(', ');
       }
     }
 
@@ -102,19 +112,23 @@ export class UsersService {
         preferredLanguage: user.user_preferences?.languages?.name,
         otherLanguages: otherLanguagesNames,
       },
-      guideProfile: user.guide_profiles ? {
-        id: user.guide_profiles.id,
-        isVerified: user.guide_profiles.verification_status === 'verified' || user.guide_profiles.verification_status === 'approved'
-      } : null,
-      companionPosts: user.companion_posts.map(post => ({
+      guideProfile: user.guide_profiles
+        ? {
+            id: user.guide_profiles.id,
+            isVerified:
+              user.guide_profiles.verification_status === 'verified' ||
+              user.guide_profiles.verification_status === 'approved',
+          }
+        : null,
+      companionPosts: user.companion_posts.map((post) => ({
         id: post.id,
         title: post.title,
         destination: post.destination,
         startDate: post.start_date,
         endDate: post.end_date,
         status: post.business_status,
-        images: post.images
-      }))
+        images: post.images,
+      })),
     };
   }
 
@@ -123,9 +137,9 @@ export class UsersService {
       // 1. Kiểm tra sự tồn tại của người dùng và lấy dữ liệu hiện tại
       const currentUser = await this.prisma.public_users.findUnique({
         where: { id },
-        include: { user_preferences: true }
+        include: { user_preferences: true },
       });
-      
+
       if (!currentUser) {
         throw new NotFoundException('Không tìm thấy người dùng');
       }
@@ -146,9 +160,12 @@ export class UsersService {
           updateData.gender = null;
         } else {
           const genderLower = data.gender.toLowerCase();
-          if (genderLower === 'nam' || genderLower === 'male') updateData.gender = 'male';
-          else if (genderLower === 'nữ' || genderLower === 'female') updateData.gender = 'female';
-          else if (genderLower === 'khác' || genderLower === 'other') updateData.gender = 'other';
+          if (genderLower === 'nam' || genderLower === 'male')
+            updateData.gender = 'male';
+          else if (genderLower === 'nữ' || genderLower === 'female')
+            updateData.gender = 'female';
+          else if (genderLower === 'khác' || genderLower === 'other')
+            updateData.gender = 'other';
           else updateData.gender = 'other'; // Mặc định nếu không khớp
         }
       }
@@ -159,7 +176,7 @@ export class UsersService {
         if (isNaN(dob.getTime())) {
           throw new BadRequestException('Ngày sinh không hợp lệ');
         }
-        
+
         const year = dob.getFullYear();
         if (year < 1950) {
           throw new BadRequestException('Năm sinh không được trước năm 1950');
@@ -167,32 +184,36 @@ export class UsersService {
         if (dob > new Date()) {
           throw new BadRequestException('Ngày sinh không được ở tương lai');
         }
-        
+
         updateData.date_of_birth = dob;
       }
 
       // Phone handling with proactive conflict check
       if (data.phone !== undefined) {
         const newPhone = data.phone === '' ? null : data.phone;
-        
+
         // Chỉ xử lý nếu phone thay đổi
         if (newPhone !== currentUser.phone) {
           if (newPhone !== null) {
             // Kiểm tra số điện thoại chỉ chứa chữ số
             if (!/^[0-9]+$/.test(newPhone)) {
-              throw new BadRequestException('Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)');
+              throw new BadRequestException(
+                'Số điện thoại chỉ được phép chứa các ký tự số (không chứa chữ hoặc ký tự đặc biệt)',
+              );
             }
 
             // Kiểm tra xem số điện thoại này đã được người khác sử dụng chưa
             const existingUser = await this.prisma.public_users.findFirst({
               where: {
                 phone: newPhone,
-                id: { not: id }
-              }
+                id: { not: id },
+              },
             });
-            
+
             if (existingUser) {
-              throw new BadRequestException('Số điện thoại này đã được sử dụng bởi một tài khoản khác');
+              throw new BadRequestException(
+                'Số điện thoại này đã được sử dụng bởi một tài khoản khác',
+              );
             }
           }
           updateData.phone = newPhone;
@@ -202,15 +223,17 @@ export class UsersService {
       // Location fields
       if (data.region !== undefined) updateData.region = data.region;
       if (data.homeProvinceId !== undefined) {
-        updateData.home_province_id = data.homeProvinceId && data.homeProvinceId !== '' 
-          ? BigInt(data.homeProvinceId) 
-          : null;
+        updateData.home_province_id =
+          data.homeProvinceId && data.homeProvinceId !== ''
+            ? BigInt(data.homeProvinceId)
+            : null;
       }
 
       // Media URLs
       if (data.avatarUrl !== undefined) updateData.avatar_url = data.avatarUrl;
       if (data.coverUrl !== undefined) updateData.cover_url = data.coverUrl;
-      if (data.facebookUrl !== undefined) updateData.facebook_url = data.facebookUrl;
+      if (data.facebookUrl !== undefined)
+        updateData.facebook_url = data.facebookUrl;
 
       // 3. Thực hiện cập nhật DB
       const updatedUser = await this.prisma.public_users.update({
@@ -219,22 +242,35 @@ export class UsersService {
       });
 
       // 4. Cập nhật User Preferences (travel style, language)
-      if (data.travelStyle !== undefined || data.preferredLanguageId !== undefined || data.otherLanguages !== undefined) {
+      if (
+        data.travelStyle !== undefined ||
+        data.preferredLanguageId !== undefined ||
+        data.otherLanguages !== undefined
+      ) {
         await this.prisma.user_preferences.upsert({
           where: { user_id: id },
           update: {
-            preferred_trip_style: data.travelStyle ?? currentUser.user_preferences?.preferred_trip_style,
-            preferred_language_id: data.preferredLanguageId && data.preferredLanguageId !== '' 
-              ? BigInt(data.preferredLanguageId) 
-              : (data.preferredLanguageId === '' ? null : currentUser.user_preferences?.preferred_language_id),
-            other_languages: data.otherLanguages !== undefined ? data.otherLanguages : currentUser.user_preferences?.other_languages,
+            preferred_trip_style:
+              data.travelStyle ??
+              currentUser.user_preferences?.preferred_trip_style,
+            preferred_language_id:
+              data.preferredLanguageId && data.preferredLanguageId !== ''
+                ? BigInt(data.preferredLanguageId)
+                : data.preferredLanguageId === ''
+                  ? null
+                  : currentUser.user_preferences?.preferred_language_id,
+            other_languages:
+              data.otherLanguages !== undefined
+                ? data.otherLanguages
+                : currentUser.user_preferences?.other_languages,
           },
           create: {
             user_id: id,
             preferred_trip_style: data.travelStyle || '',
-            preferred_language_id: data.preferredLanguageId && data.preferredLanguageId !== '' 
-              ? BigInt(data.preferredLanguageId) 
-              : null,
+            preferred_language_id:
+              data.preferredLanguageId && data.preferredLanguageId !== ''
+                ? BigInt(data.preferredLanguageId)
+                : null,
             other_languages: data.otherLanguages || '',
           },
         });
@@ -246,14 +282,21 @@ export class UsersService {
       return updatedUser;
     } catch (error) {
       console.error('ERROR - UsersService.update:', error);
-      if (error instanceof BadRequestException || error instanceof NotFoundException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
         throw error;
       }
       // Xử lý lỗi Unique constraint từ Prisma nếu lọt qua bước validate
       if (error.code === 'P2002') {
-        throw new BadRequestException('Dữ liệu (số điện thoại hoặc email) đã tồn tại trong hệ thống');
+        throw new BadRequestException(
+          'Dữ liệu (số điện thoại hoặc email) đã tồn tại trong hệ thống',
+        );
       }
-      throw new InternalServerErrorException('Đã có lỗi xảy ra khi cập nhật hồ sơ');
+      throw new InternalServerErrorException(
+        'Đã có lỗi xảy ra khi cập nhật hồ sơ',
+      );
     }
   }
 
@@ -262,22 +305,20 @@ export class UsersService {
     try {
       // Sync to Supabase Auth
       if (data.fullName || data.avatarUrl) {
-        await this.supabaseService.getAdminClient().auth.admin.updateUserById(id, {
-          user_metadata: {
-            full_name: data.fullName,
-            avatar_url: data.avatarUrl,
-          },
-        });
+        await this.supabaseService
+          .getAdminClient()
+          .auth.admin.updateUserById(id, {
+            user_metadata: {
+              full_name: data.fullName,
+              avatar_url: data.avatarUrl,
+            },
+          });
       }
 
       // Log activity
-      await this.activityLogsService.log(
-        id,
-        'profile.updated',
-        'PROFILE',
-        id,
-        { updated_fields: Object.keys(data).filter(k => data[k] !== undefined) },
-      );
+      await this.activityLogsService.log(id, 'profile.updated', 'PROFILE', id, {
+        updated_fields: Object.keys(data).filter((k) => data[k] !== undefined),
+      });
     } catch (err) {
       console.error('Failed to sync/log profile update:', err);
     }
@@ -293,20 +334,26 @@ export class UsersService {
 
   async updateAvatar(id: string, file: any) {
     console.log('DEBUG - UsersService.updateAvatar started for user:', id);
-    
+
     // 1. Tìm thông tin avatar cũ để xóa
     try {
       const currentUser = await this.prisma.public_users.findUnique({
         where: { id },
-        select: { avatar_url: true }
+        select: { avatar_url: true },
       });
-      
+
       if (currentUser?.avatar_url) {
-        console.log('DEBUG - Found old avatar, attempting to delete:', currentUser.avatar_url);
+        console.log(
+          'DEBUG - Found old avatar, attempting to delete:',
+          currentUser.avatar_url,
+        );
         await this.supabaseService.deleteAvatar(currentUser.avatar_url);
       }
     } catch (findError) {
-      console.warn('Could not find user for old avatar cleanup, skipping deletion:', findError.message);
+      console.warn(
+        'Could not find user for old avatar cleanup, skipping deletion:',
+        findError.message,
+      );
     }
 
     let avatarUrl: string;
@@ -331,14 +378,19 @@ export class UsersService {
     try {
       const adminClient = this.supabaseService.getAdminClient();
       // Kiểm tra xem client có phải là admin client thực sự không (dựa trên key)
-      if (process.env.SUPABASE_SERVICE_ROLE_KEY && !process.env.SUPABASE_SERVICE_ROLE_KEY.includes('VUI-LONG-DIEN')) {
+      if (
+        process.env.SUPABASE_SERVICE_ROLE_KEY &&
+        !process.env.SUPABASE_SERVICE_ROLE_KEY.includes('VUI-LONG-DIEN')
+      ) {
         await adminClient.auth.admin.updateUserById(id, {
           user_metadata: {
             avatar_url: avatarUrl,
           },
         });
       } else {
-        console.warn('Skipping Auth Metadata sync: SUPABASE_SERVICE_ROLE_KEY is missing');
+        console.warn(
+          'Skipping Auth Metadata sync: SUPABASE_SERVICE_ROLE_KEY is missing',
+        );
       }
     } catch (authError) {
       console.error('Failed to sync avatar to Supabase Auth:', authError);
@@ -354,6 +406,5 @@ export class UsersService {
     );
 
     return updatedUser;
-
   }
 }

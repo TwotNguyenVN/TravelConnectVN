@@ -19,7 +19,7 @@ export class SupabaseService {
     }
 
     this.client = createClient(url as string, key as string);
-    
+
     // Initialize admin client if serviceKey exists
     if (serviceKey && !serviceKey.includes('VUI-LONG-DIEN')) {
       this.adminClient = createClient(url as string, serviceKey);
@@ -32,7 +32,9 @@ export class SupabaseService {
 
   getAdminClient(): SupabaseClient {
     if (!this.adminClient) {
-      this.logger.error('SUPABASE_SERVICE_ROLE_KEY is missing! Admin operations will fail.');
+      this.logger.error(
+        'SUPABASE_SERVICE_ROLE_KEY is missing! Admin operations will fail.',
+      );
       return this.client; // Fallback to normal client
     }
     return this.adminClient;
@@ -43,17 +45,19 @@ export class SupabaseService {
       data: { user },
       error,
     } = await this.client.auth.getUser(token);
-    
+
     if (error) {
       console.error('DEBUG - SupabaseService.verifyUser ERROR:', error.message);
       throw error;
     }
-    
+
     if (!user) {
-      console.error('DEBUG - SupabaseService.verifyUser: No user found for token');
+      console.error(
+        'DEBUG - SupabaseService.verifyUser: No user found for token',
+      );
       throw new Error('User not found');
     }
-    
+
     return user;
   }
 
@@ -61,10 +65,12 @@ export class SupabaseService {
     const fileExt = file.originalname.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
     const filePath = `public/${fileName}`;
-    console.log(`DEBUG - SupabaseService: Attempting to upload to bucket "avatars" at path: ${filePath}`);
+    console.log(
+      `DEBUG - SupabaseService: Attempting to upload to bucket "avatars" at path: ${filePath}`,
+    );
 
-    const { error } = await this.getAdminClient().storage
-      .from('avatars')
+    const { error } = await this.getAdminClient()
+      .storage.from('avatars')
       .upload(filePath, file.buffer, {
         contentType: file.mimetype,
         upsert: true,
@@ -78,9 +84,7 @@ export class SupabaseService {
 
     console.log('DEBUG - Upload success, getting public URL...');
 
-    const { data } = this.client.storage
-      .from('avatars')
-      .getPublicUrl(filePath);
+    const { data } = this.client.storage.from('avatars').getPublicUrl(filePath);
 
     return data.publicUrl;
   }
@@ -94,16 +98,23 @@ export class SupabaseService {
       if (pathParts.length < 2) return;
 
       const filePath = pathParts[1];
-      console.log(`DEBUG - SupabaseService: Attempting to delete old avatar at path: ${filePath}`);
+      console.log(
+        `DEBUG - SupabaseService: Attempting to delete old avatar at path: ${filePath}`,
+      );
 
-      const { error } = await this.getAdminClient().storage
-        .from('avatars')
+      const { error } = await this.getAdminClient()
+        .storage.from('avatars')
         .remove([filePath]);
 
       if (error) {
-        console.warn('Could not delete old avatar (might have been manually deleted):', error.message);
+        console.warn(
+          'Could not delete old avatar (might have been manually deleted):',
+          error.message,
+        );
       } else {
-        console.log('DEBUG - Successfully deleted old avatar file from storage');
+        console.log(
+          'DEBUG - Successfully deleted old avatar file from storage',
+        );
       }
     } catch (err) {
       console.error('Error in deleteAvatar:', err);

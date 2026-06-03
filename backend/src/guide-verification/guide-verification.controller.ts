@@ -22,7 +22,10 @@ export class GuideVerificationController {
   @Post('request')
   @Roles(Role.GUIDE)
   @UseGuards(RoleGuard)
-  async createRequest(@Request() req, @Body() dto: CreateVerificationRequestDto) {
+  async createRequest(
+    @Request() req,
+    @Body() dto: CreateVerificationRequestDto,
+  ) {
     const userId = req.user.id;
     return this.verificationService.createRequest(userId, dto);
   }

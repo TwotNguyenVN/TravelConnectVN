@@ -1,4 +1,9 @@
-import { Injectable, InternalServerErrorException, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -9,7 +14,7 @@ export class PaymentsService {
   constructor(
     private prisma: PrismaService,
     private notificationsService: NotificationsService,
-    private socketGateway: SocketGateway
+    private socketGateway: SocketGateway,
   ) {}
 
   private sortObject(obj: any): any {
@@ -29,7 +34,12 @@ export class PaymentsService {
   }
 
   // 1. Tạo URL thanh toán VNPAY
-  async createPaymentUrl(userId: string, tourRequestId: string, ipAddr: string, paymentType: 'full' | 'deposit' = 'full') {
+  async createPaymentUrl(
+    userId: string,
+    tourRequestId: string,
+    ipAddr: string,
+    paymentType: 'full' | 'deposit' = 'full',
+  ) {
     try {
       // Tìm thông tin yêu cầu tour
       const request = await this.prisma.tour_requests.findUnique({
@@ -38,28 +48,44 @@ export class PaymentsService {
       });
 
       if (!request) throw new NotFoundException('Yêu cầu không tồn tại');
-      if (request.user_id !== userId) throw new BadRequestException('Bạn không có quyền thanh toán yêu cầu này');
+      if (request.user_id !== userId)
+        throw new BadRequestException(
+          'Bạn không có quyền thanh toán yêu cầu này',
+        );
       if (request.status !== 'approved' && request.status !== 'paid') {
-        throw new BadRequestException('Trạng thái yêu cầu không hợp lệ để thanh toán (Yêu cầu cần được duyệt trước)');
+        throw new BadRequestException(
+          'Trạng thái yêu cầu không hợp lệ để thanh toán (Yêu cầu cần được duyệt trước)',
+        );
       }
 
       // Kiểm tra số tiền đã thanh toán từ trước
       const paidTransactions = await this.prisma.payment_transactions.findMany({
         where: {
           tour_request_id: tourRequestId,
-          status: 'paid'
-        }
+          status: 'paid',
+        },
       });
-      const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalPaid = paidTransactions.reduce(
+        (sum, t) => sum + Number(t.amount),
+        0,
+      );
       const price = request.price_at_booking
         ? Number(request.price_at_booking)
-        : (request.schedule_id
-            ? Number((await this.prisma.tour_schedules.findUnique({ where: { id: request.schedule_id } }))?.price || request.tours.price)
-            : Number(request.tours.price));
+        : request.schedule_id
+          ? Number(
+              (
+                await this.prisma.tour_schedules.findUnique({
+                  where: { id: request.schedule_id },
+                })
+              )?.price || request.tours.price,
+            )
+          : Number(request.tours.price);
       const totalAmount = price * request.participant_count;
 
       if (request.status === 'paid' && totalPaid >= totalAmount) {
-        throw new BadRequestException('Yêu cầu đặt tour này đã được thanh toán đầy đủ 100%');
+        throw new BadRequestException(
+          'Yêu cầu đặt tour này đã được thanh toán đầy đủ 100%',
+        );
       }
 
       // Tính số tiền cần thanh toán cho giao dịch này
@@ -69,13 +95,14 @@ export class PaymentsService {
       }
 
       // Kiểm tra xem đã có giao dịch pending cho yêu cầu này chưa
-      const existingTransaction = await this.prisma.payment_transactions.findFirst({
-        where: {
-          tour_request_id: tourRequestId,
-          user_id: userId,
-          status: 'pending'
-        }
-      });
+      const existingTransaction =
+        await this.prisma.payment_transactions.findFirst({
+          where: {
+            tour_request_id: tourRequestId,
+            user_id: userId,
+            status: 'pending',
+          },
+        });
 
       let transactionId: string;
 
@@ -85,7 +112,7 @@ export class PaymentsService {
         if (Number(existingTransaction.amount) !== amount) {
           await this.prisma.payment_transactions.update({
             where: { id: transactionId },
-            data: { amount: amount }
+            data: { amount: amount },
           });
         }
       } else {
@@ -110,7 +137,7 @@ export class PaymentsService {
       const returnUrl = process.env.VNP_RETURN_URL;
 
       const date = new Date();
-      const createDate = 
+      const createDate =
         date.getFullYear().toString() +
         ('0' + (date.getMonth() + 1)).slice(-2) +
         ('0' + date.getDate()).slice(-2) +
@@ -150,7 +177,11 @@ export class PaymentsService {
       return { paymentUrl: vnpUrl };
     } catch (error) {
       console.error('Error creating payment:', error);
-      if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      )
+        throw error;
       throw new InternalServerErrorException('Failed to create payment URL');
     }
   }
@@ -158,12 +189,13 @@ export class PaymentsService {
   // 2. IPN Listener (Dùng để VNPAY gọi về báo kết quả ngầm)
   async vnpayIpn(vnp_Params: any) {
     try {
-      console.log("IPN Params:", vnp_Params); let secureHash = vnp_Params['vnp_SecureHash'];
+      console.log('IPN Params:', vnp_Params);
+      const secureHash = vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHashType'];
 
       vnp_Params = this.sortObject(vnp_Params);
-      
+
       let signData = '';
       for (const key in vnp_Params) {
         if (Object.prototype.hasOwnProperty.call(vnp_Params, key)) {
@@ -182,7 +214,7 @@ export class PaymentsService {
 
         // Tìm transaction
         const transaction = await this.prisma.payment_transactions.findUnique({
-          where: { id: orderId }
+          where: { id: orderId },
         });
 
         if (!transaction) {
@@ -203,17 +235,23 @@ export class PaymentsService {
         const newStatus = isSuccess ? 'paid' : 'failed';
 
         // Kiểm tra tổng số tiền đã thanh toán sau khi giao dịch này thành công
-        const paidTransactions = await this.prisma.payment_transactions.findMany({
-          where: {
-            tour_request_id: transaction.tour_request_id,
-            status: 'paid',
-          },
-        });
-        const currentPaidSum = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-        
+        const paidTransactions =
+          await this.prisma.payment_transactions.findMany({
+            where: {
+              tour_request_id: transaction.tour_request_id,
+              status: 'paid',
+            },
+          });
+        const currentPaidSum = paidTransactions.reduce(
+          (sum, t) => sum + Number(t.amount),
+          0,
+        );
+
         // Thêm số tiền của giao dịch hiện tại nếu nó thành công và chưa được lưu là 'paid' trong DB
         const transactionAmount = Number(transaction.amount);
-        const totalPaid = isSuccess ? (currentPaidSum + transactionAmount) : currentPaidSum;
+        const totalPaid = isSuccess
+          ? currentPaidSum + transactionAmount
+          : currentPaidSum;
 
         // Lấy thông tin tour request để so sánh tổng tiền
         const tourRequest = await this.prisma.tour_requests.findUnique({
@@ -225,9 +263,15 @@ export class PaymentsService {
         if (tourRequest) {
           const price = tourRequest.price_at_booking
             ? Number(tourRequest.price_at_booking)
-            : (tourRequest.schedule_id
-                ? Number((await this.prisma.tour_schedules.findUnique({ where: { id: tourRequest.schedule_id } }))?.price || tourRequest.tours.price)
-                : Number(tourRequest.tours.price));
+            : tourRequest.schedule_id
+              ? Number(
+                  (
+                    await this.prisma.tour_schedules.findUnique({
+                      where: { id: tourRequest.schedule_id },
+                    })
+                  )?.price || tourRequest.tours.price,
+                )
+              : Number(tourRequest.tours.price);
           const totalAmount = price * tourRequest.participant_count;
           if (totalPaid >= totalAmount) {
             targetStatus = 'paid';
@@ -240,36 +284,41 @@ export class PaymentsService {
         await this.prisma.$transaction([
           this.prisma.payment_transactions.update({
             where: { id: orderId },
-            data: { 
+            data: {
               status: newStatus,
-              paid_at: isSuccess ? new Date() : undefined
-            }
+              paid_at: isSuccess ? new Date() : undefined,
+            },
           }),
-          ...(isSuccess ? [
-            this.prisma.tour_requests.update({
-              where: { id: transaction.tour_request_id },
-              data: { status: targetStatus }
-            })
-          ] : [])
+          ...(isSuccess
+            ? [
+                this.prisma.tour_requests.update({
+                  where: { id: transaction.tour_request_id },
+                  data: { status: targetStatus },
+                }),
+              ]
+            : []),
         ]);
 
         // Nếu thanh toán thành công, gửi thông báo cho Guide
         if (isSuccess) {
           const requestWithGuide = await this.prisma.tour_requests.findUnique({
             where: { id: transaction.tour_request_id },
-            include: { 
+            include: {
               tours: { include: { guide_profiles: true } },
-              users_tour_requests_user_idTousers: true
-            }
+              users_tour_requests_user_idTousers: true,
+            },
           });
 
           if (requestWithGuide) {
             const guideUserId = requestWithGuide.tours.guide_profiles.user_id;
-            const customerName = requestWithGuide.users_tour_requests_user_idTousers.full_name;
+            const customerName =
+              requestWithGuide.users_tour_requests_user_idTousers.full_name;
             const tourTitle = requestWithGuide.tours.title;
             const amount = Number(transaction.amount);
-            const totalPrice = Number(requestWithGuide.tours.price) * requestWithGuide.participant_count;
-            
+            const totalPrice =
+              Number(requestWithGuide.tours.price) *
+              requestWithGuide.participant_count;
+
             let paymentDesc = `đã thanh toán ${amount.toLocaleString()} đ`;
             if (amount >= totalPrice) {
               paymentDesc = 'đã thanh toán 100%';
@@ -295,7 +344,7 @@ export class PaymentsService {
               requestId: transaction.tour_request_id,
               tourTitle: tourTitle,
               message: content,
-              paymentStatus: paymentDesc
+              paymentStatus: paymentDesc,
             });
           }
         }
@@ -306,7 +355,11 @@ export class PaymentsService {
       }
     } catch (error: any) {
       console.error('IPN Error:', error);
-      return { RspCode: '99', Message: error?.message || 'Unknown error', ReceivedParams: vnp_Params };
+      return {
+        RspCode: '99',
+        Message: error?.message || 'Unknown error',
+        ReceivedParams: vnp_Params,
+      };
     }
   }
 
@@ -316,10 +369,10 @@ export class PaymentsService {
       where: { user_id: userId },
       include: {
         tour_requests: {
-          include: { tours: true }
-        }
+          include: { tours: true },
+        },
       },
-      orderBy: { created_at: 'desc' }
+      orderBy: { created_at: 'desc' },
     });
   }
 
@@ -328,9 +381,9 @@ export class PaymentsService {
       where: { id },
       include: {
         tour_requests: {
-          include: { tours: true }
-        }
-      }
+          include: { tours: true },
+        },
+      },
     });
 
     if (!transaction || transaction.user_id !== userId) {

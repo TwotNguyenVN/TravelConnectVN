@@ -7,15 +7,21 @@ async function bootstrap() {
     return this.toString();
   };
   const app = await NestFactory.create(AppModule);
-  
+
   // Global Request Logger & Manual CORS Middleware
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS,PATCH');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept');
-    
+    res.header(
+      'Access-Control-Allow-Methods',
+      'GET,PUT,POST,DELETE,OPTIONS,PATCH',
+    );
+    res.header(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, Accept',
+    );
+
     console.log(`[GLOBAL LOG] ${req.method} ${req.url}`);
-    
+
     if (req.method === 'OPTIONS') {
       return res.sendStatus(200);
     }
@@ -23,20 +29,26 @@ async function bootstrap() {
   });
 
   // Standardization: Global Exception Filter
-  const { HttpExceptionFilter } = require('./common/filters/http-exception.filter');
+  const {
+    HttpExceptionFilter,
+  } = require('./common/filters/http-exception.filter');
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Standardization: Global Transform Interceptor
-  const { TransformInterceptor } = require('./common/interceptors/transform.interceptor');
+  const {
+    TransformInterceptor,
+  } = require('./common/interceptors/transform.interceptor');
   app.useGlobalInterceptors(new TransformInterceptor());
 
   // Standardization: Global Validation Pipe
   const { ValidationPipe } = require('@nestjs/common');
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   app.enableCors({
     origin: true,

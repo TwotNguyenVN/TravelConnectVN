@@ -81,14 +81,16 @@ describe('ToursService', () => {
           max_participants: 10,
           business_status: 'published',
           visibility_status: 'visible',
-          tour_images: [{ image_url: 'https://example.com/img.jpg', is_cover: true }],
+          tour_images: [
+            { image_url: 'https://example.com/img.jpg', is_cover: true },
+          ],
           tour_categories: { name: 'Biển đảo', slug: 'bien-dao' },
           guide_profiles: {
             user_id: 'guide-1',
             users: { full_name: 'Nguyễn HDV', avatar_url: null },
           },
           tour_schedules: [],
-          start_date: new Date(),
+          start_date: new Date(Date.now() + 24 * 60 * 60 * 1000), // tomorrow
           tour_destinations: [],
         },
       ];
@@ -125,9 +127,9 @@ describe('ToursService', () => {
     it('should throw NotFoundException when tour does not exist', async () => {
       mockPrismaService.tours.findUnique.mockResolvedValue(null);
 
-      await expect(service.getPublicTourDetail('non-existent-id'))
-        .rejects
-        .toThrow(NotFoundException);
+      await expect(
+        service.getPublicTourDetail('non-existent-id'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should return tour detail with related data', async () => {
@@ -160,8 +162,12 @@ describe('ToursService', () => {
       };
 
       mockPrismaService.tours.findUnique.mockResolvedValue(mockTour);
-      mockPrismaService.tour_reviews.aggregate.mockResolvedValue({ _avg: { rating: 4.5 } });
-      mockPrismaService.guide_reviews.aggregate.mockResolvedValue({ _avg: { rating: 4.8 } });
+      mockPrismaService.tour_reviews.aggregate.mockResolvedValue({
+        _avg: { rating: 4.5 },
+      });
+      mockPrismaService.guide_reviews.aggregate.mockResolvedValue({
+        _avg: { rating: 4.8 },
+      });
 
       const result = await service.getPublicTourDetail('tour-1');
 
@@ -171,7 +177,7 @@ describe('ToursService', () => {
       expect(mockPrismaService.tours.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({ id: 'tour-1' }),
-        })
+        }),
       );
     });
   });
@@ -187,13 +193,17 @@ describe('ToursService', () => {
         { id: 'cat-3', name: 'Văn hóa', slug: 'van-hoa' },
       ];
 
-      mockPrismaService.tour_categories.findMany.mockResolvedValue(mockCategories);
+      mockPrismaService.tour_categories.findMany.mockResolvedValue(
+        mockCategories,
+      );
 
       const result = await service.getTourCategories();
 
       expect(result).toHaveLength(3);
       expect(result[0]).toHaveProperty('name', 'Biển đảo');
-      expect(mockPrismaService.tour_categories.findMany).toHaveBeenCalledTimes(1);
+      expect(mockPrismaService.tour_categories.findMany).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 
@@ -203,7 +213,7 @@ describe('ToursService', () => {
   describe('createTourSchedule', () => {
     const userId = 'guide-1';
     const tourId = 'tour-1';
-    
+
     beforeEach(() => {
       // Mock tour ownership
       mockPrismaService.tours.findFirst = jest.fn().mockResolvedValue({
@@ -225,15 +235,17 @@ describe('ToursService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('should create tour schedule when date is in the future and doesn\'t exist', async () => {
+    it("should create tour schedule when date is in the future and doesn't exist", async () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
 
       mockPrismaService.tour_schedules.findFirst.mockResolvedValue(null);
-      mockPrismaService.tour_schedules.create.mockImplementation(({ data }) => ({
-        id: 'sched-1',
-        ...data,
-      }));
+      mockPrismaService.tour_schedules.create.mockImplementation(
+        ({ data }) => ({
+          id: 'sched-1',
+          ...data,
+        }),
+      );
 
       const res = await service.createTourSchedule(userId, tourId, {
         startDate: tomorrow.toISOString(),

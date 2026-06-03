@@ -39,10 +39,12 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
       isGlobal: true,
       envFilePath: '.env',
     }),
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // 1 minute
-      limit: 60,  // max 60 requests per minute
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 60, // max 60 requests per minute
+      },
+    ]),
     ScheduleModule.forRoot(),
     SchedulerModule,
     PrismaModule,
@@ -88,7 +90,9 @@ export class AppModule implements NestModule {
         const start = Date.now();
         res.on('finish', () => {
           const duration = Date.now() - start;
-          console.log(`[HTTP] ${method} ${originalUrl} ${res.statusCode} - ${duration}ms`);
+          console.log(
+            `[HTTP] ${method} ${originalUrl} ${res.statusCode} - ${duration}ms`,
+          );
         });
         next();
       })
