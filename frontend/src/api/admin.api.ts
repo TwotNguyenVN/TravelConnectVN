@@ -30,4 +30,13 @@ export const adminApi = {
 
   // Activity Logs
   getActivityLogs: (params: any) => api.get('/admin/activity-logs', { params }),
+
+  // Refund Management
+  getPendingRefunds: () => api.get('/admin/refunds/pending'),
+  processRefund: (id: string, data: any) => api.post(`/admin/refunds/${id}/process`, data),
+  getTransactions: (params?: any) => api.get('/admin/transactions', { params }),
+
+  // Guide Settlements
+  getGuideSettlements: () => api.get('/admin/guides/settlements'),
+  settleGuideTransactions: (id: string) => api.post(`/admin/guides/${id}/settle`),
 };

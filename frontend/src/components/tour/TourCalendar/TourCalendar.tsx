@@ -6,6 +6,7 @@ interface DepartureDate {
   price: number;
   remainingSlots: number;
   maxParticipants: number;
+  startDate?: string;
 }
 
 interface TourCalendarProps {

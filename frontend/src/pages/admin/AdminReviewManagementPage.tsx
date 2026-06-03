@@ -37,7 +37,7 @@ export const AdminReviewManagementPage: React.FC = () => {
       setReviews(combined);
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      toast('Không thể tải danh sách đánh giá', 'error');
+      toast.error('Không thể tải danh sách đánh giá');
     } finally {
       setLoading(false);
     }
@@ -54,9 +54,9 @@ export const AdminReviewManagementPage: React.FC = () => {
         : r
       ));
       
-      toast(`Đã ${newStatus === 'hidden' ? 'ẩn' : 'hiển thị'} đánh giá`, 'success');
+      toast.success(`Đã ${newStatus === 'hidden' ? 'ẩn' : 'hiển thị'} đánh giá`);
     } catch (error) {
-      toast('Lỗi khi cập nhật trạng thái', 'error');
+      toast.error('Lỗi khi cập nhật trạng thái');
     }
   };
 

@@ -1,11 +1,10 @@
 import React from 'react';
 import { NavLink, useNavigate, Link } from 'react-router-dom';
 
-export const AdminSidebar: React.FC = () => {
+export const SupportSidebar: React.FC = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Basic logout logic for now
     navigate('/login');
   };
 
@@ -38,14 +37,12 @@ export const AdminSidebar: React.FC = () => {
             TravelConnect
           </h2>
         </Link>
-        <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>Admin Control Panel</span>
+        <span style={{ fontSize: 'var(--tc-font-size-xs)', color: 'var(--tc-text-secondary)' }}>Support Staff Panel</span>
       </div>
 
       <nav style={{ flex: 1, padding: 'var(--tc-spacing-4)', overflowY: 'auto' }}>
-        <NavLink to="/admin" end style={navLinkStyle}>Dashboard</NavLink>
-        <NavLink to="/admin/users" style={navLinkStyle}>Quản lý người dùng</NavLink>
-        <NavLink to="/admin/activity-logs" style={navLinkStyle}>Nhật ký hoạt động</NavLink>
-        <NavLink to="/admin/statistics" style={navLinkStyle}>Thống kê</NavLink>
+        <NavLink to="/support" end style={navLinkStyle}>Dashboard</NavLink>
+        <NavLink to="/support/reports" style={navLinkStyle}>Xử lý báo cáo</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

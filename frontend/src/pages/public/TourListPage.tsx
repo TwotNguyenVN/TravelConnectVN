@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Card } from '../../components/common/Card/Card';
 import { Button } from '../../components/common/Button/Button';
 import { tourService } from '../../services/tourService';
 import type { Tour } from '../../services/tourService';

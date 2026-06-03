@@ -27,7 +27,7 @@ create table if not exists public.roles (
     role_code text primary key,
     description text not null,
     created_at timestamptz not null default now(),
-    check (role_code in ('USER', 'GUIDE', 'SYSTEM_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_STAFF'))
+    check (role_code in ('USER', 'GUIDE', 'SYSTEM_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_STAFF', 'ACCOUNTANT'))
 );
 
 create table if not exists public.user_roles (
@@ -519,7 +519,8 @@ values
     ('GUIDE', 'Local guide'),
     ('SYSTEM_ADMIN', 'Full system administrator'),
     ('CONTENT_MODERATOR', 'Moderates content and visibility'),
-    ('SUPPORT_STAFF', 'Handles reports and complaints')
+    ('SUPPORT_STAFF', 'Handles reports and complaints'),
+    ('ACCOUNTANT', 'Handles payments, refunds, and financial auditing')
 on conflict (role_code) do update
 set description = excluded.description;
 
@@ -653,7 +654,7 @@ stable
 security definer
 set search_path = public
 as $$
-    select public.has_role(_user_id, array['SYSTEM_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_STAFF']);
+    select public.has_role(_user_id, array['SYSTEM_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_STAFF', 'ACCOUNTANT']);
 $$;
 
 create or replace function public.owns_guide_profile(_guide_profile_id uuid, _user_id uuid)
@@ -1142,3 +1143,6 @@ drop trigger if exists trg_sync_notification_read_at on public.notifications;
 create trigger trg_sync_notification_read_at
 before update on public.notifications
 for each row execute function public.sync_notification_read_at();
+
+-- Add guide_settled column to payment_transactions
+ALTER TABLE public.payment_transactions ADD COLUMN IF NOT EXISTS guide_settled BOOLEAN NOT NULL DEFAULT false;

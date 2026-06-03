@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  PageContainer, Badge, Button, LoadingBlock, EmptyState, Modal 
+  PageContainer, Button, LoadingBlock, EmptyState, Modal 
 } from '../../components/common';
 import { useToast } from '../../contexts/ToastContext';
 import { companionService } from '../../services/companionService';

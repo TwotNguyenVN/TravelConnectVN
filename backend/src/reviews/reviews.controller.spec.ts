@@ -1,5 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ExecutionContext } from '@nestjs/common';
 import { ReviewsController } from './reviews.controller';
+import { ReviewsService } from './reviews.service';
+import { AuthGuard } from '../common/guards/auth.guard';
+
+const mockAuthGuard = {
+  canActivate: (_context: ExecutionContext) => true,
+};
 
 describe('ReviewsController', () => {
   let controller: ReviewsController;
@@ -7,7 +14,24 @@ describe('ReviewsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ReviewsController],
-    }).compile();
+      providers: [
+        {
+          provide: ReviewsService,
+          useValue: {
+            createTourReview: jest.fn(),
+            getTourReviews: jest.fn(),
+            createGuideReview: jest.fn(),
+            getGuideReviews: jest.fn(),
+            getMyReviews: jest.fn(),
+            getAllReviewsAdmin: jest.fn(),
+            updateReviewVisibility: jest.fn(),
+          },
+        },
+      ],
+    })
+      .overrideGuard(AuthGuard)
+      .useValue(mockAuthGuard)
+      .compile();
 
     controller = module.get<ReviewsController>(ReviewsController);
   });

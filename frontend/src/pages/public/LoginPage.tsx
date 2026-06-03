@@ -4,6 +4,7 @@ import { Button } from '../../components/common/Button/Button';
 import { Input } from '../../components/common/Input/Input';
 import { Card } from '../../components/common/Card/Card';
 import { supabase } from '../../utils/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 import './Auth.css';
 
 export const LoginPage: React.FC = () => {
@@ -12,6 +13,24 @@ export const LoginPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { user, roles } = useAuth();
+
+  // Redirect if already logged in and roles are loaded
+  React.useEffect(() => {
+    if (user && roles.length > 0) {
+      if (roles.includes('SYSTEM_ADMIN')) {
+        navigate('/admin');
+      } else if (roles.includes('CONTENT_MODERATOR')) {
+        navigate('/content');
+      } else if (roles.includes('SUPPORT_STAFF')) {
+        navigate('/support');
+      } else if (roles.includes('ACCOUNTANT')) {
+        navigate('/accountant');
+      } else {
+        navigate('/');
+      }
+    }
+  }, [user, roles, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +38,36 @@ export const LoginPage: React.FC = () => {
     setIsLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
       if (error) throw error;
       
-      navigate('/');
+      if (data?.user) {
+        // Fetch user's roles immediately for faster redirection
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role_code')
+          .eq('user_id', data.user.id);
+          
+        const userRoles = roleData ? roleData.map((r: any) => r.role_code) : [];
+        
+        if (userRoles.includes('SYSTEM_ADMIN')) {
+          navigate('/admin');
+        } else if (userRoles.includes('CONTENT_MODERATOR')) {
+          navigate('/content');
+        } else if (userRoles.includes('SUPPORT_STAFF')) {
+          navigate('/support');
+        } else if (userRoles.includes('ACCOUNTANT')) {
+          navigate('/accountant');
+        } else {
+          navigate('/');
+        }
+      } else {
+        navigate('/');
+      }
     } catch (err: any) {
       setErrorMsg(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {

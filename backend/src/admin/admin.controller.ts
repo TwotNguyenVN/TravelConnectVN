@@ -53,7 +53,7 @@ export class AdminController {
   }
 
   @Get('statistics/revenue')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   getStatisticsRevenue() {
     return this.adminService.getStatisticsRevenue();
   }
@@ -125,7 +125,7 @@ export class AdminController {
   }
 
   @Patch('reports/:id')
-  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF, Role.CONTENT_MODERATOR)
   processReport(
     @Param('id') id: string,
     @Body() dto: ProcessReportDto,
@@ -197,7 +197,7 @@ export class AdminController {
   }
 
   @Patch('guides/verification/:id')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
   processVerification(
     @Param('id') id: string,
     @Body() dto: ProcessVerificationDto,
@@ -221,19 +221,52 @@ export class AdminController {
     });
   }
 
+  // Transaction Management
+  @Get('transactions')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  getTransactions(
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getTransactions({
+      skip: skip ? parseInt(skip) : undefined,
+      take: take ? parseInt(take) : undefined,
+      status,
+      search,
+    });
+  }
+
   // Refund Management
   @Get('refunds/pending')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   getPendingRefunds() {
     return this.adminService.getPendingRefunds();
   }
 
   @Post('refunds/:id/process')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   processRefund(
     @Param('id') id: string,
     @Body() body: { action: 'approve' | 'reject'; note?: string },
   ) {
     return this.adminService.processRefund(id, body.action, body.note);
+  }
+
+  // Guide Settlements
+  @Get('guides/settlements')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  getGuideSettlements() {
+    return this.adminService.getGuideSettlements();
+  }
+
+  @Post('guides/:id/settle')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  settleGuideTransactions(
+    @Param('id') id: string,
+    @Req() req: any,
+  ) {
+    return this.adminService.settleGuideTransactions(id, req.user.id);
   }
 }

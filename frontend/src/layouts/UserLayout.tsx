@@ -1,5 +1,4 @@
-import { Outlet, Link, NavLink, useLocation } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AppSidebar } from '../components/common/AppSidebar';
 import './UserLayout.css';
 
