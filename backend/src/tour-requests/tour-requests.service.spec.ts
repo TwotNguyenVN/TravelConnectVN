@@ -27,6 +27,7 @@ describe('TourRequestsService', () => {
     },
     tour_schedules: {
       findUnique: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -55,6 +56,7 @@ describe('TourRequestsService', () => {
 
     service = module.get<TourRequestsService>(TourRequestsService);
     jest.clearAllMocks();
+    mockPrismaService.tour_schedules.count.mockResolvedValue(0);
   });
 
   it('should be defined', () => {
@@ -126,6 +128,20 @@ describe('TourRequestsService', () => {
         id: 'existing-req',
         status: 'pending',
       });
+
+      await expect(service.createRequest(userId, dto))
+        .rejects
+        .toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when tour has active schedules but scheduleId is not provided', async () => {
+      mockPrismaService.tours.findUnique.mockResolvedValue({
+        id: 'tour-1',
+        max_participants: 10,
+        guide_profiles: { user_id: 'other-guide' },
+      });
+
+      mockPrismaService.tour_schedules.count.mockResolvedValue(2); // Has 2 active schedules
 
       await expect(service.createRequest(userId, dto))
         .rejects

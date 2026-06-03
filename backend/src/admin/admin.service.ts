@@ -559,4 +559,49 @@ export class AdminService {
 
     return { items, total };
   }
+
+  // Refund Management
+  async getPendingRefunds() {
+    return this.prisma.payment_transactions.findMany({
+      where: { status: 'refund_pending' },
+      include: {
+        users: { select: { id: true, full_name: true, email: true } },
+        tour_requests: { include: { tours: true } },
+      },
+      orderBy: { created_at: 'desc' },
+    });
+  }
+
+  async processRefund(transactionId: string, action: 'approve' | 'reject', note?: string) {
+    const transaction = await this.prisma.payment_transactions.findUnique({
+      where: { id: transactionId },
+      include: { tour_requests: true },
+    });
+
+    if (!transaction) throw new NotFoundException('Không tìm thấy giao dịch');
+    if (transaction.status !== 'refund_pending') {
+      throw new BadRequestException('Giao dịch không nằm trong trạng thái chờ hoàn tiền');
+    }
+
+    const nextStatus = action === 'approve' ? 'refunded' : 'refund_rejected';
+
+    await this.prisma.$transaction([
+      this.prisma.payment_transactions.update({
+        where: { id: transactionId },
+        data: {
+          status: nextStatus,
+          gateway_response: { admin_note: note || 'Processed by Admin' },
+        },
+      }),
+      this.prisma.tour_requests.update({
+        where: { id: transaction.tour_request_id },
+        data: {
+          status: action === 'approve' ? 'cancelled_by_user' : 'paid',
+          cancellation_note: action === 'approve' ? `Đã hoàn trả tiền thành công` : `Từ chối hoàn tiền: ${note}`,
+        },
+      }),
+    ]);
+
+    return { success: true, message: action === 'approve' ? 'Đã hoàn tiền thành công' : 'Đã từ chối hoàn tiền' };
+  }
 }
