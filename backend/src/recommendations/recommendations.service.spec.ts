@@ -50,7 +50,7 @@ describe('RecommendationsService', () => {
           province: 'Hanoi',
           price: 150000,
           max_participants: 10,
-          start_date: new Date(),
+          start_date: new Date(Date.now() + 24 * 60 * 60 * 1000),
           end_date: new Date(),
           num_days: 2,
           num_nights: 1,

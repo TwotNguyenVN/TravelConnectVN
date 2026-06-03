@@ -1434,7 +1434,7 @@ export class ToursService implements OnApplicationBootstrap {
             data: {
               tour_request_id: req.id,
               user_id: req.user_id,
-              amount: -totalPaid,
+              amount: totalPaid,
               payment_method: 'vnpay',
               status: 'refund_pending',
               transaction_code: `REFUND-GUIDE-${req.id.substring(0, 8)}-${Date.now()}`,

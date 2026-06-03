@@ -43,6 +43,20 @@ export class TourRequestsService {
       throw new NotFoundException('Tour không tồn tại');
     }
 
+    // Kiểm tra xem tour này có lịch trình nào đang khả dụng hay không
+    const activeSchedulesCount = await this.prisma.tour_schedules.count({
+      where: {
+        tour_id: tourId,
+        status: 'available',
+      },
+    });
+
+    if (activeSchedulesCount > 0 && !scheduleId) {
+      throw new BadRequestException(
+        'Tour này yêu cầu bạn phải lựa chọn lịch khởi hành cụ thể.',
+      );
+    }
+
     // 2. Kiểm tra không phải chủ tour gửi request cho chính mình
     if (tour.guide_profiles.user_id === userId) {
       throw new BadRequestException(
@@ -396,7 +410,7 @@ export class TourRequestsService {
         data: {
           tour_request_id: requestId,
           user_id: userId,
-          amount: -refundAmount, // negative amount to represent refund
+          amount: refundAmount, // positive amount representing refund
           payment_method: 'vnpay',
           status: 'refund_pending',
           transaction_code: `REFUND-${requestId.substring(0, 8)}-${Date.now()}`,
