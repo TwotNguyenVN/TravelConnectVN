@@ -39,4 +39,13 @@ export const adminApi = {
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
   settleGuideTransactions: (id: string) => api.post(`/admin/guides/${id}/settle`),
+
+  // Support Staff — Tour Requests (Disputes)
+  getTourRequests: (params?: any) => api.get('/admin/tour-requests', { params }),
+  getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
+
+  // Support Staff — Notifications Broadcast
+  sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
+    api.post('/admin/notifications/broadcast', data),
 };
+
