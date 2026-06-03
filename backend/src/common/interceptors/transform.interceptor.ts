@@ -9,9 +9,10 @@ import { map } from 'rxjs/operators';
 import { ApiResponse } from '../interfaces/response.interface';
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T>>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler,
@@ -22,7 +23,7 @@ export class TransformInterceptor<T>
         if (data && typeof data === 'object' && 'success' in data) {
           return data;
         }
-        
+
         return {
           success: true,
           message: 'Operation successful',

@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
 
@@ -16,20 +21,23 @@ export class ConversationService {
    */
   async findAll(userId: string) {
     // Lấy tất cả conversation_id mà user là participant (chưa rời)
-    const participantRows = await this.prisma.conversation_participants.findMany({
-      where: {
-        user_id: userId,
-        left_at: null,
-      },
-      select: { conversation_id: true, last_read_at: true },
-    });
+    const participantRows =
+      await this.prisma.conversation_participants.findMany({
+        where: {
+          user_id: userId,
+          left_at: null,
+        },
+        select: { conversation_id: true, last_read_at: true },
+      });
 
     if (participantRows.length === 0) {
       return [];
     }
 
     const conversationIds = participantRows.map((p) => p.conversation_id);
-    const readMap = new Map(participantRows.map((p) => [p.conversation_id, p.last_read_at]));
+    const readMap = new Map(
+      participantRows.map((p) => [p.conversation_id, p.last_read_at]),
+    );
 
     // Lấy conversations với message mới nhất và participants rút gọn
     const conversations = await this.prisma.conversations.findMany({
@@ -76,7 +84,8 @@ export class ConversationService {
       // Tính unread: số message sau last_read_at
       const hasUnread =
         lastMessage && lastReadAt
-          ? lastMessage.sent_at > lastReadAt && lastMessage.sender_user_id !== userId
+          ? lastMessage.sent_at > lastReadAt &&
+            lastMessage.sender_user_id !== userId
           : lastMessage && lastMessage.sender_user_id !== userId;
 
       // Tìm đối tác (dành cho direct chat: người không phải current user)
@@ -99,7 +108,8 @@ export class ConversationService {
         companionPost: conv.companion_posts
           ? (() => {
               const images = (conv.companion_posts.images as any[]) || [];
-              const coverImg = images.find((img: any) => img.isCover) || images[0];
+              const coverImg =
+                images.find((img: any) => img.isCover) || images[0];
               return {
                 id: conv.companion_posts.id,
                 title: conv.companion_posts.title,
@@ -133,7 +143,11 @@ export class ConversationService {
    */
   async createOrGetDirect(
     currentUserId: string,
-    body: { guideUserId: string; relatedTourId?: string; initialMessage?: string },
+    body: {
+      guideUserId: string;
+      relatedTourId?: string;
+      initialMessage?: string;
+    },
   ) {
     const { guideUserId, relatedTourId } = body;
 
@@ -160,12 +174,17 @@ export class ConversationService {
         throw new NotFoundException('Tour liên kết không tồn tại');
       }
       if (tour.guide_profiles.user_id !== guideUserId) {
-        throw new BadRequestException('Tour liên kết không thuộc về Hướng dẫn viên này');
+        throw new BadRequestException(
+          'Tour liên kết không thuộc về Hướng dẫn viên này',
+        );
       }
     }
 
     // Tìm conversation direct hiện có giữa 2 người
-    const existing = await this.findExistingDirectConversation(currentUserId, guideUserId);
+    const existing = await this.findExistingDirectConversation(
+      currentUserId,
+      guideUserId,
+    );
     if (existing) {
       return this.enrichConversation(existing.id, currentUserId);
     }
@@ -177,10 +196,7 @@ export class ConversationService {
         created_by_user_id: currentUserId,
         related_tour_id: relatedTourId ?? null,
         conversation_participants: {
-          create: [
-            { user_id: currentUserId },
-            { user_id: guideUserId },
-          ],
+          create: [{ user_id: currentUserId }, { user_id: guideUserId }],
         },
       },
     });
@@ -194,7 +210,10 @@ export class ConversationService {
    * Chỉ cho phép tạo nếu chưa có group conversation cho post này.
    * Participant: chủ bài + tất cả approved members.
    */
-  async createGroupCompanion(currentUserId: string, body: { companionPostId: string }) {
+  async createGroupCompanion(
+    currentUserId: string,
+    body: { companionPostId: string },
+  ) {
     const { companionPostId } = body;
 
     // Validate companion post
@@ -220,25 +239,30 @@ export class ConversationService {
     // Kiểm tra quyền: chỉ chủ bài mới được tạo group chat
     if (post.user_id !== currentUserId) {
       // Hoặc là approved member
-      const isApproved = post.companion_requests.some((r) => r.user_id === currentUserId);
+      const isApproved = post.companion_requests.some(
+        (r) => r.user_id === currentUserId,
+      );
       if (!isApproved) {
-        throw new ForbiddenException('Bạn không có quyền tạo chat nhóm cho bài đồng hành này');
+        throw new ForbiddenException(
+          'Bạn không có quyền tạo chat nhóm cho bài đồng hành này',
+        );
       }
     }
 
     // Kiểm tra đã có group conversation chưa (unique constraint đã có trong DB)
     if (post.conversations) {
       const existingConvId = post.conversations.id;
-      
+
       // Kiểm tra xem currentUserId đã là participant chưa
-      const participant = await this.prisma.conversation_participants.findUnique({
-        where: {
-          conversation_id_user_id: {
-            conversation_id: existingConvId,
-            user_id: currentUserId,
+      const participant =
+        await this.prisma.conversation_participants.findUnique({
+          where: {
+            conversation_id_user_id: {
+              conversation_id: existingConvId,
+              user_id: currentUserId,
+            },
           },
-        },
-      });
+        });
 
       if (!participant || participant.left_at !== null) {
         // Nếu chưa là participant hoặc đã rời nhóm, thì add/re-add vào
@@ -352,7 +376,9 @@ export class ConversationService {
 
     // Tính lại tổng số unread messages của user này và emit qua socket
     const newUnreadCount = await this.getUnreadMessageCount(userId);
-    this.socketGateway.sendToUser(userId, 'unread_message_count_updated', { count: newUnreadCount });
+    this.socketGateway.sendToUser(userId, 'unread_message_count_updated', {
+      count: newUnreadCount,
+    });
   }
 
   /**
@@ -422,7 +448,10 @@ export class ConversationService {
     return matched;
   }
 
-  private async enrichConversation(conversationId: string, currentUserId: string) {
+  private async enrichConversation(
+    conversationId: string,
+    currentUserId: string,
+  ) {
     const conv = await this.prisma.conversations.findUnique({
       where: { id: conversationId },
       include: {
@@ -430,12 +459,12 @@ export class ConversationService {
           where: { left_at: null },
           include: {
             users: {
-              select: { 
-                id: true, 
-                full_name: true, 
-                avatar_url: true, 
+              select: {
+                id: true,
+                full_name: true,
+                avatar_url: true,
                 last_seen_at: true,
-                guide_profiles: { select: { id: true } }
+                guide_profiles: { select: { id: true } },
               },
             },
           },
@@ -458,10 +487,11 @@ export class ConversationService {
       title: conv.title,
       relatedCompanionPostId: conv.related_companion_post_id,
       relatedTourId: conv.related_tour_id,
-      companionPost: conv.companion_posts 
+      companionPost: conv.companion_posts
         ? (() => {
             const images = (conv.companion_posts.images as any[]) || [];
-            const coverImg = images.find((img: any) => img.isCover) || images[0];
+            const coverImg =
+              images.find((img: any) => img.isCover) || images[0];
             return {
               id: conv.companion_posts.id,
               title: conv.companion_posts.title,
@@ -500,7 +530,9 @@ export class ConversationService {
     });
 
     if (!participant || participant.left_at !== null) {
-      throw new ForbiddenException('Bạn không có quyền truy cập conversation này');
+      throw new ForbiddenException(
+        'Bạn không có quyền truy cập conversation này',
+      );
     }
 
     return participant;

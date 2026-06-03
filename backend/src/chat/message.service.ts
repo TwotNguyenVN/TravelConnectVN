@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConversationService } from './conversation.service';
 import { SocketGateway } from '../socket/socket.gateway';
@@ -124,14 +129,15 @@ export class MessageService {
     });
 
     // Lấy danh sách thành viên khác để gửi thông báo tin nhắn mới và cập nhật số unread
-    const otherParticipants = await this.prisma.conversation_participants.findMany({
-      where: {
-        conversation_id: conversationId,
-        user_id: { not: userId },
-        left_at: null,
-      },
-      select: { user_id: true },
-    });
+    const otherParticipants =
+      await this.prisma.conversation_participants.findMany({
+        where: {
+          conversation_id: conversationId,
+          user_id: { not: userId },
+          left_at: null,
+        },
+        select: { user_id: true },
+      });
 
     const messageData = {
       id: message.id,
@@ -154,8 +160,11 @@ export class MessageService {
       this.socketGateway.sendToUser(p.user_id, 'new_message', messageData);
 
       // 2. Tính lại tổng số tin nhắn chưa đọc của thành viên này và emit
-      const newUnreadCount = await this.conversationService.getUnreadMessageCount(p.user_id);
-      this.socketGateway.sendToUser(p.user_id, 'unread_message_count_updated', { count: newUnreadCount });
+      const newUnreadCount =
+        await this.conversationService.getUnreadMessageCount(p.user_id);
+      this.socketGateway.sendToUser(p.user_id, 'unread_message_count_updated', {
+        count: newUnreadCount,
+      });
     }
 
     return {

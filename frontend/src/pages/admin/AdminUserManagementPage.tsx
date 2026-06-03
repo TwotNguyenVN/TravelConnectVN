@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '../../api/admin.api';
 import { useToast } from '../../contexts/ToastContext';
 import { LoadingBlock } from '../../components/common';
+
+interface ApiError {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
+}
 
 interface User {
   id: string;
@@ -26,7 +36,7 @@ export function AdminUserManagementPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('');
-  const [roleStats, setRoleStats] = useState<any[]>([]);
+  const [roleStats, setRoleStats] = useState<{ name: string; value: number }[]>([]);
   const { toast } = useToast();
 
   // Create Staff States
@@ -53,7 +63,7 @@ export function AdminUserManagementPage() {
     'ACCOUNTANT': { label: 'Kế toán', color: '#06b6d4', bg: '#ecfeff', icon: '💳' },
   };
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       const response = await adminApi.getUsers({ 
@@ -62,31 +72,31 @@ export function AdminUserManagementPage() {
         take: 50 
       });
       setUsers(response.data.items);
-    } catch (error) {
+    } catch {
       toast.error('Không thể tải danh sách người dùng');
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedRole, toast]);
 
-  const fetchRoleStats = async () => {
+  const fetchRoleStats = useCallback(async () => {
     try {
       const response = await adminApi.getStatisticsUsers();
       if (response.success) {
         setRoleStats(response.data.roles);
       }
-    } catch (error) {
+    } catch {
       console.error('Failed to fetch role stats');
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchUsers();
-  }, [selectedRole]);
+  }, [fetchUsers]);
 
   useEffect(() => {
     fetchRoleStats();
-  }, []);
+  }, [fetchRoleStats]);
 
   const getRoleCount = (code: string) => {
     if (!code) return roleStats.reduce((sum, r) => sum + r.value, 0);
@@ -103,7 +113,7 @@ export function AdminUserManagementPage() {
       await adminApi.updateUserStatus(userId, { status: newStatus, reason });
       toast.success('Cập nhật trạng thái thành công');
       fetchUsers();
-    } catch (error) {
+    } catch {
       toast.error('Cập nhật trạng thái thất bại');
     }
   };
@@ -130,9 +140,9 @@ export function AdminUserManagementPage() {
       setStaffRole('CONTENT_MODERATOR');
       fetchUsers();
       fetchRoleStats();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Tạo nhân viên thất bại');
+      toast.error((err as ApiError)?.response?.data?.message || 'Tạo nhân viên thất bại');
     } finally {
       setCreating(false);
     }
@@ -160,9 +170,9 @@ export function AdminUserManagementPage() {
       }
       fetchUsers();
       fetchRoleStats();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast.error(err.response?.data?.message || 'Cập nhật vai trò thất bại');
+      toast.error((err as ApiError)?.response?.data?.message || 'Cập nhật vai trò thất bại');
     } finally {
       setUpdatingRoles(false);
     }

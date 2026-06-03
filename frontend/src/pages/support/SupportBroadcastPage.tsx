@@ -3,6 +3,15 @@ import { adminApi } from '../../api/admin.api';
 import { useToast } from '../../contexts/ToastContext';
 import { PageContainer, Card, Button } from '../../components/common';
 
+interface ApiError {
+  response?: {
+    status?: number;
+    data?: {
+      message?: string;
+    };
+  };
+}
+
 const TARGET_OPTIONS = [
   { value: 'ALL', label: '📢 Toàn bộ người dùng', description: 'Gửi tới tất cả tài khoản trong hệ thống' },
   { value: 'USER', label: '👤 Chỉ Khách du lịch', description: 'Gửi tới tất cả tài khoản có vai trò USER' },
@@ -71,10 +80,10 @@ export const SupportBroadcastPage: React.FC = () => {
       setMessage('');
       setTargetRole('ALL');
       setShowPreview(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Broadcast error:', err);
       // Graceful degradation: show success in demo mode
-      if (err?.response?.status === 404 || err?.response?.status === 403) {
+      if ((err as ApiError)?.response?.status === 404 || (err as ApiError)?.response?.status === 403) {
         const newEntry: SentNotification = {
           id: Date.now().toString(),
           title,

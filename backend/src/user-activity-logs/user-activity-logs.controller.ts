@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { UserActivityLogsService } from './user-activity-logs.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ApiResponse } from '../common/interfaces/response.interface';
@@ -21,7 +15,12 @@ export class UserActivityLogsController {
     @Query('limit') limit: number = 20,
     @Query('activityType') activityType?: string,
   ): Promise<ApiResponse<any>> {
-    const result = await this.activityLogsService.findAll(req.user.id, page, limit, activityType);
+    const result = await this.activityLogsService.findAll(
+      req.user.id,
+      page,
+      limit,
+      activityType,
+    );
     return {
       success: true,
       message: 'Lấy nhật ký hoạt động thành công',

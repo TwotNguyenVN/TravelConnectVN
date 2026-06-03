@@ -110,10 +110,7 @@ export class AdminController {
 
   @Post('staff')
   @Roles(Role.SYSTEM_ADMIN)
-  createStaff(
-    @Body() dto: CreateStaffDto,
-    @Req() req: any,
-  ) {
+  createStaff(@Body() dto: CreateStaffDto, @Req() req: any) {
     return this.adminService.createStaff(dto, req.user.id);
   }
 
@@ -273,10 +270,7 @@ export class AdminController {
 
   @Post('guides/:id/settle')
   @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
-  settleGuideTransactions(
-    @Param('id') id: string,
-    @Req() req: any,
-  ) {
+  settleGuideTransactions(@Param('id') id: string, @Req() req: any) {
     return this.adminService.settleGuideTransactions(id, req.user.id);
   }
 }

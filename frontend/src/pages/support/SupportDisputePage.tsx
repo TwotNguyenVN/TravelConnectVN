@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useEffect, useState, useCallback } from 'react';
 import { adminApi } from '../../api/admin.api';
 import { useToast } from '../../contexts/ToastContext';
 import { PageContainer, Card, Button, LoadingBlock } from '../../components/common';
 
-interface TourRequest {
+interface SystemReport {
   id: string;
   status: string;
-  total_price: number;
   created_at: string;
-  start_date?: string;
-  notes?: string;
+  report_type: string;
+  reason: string;
+  reporter?: { full_name: string; email?: string };
   users?: { full_name: string; email: string };
-  tours?: { title: string; province: string };
-  guide_profiles?: { users?: { full_name: string } };
+  notes?: string;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> = {
@@ -27,15 +27,15 @@ const STATUS_MAP: Record<string, { label: string; color: string; bg: string }> =
 export const SupportDisputePage: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [requests, setRequests] = useState<TourRequest[]>([]);
+  const [requests, setRequests] = useState<SystemReport[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedRequest, setSelectedRequest] = useState<TourRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<SystemReport | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [resolution, setResolution] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
       const res = await adminApi.getReports({ limit: 50 });
@@ -49,13 +49,13 @@ export const SupportDisputePage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [fetchRequests]);
 
-  const handleOpenDispute = (req: TourRequest) => {
+  const handleOpenDispute = (req: SystemReport) => {
     setSelectedRequest(req);
     setResolution('');
     setShowModal(true);
@@ -166,7 +166,7 @@ export const SupportDisputePage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                filteredRequests.map((req: any) => {
+                filteredRequests.map((req: SystemReport) => {
                   const s = STATUS_MAP[req.status] || { label: req.status, color: '#64748b', bg: '#f8fafc' };
                   return (
                     <tr
@@ -240,11 +240,11 @@ export const SupportDisputePage: React.FC = () => {
             <div style={{ background: '#f8fafc', borderRadius: 'var(--tc-radius-lg)', padding: 'var(--tc-spacing-4)', marginBottom: 'var(--tc-spacing-5)' }}>
               <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '6px' }}>Loại vi phạm</div>
               <div style={{ fontWeight: 700, color: '#1e293b', marginBottom: '12px' }}>
-                {(selectedRequest as any).report_type || 'Khiếu nại'}
+                {selectedRequest.report_type || 'Khiếu nại'}
               </div>
               <div style={{ fontSize: '13px', color: '#64748b', marginBottom: '6px' }}>Lý do báo cáo</div>
               <div style={{ color: '#374151', fontSize: '14px', lineHeight: '1.5' }}>
-                {(selectedRequest as any).reason || 'Không có thông tin chi tiết'}
+                {selectedRequest.reason || 'Không có thông tin chi tiết'}
               </div>
             </div>
 

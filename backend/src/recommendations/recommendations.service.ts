@@ -12,10 +12,11 @@ export class RecommendationsService {
         where: { user_id: userId },
       });
 
-      const userCategories = await this.prisma.user_preferred_categories.findMany({
-        where: { user_id: userId },
-        select: { category_id: true },
-      });
+      const userCategories =
+        await this.prisma.user_preferred_categories.findMany({
+          where: { user_id: userId },
+          select: { category_id: true },
+        });
 
       const categoryIds = userCategories.map((c) => Number(c.category_id));
 
@@ -32,28 +33,28 @@ export class RecommendationsService {
           tour_schedules: {
             where: {
               start_date: { gte: new Date() },
-              status: 'available'
+              status: 'available',
             },
             include: {
               tour_requests: {
                 where: { status: { in: ['approved', 'paid'] } },
-                select: { participant_count: true }
-              }
+                select: { participant_count: true },
+              },
             },
-            orderBy: { start_date: 'asc' }
+            orderBy: { start_date: 'asc' },
           },
           tour_requests: {
             where: {
-              status: { in: ['approved', 'paid'] }
+              status: { in: ['approved', 'paid'] },
             },
-            select: { participant_count: true }
+            select: { participant_count: true },
           },
           guide_profiles: {
             include: {
               users: {
                 select: { full_name: true, avatar_url: true, phone: true },
               },
-              guide_languages: true
+              guide_languages: true,
             },
           },
           tour_reviews: true,
@@ -69,16 +70,20 @@ export class RecommendationsService {
           }
 
           // Tìm lịch khởi hành tiếp theo còn chỗ
-          const nextAvailableSchedule = tour.tour_schedules.find(s => {
-            const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+          const nextAvailableSchedule = tour.tour_schedules.find((s) => {
+            const bookedCount = s.tour_requests.reduce(
+              (sum, req) => sum + req.participant_count,
+              0,
+            );
             return bookedCount < s.max_participants;
           });
 
           // Nếu không có lịch tương lai, kiểm tra ngày start_date chính
           if (!nextAvailableSchedule) {
-            const isMainDateFuture = tour.start_date && tour.start_date >= new Date();
+            const isMainDateFuture =
+              tour.start_date && tour.start_date >= new Date();
             const isMainDateNull = tour.start_date === null;
-            
+
             // Nếu cả ngày chính cũng không hợp lệ, loại bỏ tour
             if (!isMainDateFuture && !isMainDateNull) {
               return null;
@@ -86,22 +91,35 @@ export class RecommendationsService {
           }
 
           // Tính toán rating thực tế từ tour_reviews
-          const visibleReviews = tour.tour_reviews.filter(r => r.visibility_status === 'visible');
-          const avgRating = visibleReviews.length > 0
-            ? Number((visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length).toFixed(1))
-            : 0.0;
+          const visibleReviews = tour.tour_reviews.filter(
+            (r) => r.visibility_status === 'visible',
+          );
+          const avgRating =
+            visibleReviews.length > 0
+              ? Number(
+                  (
+                    visibleReviews.reduce((sum, r) => sum + r.rating, 0) /
+                    visibleReviews.length
+                  ).toFixed(1),
+                )
+              : 0.0;
 
           let score = 0;
           const reasons: string[] = [];
 
           // Tiêu chí 1: Category
-          if (tour.category_id && categoryIds.includes(Number(tour.category_id))) {
+          if (
+            tour.category_id &&
+            categoryIds.includes(Number(tour.category_id))
+          ) {
             score += 5;
             reasons.push('Phù hợp thể loại yêu thích');
           }
 
           // Tiêu chí 2: Budget (Ngân sách)
-          const tourPrice = nextAvailableSchedule ? Number(nextAvailableSchedule.price) : Number(tour.price);
+          const tourPrice = nextAvailableSchedule
+            ? Number(nextAvailableSchedule.price)
+            : Number(tour.price);
           if (userPrefs?.budget_max) {
             const maxBudget = Number(userPrefs.budget_max);
             if (tourPrice <= maxBudget) {
@@ -129,17 +147,27 @@ export class RecommendationsService {
             reasons.push('Tour có đánh giá tốt');
           }
 
-          const currentParticipants = nextAvailableSchedule 
-            ? nextAvailableSchedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0)
-            : (tour as any).tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
-          
+          const currentParticipants = nextAvailableSchedule
+            ? nextAvailableSchedule.tour_requests.reduce(
+                (sum, req) => sum + req.participant_count,
+                0,
+              )
+            : (tour as any).tour_requests.reduce(
+                (sum, req) => sum + req.participant_count,
+                0,
+              );
+
           const remainingSlots = nextAvailableSchedule
-            ? Math.max(0, nextAvailableSchedule.max_participants - currentParticipants)
+            ? Math.max(
+                0,
+                nextAvailableSchedule.max_participants - currentParticipants,
+              )
             : Math.max(0, tour.max_participants - currentParticipants);
 
-          const coverImg = tour.tour_images?.find(img => img.is_cover)?.image_url || 
-                          tour.tour_images?.[0]?.image_url || 
-                          'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image';
+          const coverImg =
+            tour.tour_images?.find((img) => img.is_cover)?.image_url ||
+            tour.tour_images?.[0]?.image_url ||
+            'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image';
 
           return {
             id: tour.id,
@@ -149,19 +177,24 @@ export class RecommendationsService {
             rating: avgRating,
             location: tour.province,
             province: tour.province,
-            startDate: nextAvailableSchedule ? nextAvailableSchedule.start_date : tour.start_date,
+            startDate: nextAvailableSchedule
+              ? nextAvailableSchedule.start_date
+              : tour.start_date,
             endDate: tour.end_date,
             numDays: tour.num_days,
             numNights: tour.num_nights,
-            maxParticipants: nextAvailableSchedule ? nextAvailableSchedule.max_participants : tour.max_participants,
+            maxParticipants: nextAvailableSchedule
+              ? nextAvailableSchedule.max_participants
+              : tour.max_participants,
             remainingSlots,
             category: tour.tour_categories?.name || 'Chưa phân loại',
             categoryId: tour.category_id ? tour.category_id.toString() : null,
             match_score: score,
-            match_reasons: reasons.length > 0 ? reasons : ['Có thể bạn sẽ thích'],
+            match_reasons:
+              reasons.length > 0 ? reasons : ['Có thể bạn sẽ thích'],
           };
         })
-        .filter(t => t !== null) as any[];
+        .filter((t) => t !== null) as any[];
 
       // Nếu user chưa cài đặt sở thích, trả về top tour bất kỳ đã lọc
       if (!userPrefs && categoryIds.length === 0) {
@@ -181,32 +214,37 @@ export class RecommendationsService {
 
   private isGuideProfileComplete(g: any): boolean {
     if (!g) return false;
-    
+
     // 1. Họ và tên
     if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
-    
+
     // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
     const avatar = g.avatar_url || g.users?.avatar_url;
     if (!avatar || avatar.trim() === '') return false;
-    
+
     // 3. Số điện thoại
     if (!g.users?.phone || g.users.phone.trim() === '') return false;
-    
+
     // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
     if (!g.bio || g.bio.trim().length < 20) return false;
-    
+
     // 5. Số năm kinh nghiệm
-    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
-    
+    if (g.years_of_experience === null || g.years_of_experience === undefined)
+      return false;
+
     // 6. Tỉnh thành hoạt động chính
     if (!g.home_province_id) return false;
-    
+
     // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
     if (!g.guide_languages || g.guide_languages.length === 0) return false;
-    
+
     // 8. Xác minh danh tính
-    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
-    
+    if (
+      g.verification_status !== 'approved' &&
+      g.verification_status !== 'verified'
+    )
+      return false;
+
     return true;
   }
 }

@@ -1,7 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
-import { UserStatus, UpdateUserStatusDto, AssignRoleDto, ModerationDto, ProcessReportDto, ProcessVerificationDto, CreateStaffDto } from './dto/admin.dto';
+import {
+  UpdateUserStatusDto,
+  AssignRoleDto,
+  ModerationDto,
+  ProcessReportDto,
+  ProcessVerificationDto,
+  CreateStaffDto,
+} from './dto/admin.dto';
 
 @Injectable()
 export class AdminService {
@@ -11,16 +22,25 @@ export class AdminService {
   ) {}
 
   async getDashboardStats() {
-    const [userCount, tourCount, companionCount, reportCount, pendingVerificationCount, totalRevenue] = await Promise.all([
+    const [
+      userCount,
+      tourCount,
+      companionCount,
+      reportCount,
+      pendingVerificationCount,
+      totalRevenue,
+    ] = await Promise.all([
       this.prisma.public_users.count(),
       this.prisma.tours.count({ where: { deleted_at: null } }),
       this.prisma.companion_posts.count({ where: { deleted_at: null } }),
       this.prisma.reports.count({ where: { status: 'open' } }),
-      this.prisma.guide_verification_requests.count({ where: { status: 'pending' } }),
+      this.prisma.guide_verification_requests.count({
+        where: { status: 'pending' },
+      }),
       this.prisma.payment_transactions.aggregate({
         where: { status: 'paid' },
-        _sum: { amount: true }
-      })
+        _sum: { amount: true },
+      }),
     ]);
 
     return {
@@ -37,53 +57,70 @@ export class AdminService {
     const [roleBreakdown, statusBreakdown] = await Promise.all([
       this.prisma.user_roles.groupBy({
         by: ['role_code'],
-        _count: { user_id: true }
+        _count: { user_id: true },
       }),
       this.prisma.public_users.groupBy({
         by: ['status'],
-        _count: { id: true }
-      })
+        _count: { id: true },
+      }),
     ]);
 
     return {
-      roles: roleBreakdown.map(r => ({ name: r.role_code, value: r._count.user_id })),
-      statuses: statusBreakdown.map(s => ({ name: s.status, value: s._count.id }))
+      roles: roleBreakdown.map((r) => ({
+        name: r.role_code,
+        value: r._count.user_id,
+      })),
+      statuses: statusBreakdown.map((s) => ({
+        name: s.status,
+        value: s._count.id,
+      })),
     };
   }
 
   async getStatisticsTours() {
-    const [categoryBreakdown, provinceBreakdown, statusBreakdown] = await Promise.all([
-      this.prisma.tours.groupBy({
-        by: ['category_id'],
-        where: { deleted_at: null },
-        _count: { id: true }
-      }),
-      this.prisma.tours.groupBy({
-        by: ['province'],
-        where: { deleted_at: null },
-        _count: { id: true },
-        orderBy: { _count: { id: 'desc' } },
-        take: 10
-      }),
-      this.prisma.tours.groupBy({
-        by: ['visibility_status'],
-        where: { deleted_at: null },
-        _count: { id: true }
-      })
-    ]);
+    const [categoryBreakdown, provinceBreakdown, statusBreakdown] =
+      await Promise.all([
+        this.prisma.tours.groupBy({
+          by: ['category_id'],
+          where: { deleted_at: null },
+          _count: { id: true },
+        }),
+        this.prisma.tours.groupBy({
+          by: ['province'],
+          where: { deleted_at: null },
+          _count: { id: true },
+          orderBy: { _count: { id: 'desc' } },
+          take: 10,
+        }),
+        this.prisma.tours.groupBy({
+          by: ['visibility_status'],
+          where: { deleted_at: null },
+          _count: { id: true },
+        }),
+      ]);
 
     // Fetch category names
     const categories = await this.prisma.tour_categories.findMany();
-    const categoryMap = new Map(categories.map(c => [c.id.toString(), c.name]));
+    const categoryMap = new Map(
+      categories.map((c) => [c.id.toString(), c.name]),
+    );
 
     return {
-      categories: categoryBreakdown.map(c => ({ 
-        name: (c.category_id ? categoryMap.get(c.category_id.toString()) : null) || 'Unknown', 
-        value: c._count.id 
+      categories: categoryBreakdown.map((c) => ({
+        name:
+          (c.category_id ? categoryMap.get(c.category_id.toString()) : null) ||
+          'Unknown',
+        value: c._count.id,
       })),
 
-      provinces: provinceBreakdown.map(p => ({ name: p.province, value: p._count.id })),
-      statuses: statusBreakdown.map(s => ({ name: s.visibility_status, value: s._count.id }))
+      provinces: provinceBreakdown.map((p) => ({
+        name: p.province,
+        value: p._count.id,
+      })),
+      statuses: statusBreakdown.map((s) => ({
+        name: s.visibility_status,
+        value: s._count.id,
+      })),
     };
   }
 
@@ -91,17 +128,23 @@ export class AdminService {
     const [statusBreakdown, typeBreakdown] = await Promise.all([
       this.prisma.reports.groupBy({
         by: ['status'],
-        _count: { id: true }
+        _count: { id: true },
       }),
       this.prisma.reports.groupBy({
         by: ['target_type'],
-        _count: { id: true }
-      })
+        _count: { id: true },
+      }),
     ]);
 
     return {
-      statuses: statusBreakdown.map(s => ({ name: s.status, value: s._count.id })),
-      types: typeBreakdown.map(t => ({ name: t.target_type, value: t._count.id }))
+      statuses: statusBreakdown.map((s) => ({
+        name: s.status,
+        value: s._count.id,
+      })),
+      types: typeBreakdown.map((t) => ({
+        name: t.target_type,
+        value: t._count.id,
+      })),
     };
   }
 
@@ -122,7 +165,7 @@ export class AdminService {
 
     // Map existing data for quick lookup
     const revenueMap = new Map();
-    dailyRevenue.forEach(d => {
+    dailyRevenue.forEach((d) => {
       const dateStr = new Date(d.date).toLocaleDateString('vi-VN');
       revenueMap.set(dateStr, Number(d.total));
     });
@@ -133,26 +176,31 @@ export class AdminService {
       const date = new Date(sevenDaysAgo);
       date.setDate(sevenDaysAgo.getDate() + i);
       const dateStr = date.toLocaleDateString('vi-VN');
-      
+
       daily.push({
         date: dateStr,
-        amount: revenueMap.get(dateStr) || 0
+        amount: revenueMap.get(dateStr) || 0,
       });
     }
 
     return { daily };
   }
 
-
   // User Management
-  async getUsers(params: { skip?: number; take?: number; role?: string; status?: string; search?: string }) {
+  async getUsers(params: {
+    skip?: number;
+    take?: number;
+    role?: string;
+    status?: string;
+    search?: string;
+  }) {
     const { skip, take, role, status, search } = params;
-    
+
     const where: any = {};
     if (status) where.status = status;
     if (role) {
       where.user_roles_user_roles_user_idTousers = {
-        some: { role_code: role }
+        some: { role_code: role },
       };
     }
     if (search) {
@@ -169,24 +217,28 @@ export class AdminService {
         take,
         include: {
           user_roles_user_roles_user_idTousers: {
-            select: { role_code: true }
-          }
+            select: { role_code: true },
+          },
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
-      this.prisma.public_users.count({ where })
+      this.prisma.public_users.count({ where }),
     ]);
 
     return { items, total };
   }
 
-  async updateUserStatus(id: string, dto: UpdateUserStatusDto, adminId: string) {
+  async updateUserStatus(
+    id: string,
+    dto: UpdateUserStatusDto,
+    adminId: string,
+  ) {
     const user = await this.prisma.public_users.findUnique({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
 
     const updatedUser = await this.prisma.public_users.update({
       where: { id },
-      data: { status: dto.status }
+      data: { status: dto.status },
     });
 
     // Log activity
@@ -196,36 +248,42 @@ export class AdminService {
         module_name: 'user_management',
         entity_type: 'users',
         entity_pk: id,
-        action_type: dto.status === 'locked' ? 'lock_account' : 'unlock_account',
+        action_type:
+          dto.status === 'locked' ? 'lock_account' : 'unlock_account',
         reason: dto.reason,
         old_data: { status: user.status },
-        new_data: { status: dto.status }
-      }
+        new_data: { status: dto.status },
+      },
     });
 
     return updatedUser;
   }
 
   async assignRole(userId: string, dto: AssignRoleDto, adminId: string) {
-    const user = await this.prisma.public_users.findUnique({ 
+    const user = await this.prisma.public_users.findUnique({
       where: { id: userId },
-      include: { user_roles_user_roles_user_idTousers: true }
+      include: { user_roles_user_roles_user_idTousers: true },
     });
     if (!user) throw new NotFoundException('User not found');
 
-    const roleExists = await this.prisma.roles.findUnique({ where: { role_code: dto.roleCode } });
+    const roleExists = await this.prisma.roles.findUnique({
+      where: { role_code: dto.roleCode },
+    });
     if (!roleExists) throw new BadRequestException('Role does not exist');
 
-    const alreadyHasRole = user.user_roles_user_roles_user_idTousers.some(ur => ur.role_code === dto.roleCode);
-    if (alreadyHasRole) throw new BadRequestException('User already has this role');
+    const alreadyHasRole = user.user_roles_user_roles_user_idTousers.some(
+      (ur) => ur.role_code === dto.roleCode,
+    );
+    if (alreadyHasRole)
+      throw new BadRequestException('User already has this role');
 
     const result = await this.prisma.$transaction(async (tx) => {
       const ur = await tx.user_roles.create({
         data: {
           user_id: userId,
           role_code: dto.roleCode,
-          assigned_by: adminId
-        }
+          assigned_by: adminId,
+        },
       });
 
       await tx.user_role_change_logs.create({
@@ -236,8 +294,11 @@ export class AdminService {
           changed_by_user_id: adminId,
           note: dto.note,
           old_snapshot: user.user_roles_user_roles_user_idTousers,
-          new_snapshot: [...user.user_roles_user_roles_user_idTousers, { role_code: dto.roleCode }]
-        }
+          new_snapshot: [
+            ...user.user_roles_user_roles_user_idTousers,
+            { role_code: dto.roleCode },
+          ],
+        },
       });
 
       await tx.admin_activity_logs.create({
@@ -248,8 +309,8 @@ export class AdminService {
           entity_pk: userId,
           action_type: 'assign_role',
           reason: dto.note,
-          new_data: { role_code: dto.roleCode }
-        }
+          new_data: { role_code: dto.roleCode },
+        },
       });
 
       return ur;
@@ -259,13 +320,15 @@ export class AdminService {
   }
 
   async revokeRole(userId: string, roleCode: string, adminId: string) {
-    const user = await this.prisma.public_users.findUnique({ 
+    const user = await this.prisma.public_users.findUnique({
       where: { id: userId },
-      include: { user_roles_user_roles_user_idTousers: true }
+      include: { user_roles_user_roles_user_idTousers: true },
     });
     if (!user) throw new NotFoundException('User not found');
 
-    const hasRole = user.user_roles_user_roles_user_idTousers.some(ur => ur.role_code === roleCode);
+    const hasRole = user.user_roles_user_roles_user_idTousers.some(
+      (ur) => ur.role_code === roleCode,
+    );
     if (!hasRole) throw new BadRequestException('User does not have this role');
 
     if (userId === adminId && roleCode === 'SYSTEM_ADMIN') {
@@ -277,9 +340,9 @@ export class AdminService {
         where: {
           user_id_role_code: {
             user_id: userId,
-            role_code: roleCode
-          }
-        }
+            role_code: roleCode,
+          },
+        },
       });
 
       await tx.user_role_change_logs.create({
@@ -289,8 +352,10 @@ export class AdminService {
           action_type: 'revoke',
           changed_by_user_id: adminId,
           old_snapshot: user.user_roles_user_roles_user_idTousers,
-          new_snapshot: user.user_roles_user_roles_user_idTousers.filter(ur => ur.role_code !== roleCode)
-        }
+          new_snapshot: user.user_roles_user_roles_user_idTousers.filter(
+            (ur) => ur.role_code !== roleCode,
+          ),
+        },
       });
 
       await tx.admin_activity_logs.create({
@@ -300,8 +365,8 @@ export class AdminService {
           entity_type: 'users',
           entity_pk: userId,
           action_type: 'revoke_role',
-          new_data: { role_code: roleCode }
-        }
+          new_data: { role_code: roleCode },
+        },
       });
 
       return { success: true };
@@ -311,7 +376,12 @@ export class AdminService {
   }
 
   // Reports
-  async getReports(params: { skip?: number; take?: number; status?: string; targetType?: string }) {
+  async getReports(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    targetType?: string;
+  }) {
     const { skip, take, status, targetType } = params;
     const where: any = {};
     if (status) where.status = status;
@@ -323,12 +393,16 @@ export class AdminService {
         skip,
         take,
         include: {
-          users_reports_reporter_user_idTousers: { select: { full_name: true, email: true } },
-          users_reports_assigned_to_user_idTousers: { select: { full_name: true } }
+          users_reports_reporter_user_idTousers: {
+            select: { full_name: true, email: true },
+          },
+          users_reports_assigned_to_user_idTousers: {
+            select: { full_name: true },
+          },
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
-      this.prisma.reports.count({ where })
+      this.prisma.reports.count({ where }),
     ]);
 
     return { items, total };
@@ -346,8 +420,9 @@ export class AdminService {
           processed_by_user_id: adminId,
           processed_at: new Date(),
           resolution_note: dto.resolution_note,
-          assigned_to_user_id: dto.status === 'assigned' ? adminId : report.assigned_to_user_id
-        }
+          assigned_to_user_id:
+            dto.status === 'assigned' ? adminId : report.assigned_to_user_id,
+        },
       });
 
       await tx.report_processing_history.create({
@@ -357,8 +432,8 @@ export class AdminService {
           action_type: 'status_changed',
           old_status: report.status,
           new_status: dto.status,
-          note: dto.resolution_note
-        }
+          note: dto.resolution_note,
+        },
       });
 
       await tx.admin_activity_logs.create({
@@ -367,11 +442,12 @@ export class AdminService {
           module_name: 'report_handling',
           entity_type: 'reports',
           entity_pk: id,
-          action_type: dto.status === 'resolved' ? 'resolve_report' : 'reject_report',
+          action_type:
+            dto.status === 'resolved' ? 'resolve_report' : 'reject_report',
           reason: dto.resolution_note,
           old_data: { status: report.status },
-          new_data: { status: dto.status }
-        }
+          new_data: { status: dto.status },
+        },
       });
 
       return updated;
@@ -387,7 +463,7 @@ export class AdminService {
 
     const updated = await this.prisma.tours.update({
       where: { id },
-      data: { visibility_status: dto.visibility_status }
+      data: { visibility_status: dto.visibility_status },
     });
 
     await this.prisma.admin_activity_logs.create({
@@ -399,20 +475,22 @@ export class AdminService {
         action_type: dto.visibility_status === 'hidden' ? 'hide' : 'unhide',
         reason: dto.reason,
         old_data: { visibility_status: tour.visibility_status },
-        new_data: { visibility_status: dto.visibility_status }
-      }
+        new_data: { visibility_status: dto.visibility_status },
+      },
     });
 
     return updated;
   }
 
   async moderateCompanionPost(id: string, dto: ModerationDto, adminId: string) {
-    const post = await this.prisma.companion_posts.findUnique({ where: { id } });
+    const post = await this.prisma.companion_posts.findUnique({
+      where: { id },
+    });
     if (!post) throw new NotFoundException('Post not found');
 
     const updated = await this.prisma.companion_posts.update({
       where: { id },
-      data: { visibility_status: dto.visibility_status }
+      data: { visibility_status: dto.visibility_status },
     });
 
     await this.prisma.admin_activity_logs.create({
@@ -424,14 +502,20 @@ export class AdminService {
         action_type: dto.visibility_status === 'hidden' ? 'hide' : 'unhide',
         reason: dto.reason,
         old_data: { visibility_status: post.visibility_status },
-        new_data: { visibility_status: dto.visibility_status }
-      }
+        new_data: { visibility_status: dto.visibility_status },
+      },
     });
 
     return updated;
   }
 
-  async getTours(params: { skip?: number; take?: number; status?: string; visibility?: string; search?: string }) {
+  async getTours(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    visibility?: string;
+    search?: string;
+  }) {
     const { skip, take, status, visibility, search } = params;
     const where: any = { deleted_at: null };
     if (status) where.business_status = status;
@@ -448,19 +532,24 @@ export class AdminService {
         include: {
           guide_profiles: {
             include: {
-              users: { select: { full_name: true } }
-            }
-          }
+              users: { select: { full_name: true } },
+            },
+          },
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
-      this.prisma.tours.count({ where })
+      this.prisma.tours.count({ where }),
     ]);
 
     return { items, total };
   }
 
-  async getCompanionPosts(params: { skip?: number; take?: number; visibility?: string; search?: string }) {
+  async getCompanionPosts(params: {
+    skip?: number;
+    take?: number;
+    visibility?: string;
+    search?: string;
+  }) {
     const { skip, take, visibility, search } = params;
     const where: any = { deleted_at: null };
     if (visibility) where.visibility_status = visibility;
@@ -474,11 +563,11 @@ export class AdminService {
         skip,
         take,
         include: {
-          users: { select: { full_name: true } }
+          users: { select: { full_name: true } },
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
-      this.prisma.companion_posts.count({ where })
+      this.prisma.companion_posts.count({ where }),
     ]);
 
     return { items, total };
@@ -490,19 +579,23 @@ export class AdminService {
       include: {
         guide_profiles: {
           include: {
-            users: { select: { full_name: true, email: true } }
-          }
+            users: { select: { full_name: true, email: true } },
+          },
         },
-        guide_verification_documents: true
+        guide_verification_documents: true,
       },
-      orderBy: { submitted_at: 'desc' }
+      orderBy: { submitted_at: 'desc' },
     });
   }
 
-  async processVerification(id: string, dto: ProcessVerificationDto, adminId: string) {
-    const request = await this.prisma.guide_verification_requests.findUnique({ 
+  async processVerification(
+    id: string,
+    dto: ProcessVerificationDto,
+    adminId: string,
+  ) {
+    const request = await this.prisma.guide_verification_requests.findUnique({
       where: { id },
-      include: { guide_profiles: true }
+      include: { guide_profiles: true },
     });
     if (!request) throw new NotFoundException('Request not found');
 
@@ -513,16 +606,19 @@ export class AdminService {
           status: dto.status,
           processed_by_user_id: adminId,
           processed_at: new Date(),
-          result_note: dto.result_note
-        }
+          result_note: dto.result_note,
+        },
       });
 
       await tx.guide_profiles.update({
         where: { id: request.guide_profile_id },
         data: {
           verification_status: dto.status,
-          visibility_status: dto.status === 'approved' ? 'visible' : request.guide_profiles.visibility_status
-        }
+          visibility_status:
+            dto.status === 'approved'
+              ? 'visible'
+              : request.guide_profiles.visibility_status,
+        },
       });
 
       await tx.admin_activity_logs.create({
@@ -532,8 +628,8 @@ export class AdminService {
           entity_type: 'guide_verification_requests',
           entity_pk: id,
           action_type: dto.status === 'approved' ? 'approve' : 'reject',
-          reason: dto.result_note
-        }
+          reason: dto.result_note,
+        },
       });
 
       return updatedReq;
@@ -543,7 +639,11 @@ export class AdminService {
   }
 
   // Activity Logs
-  async getActivityLogs(params: { skip?: number; take?: number; module?: string }) {
+  async getActivityLogs(params: {
+    skip?: number;
+    take?: number;
+    module?: string;
+  }) {
     const { skip, take, module } = params;
     const where: any = {};
     if (module) where.module_name = module;
@@ -554,25 +654,30 @@ export class AdminService {
         skip,
         take,
         include: {
-          users: { select: { full_name: true } }
+          users: { select: { full_name: true } },
         },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
-      this.prisma.admin_activity_logs.count({ where })
+      this.prisma.admin_activity_logs.count({ where }),
     ]);
 
     return { items, total };
   }
 
   // Transaction Management
-  async getTransactions(params: { skip?: number; take?: number; status?: string; search?: string }) {
+  async getTransactions(params: {
+    skip?: number;
+    take?: number;
+    status?: string;
+    search?: string;
+  }) {
     const { skip, take, status, search } = params;
     const where: any = {};
-    
+
     if (status && status !== 'all') {
       where.status = status;
     }
-    
+
     if (search) {
       where.OR = [
         { transaction_code: { contains: search, mode: 'insensitive' } },
@@ -581,9 +686,9 @@ export class AdminService {
             OR: [
               { full_name: { contains: search, mode: 'insensitive' } },
               { email: { contains: search, mode: 'insensitive' } },
-            ]
-          }
-        }
+            ],
+          },
+        },
       ];
     }
 
@@ -616,7 +721,11 @@ export class AdminService {
     });
   }
 
-  async processRefund(transactionId: string, action: 'approve' | 'reject', note?: string) {
+  async processRefund(
+    transactionId: string,
+    action: 'approve' | 'reject',
+    note?: string,
+  ) {
     const transaction = await this.prisma.payment_transactions.findUnique({
       where: { id: transactionId },
       include: { tour_requests: true },
@@ -624,7 +733,9 @@ export class AdminService {
 
     if (!transaction) throw new NotFoundException('Không tìm thấy giao dịch');
     if (transaction.status !== 'refund_pending') {
-      throw new BadRequestException('Giao dịch không nằm trong trạng thái chờ hoàn tiền');
+      throw new BadRequestException(
+        'Giao dịch không nằm trong trạng thái chờ hoàn tiền',
+      );
     }
 
     const nextStatus = action === 'approve' ? 'refunded' : 'refund_rejected';
@@ -641,12 +752,21 @@ export class AdminService {
         where: { id: transaction.tour_request_id },
         data: {
           status: action === 'approve' ? 'cancelled_by_user' : 'paid',
-          cancellation_note: action === 'approve' ? `Đã hoàn trả tiền thành công` : `Từ chối hoàn tiền: ${note}`,
+          cancellation_note:
+            action === 'approve'
+              ? `Đã hoàn trả tiền thành công`
+              : `Từ chối hoàn tiền: ${note}`,
         },
       }),
     ]);
 
-    return { success: true, message: action === 'approve' ? 'Đã hoàn tiền thành công' : 'Đã từ chối hoàn tiền' };
+    return {
+      success: true,
+      message:
+        action === 'approve'
+          ? 'Đã hoàn tiền thành công'
+          : 'Đã từ chối hoàn tiền',
+    };
   }
 
   // Guide Settlements
@@ -662,51 +782,57 @@ export class AdminService {
             phone: true,
             bank_id: true,
             account_no: true,
-            account_name: true
-          }
-        }
-      }
+            account_name: true,
+          },
+        },
+      },
     });
 
-    const settlements = await Promise.all(guides.map(async (guide) => {
-      const unpaidTransactions = await this.prisma.payment_transactions.findMany({
-        where: {
-          status: 'paid',
-          guide_settled: false,
-          tour_requests: {
-            tours: {
-              guide_profile_id: guide.id
-            }
-          }
-        },
-        select: {
-          id: true,
-          amount: true,
-          transaction_code: true,
-          created_at: true
-        }
-      });
+    const settlements = await Promise.all(
+      guides.map(async (guide) => {
+        const unpaidTransactions =
+          await this.prisma.payment_transactions.findMany({
+            where: {
+              status: 'paid',
+              guide_settled: false,
+              tour_requests: {
+                tours: {
+                  guide_profile_id: guide.id,
+                },
+              },
+            },
+            select: {
+              id: true,
+              amount: true,
+              transaction_code: true,
+              created_at: true,
+            },
+          });
 
-      const totalUnpaid = unpaidTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
-      const commissionFee = totalUnpaid * 0.1;
-      const netPayable = totalUnpaid * 0.9;
+        const totalUnpaid = unpaidTransactions.reduce(
+          (sum, tx) => sum + Number(tx.amount),
+          0,
+        );
+        const commissionFee = totalUnpaid * 0.1;
+        const netPayable = totalUnpaid * 0.9;
 
-      return {
-        guideProfileId: guide.id,
-        guideUserId: guide.user_id,
-        fullName: guide.users.full_name,
-        email: guide.users.email,
-        phone: guide.users.phone,
-        bankId: guide.users.bank_id,
-        accountNo: guide.users.account_no,
-        accountName: guide.users.account_name,
-        unsettledTxCount: unpaidTransactions.length,
-        totalUnpaidAmount: totalUnpaid,
-        commissionFee,
-        netPayable,
-        transactions: unpaidTransactions
-      };
-    }));
+        return {
+          guideProfileId: guide.id,
+          guideUserId: guide.user_id,
+          fullName: guide.users.full_name,
+          email: guide.users.email,
+          phone: guide.users.phone,
+          bankId: guide.users.bank_id,
+          accountNo: guide.users.account_no,
+          accountName: guide.users.account_name,
+          unsettledTxCount: unpaidTransactions.length,
+          totalUnpaidAmount: totalUnpaid,
+          commissionFee,
+          netPayable,
+          transactions: unpaidTransactions,
+        };
+      }),
+    );
 
     return settlements;
   }
@@ -714,37 +840,44 @@ export class AdminService {
   async settleGuideTransactions(guideProfileId: string, adminId: string) {
     const guide = await this.prisma.guide_profiles.findUnique({
       where: { id: guideProfileId },
-      include: { users: { select: { full_name: true } } }
+      include: { users: { select: { full_name: true } } },
     });
-    if (!guide) throw new NotFoundException('Không tìm thấy thông tin Hướng dẫn viên');
+    if (!guide)
+      throw new NotFoundException('Không tìm thấy thông tin Hướng dẫn viên');
 
-    const transactionsToSettle = await this.prisma.payment_transactions.findMany({
-      where: {
-        status: 'paid',
-        guide_settled: false,
-        tour_requests: {
-          tours: {
-            guide_profile_id: guideProfileId
-          }
-        }
-      }
-    });
+    const transactionsToSettle =
+      await this.prisma.payment_transactions.findMany({
+        where: {
+          status: 'paid',
+          guide_settled: false,
+          tour_requests: {
+            tours: {
+              guide_profile_id: guideProfileId,
+            },
+          },
+        },
+      });
 
     if (transactionsToSettle.length === 0) {
-      throw new BadRequestException('Không có giao dịch nào cần quyết toán cho Hướng dẫn viên này');
+      throw new BadRequestException(
+        'Không có giao dịch nào cần quyết toán cho Hướng dẫn viên này',
+      );
     }
 
-    const totalSettledAmount = transactionsToSettle.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const totalSettledAmount = transactionsToSettle.reduce(
+      (sum, tx) => sum + Number(tx.amount),
+      0,
+    );
     const netPaid = totalSettledAmount * 0.9;
 
-    const result = await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx) => {
       const updateRes = await tx.payment_transactions.updateMany({
         where: {
-          id: { in: transactionsToSettle.map(t => t.id) }
+          id: { in: transactionsToSettle.map((t) => t.id) },
         },
         data: {
-          guide_settled: true
-        }
+          guide_settled: true,
+        },
       });
 
       await tx.admin_activity_logs.create({
@@ -756,11 +889,11 @@ export class AdminService {
           action_type: 'settle_guide_income',
           reason: `Quyết toán thu nhập HDV ${guide.users.full_name}. Tổng doanh thu: ${totalSettledAmount}đ. Thực nhận (90%): ${netPaid}đ.`,
           new_data: {
-            settledTransactionIds: transactionsToSettle.map(t => t.id),
+            settledTransactionIds: transactionsToSettle.map((t) => t.id),
             grossAmount: totalSettledAmount,
-            netAmount: netPaid
-          }
-        }
+            netAmount: netPaid,
+          },
+        },
       });
 
       return updateRes;
@@ -771,7 +904,7 @@ export class AdminService {
       message: `Quyết toán thành công cho HDV ${guide.users.full_name}`,
       settledCount: transactionsToSettle.length,
       grossAmount: totalSettledAmount,
-      netAmount: netPaid
+      netAmount: netPaid,
     };
   }
 
@@ -781,7 +914,7 @@ export class AdminService {
       email: dto.email,
       password: dto.password,
       email_confirm: true,
-      user_metadata: { full_name: dto.fullName }
+      user_metadata: { full_name: dto.fullName },
     });
 
     if (error) {
@@ -796,21 +929,21 @@ export class AdminService {
         where: { id: userId },
         update: {
           email: dto.email,
-          full_name: dto.fullName
+          full_name: dto.fullName,
         },
         create: {
           id: userId,
           email: dto.email,
           full_name: dto.fullName,
-          status: 'active'
-        }
+          status: 'active',
+        },
       });
 
       // 2. Assign the chosen role
       const alreadyHasRole = await tx.user_roles.findUnique({
         where: {
-          user_id_role_code: { user_id: userId, role_code: dto.roleCode }
-        }
+          user_id_role_code: { user_id: userId, role_code: dto.roleCode },
+        },
       });
 
       if (!alreadyHasRole) {
@@ -818,16 +951,16 @@ export class AdminService {
           data: {
             user_id: userId,
             role_code: dto.roleCode,
-            assigned_by: adminId
-          }
+            assigned_by: adminId,
+          },
         });
       }
 
       // Also give USER role by default
       const alreadyHasUserRole = await tx.user_roles.findUnique({
         where: {
-          user_id_role_code: { user_id: userId, role_code: 'USER' }
-        }
+          user_id_role_code: { user_id: userId, role_code: 'USER' },
+        },
       });
 
       if (!alreadyHasUserRole) {
@@ -835,8 +968,8 @@ export class AdminService {
           data: {
             user_id: userId,
             role_code: 'USER',
-            assigned_by: adminId
-          }
+            assigned_by: adminId,
+          },
         });
       }
 
@@ -849,8 +982,8 @@ export class AdminService {
           changed_by_user_id: adminId,
           note: `Tạo tài khoản nhân viên mới với vai trò: ${dto.roleCode}`,
           old_snapshot: [],
-          new_snapshot: [{ role_code: 'USER' }, { role_code: dto.roleCode }]
-        }
+          new_snapshot: [{ role_code: 'USER' }, { role_code: dto.roleCode }],
+        },
       });
 
       // 4. Create admin activity log
@@ -865,9 +998,9 @@ export class AdminService {
           new_data: {
             email: dto.email,
             full_name: dto.fullName,
-            role_code: dto.roleCode
-          }
-        }
+            role_code: dto.roleCode,
+          },
+        },
       });
 
       return publicUser;
@@ -876,7 +1009,7 @@ export class AdminService {
     return {
       success: true,
       message: `Tạo tài khoản nhân viên ${dto.fullName} thành công`,
-      data: result
+      data: result,
     };
   }
 }

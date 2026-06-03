@@ -16,7 +16,6 @@ import { SocketGateway } from '../socket/socket.gateway';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
 import { NotificationsService } from '../notifications/notifications.service';
 
-
 @Injectable()
 export class TourRequestsService {
   constructor(
@@ -25,8 +24,6 @@ export class TourRequestsService {
     private readonly activityLogsService: UserActivityLogsService,
     private readonly notificationsService: NotificationsService,
   ) {}
-
-
 
   async createRequest(userId: string, dto: CreateTourRequestDto) {
     const { tourId, scheduleId, participantCount, note } = dto;
@@ -86,7 +83,7 @@ export class TourRequestsService {
 
     if (scheduleId) {
       schedule = await this.prisma.tour_schedules.findUnique({
-        where: { id: scheduleId }
+        where: { id: scheduleId },
       });
       if (!schedule || schedule.tour_id !== tourId) {
         throw new NotFoundException('Lịch khởi hành không hợp lệ');
@@ -159,7 +156,7 @@ export class TourRequestsService {
             include: {
               tour_images: {
                 orderBy: { is_cover: 'desc' },
-                take: 1
+                take: 1,
               },
               guide_profiles: {
                 include: {
@@ -173,7 +170,7 @@ export class TourRequestsService {
           payment_transactions: {
             where: { status: 'paid' },
             orderBy: { created_at: 'desc' },
-          }
+          },
         },
         orderBy: { requested_at: 'desc' },
         skip,
@@ -184,13 +181,18 @@ export class TourRequestsService {
     return {
       data: requests.map((req) => {
         const paidTransactions = req.payment_transactions || [];
-        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+        const totalPaid = paidTransactions.reduce(
+          (sum, t) => sum + Number(t.amount),
+          0,
+        );
         const price = req.price_at_booking
           ? Number(req.price_at_booking)
-          : (req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price));
+          : req.tour_schedules
+            ? Number(req.tour_schedules.price)
+            : Number(req.tours.price);
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
-        
+
         if (totalPaid > 0) {
           if (totalPaid >= totalPrice) {
             paymentStatus = 'Đã thanh toán 100%';
@@ -205,12 +207,16 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
-          tourImage: req.tours.tour_images.find(img => img.is_cover)?.image_url || req.tours.tour_images[0]?.image_url,
+          tourImage:
+            req.tours.tour_images.find((img) => img.is_cover)?.image_url ||
+            req.tours.tour_images[0]?.image_url,
           startDate: req.tour_schedules?.start_date,
           guideId: req.tours.guide_profiles.id, // Using profile ID for navigation
           guideUserId: req.tours.guide_profiles.user_id,
           guideName: req.tours.guide_profiles.users?.full_name,
-          guideAvatar: req.tours.guide_profiles.avatar_url || req.tours.guide_profiles.users?.avatar_url,
+          guideAvatar:
+            req.tours.guide_profiles.avatar_url ||
+            req.tours.guide_profiles.users?.avatar_url,
           participantCount: req.participant_count,
           status: req.status,
           requestedAt: req.requested_at,
@@ -263,19 +269,19 @@ export class TourRequestsService {
             include: {
               tour_images: {
                 orderBy: { is_cover: 'desc' },
-                take: 1
+                take: 1,
               },
               guide_profiles: {
                 include: {
-                  users: true
-                }
-              }
-            }
+                  users: true,
+                },
+              },
+            },
           },
           payment_transactions: {
             where: { status: 'paid' },
             orderBy: { created_at: 'desc' },
-          }
+          },
         },
         orderBy: { requested_at: 'desc' },
         skip,
@@ -287,13 +293,18 @@ export class TourRequestsService {
     return {
       data: requests.map((req) => {
         const paidTransactions = req.payment_transactions || [];
-        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+        const totalPaid = paidTransactions.reduce(
+          (sum, t) => sum + Number(t.amount),
+          0,
+        );
         const price = req.price_at_booking
           ? Number(req.price_at_booking)
-          : (req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price));
+          : req.tour_schedules
+            ? Number(req.tour_schedules.price)
+            : Number(req.tours.price);
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
-        
+
         if (totalPaid > 0) {
           if (totalPaid >= totalPrice) {
             paymentStatus = 'Đã thanh toán 100%';
@@ -308,11 +319,15 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
-          tourImage: req.tours.tour_images.find(img => img.is_cover)?.image_url || req.tours.tour_images[0]?.image_url,
+          tourImage:
+            req.tours.tour_images.find((img) => img.is_cover)?.image_url ||
+            req.tours.tour_images[0]?.image_url,
           startDate: req.tour_schedules?.start_date,
           guideId: req.tours.guide_profiles.id,
           guideName: req.tours.guide_profiles.users.full_name,
-          guideAvatar: req.tours.guide_profiles.avatar_url || req.tours.guide_profiles.users.avatar_url,
+          guideAvatar:
+            req.tours.guide_profiles.avatar_url ||
+            req.tours.guide_profiles.users.avatar_url,
           userName: req.users_tour_requests_user_idTousers.full_name,
           userAvatar: req.users_tour_requests_user_idTousers.avatar_url,
           participantCount: req.participant_count,
@@ -340,9 +355,9 @@ export class TourRequestsService {
   ) {
     const request = await this.prisma.tour_requests.findUnique({
       where: { id: requestId },
-      include: { 
+      include: {
         tours: { include: { guide_profiles: true } },
-        tour_schedules: true
+        tour_schedules: true,
       },
     });
 
@@ -354,7 +369,11 @@ export class TourRequestsService {
       throw new ForbiddenException('Bạn không có quyền hủy yêu cầu này');
     }
 
-    if (request.status !== 'pending' && request.status !== 'approved' && request.status !== 'paid') {
+    if (
+      request.status !== 'pending' &&
+      request.status !== 'approved' &&
+      request.status !== 'paid'
+    ) {
       throw new BadRequestException(
         'Chỉ có thể hủy yêu cầu đang chờ, đã duyệt hoặc đã thanh toán',
       );
@@ -372,19 +391,23 @@ export class TourRequestsService {
           status: 'paid',
         },
       });
-      const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+      const totalPaid = paidTransactions.reduce(
+        (sum, t) => sum + Number(t.amount),
+        0,
+      );
 
       if (totalPaid > 0) {
         // Calculate days to start date
-        const startDateVal = request.tour_schedules?.start_date || request.tours.start_date;
+        const startDateVal =
+          request.tour_schedules?.start_date || request.tours.start_date;
         if (startDateVal) {
           const start = new Date(startDateVal);
           const now = new Date();
-          
+
           // Clear time for calculation
           start.setHours(0, 0, 0, 0);
           now.setHours(0, 0, 0, 0);
-          
+
           const diffTime = start.getTime() - now.getTime();
           const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
@@ -407,7 +430,11 @@ export class TourRequestsService {
       data: {
         status: nextStatus,
         cancelled_at: new Date(),
-        cancellation_note: dto.reason || (nextStatus === 'refund_pending' ? `Người dùng hủy - Đang chờ hoàn tiền ${refundAmount.toLocaleString()}đ` : 'Người dùng đã hủy yêu cầu'),
+        cancellation_note:
+          dto.reason ||
+          (nextStatus === 'refund_pending'
+            ? `Người dùng hủy - Đang chờ hoàn tiền ${refundAmount.toLocaleString()}đ`
+            : 'Người dùng đã hủy yêu cầu'),
       },
     });
 
@@ -482,7 +509,9 @@ export class TourRequestsService {
     if (status === 'approved') {
       let maxParticipants = 999;
       if (request.schedule_id) {
-        const schedule = await this.prisma.tour_schedules.findUnique({ where: { id: request.schedule_id } });
+        const schedule = await this.prisma.tour_schedules.findUnique({
+          where: { id: request.schedule_id },
+        });
         if (schedule) maxParticipants = schedule.max_participants;
       }
 
@@ -493,18 +522,26 @@ export class TourRequestsService {
           status: { in: ['approved', 'paid', 'payment_pending'] },
         },
       });
-      const currentParticipants = existingRequests.reduce((sum, req) => sum + req.participant_count, 0);
+      const currentParticipants = existingRequests.reduce(
+        (sum, req) => sum + req.participant_count,
+        0,
+      );
 
       if (currentParticipants + request.participant_count > maxParticipants) {
-        throw new BadRequestException(`Không thể duyệt. Số lượng người tham gia vượt quá giới hạn tối đa (${maxParticipants} người). Hiện đã có ${currentParticipants} người được duyệt.`);
+        throw new BadRequestException(
+          `Không thể duyệt. Số lượng người tham gia vượt quá giới hạn tối đa (${maxParticipants} người). Hiện đã có ${currentParticipants} người được duyệt.`,
+        );
       }
 
       // Kiểm tra trùng lịch (overlapping dates) của Guide
-      const newStartDateVal = request.tour_schedules?.start_date || request.tours.start_date;
+      const newStartDateVal =
+        request.tour_schedules?.start_date || request.tours.start_date;
       if (newStartDateVal) {
         const newStartDate = new Date(newStartDateVal);
         const numDays = request.tours.num_days || 1;
-        const newEndDate = new Date(newStartDate.getTime() + numDays * 24 * 60 * 60 * 1000);
+        const newEndDate = new Date(
+          newStartDate.getTime() + numDays * 24 * 60 * 60 * 1000,
+        );
 
         const guideApprovedRequests = await this.prisma.tour_requests.findMany({
           where: {
@@ -521,16 +558,19 @@ export class TourRequestsService {
         });
 
         for (const activeReq of guideApprovedRequests) {
-          const activeStartVal = activeReq.tour_schedules?.start_date || activeReq.tours.start_date;
+          const activeStartVal =
+            activeReq.tour_schedules?.start_date || activeReq.tours.start_date;
           if (!activeStartVal) continue;
-          
+
           const activeStart = new Date(activeStartVal);
           const activeNumDays = activeReq.tours.num_days || 1;
-          const activeEnd = new Date(activeStart.getTime() + activeNumDays * 24 * 60 * 60 * 1000);
+          const activeEnd = new Date(
+            activeStart.getTime() + activeNumDays * 24 * 60 * 60 * 1000,
+          );
 
           if (newStartDate < activeEnd && newEndDate > activeStart) {
             throw new BadRequestException(
-              `Không thể duyệt. Hướng dẫn viên bị trùng lịch với tour "${activeReq.tours.title}" khởi hành ngày ${activeStart.toLocaleDateString('vi-VN')}`
+              `Không thể duyệt. Hướng dẫn viên bị trùng lịch với tour "${activeReq.tours.title}" khởi hành ngày ${activeStart.toLocaleDateString('vi-VN')}`,
             );
           }
         }
@@ -567,7 +607,6 @@ export class TourRequestsService {
     );
 
     await this.notificationsService.create({
-
       user_id: request.user_id,
       title: title,
       content: content,
@@ -575,8 +614,6 @@ export class TourRequestsService {
       entity_type: 'TOUR_REQUEST',
       entity_id: requestId,
     });
-
-
 
     // 7. Phát tín hiệu realtime cho User qua Socket
     this.socketGateway.sendToUser(request.user_id, 'tour_request_processed', {
@@ -587,6 +624,5 @@ export class TourRequestsService {
     });
 
     return updatedRequest;
-
   }
 }

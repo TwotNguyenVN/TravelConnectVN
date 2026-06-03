@@ -7,6 +7,6 @@ import { SocketModule } from '../socket/socket.module';
 @Module({
   imports: [NotificationsModule, SocketModule],
   controllers: [PaymentsController],
-  providers: [PaymentsService]
+  providers: [PaymentsService],
 })
 export class PaymentsModule {}

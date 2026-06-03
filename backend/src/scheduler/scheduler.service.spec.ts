@@ -61,7 +61,9 @@ describe('SchedulerService', () => {
         },
       ];
 
-      mockPrismaService.tour_requests.findMany.mockResolvedValue(mockPendingRequests);
+      mockPrismaService.tour_requests.findMany.mockResolvedValue(
+        mockPendingRequests,
+      );
       mockPrismaService.tour_requests.update.mockResolvedValue({});
 
       await service.cancelExpiredUnpaidBookings();
@@ -88,7 +90,9 @@ describe('SchedulerService', () => {
         },
       ];
 
-      mockPrismaService.tour_requests.findMany.mockResolvedValue(mockPendingRequests);
+      mockPrismaService.tour_requests.findMany.mockResolvedValue(
+        mockPendingRequests,
+      );
 
       await service.cancelExpiredUnpaidBookings();
 
@@ -105,13 +109,13 @@ describe('SchedulerService', () => {
           tour_schedules: {
             start_date: new Date(now.getTime() + 12 * 60 * 60 * 1000),
           },
-          payment_transactions: [
-            { id: 'tx-2', status: 'paid', amount: 50000 },
-          ],
+          payment_transactions: [{ id: 'tx-2', status: 'paid', amount: 50000 }],
         },
       ];
 
-      mockPrismaService.tour_requests.findMany.mockResolvedValue(mockPendingRequests);
+      mockPrismaService.tour_requests.findMany.mockResolvedValue(
+        mockPendingRequests,
+      );
 
       await service.cancelExpiredUnpaidBookings();
 
@@ -147,7 +151,9 @@ describe('SchedulerService', () => {
         },
       ];
 
-      mockPrismaService.tour_schedules.findMany.mockResolvedValue(mockSchedules);
+      mockPrismaService.tour_schedules.findMany.mockResolvedValue(
+        mockSchedules,
+      );
       mockPrismaService.tour_requests.findMany.mockResolvedValue(mockRequests);
 
       await service.completeEndedTours();
@@ -177,7 +183,9 @@ describe('SchedulerService', () => {
       ];
 
       mockPrismaService.companion_posts.findMany.mockResolvedValue(mockPosts);
-      mockPrismaService.companion_requests.updateMany.mockResolvedValue({ count: 1 });
+      mockPrismaService.companion_requests.updateMany.mockResolvedValue({
+        count: 1,
+      });
 
       await service.completeEndedCompanions();
 
@@ -186,7 +194,9 @@ describe('SchedulerService', () => {
         data: { business_status: 'closed' },
       });
 
-      expect(mockPrismaService.companion_requests.updateMany).toHaveBeenCalledWith({
+      expect(
+        mockPrismaService.companion_requests.updateMany,
+      ).toHaveBeenCalledWith({
         where: {
           post_id: 'post-1',
           status: 'pending',

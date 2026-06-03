@@ -4,10 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
 import { NotificationsService } from '../notifications/notifications.service';
-import {
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 /**
  * Unit Tests cho TourRequestsService
@@ -78,9 +75,9 @@ describe('TourRequestsService', () => {
     it('should throw NotFoundException when tour does not exist', async () => {
       mockPrismaService.tours.findUnique.mockResolvedValue(null);
 
-      await expect(service.createRequest(userId, dto))
-        .rejects
-        .toThrow(NotFoundException);
+      await expect(service.createRequest(userId, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw BadRequestException when guide tries to book own tour', async () => {
@@ -90,9 +87,9 @@ describe('TourRequestsService', () => {
         guide_profiles: { user_id: userId }, // Guide = current user
       });
 
-      await expect(service.createRequest(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.createRequest(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException when tour is full', async () => {
@@ -107,9 +104,9 @@ describe('TourRequestsService', () => {
         _sum: { participant_count: 4 },
       });
 
-      await expect(service.createRequest(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.createRequest(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException when user already has active request', async () => {
@@ -129,9 +126,9 @@ describe('TourRequestsService', () => {
         status: 'pending',
       });
 
-      await expect(service.createRequest(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.createRequest(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException when tour has active schedules but scheduleId is not provided', async () => {
@@ -143,9 +140,9 @@ describe('TourRequestsService', () => {
 
       mockPrismaService.tour_schedules.count.mockResolvedValue(2); // Has 2 active schedules
 
-      await expect(service.createRequest(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.createRequest(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should save price_at_booking as tour price if schedule is not provided', async () => {

@@ -43,14 +43,17 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('register')
-  handleRegister(@MessageBody() data: { userId: string }, @ConnectedSocket() client: Socket) {
+  handleRegister(
+    @MessageBody() data: { userId: string },
+    @ConnectedSocket() client: Socket,
+  ) {
     this.logger.log(`User ${data.userId} registered with socket ${client.id}`);
-    
+
     if (!this.userSockets.has(data.userId)) {
       this.userSockets.set(data.userId, new Set());
     }
     this.userSockets.get(data.userId)?.add(client.id);
-    
+
     client.join(`user_${data.userId}`);
     return { status: 'ok' };
   }

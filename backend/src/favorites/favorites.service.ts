@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
@@ -9,7 +13,6 @@ export class FavoritesService {
     private readonly prisma: PrismaService,
     private readonly activityLogsService: UserActivityLogsService,
   ) {}
-
 
   // ==========================================
   // TOUR FAVORITES
@@ -57,7 +60,6 @@ export class FavoritesService {
     );
 
     return favorite;
-
   }
 
   async removeTourFavorite(userId: string, tourId: string) {
@@ -96,7 +98,9 @@ export class FavoritesService {
     return favorites.map((f) => ({
       id: f.tours.id,
       title: f.tours.title,
-      cover: f.tours.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+      cover:
+        f.tours.tour_images?.[0]?.image_url ||
+        'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
       price: Number(f.tours.price),
       location: f.tours.province,
       category: f.tours.tour_categories?.name || 'Chưa phân loại',
@@ -140,9 +144,9 @@ export class FavoritesService {
       },
       include: {
         guide_profiles: {
-          include: { users: true }
-        }
-      }
+          include: { users: true },
+        },
+      },
     });
 
     // 4. Ghi log hoạt động
@@ -155,7 +159,6 @@ export class FavoritesService {
     );
 
     return favorite;
-
   }
 
   async removeGuideFavorite(userId: string, guideId: string) {

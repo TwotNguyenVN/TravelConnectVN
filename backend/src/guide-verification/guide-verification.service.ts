@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateVerificationRequestDto } from './dto/create-verification.dto';
 
@@ -17,19 +22,24 @@ export class GuideVerificationService {
     });
 
     if (!guideProfile) {
-      throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên. Vui lòng cập nhật hồ sơ trước.');
+      throw new NotFoundException(
+        'Không tìm thấy hồ sơ hướng dẫn viên. Vui lòng cập nhật hồ sơ trước.',
+      );
     }
 
     // 2. Kiểm tra xem có yêu cầu nào đang chờ xử lý không
-    const existingPending = await this.prisma.guide_verification_requests.findFirst({
-      where: {
-        guide_profile_id: guideProfile.id,
-        status: 'pending',
-      },
-    });
+    const existingPending =
+      await this.prisma.guide_verification_requests.findFirst({
+        where: {
+          guide_profile_id: guideProfile.id,
+          status: 'pending',
+        },
+      });
 
     if (existingPending) {
-      throw new BadRequestException('Bạn đã có một yêu cầu xác minh đang chờ xử lý.');
+      throw new BadRequestException(
+        'Bạn đã có một yêu cầu xác minh đang chờ xử lý.',
+      );
     }
 
     // 3. Tạo yêu cầu mới trong transaction
@@ -84,7 +94,6 @@ export class GuideVerificationService {
 
     return result;
   }
-
 
   async getMyRequests(userId: string) {
     const guideProfile = await this.prisma.guide_profiles.findUnique({

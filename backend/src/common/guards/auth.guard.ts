@@ -17,7 +17,10 @@ export class AuthGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
-    console.log('DEBUG - AuthGuard: Received Authorization header:', authHeader ? 'Present' : 'Missing');
+    console.log(
+      'DEBUG - AuthGuard: Received Authorization header:',
+      authHeader ? 'Present' : 'Missing',
+    );
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.error('DEBUG - AuthGuard: Missing or invalid header format');
@@ -29,7 +32,9 @@ export class AuthGuard implements CanActivate {
     const token = authHeader.split(' ')[1];
 
     try {
-      console.log('DEBUG - AuthGuard: Attempting to verify token with Supabase...');
+      console.log(
+        'DEBUG - AuthGuard: Attempting to verify token with Supabase...',
+      );
       const user = await this.supabaseService.verifyUser(token);
       console.log('DEBUG - AuthGuard: User verified:', user.id);
 
@@ -54,7 +59,9 @@ export class AuthGuard implements CanActivate {
     } catch (error) {
       console.error('DEBUG - AuthGuard Error:', error);
       if (error.code === 'P2021') {
-        throw new UnauthorizedException('Database table not found. Please contact admin.');
+        throw new UnauthorizedException(
+          'Database table not found. Please contact admin.',
+        );
       }
       throw new UnauthorizedException(
         `Authentication failed: ${error.message || 'Invalid or expired token'}`,
@@ -64,7 +71,7 @@ export class AuthGuard implements CanActivate {
 
   private async updateLastSeen(userId: string) {
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
-    
+
     // Check last_seen_at trước khi update để tránh ghi DB quá nhiều
     const user = await this.prisma.public_users.findUnique({
       where: { id: userId },

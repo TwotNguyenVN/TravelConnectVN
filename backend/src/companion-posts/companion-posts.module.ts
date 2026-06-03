@@ -10,8 +10,13 @@ import { SocketModule } from '../socket/socket.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [PrismaModule, UserActivityLogsModule, SocketModule, NotificationsModule],
+  imports: [
+    PrismaModule,
+    UserActivityLogsModule,
+    SocketModule,
+    NotificationsModule,
+  ],
   controllers: [CompanionPostsController],
-  providers: [CompanionPostsService]
+  providers: [CompanionPostsService],
 })
 export class CompanionPostsModule {}

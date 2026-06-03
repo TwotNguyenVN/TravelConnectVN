@@ -1,4 +1,5 @@
-import React, { useEffect, useState, useRef } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../api/admin.api';
 import { useToast } from '../../contexts/ToastContext';
@@ -58,7 +59,7 @@ export const SupportDashboardPage: React.FC = () => {
   const [sosVisible, setSosVisible] = useState(true);
   const sosRef = useRef<HTMLDivElement>(null);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const [statsRes, reportsRes] = await Promise.all([
@@ -73,11 +74,11 @@ export const SupportDashboardPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [fetchData]);
 
   if (loading) {
     return (
