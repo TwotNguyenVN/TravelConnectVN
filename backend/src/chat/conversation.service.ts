@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
 
@@ -148,6 +148,20 @@ export class ConversationService {
     });
     if (!guideUser) {
       throw new NotFoundException('Người dùng đích không tồn tại');
+    }
+
+    // Kiểm tra tour liên kết có thuộc về guide không
+    if (relatedTourId) {
+      const tour = await this.prisma.tours.findUnique({
+        where: { id: relatedTourId },
+        include: { guide_profiles: true },
+      });
+      if (!tour) {
+        throw new NotFoundException('Tour liên kết không tồn tại');
+      }
+      if (tour.guide_profiles.user_id !== guideUserId) {
+        throw new BadRequestException('Tour liên kết không thuộc về Hướng dẫn viên này');
+      }
     }
 
     // Tìm conversation direct hiện có giữa 2 người
