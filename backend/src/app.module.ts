@@ -32,6 +32,9 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
+import { SosModule } from './sos/sos.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { DisputesModule } from './disputes/disputes.module';
 
 @Module({
   imports: [
@@ -72,6 +75,9 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     PaymentsModule,
     AiChatModule,
     TripExpensesModule,
+    SosModule,
+    TicketsModule,
+    DisputesModule,
   ],
   controllers: [AppController],
   providers: [

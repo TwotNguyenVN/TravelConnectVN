@@ -1012,4 +1012,67 @@ export class AdminService {
       data: result,
     };
   }
+
+  async sendBroadcastNotification(
+    dto: { title: string; message: string; targetRole?: string; targetUserId?: string },
+    adminId: string,
+  ) {
+    const { title, message, targetRole, targetUserId } = dto;
+    let targetUserIds: string[] = [];
+
+    if (targetUserId) {
+      targetUserIds = [targetUserId];
+    } else if (targetRole) {
+      const userRoles = await this.prisma.user_roles.findMany({
+        where: { role_code: targetRole },
+        select: { user_id: true },
+      });
+      targetUserIds = userRoles.map((ur) => ur.user_id);
+    } else {
+      const users = await this.prisma.public_users.findMany({
+        select: { id: true },
+      });
+      targetUserIds = users.map((u) => u.id);
+    }
+
+    if (targetUserIds.length === 0) {
+      return {
+        success: false,
+        message: 'Không tìm thấy người nhận phù hợp',
+      };
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      const notificationsData = targetUserIds.map((userId) => ({
+        user_id: userId,
+        notification_type: 'broadcast',
+        title,
+        content: message,
+        payload: {
+          broadcast_by: adminId,
+          target_role: targetRole || null,
+        },
+      }));
+
+      await tx.notifications.createMany({
+        data: notificationsData,
+      });
+
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'broadcast_notifications',
+          entity_type: 'notifications',
+          action_type: 'broadcast',
+          reason: `Phát thông báo rộng rãi: "${title}". Đối tượng: ${targetRole || targetUserId || 'Tất cả'}`,
+          new_data: { title, message, targetRole, targetUserId, total_recipients: targetUserIds.length } as any,
+        },
+      });
+    });
+
+    return {
+      success: true,
+      message: `Đã gửi thông báo tới ${targetUserIds.length} người dùng thành công`,
+    };
+  }
 }

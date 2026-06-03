@@ -37,6 +37,19 @@ export const adminApi = {
   processRefund: (id: string, data: any) => api.post(`/admin/refunds/${id}/process`, data),
   getTransactions: (params?: any) => api.get('/admin/transactions', { params }),
 
+  // SOS Alerts
+  getSosAlerts: () => api.get('/admin/sos'),
+  resolveSosAlert: (id: string, note: string) => api.patch(`/admin/sos/${id}/resolve`, { note }),
+
+  // Support Tickets
+  getTickets: (params?: any) => api.get('/admin/tickets', { params }),
+  updateTicket: (id: string, data: any) => api.patch(`/admin/tickets/${id}`, data),
+
+  // Tour Disputes
+  getDisputes: () => api.get('/admin/disputes'),
+  getDisputeChatHistory: (disputeId: string) => api.get(`/admin/disputes/${disputeId}/chat-history`),
+  resolveDispute: (id: string, data: any) => api.patch(`/admin/disputes/${id}/resolve`, data),
+
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
   settleGuideTransactions: (id: string) => api.post(`/admin/guides/${id}/settle`),
