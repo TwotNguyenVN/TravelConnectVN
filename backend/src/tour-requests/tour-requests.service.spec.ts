@@ -165,7 +165,7 @@ describe('TourRequestsService', () => {
         ...data,
       }));
 
-      const res = await service.createRequest(userId, dto);
+      const res: any = await service.createRequest(userId, dto);
       expect(res.price_at_booking).toBe(tourPrice);
     });
 
@@ -193,7 +193,7 @@ describe('TourRequestsService', () => {
         ...data,
       }));
 
-      const res = await service.createRequest(userId, dtoWithSchedule);
+      const res: any = await service.createRequest(userId, dtoWithSchedule);
       expect(res.price_at_booking).toBe(schedulePrice);
     });
   });
