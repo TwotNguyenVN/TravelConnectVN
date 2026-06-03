@@ -3,7 +3,7 @@ import { adminApi } from '../../api/admin.api';
 import { LoadingBlock } from '../../components/common';
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  BarChart, Bar, PieChart, Pie, Cell
+  PieChart, Pie, Cell
 } from 'recharts';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];

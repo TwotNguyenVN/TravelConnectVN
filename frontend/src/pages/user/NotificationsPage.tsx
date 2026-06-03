@@ -14,7 +14,6 @@ import './NotificationsPage.css';
 export const NotificationsPage: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
-  const [total, setTotal] = useState(0);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -29,7 +28,6 @@ export const NotificationsPage: React.FC = () => {
     if (socket) {
       const handleNewNotification = (data: any) => {
         setNotifications(prev => [data, ...prev]);
-        setTotal(prev => prev + 1);
         toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
       };
 
@@ -50,7 +48,6 @@ export const NotificationsPage: React.FC = () => {
         } else {
           setNotifications(res.data.data);
         }
-        setTotal(res.data.total);
         setHasMore(pageNum < res.data.totalPages);
       }
     } catch (err) {
@@ -98,7 +95,6 @@ export const NotificationsPage: React.FC = () => {
       const res = await notificationService.deleteNotification(id);
       if (res.success) {
         setNotifications(prev => prev.filter(n => n.id !== id));
-        setTotal(prev => prev - 1);
         toast.success('Đã xóa thông báo');
       }
     } catch (err) {
