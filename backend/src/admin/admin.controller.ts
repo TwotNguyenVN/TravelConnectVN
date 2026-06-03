@@ -221,6 +221,23 @@ export class AdminController {
     });
   }
 
+  // Transaction Management
+  @Get('transactions')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  getTransactions(
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('status') status?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.adminService.getTransactions({
+      skip: skip ? parseInt(skip) : undefined,
+      take: take ? parseInt(take) : undefined,
+      status,
+      search,
+    });
+  }
+
   // Refund Management
   @Get('refunds/pending')
   @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)

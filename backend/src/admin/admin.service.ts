@@ -560,6 +560,46 @@ export class AdminService {
     return { items, total };
   }
 
+  // Transaction Management
+  async getTransactions(params: { skip?: number; take?: number; status?: string; search?: string }) {
+    const { skip, take, status, search } = params;
+    const where: any = {};
+    
+    if (status && status !== 'all') {
+      where.status = status;
+    }
+    
+    if (search) {
+      where.OR = [
+        { transaction_code: { contains: search, mode: 'insensitive' } },
+        {
+          users: {
+            OR: [
+              { full_name: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
+            ]
+          }
+        }
+      ];
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.payment_transactions.findMany({
+        where,
+        skip,
+        take,
+        include: {
+          users: { select: { id: true, full_name: true, email: true } },
+          tour_requests: { include: { tours: true } },
+        },
+        orderBy: { created_at: 'desc' },
+      }),
+      this.prisma.payment_transactions.count({ where }),
+    ]);
+
+    return { items, total };
+  }
+
   // Refund Management
   async getPendingRefunds() {
     return this.prisma.payment_transactions.findMany({

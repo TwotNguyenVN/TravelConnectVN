@@ -43,7 +43,7 @@ export const FinanceSidebar: React.FC = () => {
       <nav style={{ flex: 1, padding: 'var(--tc-spacing-4)', overflowY: 'auto' }}>
         <NavLink to="/accountant" end style={navLinkStyle}>Tổng quan</NavLink>
         <NavLink to="/accountant/refunds" style={navLinkStyle}>Yêu cầu hoàn tiền</NavLink>
-        <NavLink to="/accountant/payments" style={navLinkStyle}>Lịch sử thanh toán</NavLink>
+        <NavLink to="/accountant/transactions" style={navLinkStyle}>Lịch sử giao dịch</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

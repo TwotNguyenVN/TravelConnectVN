@@ -34,4 +34,5 @@ export const adminApi = {
   // Refund Management
   getPendingRefunds: () => api.get('/admin/refunds/pending'),
   processRefund: (id: string, data: any) => api.post(`/admin/refunds/${id}/process`, data),
+  getTransactions: (params?: any) => api.get('/admin/transactions', { params }),
 };
