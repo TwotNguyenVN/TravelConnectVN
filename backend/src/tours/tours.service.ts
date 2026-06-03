@@ -1320,6 +1320,14 @@ export class ToursService implements OnApplicationBootstrap {
       throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
     }
 
+    // Kiểm tra xem ngày khởi hành có ở trong quá khứ không
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    const scheduleDate = new Date(data.startDate);
+    if (scheduleDate < now) {
+      throw new BadRequestException('Không thể tạo lịch khởi hành cho thời gian trong quá khứ');
+    }
+
     // 2. Kiểm tra xem ngày này đã có lịch chưa
     const existingSchedule = await this.prisma.tour_schedules.findFirst({
       where: {

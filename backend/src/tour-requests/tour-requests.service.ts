@@ -112,6 +112,8 @@ export class TourRequestsService {
       );
     }
 
+    const priceAtBooking = schedule ? schedule.price : tour.price;
+
     // 5. Tạo request
     const request = await this.prisma.tour_requests.create({
       data: {
@@ -121,6 +123,7 @@ export class TourRequestsService {
         participant_count: participantCount,
         note,
         status: 'pending',
+        price_at_booking: priceAtBooking,
       },
       include: {
         tours: true,
@@ -182,7 +185,9 @@ export class TourRequestsService {
       data: requests.map((req) => {
         const paidTransactions = req.payment_transactions || [];
         const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-        const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
+        const price = req.price_at_booking
+          ? Number(req.price_at_booking)
+          : (req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price));
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
@@ -283,7 +288,9 @@ export class TourRequestsService {
       data: requests.map((req) => {
         const paidTransactions = req.payment_transactions || [];
         const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-        const price = req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price);
+        const price = req.price_at_booking
+          ? Number(req.price_at_booking)
+          : (req.tour_schedules ? Number(req.tour_schedules.price) : Number(req.tours.price));
         const totalPrice = price * req.participant_count;
         let paymentStatus = 'Chưa thanh toán';
         
@@ -449,6 +456,7 @@ export class TourRequestsService {
     const request = await this.prisma.tour_requests.findUnique({
       where: { id: requestId },
       include: {
+        tour_schedules: true,
         tours: {
           include: {
             guide_profiles: true,
@@ -489,6 +497,43 @@ export class TourRequestsService {
 
       if (currentParticipants + request.participant_count > maxParticipants) {
         throw new BadRequestException(`Không thể duyệt. Số lượng người tham gia vượt quá giới hạn tối đa (${maxParticipants} người). Hiện đã có ${currentParticipants} người được duyệt.`);
+      }
+
+      // Kiểm tra trùng lịch (overlapping dates) của Guide
+      const newStartDateVal = request.tour_schedules?.start_date || request.tours.start_date;
+      if (newStartDateVal) {
+        const newStartDate = new Date(newStartDateVal);
+        const numDays = request.tours.num_days || 1;
+        const newEndDate = new Date(newStartDate.getTime() + numDays * 24 * 60 * 60 * 1000);
+
+        const guideApprovedRequests = await this.prisma.tour_requests.findMany({
+          where: {
+            tours: {
+              guide_profile_id: request.tours.guide_profile_id,
+            },
+            status: { in: ['approved', 'paid', 'payment_pending'] },
+            id: { not: request.id },
+          },
+          include: {
+            tour_schedules: true,
+            tours: true,
+          },
+        });
+
+        for (const activeReq of guideApprovedRequests) {
+          const activeStartVal = activeReq.tour_schedules?.start_date || activeReq.tours.start_date;
+          if (!activeStartVal) continue;
+          
+          const activeStart = new Date(activeStartVal);
+          const activeNumDays = activeReq.tours.num_days || 1;
+          const activeEnd = new Date(activeStart.getTime() + activeNumDays * 24 * 60 * 60 * 1000);
+
+          if (newStartDate < activeEnd && newEndDate > activeStart) {
+            throw new BadRequestException(
+              `Không thể duyệt. Hướng dẫn viên bị trùng lịch với tour "${activeReq.tours.title}" khởi hành ngày ${activeStart.toLocaleDateString('vi-VN')}`
+            );
+          }
+        }
       }
     }
 
