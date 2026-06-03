@@ -53,7 +53,7 @@ export class AdminController {
   }
 
   @Get('statistics/revenue')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   getStatisticsRevenue() {
     return this.adminService.getStatisticsRevenue();
   }
@@ -223,13 +223,13 @@ export class AdminController {
 
   // Refund Management
   @Get('refunds/pending')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   getPendingRefunds() {
     return this.adminService.getPendingRefunds();
   }
 
   @Post('refunds/:id/process')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   processRefund(
     @Param('id') id: string,
     @Body() body: { action: 'approve' | 'reject'; note?: string },
