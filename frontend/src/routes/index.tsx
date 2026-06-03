@@ -60,6 +60,7 @@ import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManag
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
+import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
@@ -167,7 +168,8 @@ export const router = createBrowserRouter([
       </RoleGuard>
     ),
     children: [
-      { index: true, element: <AdminTourManagementPage /> },
+      { index: true, element: <ContentDashboardPage /> },
+      { path: 'dashboard', element: <ContentDashboardPage /> },
       { path: 'tours', element: <AdminTourManagementPage /> },
       { path: 'guides', element: <AdminVerificationPage /> },
       { path: 'companion-posts', element: <AdminCompanionManagementPage /> },
