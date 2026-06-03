@@ -231,7 +231,7 @@ Cấu hình `.gitignore` chuẩn để tuyệt đối không push:
     *   Khi người dùng yêu cầu "push git", AI Assistant phải thực hiện tự động hóa theo luồng sau:
         1. Nếu đang ở `develop` và có thay đổi chưa commit, tự động tạo nhánh mới `fix/<description>` hoặc `feat/<description>`.
         2. Chạy `git add .` và commit thay đổi bằng cách sử dụng logic viết commit của hàm `gac` với format Conventional Commit chuẩn.
-        3. Đẩy nhánh mới lên remote và tạo PR vào `develop` bằng GitHub CLI (`gh pr create --title "<PR Title>" --body "Update code changes" --base develop`).
+        3. Đẩy nhánh mới lên remote và tạo PR vào `develop` bằng GitHub CLI (`gh pr create --title "<PR Title>" --body "<Mô tả chi tiết và chính xác các thay đổi thực tế được đẩy lên>" --base develop`).
         4. Cung cấp đường dẫn PR vừa tạo cho người dùng.
 236: 
 237: ---
