@@ -228,11 +228,11 @@ Cấu hình `.gitignore` chuẩn để tuyệt đối không push:
 228:     *   AI chỉ merge các nhánh ở local khi được hướng dẫn hoặc đồng bộ phát triển. Tuyệt đối không tự ý merge trực tiếp lên nhánh `main` hoặc `develop` trên GitHub (remote) khi chưa có sự xác nhận qua PR được chấp nhận.
 229: 
 230: 6.  **Quy trình tự động hóa Push Git siêu nhanh (High-Efficiency Automation):**
-231:     *   Khi người dùng yêu cầu "push git", AI Assistant phải thực hiện tự động hóa theo luồng sau:
-232:         1. Nếu đang ở `develop` và có thay đổi chưa commit, tự động tạo nhánh mới `fix/<description>` hoặc `feat/<description>`.
-233:         2. Chạy `git add .` và commit thay đổi bằng cách sử dụng logic viết commit của hàm `gac` với format Conventional Commit chuẩn.
-234:         3. Đẩy nhánh mới lên remote và tạo PR vào `develop` bằng GitHub CLI (`gh pr create --title "<PR Title>" --body "Auto-generated PR by AI" --base develop`).
-235:         4. Cung cấp đường dẫn PR vừa tạo cho người dùng.
+    *   Khi người dùng yêu cầu "push git", AI Assistant phải thực hiện tự động hóa theo luồng sau:
+        1. Nếu đang ở `develop` và có thay đổi chưa commit, tự động tạo nhánh mới `fix/<description>` hoặc `feat/<description>`.
+        2. Chạy `git add .` và commit thay đổi bằng cách sử dụng logic viết commit của hàm `gac` với format Conventional Commit chuẩn.
+        3. Đẩy nhánh mới lên remote và tạo PR vào `develop` bằng GitHub CLI (`gh pr create --title "<PR Title>" --body "Update code changes" --base develop`).
+        4. Cung cấp đường dẫn PR vừa tạo cho người dùng.
 236: 
 237: ---
 238: 
