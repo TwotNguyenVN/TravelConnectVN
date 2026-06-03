@@ -147,6 +147,55 @@ describe('TourRequestsService', () => {
         .rejects
         .toThrow(BadRequestException);
     });
+
+    it('should save price_at_booking as tour price if schedule is not provided', async () => {
+      const tourPrice = 120000;
+      mockPrismaService.tours.findUnique.mockResolvedValue({
+        id: 'tour-1',
+        price: tourPrice,
+        max_participants: 10,
+        guide_profiles: { user_id: 'other-guide' },
+      });
+      mockPrismaService.tour_requests.findFirst.mockResolvedValue(null);
+      mockPrismaService.tour_requests.aggregate.mockResolvedValue({
+        _sum: { participant_count: 0 },
+      });
+      mockPrismaService.tour_requests.create.mockImplementation(({ data }) => ({
+        id: 'req-1',
+        ...data,
+      }));
+
+      const res: any = await service.createRequest(userId, dto);
+      expect(res.price_at_booking).toBe(tourPrice);
+    });
+
+    it('should save price_at_booking as schedule price if schedule is provided', async () => {
+      const schedulePrice = 150000;
+      const dtoWithSchedule = { ...dto, scheduleId: 'sched-1' };
+      mockPrismaService.tours.findUnique.mockResolvedValue({
+        id: 'tour-1',
+        price: 120000,
+        max_participants: 10,
+        guide_profiles: { user_id: 'other-guide' },
+      });
+      mockPrismaService.tour_schedules.findUnique.mockResolvedValue({
+        id: 'sched-1',
+        tour_id: 'tour-1',
+        price: schedulePrice,
+        max_participants: 10,
+      });
+      mockPrismaService.tour_requests.findFirst.mockResolvedValue(null);
+      mockPrismaService.tour_requests.aggregate.mockResolvedValue({
+        _sum: { participant_count: 0 },
+      });
+      mockPrismaService.tour_requests.create.mockImplementation(({ data }) => ({
+        id: 'req-1',
+        ...data,
+      }));
+
+      const res: any = await service.createRequest(userId, dtoWithSchedule);
+      expect(res.price_at_booking).toBe(schedulePrice);
+    });
   });
 
   // ============================================

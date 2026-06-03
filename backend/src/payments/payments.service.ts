@@ -51,7 +51,12 @@ export class PaymentsService {
         }
       });
       const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
-      const totalAmount = Number(request.tours.price) * request.participant_count;
+      const price = request.price_at_booking
+        ? Number(request.price_at_booking)
+        : (request.schedule_id
+            ? Number((await this.prisma.tour_schedules.findUnique({ where: { id: request.schedule_id } }))?.price || request.tours.price)
+            : Number(request.tours.price));
+      const totalAmount = price * request.participant_count;
 
       if (request.status === 'paid' && totalPaid >= totalAmount) {
         throw new BadRequestException('Yêu cầu đặt tour này đã được thanh toán đầy đủ 100%');
@@ -218,7 +223,12 @@ export class PaymentsService {
 
         let targetStatus = 'approved'; // Giữ nguyên approved nếu chưa thanh toán đủ
         if (tourRequest) {
-          const totalAmount = Number(tourRequest.tours.price) * tourRequest.participant_count;
+          const price = tourRequest.price_at_booking
+            ? Number(tourRequest.price_at_booking)
+            : (tourRequest.schedule_id
+                ? Number((await this.prisma.tour_schedules.findUnique({ where: { id: tourRequest.schedule_id } }))?.price || tourRequest.tours.price)
+                : Number(tourRequest.tours.price));
+          const totalAmount = price * tourRequest.participant_count;
           if (totalPaid >= totalAmount) {
             targetStatus = 'paid';
           } else if (totalPaid > 0) {

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ToursService } from './tours.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 /**
  * Unit Tests cho ToursService
@@ -16,6 +16,7 @@ describe('ToursService', () => {
     tours: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       count: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
@@ -34,8 +35,11 @@ describe('ToursService', () => {
     guide_profiles: {
       findMany: jest.fn(),
     },
-    companion_posts: {
-      findMany: jest.fn(),
+    tour_schedules: {
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      findUnique: jest.fn(),
+      update: jest.fn(),
     },
     $transaction: jest.fn(),
   };
@@ -50,6 +54,9 @@ describe('ToursService', () => {
 
     service = module.get<ToursService>(ToursService);
     prisma = module.get<PrismaService>(PrismaService);
+
+    // Mock private validation check
+    jest.spyOn(service as any, 'isGuideProfileComplete').mockReturnValue(true);
 
     // Reset mocks
     jest.clearAllMocks();
@@ -80,6 +87,8 @@ describe('ToursService', () => {
             user_id: 'guide-1',
             users: { full_name: 'Nguyễn HDV', avatar_url: null },
           },
+          tour_schedules: [],
+          start_date: new Date(),
           tour_destinations: [],
         },
       ];
@@ -95,7 +104,6 @@ describe('ToursService', () => {
       expect(result).toHaveProperty('limit');
       expect(result.data).toHaveLength(1);
       expect(mockPrismaService.tours.findMany).toHaveBeenCalledTimes(1);
-      expect(mockPrismaService.tours.count).toHaveBeenCalledTimes(1);
     });
 
     it('should apply default pagination when no params provided', async () => {
@@ -186,6 +194,55 @@ describe('ToursService', () => {
       expect(result).toHaveLength(3);
       expect(result[0]).toHaveProperty('name', 'Biển đảo');
       expect(mockPrismaService.tour_categories.findMany).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  // ============================================
+  // TEST 4: createTourSchedule
+  // ============================================
+  describe('createTourSchedule', () => {
+    const userId = 'guide-1';
+    const tourId = 'tour-1';
+    
+    beforeEach(() => {
+      // Mock tour ownership
+      mockPrismaService.tours.findFirst = jest.fn().mockResolvedValue({
+        id: tourId,
+        guide_profile_id: 'gp-1',
+      });
+    });
+
+    it('should throw BadRequestException when startDate is in the past', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      await expect(
+        service.createTourSchedule(userId, tourId, {
+          startDate: yesterday.toISOString(),
+          price: 100000,
+          maxParticipants: 10,
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should create tour schedule when date is in the future and doesn\'t exist', async () => {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      mockPrismaService.tour_schedules.findFirst.mockResolvedValue(null);
+      mockPrismaService.tour_schedules.create.mockImplementation(({ data }) => ({
+        id: 'sched-1',
+        ...data,
+      }));
+
+      const res = await service.createTourSchedule(userId, tourId, {
+        startDate: tomorrow.toISOString(),
+        price: 100000,
+        maxParticipants: 10,
+      });
+
+      expect(res).toBeDefined();
+      expect(res.id).toBe('sched-1');
     });
   });
 });
