@@ -125,7 +125,7 @@ export class AdminController {
   }
 
   @Patch('reports/:id')
-  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF, Role.CONTENT_MODERATOR)
   processReport(
     @Param('id') id: string,
     @Body() dto: ProcessReportDto,
@@ -197,7 +197,7 @@ export class AdminController {
   }
 
   @Patch('guides/verification/:id')
-  @Roles(Role.SYSTEM_ADMIN)
+  @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
   processVerification(
     @Param('id') id: string,
     @Body() dto: ProcessVerificationDto,
