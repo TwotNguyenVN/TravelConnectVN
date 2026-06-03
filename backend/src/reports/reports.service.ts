@@ -38,7 +38,6 @@ export class ReportsService {
     return report;
   }
 
-
   async getMyReports(userId: string) {
     return this.prisma.reports.findMany({
       where: { reporter_user_id: userId },

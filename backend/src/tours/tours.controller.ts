@@ -175,9 +175,18 @@ export class ToursController {
   async createSchedule(
     @Request() req,
     @Param('id') tourId: string,
-    @Body() createScheduleDto: { startDate: string; price: number; maxParticipants: number }
+    @Body()
+    createScheduleDto: {
+      startDate: string;
+      price: number;
+      maxParticipants: number;
+    },
   ) {
-    return this.toursService.createTourSchedule(req.user.id, tourId, createScheduleDto);
+    return this.toursService.createTourSchedule(
+      req.user.id,
+      tourId,
+      createScheduleDto,
+    );
   }
 
   @UseGuards(AuthGuard, RoleGuard)
@@ -187,9 +196,19 @@ export class ToursController {
     @Request() req,
     @Param('id') tourId: string,
     @Param('scheduleId') scheduleId: string,
-    @Body() updateScheduleDto: { price?: number; maxParticipants?: number; status?: string }
+    @Body()
+    updateScheduleDto: {
+      price?: number;
+      maxParticipants?: number;
+      status?: string;
+    },
   ) {
-    return this.toursService.updateTourSchedule(req.user.id, tourId, scheduleId, updateScheduleDto);
+    return this.toursService.updateTourSchedule(
+      req.user.id,
+      tourId,
+      scheduleId,
+      updateScheduleDto,
+    );
   }
 
   @UseGuards(AuthGuard, RoleGuard)
@@ -198,8 +217,12 @@ export class ToursController {
   async deleteSchedule(
     @Request() req,
     @Param('id') tourId: string,
-    @Param('scheduleId') scheduleId: string
+    @Param('scheduleId') scheduleId: string,
   ) {
-    return this.toursService.deleteTourSchedule(req.user.id, tourId, scheduleId);
+    return this.toursService.deleteTourSchedule(
+      req.user.id,
+      tourId,
+      scheduleId,
+    );
   }
 }

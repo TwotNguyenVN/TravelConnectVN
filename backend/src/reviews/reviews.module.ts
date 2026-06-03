@@ -9,6 +9,6 @@ import { UserActivityLogsModule } from '../user-activity-logs/user-activity-logs
   imports: [PrismaModule, UserActivityLogsModule],
 
   controllers: [ReviewsController],
-  providers: [ReviewsService]
+  providers: [ReviewsService],
 })
 export class ReviewsModule {}

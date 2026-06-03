@@ -57,9 +57,9 @@ describe('CompanionReviewsService', () => {
     it('should throw NotFoundException when companion request does not exist', async () => {
       mockPrismaService.companion_requests.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(userId, dto))
-        .rejects
-        .toThrow(NotFoundException);
+      await expect(service.create(userId, dto)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException when user does not own the request', async () => {
@@ -74,9 +74,9 @@ describe('CompanionReviewsService', () => {
         },
       });
 
-      await expect(service.create(userId, dto))
-        .rejects
-        .toThrow(ForbiddenException);
+      await expect(service.create(userId, dto)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should throw BadRequestException when request status is not approved', async () => {
@@ -91,9 +91,9 @@ describe('CompanionReviewsService', () => {
         },
       });
 
-      await expect(service.create(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.create(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException when trip has not ended yet', async () => {
@@ -112,9 +112,9 @@ describe('CompanionReviewsService', () => {
         },
       });
 
-      await expect(service.create(userId, dto))
-        .rejects
-        .toThrow(BadRequestException);
+      await expect(service.create(userId, dto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw ConflictException when review already exists for the request', async () => {
@@ -136,9 +136,9 @@ describe('CompanionReviewsService', () => {
         id: 'review-1',
       });
 
-      await expect(service.create(userId, dto))
-        .rejects
-        .toThrow(ConflictException);
+      await expect(service.create(userId, dto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should create companion review successfully with valid data', async () => {
@@ -167,7 +167,9 @@ describe('CompanionReviewsService', () => {
         visibility_status: 'visible',
       };
 
-      mockPrismaService.companion_requests.findUnique.mockResolvedValue(mockRequest);
+      mockPrismaService.companion_requests.findUnique.mockResolvedValue(
+        mockRequest,
+      );
       mockPrismaService.companion_reviews.findUnique.mockResolvedValue(null);
       mockPrismaService.companion_reviews.create.mockResolvedValue(mockReview);
 

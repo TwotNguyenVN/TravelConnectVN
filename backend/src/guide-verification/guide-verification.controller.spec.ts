@@ -32,7 +32,9 @@ describe('GuideVerificationController', () => {
       .useValue(mockAuthGuard)
       .compile();
 
-    controller = module.get<GuideVerificationController>(GuideVerificationController);
+    controller = module.get<GuideVerificationController>(
+      GuideVerificationController,
+    );
   });
 
   it('should be defined', () => {

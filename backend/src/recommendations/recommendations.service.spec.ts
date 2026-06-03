@@ -41,7 +41,9 @@ describe('RecommendationsService', () => {
         extra_preferences: { provinces: ['Hanoi'] },
       });
 
-      mockPrismaService.user_preferred_categories.findMany.mockResolvedValue([]);
+      mockPrismaService.user_preferred_categories.findMany.mockResolvedValue(
+        [],
+      );
 
       const mockTours = [
         {

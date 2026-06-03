@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -25,7 +29,7 @@ export class AccommodationsService {
         },
       });
 
-      return links.map(link => ({
+      return links.map((link) => ({
         ...link.partner_accommodations,
         check_in_date: link.check_in_date,
         check_out_date: link.check_out_date,
@@ -34,7 +38,9 @@ export class AccommodationsService {
     } catch (error) {
       console.error('Error getting accommodations for tour:', error);
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to get tour accommodations');
+      throw new InternalServerErrorException(
+        'Failed to get tour accommodations',
+      );
     }
   }
 
@@ -62,7 +68,9 @@ export class AccommodationsService {
     } catch (error) {
       console.error('Error getting accommodation by id:', error);
       if (error instanceof NotFoundException) throw error;
-      throw new InternalServerErrorException('Failed to get accommodation detail');
+      throw new InternalServerErrorException(
+        'Failed to get accommodation detail',
+      );
     }
   }
 }

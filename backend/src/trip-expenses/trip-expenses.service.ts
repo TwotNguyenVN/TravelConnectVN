@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { SettleExpenseDto } from './dto/settle-expense.dto';
@@ -37,7 +42,9 @@ export class TripExpensesService {
     });
 
     if (!approvedRequest) {
-      throw new ForbiddenException('Bạn không có quyền truy cập thông tin chi tiêu của chuyến đi này');
+      throw new ForbiddenException(
+        'Bạn không có quyền truy cập thông tin chi tiêu của chuyến đi này',
+      );
     }
 
     return post;
@@ -46,7 +53,7 @@ export class TripExpensesService {
   async getExpenses(userId: string, postId: string): Promise<ApiResponse<any>> {
     // Cast to any: Prisma include inference is correct at compile time (tsc passes),
     // but the IDE TS server doesn't properly infer bank_id and included relations.
-    const post = await this.prisma.companion_posts.findUnique({
+    const post = (await this.prisma.companion_posts.findUnique({
       where: { id: postId },
       include: {
         users: {
@@ -75,7 +82,7 @@ export class TripExpensesService {
           },
         },
       },
-    }) as any;
+    })) as any;
 
     if (!post) {
       throw new NotFoundException('Không tìm thấy bài đăng đồng hành');
@@ -122,7 +129,8 @@ export class TripExpensesService {
 
     const participants = post.companion_requests.map((req) => ({
       id: req.users_companion_requests_user_idTousers.id,
-      fullName: req.users_companion_requests_user_idTousers.full_name || 'Thành viên',
+      fullName:
+        req.users_companion_requests_user_idTousers.full_name || 'Thành viên',
       avatarUrl: req.users_companion_requests_user_idTousers.avatar_url,
       bankId: req.users_companion_requests_user_idTousers.bank_id,
       accountNo: req.users_companion_requests_user_idTousers.account_no,
@@ -336,16 +344,26 @@ export class TripExpensesService {
 
     if (!post) throw new NotFoundException('Không tìm thấy bài đăng');
 
-    const allMemberIds = [post.user_id, ...post.companion_requests.map((r) => r.user_id)];
+    const allMemberIds = [
+      post.user_id,
+      ...post.companion_requests.map((r) => r.user_id),
+    ];
 
     const memberBalances = allMemberIds.map((memberId) => {
       const pendingPaid = expenses.reduce((sum, expense) => {
         if (expense.paid_by_user_id !== memberId) return sum;
-        return sum + expense.splits.filter((s) => s.status === 'pending').reduce((sSum, s) => sSum + Number(s.amount), 0);
+        return (
+          sum +
+          expense.splits
+            .filter((s) => s.status === 'pending')
+            .reduce((sSum, s) => sSum + Number(s.amount), 0)
+        );
       }, 0);
 
       const pendingShare = expenses.reduce((sum, expense) => {
-        const myPendingSplit = expense.splits.find((s) => s.user_id === memberId && s.status === 'pending');
+        const myPendingSplit = expense.splits.find(
+          (s) => s.user_id === memberId && s.status === 'pending',
+        );
         return sum + (myPendingSplit ? Number(myPendingSplit.amount) : 0);
       }, 0);
 
@@ -356,8 +374,12 @@ export class TripExpensesService {
     });
 
     // 2. Chạy thuật toán Greedy để tìm settlement tương ứng giữa debtorId và creditorId
-    const creditors = memberBalances.filter((m) => m.netBalance > 0.01).map((m) => ({ ...m }));
-    const debtors = memberBalances.filter((m) => m.netBalance < -0.01).map((m) => ({ ...m, netBalance: Math.abs(m.netBalance) }));
+    const creditors = memberBalances
+      .filter((m) => m.netBalance > 0.01)
+      .map((m) => ({ ...m }));
+    const debtors = memberBalances
+      .filter((m) => m.netBalance < -0.01)
+      .map((m) => ({ ...m, netBalance: Math.abs(m.netBalance) }));
 
     let settleAmount = 0;
     let cIdx = 0;
@@ -368,7 +390,10 @@ export class TripExpensesService {
       const debtor = debtors[dIdx];
       const amount = Math.min(creditor.netBalance, debtor.netBalance);
 
-      if (debtor.userId === data.debtorId && creditor.userId === data.creditorId) {
+      if (
+        debtor.userId === data.debtorId &&
+        creditor.userId === data.creditorId
+      ) {
         settleAmount = Math.round(amount);
         break;
       }
@@ -380,7 +405,9 @@ export class TripExpensesService {
     }
 
     if (settleAmount <= 0) {
-      throw new BadRequestException('Không tìm thấy khoản nợ hợp lệ cần quyết toán giữa hai thành viên này');
+      throw new BadRequestException(
+        'Không tìm thấy khoản nợ hợp lệ cần quyết toán giữa hai thành viên này',
+      );
     }
 
     // 3. Thực hiện khấu trừ công nợ trong Database Transaction
@@ -404,14 +431,24 @@ export class TripExpensesService {
         if (splitAmount <= remainingDebtorAmount) {
           // Settle toàn bộ split này
           await tx.trip_expense_splits.update({
-            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            where: {
+              expense_id_user_id: {
+                expense_id: split.expense_id,
+                user_id: split.user_id,
+              },
+            },
             data: { status: 'settled', settled_at: new Date() },
           });
           remainingDebtorAmount -= splitAmount;
         } else {
           // Chia nhỏ split này ra
           await tx.trip_expense_splits.update({
-            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            where: {
+              expense_id_user_id: {
+                expense_id: split.expense_id,
+                user_id: split.user_id,
+              },
+            },
             data: { amount: splitAmount - remainingDebtorAmount },
           });
           await tx.trip_expense_splits.create({
@@ -447,13 +484,23 @@ export class TripExpensesService {
         const splitAmount = Number(split.amount);
         if (splitAmount <= remainingCreditorAmount) {
           await tx.trip_expense_splits.update({
-            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            where: {
+              expense_id_user_id: {
+                expense_id: split.expense_id,
+                user_id: split.user_id,
+              },
+            },
             data: { status: 'settled', settled_at: new Date() },
           });
           remainingCreditorAmount -= splitAmount;
         } else {
           await tx.trip_expense_splits.update({
-            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            where: {
+              expense_id_user_id: {
+                expense_id: split.expense_id,
+                user_id: split.user_id,
+              },
+            },
             data: { amount: splitAmount - remainingCreditorAmount },
           });
           await tx.trip_expense_splits.create({
@@ -476,17 +523,20 @@ export class TripExpensesService {
     };
   }
 
-  async updateMyBank(userId: string, data: UpdateBankDto): Promise<ApiResponse<any>> {
+  async updateMyBank(
+    userId: string,
+    data: UpdateBankDto,
+  ): Promise<ApiResponse<any>> {
     // Cast data to any: bank_id/account_no/account_name exist in schema but
     // IDE TS server doesn't detect them due to skipLibCheck difference.
-    const updatedUser = await this.prisma.public_users.update({
+    const updatedUser = (await this.prisma.public_users.update({
       where: { id: userId },
       data: {
         bank_id: data.bankId,
         account_no: data.accountNo,
         account_name: data.accountName,
       } as any,
-    }) as any;
+    })) as any;
 
     return {
       success: true,

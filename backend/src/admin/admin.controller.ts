@@ -21,6 +21,7 @@ import {
   ModerationDto,
   ProcessReportDto,
   ProcessVerificationDto,
+  CreateStaffDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -105,6 +106,12 @@ export class AdminController {
     @Req() req: any,
   ) {
     return this.adminService.revokeRole(id, role, req.user.id);
+  }
+
+  @Post('staff')
+  @Roles(Role.SYSTEM_ADMIN)
+  createStaff(@Body() dto: CreateStaffDto, @Req() req: any) {
+    return this.adminService.createStaff(dto, req.user.id);
   }
 
   // Reports
@@ -263,10 +270,7 @@ export class AdminController {
 
   @Post('guides/:id/settle')
   @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
-  settleGuideTransactions(
-    @Param('id') id: string,
-    @Req() req: any,
-  ) {
+  settleGuideTransactions(@Param('id') id: string, @Req() req: any) {
     return this.adminService.settleGuideTransactions(id, req.user.id);
   }
 }

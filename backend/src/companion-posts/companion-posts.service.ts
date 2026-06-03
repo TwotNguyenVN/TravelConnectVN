@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCompanionPostDto } from './dto/create-companion-post.dto';
 import { UpdateCompanionPostDto } from './dto/update-companion-post.dto';
@@ -21,8 +25,9 @@ export class CompanionPostsService {
     private readonly activityLogsService: UserActivityLogsService,
   ) {}
 
-
-  async getPublicCompanionPosts(query: CompanionPostQueryDto): Promise<ApiResponse<any>> {
+  async getPublicCompanionPosts(
+    query: CompanionPostQueryDto,
+  ): Promise<ApiResponse<any>> {
     const {
       destination,
       startDateFrom,
@@ -130,30 +135,35 @@ export class CompanionPostsService {
 
     // Tính toán rating trung bình và số lượng đánh giá của host
     const hostId = post.user_id;
-    const companionRatingAggregate = await this.prisma.companion_reviews.aggregate({
-      where: {
-        host_id: hostId,
-        visibility_status: 'visible'
-      },
-      _avg: {
-        rating: true
-      },
-      _count: {
-        id: true
-      }
-    });
+    const companionRatingAggregate =
+      await this.prisma.companion_reviews.aggregate({
+        where: {
+          host_id: hostId,
+          visibility_status: 'visible',
+        },
+        _avg: {
+          rating: true,
+        },
+        _count: {
+          id: true,
+        },
+      });
 
-    const companionRating = companionRatingAggregate._avg.rating ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1)) : null;
+    const companionRating = companionRatingAggregate._avg.rating
+      ? parseFloat(companionRatingAggregate._avg.rating.toFixed(1))
+      : null;
     const companionReviewCount = companionRatingAggregate._count.id;
 
     // Gán thông tin rating vào users object
     const postWithRating = {
       ...post,
-      users: post.users ? {
-        ...post.users,
-        companionRating,
-        companionReviewCount
-      } : null
+      users: post.users
+        ? {
+            ...post.users,
+            companionRating,
+            companionReviewCount,
+          }
+        : null,
     };
 
     return {
@@ -163,7 +173,10 @@ export class CompanionPostsService {
     };
   }
 
-  async createCompanionPost(userId: string, data: CreateCompanionPostDto): Promise<ApiResponse<any>> {
+  async createCompanionPost(
+    userId: string,
+    data: CreateCompanionPostDto,
+  ): Promise<ApiResponse<any>> {
     const post = await this.prisma.companion_posts.create({
       data: {
         user_id: userId,
@@ -192,14 +205,17 @@ export class CompanionPostsService {
     );
 
     return {
-
       success: true,
       message: 'Companion post created successfully',
       data: post,
     };
   }
 
-  async updateCompanionPost(userId: string, id: string, data: UpdateCompanionPostDto): Promise<ApiResponse<any>> {
+  async updateCompanionPost(
+    userId: string,
+    id: string,
+    data: UpdateCompanionPostDto,
+  ): Promise<ApiResponse<any>> {
     const post = await this.prisma.companion_posts.findUnique({
       where: { id },
     });
@@ -209,7 +225,9 @@ export class CompanionPostsService {
     }
 
     if (post.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to update this post');
+      throw new ForbiddenException(
+        'You do not have permission to update this post',
+      );
     }
 
     const updatedPost = await this.prisma.companion_posts.update({
@@ -241,14 +259,16 @@ export class CompanionPostsService {
     );
 
     return {
-
       success: true,
       message: 'Companion post updated successfully',
       data: updatedPost,
     };
   }
 
-  async softDeleteCompanionPost(userId: string, id: string): Promise<ApiResponse<any>> {
+  async softDeleteCompanionPost(
+    userId: string,
+    id: string,
+  ): Promise<ApiResponse<any>> {
     const post = await this.prisma.companion_posts.findUnique({
       where: { id },
     });
@@ -258,7 +278,9 @@ export class CompanionPostsService {
     }
 
     if (post.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to delete this post');
+      throw new ForbiddenException(
+        'You do not have permission to delete this post',
+      );
     }
 
     await this.prisma.companion_posts.update({
@@ -274,7 +296,10 @@ export class CompanionPostsService {
     };
   }
 
-  async getMyCompanionPosts(userId: string, query: any): Promise<ApiResponse<any>> {
+  async getMyCompanionPosts(
+    userId: string,
+    query: any,
+  ): Promise<ApiResponse<any>> {
     const { page = '1', limit = '10', status, keyword } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
@@ -333,7 +358,10 @@ export class CompanionPostsService {
   // COMPANION REQUESTS LOGIC
   // ==========================================
 
-  async sendJoinRequest(userId: string, data: CreateCompanionRequestDto): Promise<ApiResponse<any>> {
+  async sendJoinRequest(
+    userId: string,
+    data: CreateCompanionRequestDto,
+  ): Promise<ApiResponse<any>> {
     const { postId, message } = data;
 
     // 1. Check if post exists and is open
@@ -364,7 +392,9 @@ export class CompanionPostsService {
     });
 
     if (existingRequest) {
-      throw new ForbiddenException('You already have an active request for this post');
+      throw new ForbiddenException(
+        'You already have an active request for this post',
+      );
     }
 
     // 4. Create request
@@ -397,8 +427,6 @@ export class CompanionPostsService {
       entity_id: request.id,
     });
 
-
-
     // 6. Phát tín hiệu realtime cho chủ bài đăng qua Socket
     this.socketGateway.sendToUser(post.user_id, 'new_companion_request', {
       postId: postId,
@@ -412,7 +440,10 @@ export class CompanionPostsService {
     };
   }
 
-  async getMySentRequests(userId: string, query: any): Promise<ApiResponse<any>> {
+  async getMySentRequests(
+    userId: string,
+    query: any,
+  ): Promise<ApiResponse<any>> {
     const { page = '1', limit = '10', status } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
@@ -464,7 +495,11 @@ export class CompanionPostsService {
     };
   }
 
-  async getPostRequests(userId: string, postId: string, query: any): Promise<ApiResponse<any>> {
+  async getPostRequests(
+    userId: string,
+    postId: string,
+    query: any,
+  ): Promise<ApiResponse<any>> {
     // 1. Check if post exists and user is owner
     const post = await this.prisma.companion_posts.findUnique({
       where: { id: postId },
@@ -475,7 +510,9 @@ export class CompanionPostsService {
     }
 
     if (post.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to view requests for this post');
+      throw new ForbiddenException(
+        'You do not have permission to view requests for this post',
+      );
     }
 
     const { page = '1', limit = '10', status } = query;
@@ -524,7 +561,10 @@ export class CompanionPostsService {
     };
   }
 
-  async cancelJoinRequest(userId: string, requestId: string): Promise<ApiResponse<any>> {
+  async cancelJoinRequest(
+    userId: string,
+    requestId: string,
+  ): Promise<ApiResponse<any>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
     });
@@ -534,7 +574,9 @@ export class CompanionPostsService {
     }
 
     if (request.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to cancel this request');
+      throw new ForbiddenException(
+        'You do not have permission to cancel this request',
+      );
     }
 
     if (request.status !== 'pending') {
@@ -556,7 +598,11 @@ export class CompanionPostsService {
     };
   }
 
-  async approveJoinRequest(userId: string, requestId: string, data: ProcessCompanionRequestDto): Promise<ApiResponse<any>> {
+  async approveJoinRequest(
+    userId: string,
+    requestId: string,
+    data: ProcessCompanionRequestDto,
+  ): Promise<ApiResponse<any>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
       include: { companion_posts: true },
@@ -567,7 +613,9 @@ export class CompanionPostsService {
     }
 
     if (request.companion_posts.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to process this request');
+      throw new ForbiddenException(
+        'You do not have permission to process this request',
+      );
     }
 
     if (request.status !== 'pending') {
@@ -585,7 +633,9 @@ export class CompanionPostsService {
     });
 
     if (approvedCount >= request.companion_posts.expected_members) {
-      throw new ForbiddenException('This post has already reached its expected members count');
+      throw new ForbiddenException(
+        'This post has already reached its expected members count',
+      );
     }
 
     const updatedRequest = await this.prisma.companion_requests.update({
@@ -613,7 +663,8 @@ export class CompanionPostsService {
         },
         data: {
           status: 'rejected',
-          response_note: 'Yêu cầu bị từ chối tự động vì đoàn đã nhận đủ số lượng thành viên dự kiến.',
+          response_note:
+            'Yêu cầu bị từ chối tự động vì đoàn đã nhận đủ số lượng thành viên dự kiến.',
           processed_at: new Date(),
           processed_by_user_id: userId,
         },
@@ -641,18 +692,20 @@ export class CompanionPostsService {
       entity_id: requestId,
     });
 
-
-
     // 4. Phát tín hiệu realtime qua Socket
-    this.socketGateway.sendToUser(request.user_id, 'companion_request_processed', {
-      postId: request.post_id,
-      status: 'approved',
-      message: `Yêu cầu tham gia đoàn "${request.companion_posts.title}" của bạn đã được CHẤP NHẬN!`,
-    });
+    this.socketGateway.sendToUser(
+      request.user_id,
+      'companion_request_processed',
+      {
+        postId: request.post_id,
+        status: 'approved',
+        message: `Yêu cầu tham gia đoàn "${request.companion_posts.title}" của bạn đã được CHẤP NHẬN!`,
+      },
+    );
 
     // 5. Nếu bài đăng đã có group chat, tự động add user vào
     const conversation = await this.prisma.conversations.findFirst({
-      where: { related_companion_post_id: request.post_id }
+      where: { related_companion_post_id: request.post_id },
     });
 
     if (conversation) {
@@ -660,17 +713,17 @@ export class CompanionPostsService {
         where: {
           conversation_id_user_id: {
             conversation_id: conversation.id,
-            user_id: request.user_id
-          }
+            user_id: request.user_id,
+          },
         },
         create: {
           conversation_id: conversation.id,
-          user_id: request.user_id
+          user_id: request.user_id,
         },
         update: {
           left_at: null,
-          joined_at: new Date()
-        }
+          joined_at: new Date(),
+        },
       });
     }
 
@@ -681,7 +734,11 @@ export class CompanionPostsService {
     };
   }
 
-  async rejectJoinRequest(userId: string, requestId: string, data: ProcessCompanionRequestDto): Promise<ApiResponse<any>> {
+  async rejectJoinRequest(
+    userId: string,
+    requestId: string,
+    data: ProcessCompanionRequestDto,
+  ): Promise<ApiResponse<any>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
       include: { companion_posts: true },
@@ -692,7 +749,9 @@ export class CompanionPostsService {
     }
 
     if (request.companion_posts.user_id !== userId) {
-      throw new ForbiddenException('You do not have permission to process this request');
+      throw new ForbiddenException(
+        'You do not have permission to process this request',
+      );
     }
 
     if (request.status !== 'pending') {
@@ -716,7 +775,10 @@ export class CompanionPostsService {
     };
   }
 
-  async getMyRequestForPost(userId: string, postId: string): Promise<ApiResponse<any>> {
+  async getMyRequestForPost(
+    userId: string,
+    postId: string,
+  ): Promise<ApiResponse<any>> {
     const request = await this.prisma.companion_requests.findFirst({
       where: { post_id: postId, user_id: userId },
       orderBy: { requested_at: 'desc' },

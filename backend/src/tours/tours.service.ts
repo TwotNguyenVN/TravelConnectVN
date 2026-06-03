@@ -1,11 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException, OnApplicationBootstrap } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  OnApplicationBootstrap,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
 // Helper to extract coordinates from Google Maps URL
-function extractLatLngFromUrl(url: string): { lat: number, lng: number } | null {
+function extractLatLngFromUrl(
+  url: string,
+): { lat: number; lng: number } | null {
   if (!url) return null;
-  
+
   try {
     // Format 1: @10.762622,106.660172
     const atMatch = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
@@ -50,37 +57,45 @@ function extractLatLngFromUrl(url: string): { lat: number, lng: number } | null 
   } catch (e) {
     // Ignore parsing errors
   }
-  
+
   return null;
 }
 
 // Helper to resolve short Google Maps link
-async function resolveShortLink(url: string): Promise<{ lat: number, lng: number } | null> {
+async function resolveShortLink(
+  url: string,
+): Promise<{ lat: number; lng: number } | null> {
   if (!url) return null;
-  
+
   // If it's already a long link with coordinates, just extract them
   const direct = extractLatLngFromUrl(url);
   if (direct) return direct;
 
   // If it's a short link, we need to resolve it
-  if (url.includes('maps.app.goo.gl') || url.includes('goo.gl/maps') || url.includes('goo.gl')) {
+  if (
+    url.includes('maps.app.goo.gl') ||
+    url.includes('goo.gl/maps') ||
+    url.includes('goo.gl')
+  ) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
 
-      const response = await fetch(url, { 
-        method: 'GET', 
+      const response = await fetch(url, {
+        method: 'GET',
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
-          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7'
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
         },
         redirect: 'follow',
-        signal: controller.signal
+        signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       // Try to extract from final URL
       const fromUrl = extractLatLngFromUrl(response.url);
       if (fromUrl) return fromUrl;
@@ -93,7 +108,7 @@ async function resolveShortLink(url: string): Promise<{ lat: number, lng: number
       return null;
     }
   }
-  
+
   return null;
 }
 
@@ -105,9 +120,12 @@ export class ToursService implements OnApplicationBootstrap {
     // Run the check immediately on startup
     this.autoCompleteTours();
     // Run every 12 hours
-    setInterval(() => {
-      this.autoCompleteTours();
-    }, 12 * 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.autoCompleteTours();
+      },
+      12 * 60 * 60 * 1000,
+    );
   }
 
   async autoCompleteTours() {
@@ -152,11 +170,13 @@ export class ToursService implements OnApplicationBootstrap {
               participant_count: true,
             },
           });
-          
+
           const participantCount = bookingsSum._sum.participant_count || 0;
           const targetStatus = participantCount > 0 ? 'completed' : 'expired';
 
-          console.log(`Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()}) with status ${targetStatus}`);
+          console.log(
+            `Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()}) with status ${targetStatus}`,
+          );
           await this.prisma.$transaction([
             this.prisma.tour_schedules.update({
               where: { id: schedule.id },
@@ -193,7 +213,7 @@ export class ToursService implements OnApplicationBootstrap {
       business_status: 'published',
       visibility_status: 'visible',
       deleted_at: null,
-      AND: []
+      AND: [],
     };
 
     if (filter.province) {
@@ -201,7 +221,10 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     if (filter.categoryId) {
-      const categoryIds = filter.categoryId.split(',').filter(Boolean).map(id => BigInt(id.trim()));
+      const categoryIds = filter.categoryId
+        .split(',')
+        .filter(Boolean)
+        .map((id) => BigInt(id.trim()));
       if (categoryIds.length > 0) {
         where.category_id = { in: categoryIds };
       }
@@ -218,7 +241,7 @@ export class ToursService implements OnApplicationBootstrap {
         OR: [
           { title: { contains: filter.keyword, mode: 'insensitive' } },
           { province: { contains: filter.keyword, mode: 'insensitive' } },
-        ]
+        ],
       });
     }
 
@@ -232,16 +255,18 @@ export class ToursService implements OnApplicationBootstrap {
         tour_categories: true,
         tour_schedules: {
           where: {
-            start_date: { gte: filter.startDate ? new Date(filter.startDate) : new Date() },
-            status: 'available'
+            start_date: {
+              gte: filter.startDate ? new Date(filter.startDate) : new Date(),
+            },
+            status: 'available',
           },
           include: {
             tour_requests: {
               where: { status: { in: ['approved', 'paid'] } },
-              select: { participant_count: true }
-            }
+              select: { participant_count: true },
+            },
           },
-          orderBy: { start_date: 'asc' }
+          orderBy: { start_date: 'asc' },
         },
         guide_profiles: {
           include: {
@@ -250,11 +275,11 @@ export class ToursService implements OnApplicationBootstrap {
                 full_name: true,
                 avatar_url: true,
                 phone: true,
-              }
+              },
             },
-            guide_languages: true
-          }
-        }
+            guide_languages: true,
+          },
+        },
       },
       orderBy: { created_at: 'desc' },
     });
@@ -267,13 +292,19 @@ export class ToursService implements OnApplicationBootstrap {
           return null;
         }
 
-        const nextAvailableSchedule = t.tour_schedules.find(s => {
-          const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+        const nextAvailableSchedule = t.tour_schedules.find((s) => {
+          const bookedCount = s.tour_requests.reduce(
+            (sum, req) => sum + req.participant_count,
+            0,
+          );
           return bookedCount < s.max_participants;
         });
 
         if (!nextAvailableSchedule) {
-          if (t.tour_schedules.length === 0 && (t.start_date === null || t.start_date >= new Date())) {
+          if (
+            t.tour_schedules.length === 0 &&
+            (t.start_date === null || t.start_date >= new Date())
+          ) {
             return this.formatTourData(t, null);
           }
           return null;
@@ -281,7 +312,7 @@ export class ToursService implements OnApplicationBootstrap {
 
         return this.formatTourData(t, nextAvailableSchedule);
       })
-      .filter(t => t !== null);
+      .filter((t) => t !== null);
 
     const total = allFormattedTours.length;
     const paginatedTours = allFormattedTours.slice(skip, skip + limit);
@@ -327,12 +358,12 @@ export class ToursService implements OnApplicationBootstrap {
           include: {
             tour_requests: {
               where: {
-                status: { in: ['approved', 'payment_pending', 'paid'] }
+                status: { in: ['approved', 'payment_pending', 'paid'] },
               },
               select: {
-                participant_count: true
-              }
-            }
+                participant_count: true,
+              },
+            },
           },
           orderBy: { start_date: 'asc' },
         },
@@ -344,10 +375,10 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // Lấy ảnh bìa và gallery
-    const images = Array.isArray(tour.tour_images) 
-      ? tour.tour_images.map(img => img.image_url) 
+    const images = Array.isArray(tour.tour_images)
+      ? tour.tour_images.map((img) => img.image_url)
       : [];
-    
+
     if (images.length === 0) {
       images.push('https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image');
     }
@@ -361,7 +392,7 @@ export class ToursService implements OnApplicationBootstrap {
       this.prisma.guide_reviews.aggregate({
         where: { guide_profile_id: (tour as any).guide_profiles?.user_id },
         _avg: { rating: true },
-      })
+      }),
     ]);
 
     return {
@@ -371,7 +402,11 @@ export class ToursService implements OnApplicationBootstrap {
       price: Number(tour.price),
       rating: tourRating._avg.rating || 0.0,
       location: tour.province,
-      duration: tour.duration || (tour.start_date && tour.end_date ? `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+      duration:
+        tour.duration ||
+        (tour.start_date && tour.end_date
+          ? `${Math.ceil((tour.end_date.getTime() - tour.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`
+          : 'Chưa xác định'),
       numDays: tour.num_days,
       numNights: tour.num_nights,
       startDate: tour.start_date,
@@ -390,43 +425,46 @@ export class ToursService implements OnApplicationBootstrap {
       images: images,
       guideId: (tour as any).guide_profiles?.user_id,
       guide: {
-        name: (tour as any).guide_profiles?.users?.full_name || 'Hướng dẫn viên',
+        name:
+          (tour as any).guide_profiles?.users?.full_name || 'Hướng dẫn viên',
         avatar: (tour as any).guide_profiles?.avatar_url || '',
         exp: `${(tour as any).guide_profiles?.years_of_experience || 0} năm`,
         bio: (tour as any).guide_profiles?.bio || 'Chưa có giới thiệu.',
         rating: guideRating._avg.rating || 5.0,
       },
-      destinations: await Promise.all(((tour as any).tour_destinations || []).map(async (dest: any) => {
-        // Log the first one to verify data presence (invisible to user but helps debug)
-        if (dest.sequence_no === 1) {
-          console.log('DEBUG - Destination 1:', { 
-            name: dest.name, 
-            lat: dest.latitude, 
-            lng: dest.longitude,
-            hasLat: 'latitude' in dest
-          });
-        }
+      destinations: await Promise.all(
+        ((tour as any).tour_destinations || []).map(async (dest: any) => {
+          // Log the first one to verify data presence (invisible to user but helps debug)
+          if (dest.sequence_no === 1) {
+            console.log('DEBUG - Destination 1:', {
+              name: dest.name,
+              lat: dest.latitude,
+              lng: dest.longitude,
+              hasLat: 'latitude' in dest,
+            });
+          }
 
-        let lat = dest.latitude ? Number(dest.latitude.toString()) : null;
-        let lng = dest.longitude ? Number(dest.longitude.toString()) : null;
+          let lat = dest.latitude ? Number(dest.latitude.toString()) : null;
+          let lng = dest.longitude ? Number(dest.longitude.toString()) : null;
 
-        // Fallback: If no coordinates in DB, try to resolve from link
-        if ((lat === null || isNaN(lat)) && dest.google_maps_link) {
-          const coords = await resolveShortLink(dest.google_maps_link);
-          lat = coords?.lat || null;
-          lng = coords?.lng || null;
-        }
+          // Fallback: If no coordinates in DB, try to resolve from link
+          if ((lat === null || isNaN(lat)) && dest.google_maps_link) {
+            const coords = await resolveShortLink(dest.google_maps_link);
+            lat = coords?.lat || null;
+            lng = coords?.lng || null;
+          }
 
-        return {
-          id: dest.id,
-          name: dest.name,
-          address: dest.address,
-          googleMapsLink: dest.google_maps_link,
-          sequenceNo: dest.sequence_no,
-          lat: (lat !== null && !isNaN(lat)) ? lat : null,
-          lng: (lng !== null && !isNaN(lng)) ? lng : null,
-        };
-      })),
+          return {
+            id: dest.id,
+            name: dest.name,
+            address: dest.address,
+            googleMapsLink: dest.google_maps_link,
+            sequenceNo: dest.sequence_no,
+            lat: lat !== null && !isNaN(lat) ? lat : null,
+            lng: lng !== null && !isNaN(lng) ? lng : null,
+          };
+        }),
+      ),
       itinerary: ((tour as any).tour_locations || []).map((loc: any) => ({
         day: loc.sequence_no,
         title: loc.location_name,
@@ -444,7 +482,11 @@ export class ToursService implements OnApplicationBootstrap {
           `Tham quan ${loc.location_name} tại ${loc.address || tour.province}.`,
       })),
       schedules: (tour.tour_schedules || []).map((s) => {
-        const bookedCount = (s as any).tour_requests?.reduce((sum, req) => sum + req.participant_count, 0) || 0;
+        const bookedCount =
+          (s as any).tour_requests?.reduce(
+            (sum, req) => sum + req.participant_count,
+            0,
+          ) || 0;
         return {
           id: s.id,
           startDate: s.start_date,
@@ -524,15 +566,15 @@ export class ToursService implements OnApplicationBootstrap {
         tour_schedules: {
           where: {
             start_date: { gte: new Date() },
-            status: 'available'
+            status: 'available',
           },
           include: {
             tour_requests: {
               where: { status: { in: ['approved', 'paid'] } },
-              select: { participant_count: true }
-            }
+              select: { participant_count: true },
+            },
           },
-          orderBy: { start_date: 'asc' }
+          orderBy: { start_date: 'asc' },
         },
         guide_profiles: {
           include: {
@@ -541,11 +583,11 @@ export class ToursService implements OnApplicationBootstrap {
                 full_name: true,
                 avatar_url: true,
                 phone: true,
-              }
+              },
             },
-            guide_languages: true
-          }
-        }
+            guide_languages: true,
+          },
+        },
       },
       orderBy: { created_at: 'desc' },
     });
@@ -558,24 +600,30 @@ export class ToursService implements OnApplicationBootstrap {
         }
 
         // Tìm lịch khởi hành tiếp theo còn chỗ
-        const nextAvailableSchedule = t.tour_schedules.find(s => {
-          const bookedCount = s.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+        const nextAvailableSchedule = t.tour_schedules.find((s) => {
+          const bookedCount = s.tour_requests.reduce(
+            (sum, req) => sum + req.participant_count,
+            0,
+          );
           return bookedCount < s.max_participants;
         });
 
         // Nếu không có lịch nào còn chỗ trong tương lai, trả về null để lọc bỏ
         if (!nextAvailableSchedule) {
-          // Trường hợp đặc biệt: Nếu tour không có bảng lịch trình (schedules), 
+          // Trường hợp đặc biệt: Nếu tour không có bảng lịch trình (schedules),
           // thì kiểm tra ngày start_date chính của tour (cho phép fallback)
-          if (t.tour_schedules.length === 0 && (t.start_date === null || t.start_date >= new Date())) {
-             return this.formatTourData(t, null);
+          if (
+            t.tour_schedules.length === 0 &&
+            (t.start_date === null || t.start_date >= new Date())
+          ) {
+            return this.formatTourData(t, null);
           }
           return null;
         }
 
         return this.formatTourData(t, nextAvailableSchedule);
       })
-      .filter(t => t !== null) // Loại bỏ các tour đã hết chỗ hoặc hết ngày
+      .filter((t) => t !== null) // Loại bỏ các tour đã hết chỗ hoặc hết ngày
       .slice(0, 4); // Lấy 4 tour nổi bật nhất
 
     return formattedTours;
@@ -583,18 +631,23 @@ export class ToursService implements OnApplicationBootstrap {
 
   // Hàm helper để định dạng dữ liệu tour đồng nhất
   private formatTourData(t: any, schedule: any) {
-    const bookedCount = schedule 
-      ? schedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0)
+    const bookedCount = schedule
+      ? schedule.tour_requests.reduce(
+          (sum, req) => sum + req.participant_count,
+          0,
+        )
       : 0;
-    
-    const remainingSlots = schedule 
+
+    const remainingSlots = schedule
       ? Math.max(0, schedule.max_participants - bookedCount)
       : t.max_participants;
 
     return {
       id: t.id,
       title: t.title,
-      cover: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+      cover:
+        t.tour_images?.[0]?.image_url ||
+        'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
       price: schedule ? Number(schedule.price) : Number(t.price),
       rating: 0.0,
       location: t.province,
@@ -603,9 +656,15 @@ export class ToursService implements OnApplicationBootstrap {
       endDate: t.end_date,
       numDays: t.num_days,
       numNights: t.num_nights,
-      maxParticipants: schedule ? schedule.max_participants : t.max_participants,
+      maxParticipants: schedule
+        ? schedule.max_participants
+        : t.max_participants,
       remainingSlots: remainingSlots,
-      duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
+      duration:
+        t.duration ||
+        (t.start_date && t.end_date
+          ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`
+          : 'Chưa xác định'),
       category: t.tour_categories?.name || 'Chưa phân loại',
       categoryId: t.category_id?.toString(),
     };
@@ -613,32 +672,37 @@ export class ToursService implements OnApplicationBootstrap {
 
   private isGuideProfileComplete(g: any): boolean {
     if (!g) return false;
-    
+
     // 1. Họ và tên
     if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
-    
+
     // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
     const avatar = g.avatar_url || g.users?.avatar_url;
     if (!avatar || avatar.trim() === '') return false;
-    
+
     // 3. Số điện thoại
     if (!g.users?.phone || g.users.phone.trim() === '') return false;
-    
+
     // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
     if (!g.bio || g.bio.trim().length < 20) return false;
-    
+
     // 5. Số năm kinh nghiệm
-    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
-    
+    if (g.years_of_experience === null || g.years_of_experience === undefined)
+      return false;
+
     // 6. Tỉnh thành hoạt động chính
     if (!g.home_province_id) return false;
-    
+
     // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
     if (!g.guide_languages || g.guide_languages.length === 0) return false;
-    
+
     // 8. Xác minh danh tính
-    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
-    
+    if (
+      g.verification_status !== 'approved' &&
+      g.verification_status !== 'verified'
+    )
+      return false;
+
     return true;
   }
 
@@ -661,9 +725,9 @@ export class ToursService implements OnApplicationBootstrap {
         users: true,
         guide_languages: {
           include: {
-            languages: true
-          }
-        }
+            languages: true,
+          },
+        },
       },
       take: 4,
     });
@@ -676,8 +740,8 @@ export class ToursService implements OnApplicationBootstrap {
       location: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
       rating: 0.0,
-      languages: g.guide_languages.map(gl => gl.languages.name).join(', '),
-      bio: g.bio
+      languages: g.guide_languages.map((gl) => gl.languages.name).join(', '),
+      bio: g.bio,
     }));
   }
 
@@ -697,7 +761,7 @@ export class ToursService implements OnApplicationBootstrap {
       // images is a Json field, cast it to any[]
       const images = (p.images as any[]) || [];
       const coverImg = images.find((img: any) => img.isCover) || images[0];
-      
+
       return {
         id: p.id,
         title: p.title,
@@ -705,7 +769,9 @@ export class ToursService implements OnApplicationBootstrap {
         authorAvatar: p.users?.avatar_url || '',
         date: p.created_at,
         destination: p.destination,
-        coverUrl: coverImg?.imageUrl || `https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80`,
+        coverUrl:
+          coverImg?.imageUrl ||
+          `https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80`,
         estimatedCost: p.estimated_cost,
         expectedMembers: p.expected_members,
         businessStatus: p.business_status,
@@ -797,10 +863,20 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // Validate max days/nights
-    if (data.numDays !== undefined && data.numDays !== null && data.numDays !== '' && Number(data.numDays) > 15) {
+    if (
+      data.numDays !== undefined &&
+      data.numDays !== null &&
+      data.numDays !== '' &&
+      Number(data.numDays) > 15
+    ) {
       throw new BadRequestException('Số ngày tối đa cho phép là 15 ngày');
     }
-    if (data.numNights !== undefined && data.numNights !== null && data.numNights !== '' && Number(data.numNights) > 15) {
+    if (
+      data.numNights !== undefined &&
+      data.numNights !== null &&
+      data.numNights !== '' &&
+      Number(data.numNights) > 15
+    ) {
       throw new BadRequestException('Số đêm tối đa cho phép là 15 đêm');
     }
 
@@ -814,18 +890,52 @@ export class ToursService implements OnApplicationBootstrap {
           category_id: data.categoryId ? BigInt(data.categoryId) : null,
           province: data.province,
           district: data.district,
-          start_date: data.startDate && !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null,
-          end_date: data.endDate && !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null,
+          start_date:
+            data.startDate && !isNaN(new Date(data.startDate).getTime())
+              ? new Date(data.startDate)
+              : null,
+          end_date:
+            data.endDate && !isNaN(new Date(data.endDate).getTime())
+              ? new Date(data.endDate)
+              : null,
           duration: data.duration,
-          num_days: (data.numDays !== undefined && data.numDays !== null && data.numDays !== "") ? Number(data.numDays) : null,
-          num_nights: (data.numNights !== undefined && data.numNights !== null && data.numNights !== "") ? Number(data.numNights) : null,
-          price: (data.price !== undefined && data.price !== null && data.price !== "") ? Number(data.price) : 0,
-          max_participants: (data.maxParticipants !== undefined && data.maxParticipants !== null && data.maxParticipants !== "") ? Number(data.maxParticipants) : 0,
+          num_days:
+            data.numDays !== undefined &&
+            data.numDays !== null &&
+            data.numDays !== ''
+              ? Number(data.numDays)
+              : null,
+          num_nights:
+            data.numNights !== undefined &&
+            data.numNights !== null &&
+            data.numNights !== ''
+              ? Number(data.numNights)
+              : null,
+          price:
+            data.price !== undefined && data.price !== null && data.price !== ''
+              ? Number(data.price)
+              : 0,
+          max_participants:
+            data.maxParticipants !== undefined &&
+            data.maxParticipants !== null &&
+            data.maxParticipants !== ''
+              ? Number(data.maxParticipants)
+              : 0,
           meet_point: data.meetPoint,
           meet_address: data.meetAddress,
           meet_time: data.meetTime,
-          meet_latitude: (data.meetLatitude !== undefined && data.meetLatitude !== null && data.meetLatitude !== "") ? data.meetLatitude : null,
-          meet_longitude: (data.meetLongitude !== undefined && data.meetLongitude !== null && data.meetLongitude !== "") ? data.meetLongitude : null,
+          meet_latitude:
+            data.meetLatitude !== undefined &&
+            data.meetLatitude !== null &&
+            data.meetLatitude !== ''
+              ? data.meetLatitude
+              : null,
+          meet_longitude:
+            data.meetLongitude !== undefined &&
+            data.meetLongitude !== null &&
+            data.meetLongitude !== ''
+              ? data.meetLongitude
+              : null,
           google_maps_link: data.googleMapsLink,
           route_map_link: data.routeMapLink,
           description: data.description,
@@ -870,8 +980,14 @@ export class ToursService implements OnApplicationBootstrap {
           name: dest.name,
           address: dest.address,
           google_maps_link: dest.googleMapsLink,
-          latitude: dest.lat !== undefined && dest.lat !== null && dest.lat !== "" ? new Prisma.Decimal(dest.lat) : null,
-          longitude: dest.lng !== undefined && dest.lng !== null && dest.lng !== "" ? new Prisma.Decimal(dest.lng) : null,
+          latitude:
+            dest.lat !== undefined && dest.lat !== null && dest.lat !== ''
+              ? new Prisma.Decimal(dest.lat)
+              : null,
+          longitude:
+            dest.lng !== undefined && dest.lng !== null && dest.lng !== ''
+              ? new Prisma.Decimal(dest.lng)
+              : null,
         }));
 
         if (destinationData.length > 0) {
@@ -904,7 +1020,9 @@ export class ToursService implements OnApplicationBootstrap {
           tour_id: tour.id,
           start_date: new Date(s.startDate),
           price: s.price ? Number(s.price) : Number(data.price),
-          max_participants: s.maxParticipants ? Number(s.maxParticipants) : Number(data.maxParticipants),
+          max_participants: s.maxParticipants
+            ? Number(s.maxParticipants)
+            : Number(data.maxParticipants),
           status: 'available',
         }));
 
@@ -920,8 +1038,14 @@ export class ToursService implements OnApplicationBootstrap {
         const accData = data.accommodations.map((acc, index) => ({
           tour_id: tour.id,
           accommodation_id: acc.accommodationId,
-          check_in_date: acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime()) ? new Date(acc.checkInDate) : null,
-          check_out_date: acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime()) ? new Date(acc.checkOutDate) : null,
+          check_in_date:
+            acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime())
+              ? new Date(acc.checkInDate)
+              : null,
+          check_out_date:
+            acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime())
+              ? new Date(acc.checkOutDate)
+              : null,
           notes: acc.notes,
           sort_order: index,
         }));
@@ -961,148 +1085,223 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // Validate max days/nights
-    if (data.numDays !== undefined && data.numDays !== null && data.numDays !== '' && Number(data.numDays) > 15) {
+    if (
+      data.numDays !== undefined &&
+      data.numDays !== null &&
+      data.numDays !== '' &&
+      Number(data.numDays) > 15
+    ) {
       throw new BadRequestException('Số ngày tối đa cho phép là 15 ngày');
     }
-    if (data.numNights !== undefined && data.numNights !== null && data.numNights !== '' && Number(data.numNights) > 15) {
+    if (
+      data.numNights !== undefined &&
+      data.numNights !== null &&
+      data.numNights !== '' &&
+      Number(data.numNights) > 15
+    ) {
       throw new BadRequestException('Số đêm tối đa cho phép là 15 đêm');
     }
 
     // 3. Thực hiện cập nhật trong một transaction
-    return this.prisma.$transaction(async (tx) => {
-      // 3.1 Cập nhật thông tin cơ bản của tour
-      const updateData: any = {};
-      if (data.title) updateData.title = data.title;
-      if (data.categoryId) updateData.category_id = BigInt(data.categoryId);
-      if (data.province) updateData.province = data.province;
-      if (data.district !== undefined) updateData.district = data.district;
-      if (data.startDate) updateData.start_date = !isNaN(new Date(data.startDate).getTime()) ? new Date(data.startDate) : null;
-      if (data.endDate) updateData.end_date = !isNaN(new Date(data.endDate).getTime()) ? new Date(data.endDate) : null;
-      if (data.duration !== undefined) updateData.duration = data.duration;
-      if (data.numDays !== undefined) updateData.num_days = (data.numDays !== null && data.numDays !== "") ? Number(data.numDays) : null;
-      if (data.numNights !== undefined) updateData.num_nights = (data.numNights !== null && data.numNights !== "") ? Number(data.numNights) : null;
-      if (data.price !== undefined) updateData.price = (data.price !== null && data.price !== "") ? Number(data.price) : 0;
-      if (data.maxParticipants !== undefined) updateData.max_participants = (data.maxParticipants !== null && data.maxParticipants !== "") ? Number(data.maxParticipants) : 0;
-      if (data.meetPoint !== undefined) updateData.meet_point = data.meetPoint;
-      if (data.meetAddress !== undefined) updateData.meet_address = data.meetAddress;
-      if (data.meetTime !== undefined) updateData.meet_time = data.meetTime;
-      if (data.meetLatitude !== undefined) updateData.meet_latitude = (data.meetLatitude !== null && data.meetLatitude !== "") ? data.meetLatitude : null;
-      if (data.meetLongitude !== undefined) updateData.meet_longitude = (data.meetLongitude !== null && data.meetLongitude !== "") ? data.meetLongitude : null;
-      if (data.googleMapsLink !== undefined) updateData.google_maps_link = data.googleMapsLink;
-      if (data.routeMapLink !== undefined) updateData.route_map_link = data.routeMapLink;
-      if (data.description !== undefined) updateData.description = data.description;
-      if (data.participantRequirements !== undefined) updateData.participant_requirements = data.participantRequirements;
-      if (data.businessStatus) updateData.business_status = data.businessStatus;
-      if (data.visibilityStatus) updateData.visibility_status = data.visibilityStatus;
-      if (data.otherProvinces !== undefined) updateData.other_provinces = data.otherProvinces;
+    return this.prisma
+      .$transaction(async (tx) => {
+        // 3.1 Cập nhật thông tin cơ bản của tour
+        const updateData: any = {};
+        if (data.title) updateData.title = data.title;
+        if (data.categoryId) updateData.category_id = BigInt(data.categoryId);
+        if (data.province) updateData.province = data.province;
+        if (data.district !== undefined) updateData.district = data.district;
+        if (data.startDate)
+          updateData.start_date = !isNaN(new Date(data.startDate).getTime())
+            ? new Date(data.startDate)
+            : null;
+        if (data.endDate)
+          updateData.end_date = !isNaN(new Date(data.endDate).getTime())
+            ? new Date(data.endDate)
+            : null;
+        if (data.duration !== undefined) updateData.duration = data.duration;
+        if (data.numDays !== undefined)
+          updateData.num_days =
+            data.numDays !== null && data.numDays !== ''
+              ? Number(data.numDays)
+              : null;
+        if (data.numNights !== undefined)
+          updateData.num_nights =
+            data.numNights !== null && data.numNights !== ''
+              ? Number(data.numNights)
+              : null;
+        if (data.price !== undefined)
+          updateData.price =
+            data.price !== null && data.price !== '' ? Number(data.price) : 0;
+        if (data.maxParticipants !== undefined)
+          updateData.max_participants =
+            data.maxParticipants !== null && data.maxParticipants !== ''
+              ? Number(data.maxParticipants)
+              : 0;
+        if (data.meetPoint !== undefined)
+          updateData.meet_point = data.meetPoint;
+        if (data.meetAddress !== undefined)
+          updateData.meet_address = data.meetAddress;
+        if (data.meetTime !== undefined) updateData.meet_time = data.meetTime;
+        if (data.meetLatitude !== undefined)
+          updateData.meet_latitude =
+            data.meetLatitude !== null && data.meetLatitude !== ''
+              ? data.meetLatitude
+              : null;
+        if (data.meetLongitude !== undefined)
+          updateData.meet_longitude =
+            data.meetLongitude !== null && data.meetLongitude !== ''
+              ? data.meetLongitude
+              : null;
+        if (data.googleMapsLink !== undefined)
+          updateData.google_maps_link = data.googleMapsLink;
+        if (data.routeMapLink !== undefined)
+          updateData.route_map_link = data.routeMapLink;
+        if (data.description !== undefined)
+          updateData.description = data.description;
+        if (data.participantRequirements !== undefined)
+          updateData.participant_requirements = data.participantRequirements;
+        if (data.businessStatus)
+          updateData.business_status = data.businessStatus;
+        if (data.visibilityStatus)
+          updateData.visibility_status = data.visibilityStatus;
+        if (data.otherProvinces !== undefined)
+          updateData.other_provinces = data.otherProvinces;
 
-      if (data.businessStatus === 'published' && tour.business_status !== 'published') {
-        updateData.published_at = new Date();
-      }
+        if (
+          data.businessStatus === 'published' &&
+          tour.business_status !== 'published'
+        ) {
+          updateData.published_at = new Date();
+        }
 
-      updateData.updated_at = new Date();
+        updateData.updated_at = new Date();
 
-      const updatedTour = await tx.tours.update({
-        where: { id: tourId },
-        data: updateData,
+        const updatedTour = await tx.tours.update({
+          where: { id: tourId },
+          data: updateData,
+        });
+
+        // 3.2 Cập nhật Lịch trình (Itinerary) nếu có
+        if (data.itinerary && Array.isArray(data.itinerary)) {
+          await tx.tour_locations.deleteMany({ where: { tour_id: tourId } });
+          const itineraryData = data.itinerary.map((item, idx) => ({
+            tour_id: tourId,
+            sequence_no: idx + 1,
+            location_name: item.locationName,
+            address: item.address || '',
+            notes: item.notes,
+            has_breakfast: !!item.hasBreakfast,
+            has_lunch: !!item.hasLunch,
+            has_dinner: !!item.hasDinner,
+            accommodation_info: item.accommodation || '',
+            highlight_note: item.note || '',
+            latitude: item.latitude,
+            longitude: item.longitude,
+            visit_time: item.visitTime ? new Date(item.visitTime) : null,
+          }));
+          if (itineraryData.length > 0) {
+            await tx.tour_locations.createMany({ data: itineraryData });
+          }
+        }
+
+        // 3.3 Cập nhật Điểm ghé thăm (Destinations) nếu có
+        if (data.destinations && Array.isArray(data.destinations)) {
+          await tx.tour_destinations.deleteMany({ where: { tour_id: tourId } });
+          const destinationData = data.destinations.map((dest, index) => ({
+            tour_id: tourId,
+            sequence_no: index + 1,
+            name: dest.name,
+            address: dest.address,
+            google_maps_link: dest.googleMapsLink,
+            latitude:
+              dest.lat !== undefined && dest.lat !== null && dest.lat !== ''
+                ? new Prisma.Decimal(dest.lat)
+                : null,
+            longitude:
+              dest.lng !== undefined && dest.lng !== null && dest.lng !== ''
+                ? new Prisma.Decimal(dest.lng)
+                : null,
+          }));
+          if (destinationData.length > 0) {
+            await tx.tour_destinations.createMany({ data: destinationData });
+          }
+        }
+
+        // 3.4 Cập nhật Thư viện ảnh (Images) nếu có
+        if (data.images && Array.isArray(data.images)) {
+          await tx.tour_images.deleteMany({ where: { tour_id: tourId } });
+          const imagesData = data.images.map((img, index) => ({
+            tour_id: tourId,
+            image_url: img.imageUrl,
+            caption: img.caption || '',
+            sort_order: index,
+            is_cover: img.isCover || false,
+          }));
+          if (imagesData.length > 0) {
+            await tx.tour_images.createMany({ data: imagesData });
+          }
+        }
+
+        // 3.5 Cập nhật Nơi lưu trú (Accommodations) nếu có
+        if (data.accommodations && Array.isArray(data.accommodations)) {
+          await tx.tour_accommodations.deleteMany({
+            where: { tour_id: tourId },
+          });
+          const accData = data.accommodations.map((acc, index) => ({
+            tour_id: tourId,
+            accommodation_id: acc.accommodationId,
+            check_in_date:
+              acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime())
+                ? new Date(acc.checkInDate)
+                : null,
+            check_out_date:
+              acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime())
+                ? new Date(acc.checkOutDate)
+                : null,
+            notes: acc.notes,
+            sort_order: index,
+          }));
+          if (accData.length > 0) {
+            await tx.tour_accommodations.createMany({ data: accData });
+          }
+        }
+
+        // 3.6 Cập nhật Lịch khởi hành (Schedules) nếu có
+        if (data.schedules && Array.isArray(data.schedules)) {
+          await tx.tour_schedules.deleteMany({ where: { tour_id: tourId } });
+          const scheduleData = data.schedules.map((s) => ({
+            tour_id: tourId,
+            start_date: new Date(s.startDate),
+            price: s.price ? Number(s.price) : Number(updatedTour.price),
+            max_participants: s.maxParticipants
+              ? Number(s.maxParticipants)
+              : Number(updatedTour.max_participants),
+            status: 'available',
+          }));
+          if (scheduleData.length > 0) {
+            await tx.tour_schedules.createMany({ data: scheduleData });
+          }
+        }
+
+        return updatedTour;
+      })
+      .catch((error) => {
+        if (
+          error.code === 'P2002' ||
+          error.message?.includes('violates check constraint')
+        ) {
+          if (error.message?.includes('tours_check')) {
+            throw new BadRequestException(
+              'Ngày kết thúc không thể trước ngày bắt đầu',
+            );
+          }
+          throw new BadRequestException(
+            'Dữ liệu không hợp lệ: ' + error.message,
+          );
+        }
+        throw error;
       });
-
-      // 3.2 Cập nhật Lịch trình (Itinerary) nếu có
-      if (data.itinerary && Array.isArray(data.itinerary)) {
-        await tx.tour_locations.deleteMany({ where: { tour_id: tourId } });
-        const itineraryData = data.itinerary.map((item, idx) => ({
-          tour_id: tourId,
-          sequence_no: idx + 1,
-          location_name: item.locationName,
-          address: item.address || '',
-          notes: item.notes,
-          has_breakfast: !!item.hasBreakfast,
-          has_lunch: !!item.hasLunch,
-          has_dinner: !!item.hasDinner,
-          accommodation_info: item.accommodation || '',
-          highlight_note: item.note || '',
-          latitude: item.latitude,
-          longitude: item.longitude,
-          visit_time: item.visitTime ? new Date(item.visitTime) : null,
-        }));
-        if (itineraryData.length > 0) {
-          await tx.tour_locations.createMany({ data: itineraryData });
-        }
-      }
-
-      // 3.3 Cập nhật Điểm ghé thăm (Destinations) nếu có
-      if (data.destinations && Array.isArray(data.destinations)) {
-        await tx.tour_destinations.deleteMany({ where: { tour_id: tourId } });
-        const destinationData = data.destinations.map((dest, index) => ({
-          tour_id: tourId,
-          sequence_no: index + 1,
-          name: dest.name,
-          address: dest.address,
-          google_maps_link: dest.googleMapsLink,
-          latitude: dest.lat !== undefined && dest.lat !== null && dest.lat !== "" ? new Prisma.Decimal(dest.lat) : null,
-          longitude: dest.lng !== undefined && dest.lng !== null && dest.lng !== "" ? new Prisma.Decimal(dest.lng) : null,
-        }));
-        if (destinationData.length > 0) {
-          await tx.tour_destinations.createMany({ data: destinationData });
-        }
-      }
-
-      // 3.4 Cập nhật Thư viện ảnh (Images) nếu có
-      if (data.images && Array.isArray(data.images)) {
-        await tx.tour_images.deleteMany({ where: { tour_id: tourId } });
-        const imagesData = data.images.map((img, index) => ({
-          tour_id: tourId,
-          image_url: img.imageUrl,
-          caption: img.caption || '',
-          sort_order: index,
-          is_cover: img.isCover || false,
-        }));
-        if (imagesData.length > 0) {
-          await tx.tour_images.createMany({ data: imagesData });
-        }
-      }
-
-      // 3.5 Cập nhật Nơi lưu trú (Accommodations) nếu có
-      if (data.accommodations && Array.isArray(data.accommodations)) {
-        await tx.tour_accommodations.deleteMany({ where: { tour_id: tourId } });
-        const accData = data.accommodations.map((acc, index) => ({
-          tour_id: tourId,
-          accommodation_id: acc.accommodationId,
-          check_in_date: acc.checkInDate && !isNaN(new Date(acc.checkInDate).getTime()) ? new Date(acc.checkInDate) : null,
-          check_out_date: acc.checkOutDate && !isNaN(new Date(acc.checkOutDate).getTime()) ? new Date(acc.checkOutDate) : null,
-          notes: acc.notes,
-          sort_order: index,
-        }));
-        if (accData.length > 0) {
-          await tx.tour_accommodations.createMany({ data: accData });
-        }
-      }
-
-      // 3.6 Cập nhật Lịch khởi hành (Schedules) nếu có
-      if (data.schedules && Array.isArray(data.schedules)) {
-        await tx.tour_schedules.deleteMany({ where: { tour_id: tourId } });
-        const scheduleData = data.schedules.map((s) => ({
-          tour_id: tourId,
-          start_date: new Date(s.startDate),
-          price: s.price ? Number(s.price) : Number(updatedTour.price),
-          max_participants: s.maxParticipants ? Number(s.maxParticipants) : Number(updatedTour.max_participants),
-          status: 'available',
-        }));
-        if (scheduleData.length > 0) {
-          await tx.tour_schedules.createMany({ data: scheduleData });
-        }
-      }
-
-      return updatedTour;
-    }).catch(error => {
-      if (error.code === 'P2002' || error.message?.includes('violates check constraint')) {
-        if (error.message?.includes('tours_check')) {
-          throw new BadRequestException('Ngày kết thúc không thể trước ngày bắt đầu');
-        }
-        throw new BadRequestException('Dữ liệu không hợp lệ: ' + error.message);
-      }
-      throw error;
-    });
   }
 
   async getTourDetailForGuide(userId: string, tourId: string) {
@@ -1127,19 +1326,19 @@ export class ToursService implements OnApplicationBootstrap {
         _count: {
           select: {
             tour_requests: {
-              where: { status: 'paid' }
-            }
-          }
+              where: { status: 'paid' },
+            },
+          },
         },
         tour_schedules: {
           orderBy: { start_date: 'asc' },
           include: {
             tour_requests: {
               where: { status: { in: ['paid', 'approved', 'completed'] } },
-              select: { participant_count: true }
-            }
-          }
-        }
+              select: { participant_count: true },
+            },
+          },
+        },
       },
     });
 
@@ -1152,17 +1351,20 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // Tính tổng số người tham gia cho mỗi lịch trình
-    const schedulesWithCounts = tour.tour_schedules.map(schedule => {
-      const currentParticipants = schedule.tour_requests.reduce((sum, req) => sum + req.participant_count, 0);
+    const schedulesWithCounts = tour.tour_schedules.map((schedule) => {
+      const currentParticipants = schedule.tour_requests.reduce(
+        (sum, req) => sum + req.participant_count,
+        0,
+      );
       return {
         ...schedule,
-        current_participants: currentParticipants
+        current_participants: currentParticipants,
       };
     });
 
     return {
       ...tour,
-      tour_schedules: schedulesWithCounts
+      tour_schedules: schedulesWithCounts,
     };
   }
 
@@ -1290,7 +1492,9 @@ export class ToursService implements OnApplicationBootstrap {
     });
 
     if (!tour) {
-      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+      throw new NotFoundException(
+        'Không tìm thấy tour hoặc bạn không có quyền',
+      );
     }
 
     // 2. Soft delete
@@ -1307,7 +1511,11 @@ export class ToursService implements OnApplicationBootstrap {
 
   // --- LỊCH KHỞI HÀNH (TOUR SCHEDULES) ---
 
-  async createTourSchedule(userId: string, tourId: string, data: { startDate: string; price: number; maxParticipants: number }) {
+  async createTourSchedule(
+    userId: string,
+    tourId: string,
+    data: { startDate: string; price: number; maxParticipants: number },
+  ) {
     // 1. Kiểm tra quyền sở hữu
     const tour = await this.prisma.tours.findFirst({
       where: {
@@ -1317,7 +1525,9 @@ export class ToursService implements OnApplicationBootstrap {
     });
 
     if (!tour) {
-      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+      throw new NotFoundException(
+        'Không tìm thấy tour hoặc bạn không có quyền',
+      );
     }
 
     // Kiểm tra xem ngày khởi hành có ở trong quá khứ không
@@ -1325,7 +1535,9 @@ export class ToursService implements OnApplicationBootstrap {
     now.setHours(0, 0, 0, 0);
     const scheduleDate = new Date(data.startDate);
     if (scheduleDate < now) {
-      throw new BadRequestException('Không thể tạo lịch khởi hành cho thời gian trong quá khứ');
+      throw new BadRequestException(
+        'Không thể tạo lịch khởi hành cho thời gian trong quá khứ',
+      );
     }
 
     // 2. Kiểm tra xem ngày này đã có lịch chưa
@@ -1352,7 +1564,12 @@ export class ToursService implements OnApplicationBootstrap {
     });
   }
 
-  async updateTourSchedule(userId: string, tourId: string, scheduleId: string, data: { price?: number; maxParticipants?: number; status?: string }) {
+  async updateTourSchedule(
+    userId: string,
+    tourId: string,
+    scheduleId: string,
+    data: { price?: number; maxParticipants?: number; status?: string },
+  ) {
     // 1. Kiểm tra quyền sở hữu
     const tour = await this.prisma.tours.findFirst({
       where: {
@@ -1362,7 +1579,9 @@ export class ToursService implements OnApplicationBootstrap {
     });
 
     if (!tour) {
-      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+      throw new NotFoundException(
+        'Không tìm thấy tour hoặc bạn không có quyền',
+      );
     }
 
     const currentSchedule = await this.prisma.tour_schedules.findUnique({
@@ -1375,7 +1594,9 @@ export class ToursService implements OnApplicationBootstrap {
 
     if (data.price !== undefined && data.price !== null) {
       if (Number(data.price) > Number(currentSchedule.price)) {
-        throw new BadRequestException('Giá chỉnh sửa chỉ được phép giảm xuống, không được phép tăng lên');
+        throw new BadRequestException(
+          'Giá chỉnh sửa chỉ được phép giảm xuống, không được phép tăng lên',
+        );
       }
     }
 
@@ -1384,7 +1605,9 @@ export class ToursService implements OnApplicationBootstrap {
       where: { id: scheduleId },
       data: {
         ...(data.price !== undefined && { price: data.price }),
-        ...(data.maxParticipants !== undefined && { max_participants: data.maxParticipants }),
+        ...(data.maxParticipants !== undefined && {
+          max_participants: data.maxParticipants,
+        }),
         ...(data.status !== undefined && { status: data.status }),
       },
     });
@@ -1394,32 +1617,32 @@ export class ToursService implements OnApplicationBootstrap {
       await this.prisma.tour_requests.updateMany({
         where: {
           schedule_id: scheduleId,
-          status: { in: ['paid', 'approved'] }
+          status: { in: ['paid', 'approved'] },
         },
         data: {
-          status: 'completed'
-        }
+          status: 'completed',
+        },
       });
     } else if (data.status === 'cancelled') {
       // Cập nhật các yêu cầu chưa thanh toán thành bị từ chối
       await this.prisma.tour_requests.updateMany({
         where: {
           schedule_id: scheduleId,
-          status: { in: ['pending', 'approved'] }
+          status: { in: ['pending', 'approved'] },
         },
         data: {
           status: 'rejected',
           response_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên',
-          cancellation_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên'
-        }
+          cancellation_note: 'Lịch trình tour đã bị hủy bởi hướng dẫn viên',
+        },
       });
 
       // Cập nhật các yêu cầu đã thanh toán thành chờ hoàn tiền
       const paidRequests = await this.prisma.tour_requests.findMany({
         where: {
           schedule_id: scheduleId,
-          status: { in: ['paid', 'payment_pending'] }
-        }
+          status: { in: ['paid', 'payment_pending'] },
+        },
       });
 
       for (const req of paidRequests) {
@@ -1427,15 +1650,19 @@ export class ToursService implements OnApplicationBootstrap {
           where: { id: req.id },
           data: {
             status: 'refund_pending',
-            cancellation_note: 'Lịch trình tour đã bị hủy. Đang chờ hoàn tiền.'
-          }
+            cancellation_note: 'Lịch trình tour đã bị hủy. Đang chờ hoàn tiền.',
+          },
         });
-        
+
         // Tính tổng tiền đã thanh toán để hoàn lại
-        const paidTransactions = await this.prisma.payment_transactions.findMany({
-          where: { tour_request_id: req.id, status: 'paid' }
-        });
-        const totalPaid = paidTransactions.reduce((sum, t) => sum + Number(t.amount), 0);
+        const paidTransactions =
+          await this.prisma.payment_transactions.findMany({
+            where: { tour_request_id: req.id, status: 'paid' },
+          });
+        const totalPaid = paidTransactions.reduce(
+          (sum, t) => sum + Number(t.amount),
+          0,
+        );
 
         if (totalPaid > 0) {
           await this.prisma.payment_transactions.create({
@@ -1446,7 +1673,7 @@ export class ToursService implements OnApplicationBootstrap {
               payment_method: 'vnpay',
               status: 'refund_pending',
               transaction_code: `REFUND-GUIDE-${req.id.substring(0, 8)}-${Date.now()}`,
-            }
+            },
           });
         }
       }
@@ -1465,7 +1692,9 @@ export class ToursService implements OnApplicationBootstrap {
     });
 
     if (!tour) {
-      throw new NotFoundException('Không tìm thấy tour hoặc bạn không có quyền');
+      throw new NotFoundException(
+        'Không tìm thấy tour hoặc bạn không có quyền',
+      );
     }
 
     // 2. Kiểm tra xem có người đã đặt chưa

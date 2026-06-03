@@ -46,7 +46,8 @@ export class SchedulerService {
     let cancelledCount = 0;
 
     for (const req of pendingRequests) {
-      const startDateVal = req.tour_schedules?.start_date || req.tours.start_date;
+      const startDateVal =
+        req.tour_schedules?.start_date || req.tours.start_date;
       if (!startDateVal) continue;
 
       const scheduleStartDate = new Date(startDateVal);
@@ -55,7 +56,7 @@ export class SchedulerService {
       if (scheduleStartDate <= oneDayFromNow) {
         // Tính tổng tiền đã trả thực tế qua giao dịch thành công (paid)
         const totalPaid = req.payment_transactions
-          .filter(tx => tx.status === 'paid')
+          .filter((tx) => tx.status === 'paid')
           .reduce((sum, tx) => sum + Number(tx.amount), 0);
 
         if (totalPaid === 0) {
@@ -64,17 +65,22 @@ export class SchedulerService {
             where: { id: req.id },
             data: {
               status: 'cancelled_by_user',
-              cancellation_note: 'Hệ thống tự động hủy do quá hạn thanh toán (chưa thanh toán trước khi khởi hành 24 giờ).',
+              cancellation_note:
+                'Hệ thống tự động hủy do quá hạn thanh toán (chưa thanh toán trước khi khởi hành 24 giờ).',
               cancelled_at: now,
             },
           });
           cancelledCount++;
-          this.logger.log(`Đã hủy tự động Đơn đặt Tour ID: ${req.id} (Tour khởi hành ngày ${scheduleStartDate.toLocaleDateString()})`);
+          this.logger.log(
+            `Đã hủy tự động Đơn đặt Tour ID: ${req.id} (Tour khởi hành ngày ${scheduleStartDate.toLocaleDateString()})`,
+          );
         }
       }
     }
 
-    this.logger.log(`Hoàn thành hủy đơn đặt tour quá hạn. Số lượng hủy: ${cancelledCount}`);
+    this.logger.log(
+      `Hoàn thành hủy đơn đặt tour quá hạn. Số lượng hủy: ${cancelledCount}`,
+    );
   }
 
   /**
@@ -100,7 +106,9 @@ export class SchedulerService {
 
     for (const schedule of activeSchedules) {
       const numDays = schedule.tours.num_days || 1;
-      const endDate = new Date(new Date(schedule.start_date).getTime() + numDays * 24 * 60 * 60 * 1000);
+      const endDate = new Date(
+        new Date(schedule.start_date).getTime() + numDays * 24 * 60 * 60 * 1000,
+      );
 
       if (now >= endDate) {
         await this.prisma.tour_schedules.update({
@@ -108,7 +116,9 @@ export class SchedulerService {
           data: { status: 'completed' },
         });
         completedSchedulesCount++;
-        this.logger.log(`Lịch trình ID: ${schedule.id} của Tour "${schedule.tours.title}" đã được chuyển sang completed.`);
+        this.logger.log(
+          `Lịch trình ID: ${schedule.id} của Tour "${schedule.tours.title}" đã được chuyển sang completed.`,
+        );
       }
     }
 
@@ -130,11 +140,15 @@ export class SchedulerService {
     let completedRequestsCount = 0;
 
     for (const req of paidRequests) {
-      const startDateVal = req.tour_schedules?.start_date || req.tours.start_date;
+      const startDateVal =
+        req.tour_schedules?.start_date || req.tours.start_date;
       if (!startDateVal) continue;
 
-      const numDays = req.tour_schedules?.tours.num_days || req.tours.num_days || 1;
-      const endDate = new Date(new Date(startDateVal).getTime() + numDays * 24 * 60 * 60 * 1000);
+      const numDays =
+        req.tour_schedules?.tours.num_days || req.tours.num_days || 1;
+      const endDate = new Date(
+        new Date(startDateVal).getTime() + numDays * 24 * 60 * 60 * 1000,
+      );
 
       if (now >= endDate) {
         await this.prisma.tour_requests.update({
@@ -142,11 +156,15 @@ export class SchedulerService {
           data: { status: 'completed' },
         });
         completedRequestsCount++;
-        this.logger.log(`Yêu cầu đặt tour ID: ${req.id} đã tự động chuyển sang completed do tour đã kết thúc.`);
+        this.logger.log(
+          `Yêu cầu đặt tour ID: ${req.id} đã tự động chuyển sang completed do tour đã kết thúc.`,
+        );
       }
     }
 
-    this.logger.log(`Hoàn thành cập nhật trạng thái kết thúc Tour. Lịch trình: ${completedSchedulesCount}, Yêu cầu: ${completedRequestsCount}`);
+    this.logger.log(
+      `Hoàn thành cập nhật trạng thái kết thúc Tour. Lịch trình: ${completedSchedulesCount}, Yêu cầu: ${completedRequestsCount}`,
+    );
   }
 
   /**
@@ -179,15 +197,20 @@ export class SchedulerService {
         },
         data: {
           status: 'rejected',
-          response_note: 'Yêu cầu bị từ chối tự động vì thời hạn đăng ký bài viết đồng hành đã kết thúc.',
+          response_note:
+            'Yêu cầu bị từ chối tự động vì thời hạn đăng ký bài viết đồng hành đã kết thúc.',
           processed_at: now,
         },
       });
 
       closedPostsCount++;
-      this.logger.log(`Đã đóng bài viết Bạn đồng hành ID: ${post.id} (${post.title}) và từ chối các yêu cầu chờ duyệt.`);
+      this.logger.log(
+        `Đã đóng bài viết Bạn đồng hành ID: ${post.id} (${post.title}) và từ chối các yêu cầu chờ duyệt.`,
+      );
     }
 
-    this.logger.log(`Hoàn thành cập nhật Bạn đồng hành. Bài viết đóng: ${closedPostsCount}`);
+    this.logger.log(
+      `Hoàn thành cập nhật Bạn đồng hành. Bài viết đóng: ${closedPostsCount}`,
+    );
   }
 }

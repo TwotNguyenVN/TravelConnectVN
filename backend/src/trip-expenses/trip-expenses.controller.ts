@@ -65,10 +65,7 @@ export class TripExpensesController {
 
   @Put('bank')
   @ApiOperation({ summary: 'Cập nhật tài khoản ngân hàng nhận tiền của tôi' })
-  async updateMyBank(
-    @Request() req,
-    @Body() data: UpdateBankDto,
-  ) {
+  async updateMyBank(@Request() req, @Body() data: UpdateBankDto) {
     const userId = req.user.id;
     return this.tripExpensesService.updateMyBank(userId, data);
   }

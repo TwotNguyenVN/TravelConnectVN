@@ -16,7 +16,9 @@ import { CreateCompanionReviewDto } from './dto/create-companion-review.dto';
 @ApiTags('companion-reviews')
 @Controller('companion-reviews')
 export class CompanionReviewsController {
-  constructor(private readonly companionReviewsService: CompanionReviewsService) {}
+  constructor(
+    private readonly companionReviewsService: CompanionReviewsService,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -34,7 +36,11 @@ export class CompanionReviewsController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
   ) {
-    return this.companionReviewsService.getHostReviews(hostId, Number(page), Number(limit));
+    return this.companionReviewsService.getHostReviews(
+      hostId,
+      Number(page),
+      Number(limit),
+    );
   }
 
   @Get('post/:postId')

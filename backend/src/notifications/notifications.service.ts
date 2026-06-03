@@ -10,7 +10,14 @@ export class NotificationsService {
     private readonly socketGateway: SocketGateway,
   ) {}
 
-  async create(data: { user_id: string; title: string; content: string; type?: string; entity_id?: string; entity_type?: string }) {
+  async create(data: {
+    user_id: string;
+    title: string;
+    content: string;
+    type?: string;
+    entity_id?: string;
+    entity_type?: string;
+  }) {
     const notification = await this.prisma.notifications.create({
       data: {
         user_id: data.user_id,
@@ -22,16 +29,14 @@ export class NotificationsService {
       },
     });
 
-
     // Gửi socket real-time
     this.socketGateway.sendToUser(data.user_id, 'new_notification', {
       ...notification,
-      message: data.title // For toast compatibility
+      message: data.title, // For toast compatibility
     });
 
     return notification;
   }
-
 
   async findAll(userId: string, page: number = 1, limit: number = 20) {
     const skip = (page - 1) * limit;
@@ -55,7 +60,6 @@ export class NotificationsService {
       totalPages: Math.ceil(total / limit),
     };
   }
-
 
   async markAsRead(userId: string, notificationId: string) {
     return this.prisma.notifications.updateMany({
@@ -94,7 +98,6 @@ export class NotificationsService {
   }
 
   async delete(userId: string, notificationId: string) {
-
     return this.prisma.notifications.deleteMany({
       where: {
         id: notificationId,

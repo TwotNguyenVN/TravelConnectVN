@@ -1,6 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTourReviewDto, CreateGuideReviewDto } from './dto/create-review.dto';
+import {
+  CreateTourReviewDto,
+  CreateGuideReviewDto,
+} from './dto/create-review.dto';
 
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
 
@@ -11,7 +20,6 @@ export class ReviewsService {
     private readonly activityLogsService: UserActivityLogsService,
   ) {}
 
-
   // ==========================================
   // TOUR REVIEWS
   // ==========================================
@@ -20,7 +28,7 @@ export class ReviewsService {
     // 1. Find tour request
     const tourRequest = await this.prisma.tour_requests.findUnique({
       where: { id: dto.tourRequestId },
-      include: { tours: true }
+      include: { tours: true },
     });
 
     if (!tourRequest) {
@@ -35,12 +43,14 @@ export class ReviewsService {
     // 3. Status check
     const validStatuses = ['completed'];
     if (!validStatuses.includes(tourRequest.status)) {
-      throw new BadRequestException('Chỉ có thể đánh giá những tour đã hoàn thành');
+      throw new BadRequestException(
+        'Chỉ có thể đánh giá những tour đã hoàn thành',
+      );
     }
 
     // 4. Already reviewed check
     const existing = await this.prisma.tour_reviews.findUnique({
-      where: { tour_request_id: dto.tourRequestId }
+      where: { tour_request_id: dto.tourRequestId },
     });
 
     if (existing) {
@@ -55,8 +65,8 @@ export class ReviewsService {
         tour_request_id: dto.tourRequestId,
         rating: dto.rating,
         comment: dto.comment,
-        visibility_status: 'visible'
-      }
+        visibility_status: 'visible',
+      },
     });
 
     // 6. Ghi log hoạt động
@@ -69,7 +79,6 @@ export class ReviewsService {
     );
 
     return review;
-
   }
 
   async getTourReviews(tourId: string, page: number = 1, limit: number = 10) {
@@ -79,41 +88,41 @@ export class ReviewsService {
       this.prisma.tour_reviews.findMany({
         where: {
           tour_id: tourId,
-          visibility_status: 'visible'
+          visibility_status: 'visible',
         },
         include: {
           users: {
             select: {
               full_name: true,
-              avatar_url: true
-            }
-          }
+              avatar_url: true,
+            },
+          },
         },
         orderBy: { created_at: 'desc' },
         skip,
-        take: limit
+        take: limit,
       }),
       this.prisma.tour_reviews.count({
         where: {
           tour_id: tourId,
-          visibility_status: 'visible'
-        }
-      })
+          visibility_status: 'visible',
+        },
+      }),
     ]);
 
     return {
-      data: reviews.map(r => ({
+      data: reviews.map((r) => ({
         id: r.id,
         user: r.users?.full_name || 'Người dùng ẩn danh',
         avatar: r.users?.avatar_url || '',
         rating: r.rating,
         comment: r.comment,
-        date: r.created_at
+        date: r.created_at,
       })),
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -125,11 +134,11 @@ export class ReviewsService {
     // 1. Find tour request
     const tourRequest = await this.prisma.tour_requests.findUnique({
       where: { id: dto.tourRequestId },
-      include: { 
+      include: {
         tours: {
-          select: { title: true, guide_profile_id: true }
-        }
-      }
+          select: { title: true, guide_profile_id: true },
+        },
+      },
     });
 
     if (!tourRequest) {
@@ -144,16 +153,20 @@ export class ReviewsService {
     // 3. Status check
     const validStatuses = ['completed'];
     if (!validStatuses.includes(tourRequest.status)) {
-      throw new BadRequestException('Chỉ có thể đánh giá hướng dẫn viên sau khi tour đã hoàn thành');
+      throw new BadRequestException(
+        'Chỉ có thể đánh giá hướng dẫn viên sau khi tour đã hoàn thành',
+      );
     }
 
     // 4. Already reviewed check
     const existing = await this.prisma.guide_reviews.findUnique({
-      where: { tour_request_id: dto.tourRequestId }
+      where: { tour_request_id: dto.tourRequestId },
     });
 
     if (existing) {
-      throw new ConflictException('Bạn đã đánh giá hướng dẫn viên này cho tour này rồi');
+      throw new ConflictException(
+        'Bạn đã đánh giá hướng dẫn viên này cho tour này rồi',
+      );
     }
 
     // 5. Create review
@@ -165,8 +178,8 @@ export class ReviewsService {
         tour_request_id: dto.tourRequestId,
         rating: dto.rating,
         comment: dto.comment,
-        visibility_status: 'visible'
-      }
+        visibility_status: 'visible',
+      },
     });
 
     // 6. Ghi log hoạt động
@@ -179,7 +192,6 @@ export class ReviewsService {
     );
 
     return review;
-
   }
 
   async getGuideReviews(guideId: string, page: number = 1, limit: number = 10) {
@@ -189,41 +201,41 @@ export class ReviewsService {
       this.prisma.guide_reviews.findMany({
         where: {
           guide_profile_id: guideId,
-          visibility_status: 'visible'
+          visibility_status: 'visible',
         },
         include: {
           users: {
             select: {
               full_name: true,
-              avatar_url: true
-            }
-          }
+              avatar_url: true,
+            },
+          },
         },
         orderBy: { created_at: 'desc' },
         skip,
-        take: limit
+        take: limit,
       }),
       this.prisma.guide_reviews.count({
         where: {
           guide_profile_id: guideId,
-          visibility_status: 'visible'
-        }
-      })
+          visibility_status: 'visible',
+        },
+      }),
     ]);
 
     return {
-      data: reviews.map(r => ({
+      data: reviews.map((r) => ({
         id: r.id,
         user: r.users?.full_name || 'Người dùng ẩn danh',
         avatar: r.users?.avatar_url || '',
         rating: r.rating,
         comment: r.comment,
-        date: r.created_at
+        date: r.created_at,
       })),
       total,
       page,
       limit,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     };
   }
 
@@ -236,38 +248,38 @@ export class ReviewsService {
       this.prisma.tour_reviews.findMany({
         where: { user_id: userId },
         include: { tours: { select: { title: true } } },
-        orderBy: { created_at: 'desc' }
+        orderBy: { created_at: 'desc' },
       }),
       this.prisma.guide_reviews.findMany({
         where: { user_id: userId },
-        include: { 
-          guide_profiles: { 
-            include: { users: { select: { full_name: true } } } 
+        include: {
+          guide_profiles: {
+            include: { users: { select: { full_name: true } } },
           },
-          tours: { select: { title: true } }
+          tours: { select: { title: true } },
         },
-        orderBy: { created_at: 'desc' }
-      })
+        orderBy: { created_at: 'desc' },
+      }),
     ]);
 
     return {
-      tours: tourReviews.map(r => ({
+      tours: tourReviews.map((r) => ({
         id: r.id,
         tourId: r.tour_id,
         tourTitle: r.tours.title,
         rating: r.rating,
         comment: r.comment,
-        createdAt: r.created_at
+        createdAt: r.created_at,
       })),
-      guides: guideReviews.map(r => ({
+      guides: guideReviews.map((r) => ({
         id: r.id,
         guideId: r.guide_profile_id,
         guideName: r.guide_profiles.users?.full_name || 'Hướng dẫn viên',
         tourTitle: r.tours.title,
         rating: r.rating,
         comment: r.comment,
-        createdAt: r.created_at
-      }))
+        createdAt: r.created_at,
+      })),
     };
   }
 
@@ -278,31 +290,34 @@ export class ReviewsService {
   async getAllReviewsAdmin(page: number = 1, limit: number = 50) {
     const skip = (page - 1) * limit;
 
-    const [tourReviews, guideReviews, totalTour, totalGuide] = await Promise.all([
-      this.prisma.tour_reviews.findMany({
-        include: { 
-          users: { select: { full_name: true, avatar_url: true } },
-          tours: { select: { title: true } }
-        },
-        orderBy: { created_at: 'desc' },
-        skip,
-        take: limit
-      }),
-      this.prisma.guide_reviews.findMany({
-        include: { 
-          users: { select: { full_name: true, avatar_url: true } },
-          guide_profiles: { include: { users: { select: { full_name: true } } } },
-          tours: { select: { title: true } }
-        },
-        orderBy: { created_at: 'desc' },
-        skip,
-        take: limit
-      }),
-      this.prisma.tour_reviews.count(),
-      this.prisma.guide_reviews.count()
-    ]);
+    const [tourReviews, guideReviews, totalTour, totalGuide] =
+      await Promise.all([
+        this.prisma.tour_reviews.findMany({
+          include: {
+            users: { select: { full_name: true, avatar_url: true } },
+            tours: { select: { title: true } },
+          },
+          orderBy: { created_at: 'desc' },
+          skip,
+          take: limit,
+        }),
+        this.prisma.guide_reviews.findMany({
+          include: {
+            users: { select: { full_name: true, avatar_url: true } },
+            guide_profiles: {
+              include: { users: { select: { full_name: true } } },
+            },
+            tours: { select: { title: true } },
+          },
+          orderBy: { created_at: 'desc' },
+          skip,
+          take: limit,
+        }),
+        this.prisma.tour_reviews.count(),
+        this.prisma.guide_reviews.count(),
+      ]);
 
-    const tourList = tourReviews.map(r => ({
+    const tourList = tourReviews.map((r) => ({
       id: r.id,
       type: 'TOUR',
       targetName: r.tours.title,
@@ -311,10 +326,10 @@ export class ReviewsService {
       rating: r.rating,
       comment: r.comment,
       visibilityStatus: r.visibility_status,
-      createdAt: r.created_at
+      createdAt: r.created_at,
     }));
 
-    const guideList = guideReviews.map(r => ({
+    const guideList = guideReviews.map((r) => ({
       id: r.id,
       type: 'GUIDE',
       targetName: r.guide_profiles.users?.full_name || 'Hướng dẫn viên',
@@ -323,26 +338,30 @@ export class ReviewsService {
       rating: r.rating,
       comment: r.comment,
       visibilityStatus: r.visibility_status,
-      createdAt: r.created_at
+      createdAt: r.created_at,
     }));
 
     return {
       tours: tourList,
       guides: guideList,
-      total: totalTour + totalGuide
+      total: totalTour + totalGuide,
     };
   }
 
-  async updateReviewVisibility(type: 'TOUR' | 'GUIDE', id: string, status: string) {
+  async updateReviewVisibility(
+    type: 'TOUR' | 'GUIDE',
+    id: string,
+    status: string,
+  ) {
     if (type === 'TOUR') {
       return this.prisma.tour_reviews.update({
         where: { id },
-        data: { visibility_status: status }
+        data: { visibility_status: status },
       });
     } else {
       return this.prisma.guide_reviews.update({
         where: { id },
-        data: { visibility_status: status }
+        data: { visibility_status: status },
       });
     }
   }

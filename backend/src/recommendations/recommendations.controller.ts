@@ -6,7 +6,9 @@ import type { Request } from 'express';
 @Controller('recommendations')
 @UseGuards(AuthGuard)
 export class RecommendationsController {
-  constructor(private readonly recommendationsService: RecommendationsService) {}
+  constructor(
+    private readonly recommendationsService: RecommendationsService,
+  ) {}
 
   @Get('tours')
   async getRecommendedTours(@Req() req: Request) {

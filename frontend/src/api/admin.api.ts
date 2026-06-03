@@ -13,6 +13,7 @@ export const adminApi = {
   updateUserStatus: (id: string, data: any) => api.patch(`/admin/users/${id}/status`, data),
   assignRole: (id: string, data: any) => api.post(`/admin/users/${id}/roles`, data),
   revokeRole: (userId: string, role: string) => api.delete(`/admin/users/${userId}/roles/${role}`),
+  createStaff: (data: any) => api.post('/admin/staff', data),
 
   // Reports
   getReports: (params: any) => api.get('/admin/reports', { params }),
@@ -39,4 +40,13 @@ export const adminApi = {
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
   settleGuideTransactions: (id: string) => api.post(`/admin/guides/${id}/settle`),
+
+  // Support Staff — Tour Requests (Disputes)
+  getTourRequests: (params?: any) => api.get('/admin/tour-requests', { params }),
+  getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
+
+  // Support Staff — Notifications Broadcast
+  sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
+    api.post('/admin/notifications/broadcast', data),
 };
+

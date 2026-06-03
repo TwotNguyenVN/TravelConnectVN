@@ -92,13 +92,10 @@ export class GuidesService {
    */
   async getPublicGuideDetail(id: string) {
     // Thử tìm theo id (profile id) hoặc user_id
-    let guide = await this.prisma.guide_profiles.findFirst({
+    const guide = await this.prisma.guide_profiles.findFirst({
       where: {
-        OR: [
-          { id: id },
-          { user_id: id }
-        ],
-        deleted_at: null
+        OR: [{ id: id }, { user_id: id }],
+        deleted_at: null,
       },
       include: {
         users: {
@@ -122,38 +119,43 @@ export class GuidesService {
         },
         home_province: true,
         tours: {
-          where: { 
+          where: {
             visibility_status: 'visible',
             business_status: 'published',
-            deleted_at: null
+            deleted_at: null,
           },
           include: {
             tour_images: {
-              select: { image_url: true }
+              select: { image_url: true },
             },
             tour_categories: {
-              select: { name: true }
+              select: { name: true },
             },
             tour_schedules: {
               where: {
                 start_date: { gte: new Date() },
-                status: 'available'
+                status: 'available',
               },
               include: {
                 tour_requests: {
                   where: { status: { in: ['approved', 'paid'] } },
-                  select: { participant_count: true }
-                }
+                  select: { participant_count: true },
+                },
               },
-              orderBy: { start_date: 'asc' }
-            }
+              orderBy: { start_date: 'asc' },
+            },
           },
-          orderBy: { created_at: 'desc' }
-        }
+          orderBy: { created_at: 'desc' },
+        },
       },
     });
 
-    if (!guide || guide.visibility_status !== 'visible' || guide.deleted_at || !this.isGuideProfileComplete(guide)) {
+    if (
+      !guide ||
+      guide.visibility_status !== 'visible' ||
+      guide.deleted_at ||
+      !this.isGuideProfileComplete(guide)
+    ) {
       throw new NotFoundException('Không tìm thấy hướng dẫn viên');
     }
 
@@ -213,12 +215,16 @@ export class GuidesService {
           name: gs.skills.name,
         },
       })),
-      homeProvince: guide.home_province ? {
-        id: Number(guide.home_province.id),
-        name: guide.home_province.name,
-        region: guide.home_province.region,
-      } : null,
-      homeProvinceId: guide.home_province_id ? Number(guide.home_province_id) : null,
+      homeProvince: guide.home_province
+        ? {
+            id: Number(guide.home_province.id),
+            name: guide.home_province.name,
+            region: guide.home_province.region,
+          }
+        : null,
+      homeProvinceId: guide.home_province_id
+        ? Number(guide.home_province_id)
+        : null,
     };
   }
 
@@ -245,7 +251,9 @@ export class GuidesService {
         is_accepting_tours: data.isAcceptingTours ?? true,
         other_languages: data.otherLanguages,
         other_skills: data.otherSkills,
-        home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
+        home_province_id: data.homeProvinceId
+          ? BigInt(data.homeProvinceId)
+          : null,
         familiar_provinces: data.familiarProvinces,
         region: data.region,
         cover_url: data.coverUrl,
@@ -276,7 +284,9 @@ export class GuidesService {
         is_accepting_tours: data.isAcceptingTours,
         other_languages: data.otherLanguages,
         other_skills: data.otherSkills,
-        home_province_id: data.homeProvinceId ? BigInt(data.homeProvinceId) : null,
+        home_province_id: data.homeProvinceId
+          ? BigInt(data.homeProvinceId)
+          : null,
         familiar_provinces: data.familiarProvinces,
         region: data.region,
         cover_url: data.coverUrl,
@@ -392,50 +402,61 @@ export class GuidesService {
       name: g.users?.full_name || 'Hướng dẫn viên',
       avatar: g.avatar_url || g.users?.avatar_url || '', // Profile avatar (fallback to account)
       avatarUrl: g.avatar_url || g.users?.avatar_url || '', // Keep for compatibility
-      coverUrl: g.cover_url || 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/profile_cover_1.png',
+      coverUrl:
+        g.cover_url ||
+        'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/profile_cover_1.png',
       workingArea: g.working_area || 'Việt Nam',
       yearsOfExperience: g.years_of_experience || 0,
       rating: rating,
       verificationStatus: g.verification_status,
       languages: [
         ...g.guide_languages.map((gl: any) => gl.languages.name),
-        ...(g.other_languages ? g.other_languages.split(',').map((s: string) => s.trim()) : []),
+        ...(g.other_languages
+          ? g.other_languages.split(',').map((s: string) => s.trim())
+          : []),
       ],
       skills: [
         ...g.guide_skills.map((gs: any) => gs.skills.name),
-        ...(g.other_skills ? g.other_skills.split(',').map((s: string) => s.trim()) : []),
+        ...(g.other_skills
+          ? g.other_skills.split(',').map((s: string) => s.trim())
+          : []),
       ],
     };
   }
 
   private isGuideProfileComplete(g: any): boolean {
     if (!g) return false;
-    
+
     // 1. Họ và tên
     if (!g.users?.full_name || g.users.full_name.trim() === '') return false;
-    
+
     // 2. Ảnh đại diện (avatar) - ưu tiên avatar_url trong guide_profile hoặc fallback trong users
     const avatar = g.avatar_url || g.users?.avatar_url;
     if (!avatar || avatar.trim() === '') return false;
-    
+
     // 3. Số điện thoại
     if (!g.users?.phone || g.users.phone.trim() === '') return false;
-    
+
     // 4. Giới thiệu bản thân (tối thiểu 20 ký tự)
     if (!g.bio || g.bio.trim().length < 20) return false;
-    
+
     // 5. Số năm kinh nghiệm
-    if (g.years_of_experience === null || g.years_of_experience === undefined) return false;
-    
+    if (g.years_of_experience === null || g.years_of_experience === undefined)
+      return false;
+
     // 6. Tỉnh thành hoạt động chính
     if (!g.home_province_id) return false;
-    
+
     // 7. Ngôn ngữ thông thạo (phải có ít nhất 1 ngôn ngữ)
     if (!g.guide_languages || g.guide_languages.length === 0) return false;
-    
+
     // 8. Xác minh danh tính
-    if (g.verification_status !== 'approved' && g.verification_status !== 'verified') return false;
-    
+    if (
+      g.verification_status !== 'approved' &&
+      g.verification_status !== 'verified'
+    )
+      return false;
+
     return true;
   }
 
@@ -454,46 +475,73 @@ export class GuidesService {
         comment: r.comment,
         date: r.created_at,
       })),
-      homeProvince: g.home_province ? {
-        id: Number(g.home_province.id),
-        name: g.home_province.name,
-      } : null,
+      homeProvince: g.home_province
+        ? {
+            id: Number(g.home_province.id),
+            name: g.home_province.name,
+          }
+        : null,
       familiarProvinces: g.familiar_provinces || '',
       region: g.region || '',
-      tours: isComplete ? (g.tours || []).map((t: any) => {
-        const nextAvailableSchedule = (t.tour_schedules || []).find((s: any) => {
-          const bookedCount = (s.tour_requests || []).reduce((sum: number, req: any) => sum + req.participant_count, 0);
-          return bookedCount < s.max_participants;
-        });
+      tours: isComplete
+        ? (g.tours || []).map((t: any) => {
+            const nextAvailableSchedule = (t.tour_schedules || []).find(
+              (s: any) => {
+                const bookedCount = (s.tour_requests || []).reduce(
+                  (sum: number, req: any) => sum + req.participant_count,
+                  0,
+                );
+                return bookedCount < s.max_participants;
+              },
+            );
 
-        const bookedCount = nextAvailableSchedule
-          ? (nextAvailableSchedule.tour_requests || []).reduce((sum: number, req: any) => sum + req.participant_count, 0)
-          : 0;
+            const bookedCount = nextAvailableSchedule
+              ? (nextAvailableSchedule.tour_requests || []).reduce(
+                  (sum: number, req: any) => sum + req.participant_count,
+                  0,
+                )
+              : 0;
 
-        const remainingSlots = nextAvailableSchedule
-          ? Math.max(0, nextAvailableSchedule.max_participants - bookedCount)
-          : t.max_participants;
+            const remainingSlots = nextAvailableSchedule
+              ? Math.max(
+                  0,
+                  nextAvailableSchedule.max_participants - bookedCount,
+                )
+              : t.max_participants;
 
-        const price = nextAvailableSchedule ? Number(nextAvailableSchedule.price) : Number(t.price);
-        const startDate = nextAvailableSchedule ? nextAvailableSchedule.start_date : t.start_date;
-        const maxParticipants = nextAvailableSchedule ? nextAvailableSchedule.max_participants : t.max_participants;
+            const price = nextAvailableSchedule
+              ? Number(nextAvailableSchedule.price)
+              : Number(t.price);
+            const startDate = nextAvailableSchedule
+              ? nextAvailableSchedule.start_date
+              : t.start_date;
+            const maxParticipants = nextAvailableSchedule
+              ? nextAvailableSchedule.max_participants
+              : t.max_participants;
 
-        return {
-          id: t.id,
-          title: t.title,
-          price: price,
-          province: t.province,
-          image: t.tour_images?.[0]?.image_url || 'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
-          category: t.tour_categories?.name || 'Chưa phân loại',
-          duration: t.duration || (t.start_date && t.end_date ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày` : 'Chưa xác định'),
-          startDate: startDate,
-          endDate: t.end_date,
-          numDays: t.num_days,
-          numNights: t.num_nights,
-          maxParticipants: maxParticipants,
-          remainingSlots: remainingSlots,
-        };
-      }) : [],
+            return {
+              id: t.id,
+              title: t.title,
+              price: price,
+              province: t.province,
+              image:
+                t.tour_images?.[0]?.image_url ||
+                'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
+              category: t.tour_categories?.name || 'Chưa phân loại',
+              duration:
+                t.duration ||
+                (t.start_date && t.end_date
+                  ? `${Math.ceil((t.end_date.getTime() - t.start_date.getTime()) / (1000 * 60 * 60 * 24))} ngày`
+                  : 'Chưa xác định'),
+              startDate: startDate,
+              endDate: t.end_date,
+              numDays: t.num_days,
+              numNights: t.num_nights,
+              maxParticipants: maxParticipants,
+              remainingSlots: remainingSlots,
+            };
+          })
+        : [],
     };
   }
 }

@@ -9,6 +9,6 @@ import { UserActivityLogsModule } from '../user-activity-logs/user-activity-logs
   imports: [PrismaModule, UserActivityLogsModule],
 
   controllers: [FavoritesController],
-  providers: [FavoritesService]
+  providers: [FavoritesService],
 })
 export class FavoritesModule {}
