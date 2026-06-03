@@ -30,6 +30,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { SystemSettingsModule } from './system-settings/system-settings.module';
+import { MaintenanceGuard } from './common/guards/maintenance.guard';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 
@@ -72,6 +74,7 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     PaymentsModule,
     AiChatModule,
     TripExpensesModule,
+    SystemSettingsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -79,6 +82,10 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: MaintenanceGuard,
     },
   ],
 })

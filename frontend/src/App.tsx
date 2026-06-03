@@ -5,6 +5,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { MiniChatProvider } from './contexts/MiniChatContext';
 import { MiniChatContainer } from './components/chat/MiniChatContainer';
+import { MaintenanceWrapper } from './routes/MaintenanceWrapper';
 import './App.css';
 
 function App() {
@@ -13,8 +14,10 @@ function App() {
       <ToastProvider>
         <SocketProvider>
           <MiniChatProvider>
-            <RouterProvider router={router} />
-            <MiniChatContainer />
+            <MaintenanceWrapper>
+              <RouterProvider router={router} />
+              <MiniChatContainer />
+            </MaintenanceWrapper>
           </MiniChatProvider>
         </SocketProvider>
       </ToastProvider>

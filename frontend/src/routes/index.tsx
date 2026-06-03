@@ -71,6 +71,7 @@ import TourBookingPage from '../pages/public/TourBookingPage';
 import { BookingManagementPage } from '../pages/user/BookingManagementPage';
 import { AuthGuard } from './AuthGuard';
 import { RoleGuard } from './RoleGuard';
+import { MaintenancePage } from '../pages/public/MaintenancePage';
 
 export const router = createBrowserRouter([
   {
@@ -96,6 +97,7 @@ export const router = createBrowserRouter([
       { path: 'companions', element: <CompanionListPage /> },
       { path: 'companions/:id', element: <CompanionDetailPage /> },
       { path: 'demo/calendar', element: <CalendarDemoPage /> },
+      { path: 'maintenance', element: <MaintenancePage /> },
     ],
   },
   {
