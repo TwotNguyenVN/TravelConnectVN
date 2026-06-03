@@ -28,7 +28,7 @@ const GuideProfilePage: React.FC = () => {
     coverUrl: "",
     avatarUrl: "",
   });
-  const { user, refreshProfile } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const coverInputRef = React.useRef<HTMLInputElement>(null);
   const avatarInputRef = React.useRef<HTMLInputElement>(null);

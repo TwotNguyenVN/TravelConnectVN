@@ -71,37 +71,6 @@ const MyToursPage: React.FC = () => {
     }
   };
 
-  const handleToggleVisibility = async (tourId: string, currentStatus: string) => {
-    try {
-      const newStatus = currentStatus === 'hidden' ? 'visible' : 'hidden';
-      const response = await tourService.updateTour(tourId, { visibilityStatus: newStatus });
-      
-      if (response.success || response.id) {
-        toast.success(newStatus === 'visible' ? 'Đã hiện bài đăng' : 'Đã ẩn bài đăng');
-        fetchTours();
-      }
-    } catch (error: any) {
-      console.error('Toggle visibility error:', error);
-      toast.error('Không thể thay đổi trạng thái hiển thị');
-    }
-  };
-
-  const handleStatusUpdateComplex = async (tourId: string, newStatus: string, newVisibility: string, successMsg: string) => {
-    try {
-      const response = await tourService.updateTour(tourId, { 
-        businessStatus: newStatus,
-        visibilityStatus: newVisibility
-      });
-      if (response.success || response.id) {
-        toast.success(successMsg);
-        fetchTours();
-      }
-    } catch (error: any) {
-      console.error('Update status complex error:', error);
-      toast.error('Không thể cập nhật trạng thái tour');
-    }
-  };
-
   const getStatusLabel = (business: string, visibility: string = 'visible') => {
     if (business === 'draft') return 'Bản nháp';
     if (business === 'published') return 'Đang mở';

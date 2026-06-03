@@ -3,6 +3,13 @@ import { PublicLayout } from '../layouts/PublicLayout';
 import { UserLayout } from '../layouts/UserLayout';
 import { GuideLayout } from '../layouts/GuideLayout';
 import { AdminLayout } from '../layouts/AdminLayout';
+import { ContentLayout } from '../layouts/ContentLayout';
+import { SupportLayout } from '../layouts/SupportLayout';
+import { FinanceLayout } from '../layouts/FinanceLayout';
+import { FinanceDashboardPage } from '../pages/finance/FinanceDashboardPage';
+import { FinanceRefundsPage } from '../pages/finance/FinanceRefundsPage';
+import { FinanceTransactionsPage } from '../pages/finance/FinanceTransactionsPage';
+import { FinanceSettlementsPage } from '../pages/finance/FinanceSettlementsPage';
 
 import { HomePage } from '../pages/public/HomePage';
 import { TourListPage } from '../pages/public/TourListPage';
@@ -53,6 +60,7 @@ import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManag
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
+import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
@@ -141,21 +149,57 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <RoleGuard allowedRoles={['SYSTEM_ADMIN', 'CONTENT_MODERATOR', 'SUPPORT_STAFF']}>
+      <RoleGuard allowedRoles={['SYSTEM_ADMIN']}>
         <AdminLayout />
       </RoleGuard>
     ),
     children: [
       { index: true, element: <AdminDashboardPage /> },
       { path: 'users', element: <AdminUserManagementPage /> },
-      { path: 'reports', element: <AdminReportManagementPage /> },
+      { path: 'activity-logs', element: <AdminActivityLogPage /> },
+      { path: 'statistics', element: <AdminStatisticsPage /> },
+    ],
+  },
+  {
+    path: '/content',
+    element: (
+      <RoleGuard allowedRoles={['CONTENT_MODERATOR', 'SYSTEM_ADMIN']}>
+        <ContentLayout />
+      </RoleGuard>
+    ),
+    children: [
+      { index: true, element: <ContentDashboardPage /> },
+      { path: 'dashboard', element: <ContentDashboardPage /> },
+      { path: 'tours', element: <AdminTourManagementPage /> },
       { path: 'guides', element: <AdminVerificationPage /> },
       { path: 'companion-posts', element: <AdminCompanionManagementPage /> },
       { path: 'reviews', element: <AdminReviewManagementPage /> },
-      { path: 'tours', element: <AdminTourManagementPage /> },
-      { path: 'activity-logs', element: <AdminActivityLogPage /> },
-      { path: 'statistics', element: <AdminStatisticsPage /> },
-
+    ],
+  },
+  {
+    path: '/support',
+    element: (
+      <RoleGuard allowedRoles={['SUPPORT_STAFF', 'SYSTEM_ADMIN']}>
+        <SupportLayout />
+      </RoleGuard>
+    ),
+    children: [
+      { index: true, element: <AdminReportManagementPage /> },
+      { path: 'reports', element: <AdminReportManagementPage /> },
+    ],
+  },
+  {
+    path: '/accountant',
+    element: (
+      <RoleGuard allowedRoles={['ACCOUNTANT', 'SYSTEM_ADMIN']}>
+        <FinanceLayout />
+      </RoleGuard>
+    ),
+    children: [
+      { index: true, element: <FinanceDashboardPage /> },
+      { path: 'refunds', element: <FinanceRefundsPage /> },
+      { path: 'transactions', element: <FinanceTransactionsPage /> },
+      { path: 'settlements', element: <FinanceSettlementsPage /> },
     ],
   },
 ]);

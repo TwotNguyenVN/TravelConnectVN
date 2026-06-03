@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { PageContainer, Button, LoadingBlock, EmptyState, Card, Badge, TourCard } from '../../components/common';
+import { PageContainer, Button, LoadingBlock, EmptyState, Card, TourCard } from '../../components/common';
 import { guideService } from '../../services/guideService';
 import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';

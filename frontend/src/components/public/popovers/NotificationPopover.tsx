@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import notificationService from '../../../services/notificationService';
 import type { Notification } from '../../../services/notificationService';
 import { useNavigate } from 'react-router-dom';
-import { DEFAULT_AVATAR } from '../../../constants/images';
 import { useSocket } from '../../../contexts/SocketContext';
 
 interface NotificationPopoverProps {
