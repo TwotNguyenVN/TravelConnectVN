@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common';
 import { DisputesService } from './disputes.service';
-import { TourRequestsDisputesController, AdminDisputesController } from './disputes.controller';
+import {
+  TourRequestsDisputesController,
+  AdminDisputesController,
+} from './disputes.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SupabaseModule } from '../supabase/supabase.module';
 

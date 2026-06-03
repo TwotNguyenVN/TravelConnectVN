@@ -277,7 +277,13 @@ export class AdminController {
   @Post('notifications/broadcast')
   @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
   sendBroadcastNotification(
-    @Body() dto: { title: string; message: string; targetRole?: string; targetUserId?: string },
+    @Body()
+    dto: {
+      title: string;
+      message: string;
+      targetRole?: string;
+      targetUserId?: string;
+    },
     @Req() req: any,
   ) {
     return this.adminService.sendBroadcastNotification(dto, req.user.id);

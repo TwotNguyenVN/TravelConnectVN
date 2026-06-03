@@ -1014,7 +1014,12 @@ export class AdminService {
   }
 
   async sendBroadcastNotification(
-    dto: { title: string; message: string; targetRole?: string; targetUserId?: string },
+    dto: {
+      title: string;
+      message: string;
+      targetRole?: string;
+      targetUserId?: string;
+    },
     adminId: string,
   ) {
     const { title, message, targetRole, targetUserId } = dto;
@@ -1065,7 +1070,13 @@ export class AdminService {
           entity_type: 'notifications',
           action_type: 'broadcast',
           reason: `Phát thông báo rộng rãi: "${title}". Đối tượng: ${targetRole || targetUserId || 'Tất cả'}`,
-          new_data: { title, message, targetRole, targetUserId, total_recipients: targetUserIds.length } as any,
+          new_data: {
+            title,
+            message,
+            targetRole,
+            targetUserId,
+            total_recipients: targetUserIds.length,
+          } as any,
         },
       });
     });

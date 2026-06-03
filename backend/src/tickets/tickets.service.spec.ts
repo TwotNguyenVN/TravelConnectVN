@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { TicketsService } from './tickets.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -41,8 +42,16 @@ describe('TicketsService', () => {
 
   describe('createTicket', () => {
     it('should create a pending support ticket', async () => {
-      const dto = { title: 'Lỗi', description: 'Chi tiết lỗi', category: TicketCategory.PAYMENT };
-      mockPrisma.support_tickets.create.mockResolvedValue({ id: 'ticket-1', ...dto, status: 'pending' });
+      const dto = {
+        title: 'Lỗi',
+        description: 'Chi tiết lỗi',
+        category: TicketCategory.PAYMENT,
+      };
+      mockPrisma.support_tickets.create.mockResolvedValue({
+        id: 'ticket-1',
+        ...dto,
+        status: 'pending',
+      });
 
       const result = await service.createTicket('user-1', dto);
 
@@ -55,7 +64,9 @@ describe('TicketsService', () => {
   describe('getTickets', () => {
     it('should retrieve filtered list of support tickets', async () => {
       mockPrisma.support_tickets.count.mockResolvedValue(1);
-      mockPrisma.support_tickets.findMany.mockResolvedValue([{ id: 'ticket-1', status: 'pending' }]);
+      mockPrisma.support_tickets.findMany.mockResolvedValue([
+        { id: 'ticket-1', status: 'pending' },
+      ]);
 
       const result = await service.getTickets({ status: 'pending' });
 
@@ -70,12 +81,22 @@ describe('TicketsService', () => {
     it('should throw NotFoundException if ticket does not exist', async () => {
       mockPrisma.support_tickets.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateTicket('invalid-id', 'admin-1', {})).rejects.toThrow(NotFoundException);
+      await expect(
+        service.updateTicket('invalid-id', 'admin-1', {}),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should update status/assignee and log activity', async () => {
-      mockPrisma.support_tickets.findUnique.mockResolvedValue({ id: 'ticket-1', status: 'pending', assigned_to_user_id: null });
-      mockPrisma.support_tickets.update.mockResolvedValue({ id: 'ticket-1', status: 'processing', assigned_to_user_id: 'admin-1' });
+      mockPrisma.support_tickets.findUnique.mockResolvedValue({
+        id: 'ticket-1',
+        status: 'pending',
+        assigned_to_user_id: null,
+      });
+      mockPrisma.support_tickets.update.mockResolvedValue({
+        id: 'ticket-1',
+        status: 'processing',
+        assigned_to_user_id: 'admin-1',
+      });
 
       const result = await service.updateTicket('ticket-1', 'admin-1', {
         status: TicketStatus.PROCESSING,

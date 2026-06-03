@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { SosService } from './sos.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,10 +23,7 @@ describe('SosService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SosService,
-        { provide: PrismaService, useValue: mockPrisma },
-      ],
+      providers: [SosService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<SosService>(SosService);
@@ -40,7 +38,11 @@ describe('SosService', () => {
   describe('createSos', () => {
     it('should create an active SOS alert', async () => {
       const dto = { latitude: 10.5, longitude: 20.6, tourId: 'tour-1' };
-      mockPrisma.sos_alerts.create.mockResolvedValue({ id: 'sos-1', ...dto, status: 'active' });
+      mockPrisma.sos_alerts.create.mockResolvedValue({
+        id: 'sos-1',
+        ...dto,
+        status: 'active',
+      });
 
       const result = await service.createSos('user-1', dto);
 
@@ -70,7 +72,9 @@ describe('SosService', () => {
 
   describe('getSosAlerts', () => {
     it('should retrieve list of SOS alerts sorted by created_at', async () => {
-      mockPrisma.sos_alerts.findMany.mockResolvedValue([{ id: 'sos-1', status: 'active' }]);
+      mockPrisma.sos_alerts.findMany.mockResolvedValue([
+        { id: 'sos-1', status: 'active' },
+      ]);
 
       const result = await service.getSosAlerts();
 
@@ -84,12 +88,20 @@ describe('SosService', () => {
     it('should throw NotFoundException if SOS alert does not exist', async () => {
       mockPrisma.sos_alerts.findUnique.mockResolvedValue(null);
 
-      await expect(service.resolveSos('invalid-id', 'admin-1', 'Done')).rejects.toThrow(NotFoundException);
+      await expect(
+        service.resolveSos('invalid-id', 'admin-1', 'Done'),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should resolve the SOS alert and log the action', async () => {
-      mockPrisma.sos_alerts.findUnique.mockResolvedValue({ id: 'sos-1', status: 'active' });
-      mockPrisma.sos_alerts.update.mockResolvedValue({ id: 'sos-1', status: 'resolved' });
+      mockPrisma.sos_alerts.findUnique.mockResolvedValue({
+        id: 'sos-1',
+        status: 'active',
+      });
+      mockPrisma.sos_alerts.update.mockResolvedValue({
+        id: 'sos-1',
+        status: 'resolved',
+      });
 
       const result = await service.resolveSos('sos-1', 'admin-1', 'Rescued');
 

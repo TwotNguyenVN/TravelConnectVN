@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ResolveDisputeDto } from './dto/disputes.dto';
 import { Prisma } from '@prisma/client';
@@ -7,18 +11,26 @@ import { Prisma } from '@prisma/client';
 export class DisputesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createDispute(tourRequestId: string, raisedByUserId: string, reason: string) {
+  async createDispute(
+    tourRequestId: string,
+    raisedByUserId: string,
+    reason: string,
+  ) {
     const tourRequest = await this.prisma.tour_requests.findUnique({
       where: { id: tourRequestId },
       include: { tours: true },
     });
 
     if (!tourRequest) {
-      throw new NotFoundException(`Không tìm thấy booking đặt tour với mã: ${tourRequestId}`);
+      throw new NotFoundException(
+        `Không tìm thấy booking đặt tour với mã: ${tourRequestId}`,
+      );
     }
 
     if (tourRequest.status === 'disputed') {
-      throw new BadRequestException('Booking đặt tour này đã ở trong trạng thái tranh chấp.');
+      throw new BadRequestException(
+        'Booking đặt tour này đã ở trong trạng thái tranh chấp.',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {
@@ -103,17 +115,19 @@ export class DisputesService {
     });
 
     if (!dispute) {
-      throw new NotFoundException(`Không tìm thấy tranh chấp với mã: ${disputeId}`);
+      throw new NotFoundException(
+        `Không tìm thấy tranh chấp với mã: ${disputeId}`,
+      );
     }
 
     const tourId = dispute.tour_requests.tour_id;
     const tourGuideId = dispute.tour_requests.tours.guide_profile_id;
-    
+
     // Tìm profile của hướng dẫn viên để lấy user_id
     const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { id: tourGuideId },
     });
-    
+
     const guideUserId = guideProfile?.user_id;
     const customerUserId = dispute.tour_requests.user_id;
 
@@ -160,7 +174,11 @@ export class DisputesService {
     });
   }
 
-  async resolveDispute(id: string, resolvedByUserId: string, dto: ResolveDisputeDto) {
+  async resolveDispute(
+    id: string,
+    resolvedByUserId: string,
+    dto: ResolveDisputeDto,
+  ) {
     const dispute = await this.prisma.tour_disputes.findUnique({
       where: { id },
       include: { tour_requests: true },
@@ -171,7 +189,9 @@ export class DisputesService {
     }
 
     if (dispute.status === 'resolved') {
-      throw new BadRequestException('Tranh chấp này đã được giải quyết từ trước.');
+      throw new BadRequestException(
+        'Tranh chấp này đã được giải quyết từ trước.',
+      );
     }
 
     const refundAmount = dto.refundAmount || 0;
