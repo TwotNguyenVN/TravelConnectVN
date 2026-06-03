@@ -13,6 +13,7 @@ export const adminApi = {
   updateUserStatus: (id: string, data: any) => api.patch(`/admin/users/${id}/status`, data),
   assignRole: (id: string, data: any) => api.post(`/admin/users/${id}/roles`, data),
   revokeRole: (userId: string, role: string) => api.delete(`/admin/users/${userId}/roles/${role}`),
+  createStaff: (data: any) => api.post('/admin/staff', data),
 
   // Reports
   getReports: (params: any) => api.get('/admin/reports', { params }),

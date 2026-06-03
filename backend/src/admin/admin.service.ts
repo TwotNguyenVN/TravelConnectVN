@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { UserStatus, UpdateUserStatusDto, AssignRoleDto, ModerationDto, ProcessReportDto, ProcessVerificationDto } from './dto/admin.dto';
+import { SupabaseService } from '../supabase/supabase.service';
+import { UserStatus, UpdateUserStatusDto, AssignRoleDto, ModerationDto, ProcessReportDto, ProcessVerificationDto, CreateStaffDto } from './dto/admin.dto';
 
 @Injectable()
 export class AdminService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private supabaseService: SupabaseService,
+  ) {}
 
   async getDashboardStats() {
     const [userCount, tourCount, companionCount, reportCount, pendingVerificationCount, totalRevenue] = await Promise.all([
@@ -768,6 +772,111 @@ export class AdminService {
       settledCount: transactionsToSettle.length,
       grossAmount: totalSettledAmount,
       netAmount: netPaid
+    };
+  }
+
+  async createStaff(dto: CreateStaffDto, adminId: string) {
+    const adminClient = this.supabaseService.getAdminClient();
+    const { data, error } = await adminClient.auth.admin.createUser({
+      email: dto.email,
+      password: dto.password,
+      email_confirm: true,
+      user_metadata: { full_name: dto.fullName }
+    });
+
+    if (error) {
+      throw new BadRequestException(error.message);
+    }
+
+    const userId = data.user.id;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Upsert public_users to ensure it exists instantly
+      const publicUser = await tx.public_users.upsert({
+        where: { id: userId },
+        update: {
+          email: dto.email,
+          full_name: dto.fullName
+        },
+        create: {
+          id: userId,
+          email: dto.email,
+          full_name: dto.fullName,
+          status: 'active'
+        }
+      });
+
+      // 2. Assign the chosen role
+      const alreadyHasRole = await tx.user_roles.findUnique({
+        where: {
+          user_id_role_code: { user_id: userId, role_code: dto.roleCode }
+        }
+      });
+
+      if (!alreadyHasRole) {
+        await tx.user_roles.create({
+          data: {
+            user_id: userId,
+            role_code: dto.roleCode,
+            assigned_by: adminId
+          }
+        });
+      }
+
+      // Also give USER role by default
+      const alreadyHasUserRole = await tx.user_roles.findUnique({
+        where: {
+          user_id_role_code: { user_id: userId, role_code: 'USER' }
+        }
+      });
+
+      if (!alreadyHasUserRole) {
+        await tx.user_roles.create({
+          data: {
+            user_id: userId,
+            role_code: 'USER',
+            assigned_by: adminId
+          }
+        });
+      }
+
+      // 3. Create change log
+      await tx.user_role_change_logs.create({
+        data: {
+          target_user_id: userId,
+          changed_role_code: dto.roleCode,
+          action_type: 'assign',
+          changed_by_user_id: adminId,
+          note: `Tạo tài khoản nhân viên mới với vai trò: ${dto.roleCode}`,
+          old_snapshot: [],
+          new_snapshot: [{ role_code: 'USER' }, { role_code: dto.roleCode }]
+        }
+      });
+
+      // 4. Create admin activity log
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'user_management',
+          entity_type: 'users',
+          entity_pk: userId,
+          action_type: 'create_staff',
+          reason: `Tạo tài khoản nhân viên mới. Email: ${dto.email}, Quyền: ${dto.roleCode}`,
+          new_data: {
+            email: dto.email,
+            full_name: dto.fullName,
+            role_code: dto.roleCode
+          }
+        }
+      });
+
+      return publicUser;
+    });
+
+    return {
+      success: true,
+      message: `Tạo tài khoản nhân viên ${dto.fullName} thành công`,
+      data: result
     };
   }
 }
