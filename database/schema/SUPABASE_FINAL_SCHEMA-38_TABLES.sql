@@ -2302,4 +2302,7 @@ on public.user_role_change_logs for insert
 to authenticated
 with check (public.is_system_admin(auth.uid()) or public.is_backoffice(auth.uid()));
 
+-- Add guide_settled column to payment_transactions
+ALTER TABLE public.payment_transactions ADD COLUMN IF NOT EXISTS guide_settled BOOLEAN NOT NULL DEFAULT false;
+
 commit;

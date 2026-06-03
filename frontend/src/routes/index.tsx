@@ -9,6 +9,7 @@ import { FinanceLayout } from '../layouts/FinanceLayout';
 import { FinanceDashboardPage } from '../pages/finance/FinanceDashboardPage';
 import { FinanceRefundsPage } from '../pages/finance/FinanceRefundsPage';
 import { FinanceTransactionsPage } from '../pages/finance/FinanceTransactionsPage';
+import { FinanceSettlementsPage } from '../pages/finance/FinanceSettlementsPage';
 
 import { HomePage } from '../pages/public/HomePage';
 import { TourListPage } from '../pages/public/TourListPage';
@@ -196,6 +197,7 @@ export const router = createBrowserRouter([
       { index: true, element: <FinanceDashboardPage /> },
       { path: 'refunds', element: <FinanceRefundsPage /> },
       { path: 'transactions', element: <FinanceTransactionsPage /> },
+      { path: 'settlements', element: <FinanceSettlementsPage /> },
     ],
   },
 ]);

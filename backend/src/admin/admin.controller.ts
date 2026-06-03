@@ -253,4 +253,20 @@ export class AdminController {
   ) {
     return this.adminService.processRefund(id, body.action, body.note);
   }
+
+  // Guide Settlements
+  @Get('guides/settlements')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  getGuideSettlements() {
+    return this.adminService.getGuideSettlements();
+  }
+
+  @Post('guides/:id/settle')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  settleGuideTransactions(
+    @Param('id') id: string,
+    @Req() req: any,
+  ) {
+    return this.adminService.settleGuideTransactions(id, req.user.id);
+  }
 }

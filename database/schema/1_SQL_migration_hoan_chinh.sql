@@ -1143,3 +1143,6 @@ drop trigger if exists trg_sync_notification_read_at on public.notifications;
 create trigger trg_sync_notification_read_at
 before update on public.notifications
 for each row execute function public.sync_notification_read_at();
+
+-- Add guide_settled column to payment_transactions
+ALTER TABLE public.payment_transactions ADD COLUMN IF NOT EXISTS guide_settled BOOLEAN NOT NULL DEFAULT false;

@@ -644,4 +644,130 @@ export class AdminService {
 
     return { success: true, message: action === 'approve' ? 'Đã hoàn tiền thành công' : 'Đã từ chối hoàn tiền' };
   }
+
+  // Guide Settlements
+  async getGuideSettlements() {
+    const guides = await this.prisma.guide_profiles.findMany({
+      where: { deleted_at: null },
+      include: {
+        users: {
+          select: {
+            id: true,
+            full_name: true,
+            email: true,
+            phone: true,
+            bank_id: true,
+            account_no: true,
+            account_name: true
+          }
+        }
+      }
+    });
+
+    const settlements = await Promise.all(guides.map(async (guide) => {
+      const unpaidTransactions = await this.prisma.payment_transactions.findMany({
+        where: {
+          status: 'paid',
+          guide_settled: false,
+          tour_requests: {
+            tours: {
+              guide_profile_id: guide.id
+            }
+          }
+        },
+        select: {
+          id: true,
+          amount: true,
+          transaction_code: true,
+          created_at: true
+        }
+      });
+
+      const totalUnpaid = unpaidTransactions.reduce((sum, tx) => sum + Number(tx.amount), 0);
+      const commissionFee = totalUnpaid * 0.1;
+      const netPayable = totalUnpaid * 0.9;
+
+      return {
+        guideProfileId: guide.id,
+        guideUserId: guide.user_id,
+        fullName: guide.users.full_name,
+        email: guide.users.email,
+        phone: guide.users.phone,
+        bankId: guide.users.bank_id,
+        accountNo: guide.users.account_no,
+        accountName: guide.users.account_name,
+        unsettledTxCount: unpaidTransactions.length,
+        totalUnpaidAmount: totalUnpaid,
+        commissionFee,
+        netPayable,
+        transactions: unpaidTransactions
+      };
+    }));
+
+    return settlements;
+  }
+
+  async settleGuideTransactions(guideProfileId: string, adminId: string) {
+    const guide = await this.prisma.guide_profiles.findUnique({
+      where: { id: guideProfileId },
+      include: { users: { select: { full_name: true } } }
+    });
+    if (!guide) throw new NotFoundException('Không tìm thấy thông tin Hướng dẫn viên');
+
+    const transactionsToSettle = await this.prisma.payment_transactions.findMany({
+      where: {
+        status: 'paid',
+        guide_settled: false,
+        tour_requests: {
+          tours: {
+            guide_profile_id: guideProfileId
+          }
+        }
+      }
+    });
+
+    if (transactionsToSettle.length === 0) {
+      throw new BadRequestException('Không có giao dịch nào cần quyết toán cho Hướng dẫn viên này');
+    }
+
+    const totalSettledAmount = transactionsToSettle.reduce((sum, tx) => sum + Number(tx.amount), 0);
+    const netPaid = totalSettledAmount * 0.9;
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      const updateRes = await tx.payment_transactions.updateMany({
+        where: {
+          id: { in: transactionsToSettle.map(t => t.id) }
+        },
+        data: {
+          guide_settled: true
+        }
+      });
+
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'finance_settlement',
+          entity_type: 'guide_profiles',
+          entity_pk: guideProfileId,
+          action_type: 'settle_guide_income',
+          reason: `Quyết toán thu nhập HDV ${guide.users.full_name}. Tổng doanh thu: ${totalSettledAmount}đ. Thực nhận (90%): ${netPaid}đ.`,
+          new_data: {
+            settledTransactionIds: transactionsToSettle.map(t => t.id),
+            grossAmount: totalSettledAmount,
+            netAmount: netPaid
+          }
+        }
+      });
+
+      return updateRes;
+    });
+
+    return {
+      success: true,
+      message: `Quyết toán thành công cho HDV ${guide.users.full_name}`,
+      settledCount: transactionsToSettle.length,
+      grossAmount: totalSettledAmount,
+      netAmount: netPaid
+    };
+  }
 }
