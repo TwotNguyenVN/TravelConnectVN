@@ -220,4 +220,20 @@ export class AdminController {
       module,
     });
   }
+
+  // Refund Management
+  @Get('refunds/pending')
+  @Roles(Role.SYSTEM_ADMIN)
+  getPendingRefunds() {
+    return this.adminService.getPendingRefunds();
+  }
+
+  @Post('refunds/:id/process')
+  @Roles(Role.SYSTEM_ADMIN)
+  processRefund(
+    @Param('id') id: string,
+    @Body() body: { action: 'approve' | 'reject'; note?: string },
+  ) {
+    return this.adminService.processRefund(id, body.action, body.note);
+  }
 }

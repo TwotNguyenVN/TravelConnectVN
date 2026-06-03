@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { SettleExpenseDto } from './dto/settle-expense.dto';
@@ -321,45 +321,158 @@ export class TripExpensesService {
   ): Promise<ApiResponse<any>> {
     await this.validateAccess(userId, postId);
 
-    // Tìm tất cả các splits chưa quyết toán của con nợ (debtorId)
-    // nằm trong các khoản chi của chủ nợ (creditorId) thuộc chuyến đi này
-    const pendingSplits = await this.prisma.trip_expense_splits.findMany({
-      where: {
-        user_id: data.debtorId,
-        status: 'pending',
-        expense: {
-          post_id: postId,
-          paid_by_user_id: data.creditorId,
-        },
+    // 1. Lấy dữ liệu expenses để tính toán netBalance thực tế giống getExpenses
+    const expenses = await this.prisma.trip_expenses.findMany({
+      where: { post_id: postId },
+      include: { splits: true },
+    });
+
+    const post = await this.prisma.companion_posts.findUnique({
+      where: { id: postId },
+      include: {
+        companion_requests: { where: { status: 'approved' } },
       },
     });
 
-    if (pendingSplits.length === 0) {
+    if (!post) throw new NotFoundException('Không tìm thấy bài đăng');
+
+    const allMemberIds = [post.user_id, ...post.companion_requests.map((r) => r.user_id)];
+
+    const memberBalances = allMemberIds.map((memberId) => {
+      const pendingPaid = expenses.reduce((sum, expense) => {
+        if (expense.paid_by_user_id !== memberId) return sum;
+        return sum + expense.splits.filter((s) => s.status === 'pending').reduce((sSum, s) => sSum + Number(s.amount), 0);
+      }, 0);
+
+      const pendingShare = expenses.reduce((sum, expense) => {
+        const myPendingSplit = expense.splits.find((s) => s.user_id === memberId && s.status === 'pending');
+        return sum + (myPendingSplit ? Number(myPendingSplit.amount) : 0);
+      }, 0);
+
       return {
-        success: true,
-        message: 'Không có khoản nợ nào cần quyết toán giữa hai thành viên này',
+        userId: memberId,
+        netBalance: pendingPaid - pendingShare,
       };
+    });
+
+    // 2. Chạy thuật toán Greedy để tìm settlement tương ứng giữa debtorId và creditorId
+    const creditors = memberBalances.filter((m) => m.netBalance > 0.01).map((m) => ({ ...m }));
+    const debtors = memberBalances.filter((m) => m.netBalance < -0.01).map((m) => ({ ...m, netBalance: Math.abs(m.netBalance) }));
+
+    let settleAmount = 0;
+    let cIdx = 0;
+    let dIdx = 0;
+
+    while (cIdx < creditors.length && dIdx < debtors.length) {
+      const creditor = creditors[cIdx];
+      const debtor = debtors[dIdx];
+      const amount = Math.min(creditor.netBalance, debtor.netBalance);
+
+      if (debtor.userId === data.debtorId && creditor.userId === data.creditorId) {
+        settleAmount = Math.round(amount);
+        break;
+      }
+
+      creditor.netBalance -= amount;
+      debtor.netBalance -= amount;
+      if (creditor.netBalance <= 0.01) cIdx++;
+      if (debtor.netBalance <= 0.01) dIdx++;
     }
 
-    // Đánh dấu tất cả các splits này là settled
-    await this.prisma.trip_expense_splits.updateMany({
-      where: {
-        user_id: data.debtorId,
-        status: 'pending',
-        expense: {
-          post_id: postId,
-          paid_by_user_id: data.creditorId,
+    if (settleAmount <= 0) {
+      throw new BadRequestException('Không tìm thấy khoản nợ hợp lệ cần quyết toán giữa hai thành viên này');
+    }
+
+    // 3. Thực hiện khấu trừ công nợ trong Database Transaction
+    await this.prisma.$transaction(async (tx) => {
+      // A. Trừ dần nợ của debtorId (pending splits của debtorId trong chuyến đi)
+      const debtorSplits = await tx.trip_expense_splits.findMany({
+        where: {
+          user_id: data.debtorId,
+          status: 'pending',
+          expense: { post_id: postId },
         },
-      },
-      data: {
-        status: 'settled',
-        settled_at: new Date(),
-      },
+        include: { expense: true },
+        orderBy: [{ expense: { expense_date: 'asc' } }],
+      });
+
+      let remainingDebtorAmount = settleAmount;
+      for (const split of debtorSplits) {
+        if (remainingDebtorAmount <= 0) break;
+
+        const splitAmount = Number(split.amount);
+        if (splitAmount <= remainingDebtorAmount) {
+          // Settle toàn bộ split này
+          await tx.trip_expense_splits.update({
+            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            data: { status: 'settled', settled_at: new Date() },
+          });
+          remainingDebtorAmount -= splitAmount;
+        } else {
+          // Chia nhỏ split này ra
+          await tx.trip_expense_splits.update({
+            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            data: { amount: splitAmount - remainingDebtorAmount },
+          });
+          await tx.trip_expense_splits.create({
+            data: {
+              expense_id: split.expense_id,
+              user_id: split.user_id,
+              amount: remainingDebtorAmount,
+              status: 'settled',
+              settled_at: new Date(),
+            },
+          });
+          remainingDebtorAmount = 0;
+        }
+      }
+
+      // B. Trừ dần có của creditorId (tất cả pending splits của người khác thuộc hóa đơn do creditorId trả tiền)
+      const creditorSplits = await tx.trip_expense_splits.findMany({
+        where: {
+          status: 'pending',
+          expense: {
+            post_id: postId,
+            paid_by_user_id: data.creditorId,
+          },
+        },
+        include: { expense: true },
+        orderBy: [{ expense: { expense_date: 'asc' } }],
+      });
+
+      let remainingCreditorAmount = settleAmount;
+      for (const split of creditorSplits) {
+        if (remainingCreditorAmount <= 0) break;
+
+        const splitAmount = Number(split.amount);
+        if (splitAmount <= remainingCreditorAmount) {
+          await tx.trip_expense_splits.update({
+            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            data: { status: 'settled', settled_at: new Date() },
+          });
+          remainingCreditorAmount -= splitAmount;
+        } else {
+          await tx.trip_expense_splits.update({
+            where: { expense_id_user_id: { expense_id: split.expense_id, user_id: split.user_id } },
+            data: { amount: splitAmount - remainingCreditorAmount },
+          });
+          await tx.trip_expense_splits.create({
+            data: {
+              expense_id: split.expense_id,
+              user_id: split.user_id,
+              amount: remainingCreditorAmount,
+              status: 'settled',
+              settled_at: new Date(),
+            },
+          });
+          remainingCreditorAmount = 0;
+        }
+      }
     });
 
     return {
       success: true,
-      message: 'Quyết toán nợ thành công',
+      message: `Quyết toán thành công số tiền ${settleAmount.toLocaleString()} đ`,
     };
   }
 
