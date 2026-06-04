@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
@@ -91,3 +92,93 @@ describe('AdminService - analyzeContent', () => {
     expect(result.highlights[1].text).toBe('test@example.com');
   });
 });
+
+describe('AdminService - updateTransactionStatus', () => {
+  let service: AdminService;
+  let mockPrisma: any;
+  let mockSupabase: any;
+  let mockConfig: any;
+
+  beforeEach(async () => {
+    mockPrisma = {
+      payment_transactions: {
+        findUnique: jest.fn(),
+        update: jest.fn(),
+        findMany: jest.fn(),
+      },
+      tour_requests: {
+        findUnique: jest.fn(),
+        update: jest.fn(),
+      },
+      admin_activity_logs: {
+        create: jest.fn(),
+      },
+      $transaction: jest.fn((callback) => callback(mockPrisma)),
+    };
+    mockSupabase = {};
+    mockConfig = {
+      get: jest.fn().mockReturnValue('mock-api-key'),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: SupabaseService, useValue: mockSupabase },
+        { provide: ConfigService, useValue: mockConfig },
+      ],
+    }).compile();
+
+    service = module.get<AdminService>(AdminService);
+  });
+
+  it('should throw NotFoundException if transaction is not found', async () => {
+    mockPrisma.payment_transactions.findUnique.mockResolvedValue(null);
+    await expect(
+      service.updateTransactionStatus('tx-1', 'paid', 'admin-1'),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('should update status to paid and update tour_request to paid if total amount matched', async () => {
+    const mockTx = {
+      id: 'tx-1',
+      status: 'pending',
+      amount: 100000,
+      tour_request_id: 'tr-1',
+      paid_at: null,
+    };
+    const mockRequest = {
+      id: 'tr-1',
+      price_at_booking: 100000,
+      participant_count: 1,
+      tours: { price: 100000 },
+    };
+
+    mockPrisma.payment_transactions.findUnique.mockResolvedValue(mockTx);
+    mockPrisma.payment_transactions.update.mockResolvedValue({
+      ...mockTx,
+      status: 'paid',
+    });
+    mockPrisma.tour_requests.findUnique.mockResolvedValue(mockRequest);
+    mockPrisma.payment_transactions.findMany.mockResolvedValue([
+      { id: 'tx-1', amount: 100000, status: 'paid' },
+    ]);
+
+    const result = await service.updateTransactionStatus(
+      'tx-1',
+      'paid',
+      'admin-1',
+    );
+    expect(result.status).toBe('paid');
+    expect(mockPrisma.payment_transactions.update).toHaveBeenCalledWith({
+      where: { id: 'tx-1' },
+      data: expect.objectContaining({ status: 'paid' }),
+    });
+    expect(mockPrisma.tour_requests.update).toHaveBeenCalledWith({
+      where: { id: 'tr-1' },
+      data: { status: 'paid' },
+    });
+    expect(mockPrisma.admin_activity_logs.create).toHaveBeenCalled();
+  });
+});
+

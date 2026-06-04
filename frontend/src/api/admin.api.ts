@@ -36,6 +36,8 @@ export const adminApi = {
   getPendingRefunds: () => api.get('/admin/refunds/pending'),
   processRefund: (id: string, data: Record<string, unknown>) => api.post(`/admin/refunds/${id}/process`, data),
   getTransactions: (params?: Record<string, unknown>) => api.get('/admin/transactions', { params }),
+  updateTransactionStatus: (id: string, status: string) => api.patch(`/admin/transactions/${id}/status`, { status }),
+
 
   // SOS Alerts
   getSosAlerts: () => api.get('/admin/sos'),

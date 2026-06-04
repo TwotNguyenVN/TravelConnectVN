@@ -69,3 +69,9 @@ export class AnalyzeContentDto {
   @IsString()
   text: string;
 }
+
+export class UpdateTransactionStatusDto {
+  @IsEnum(['pending', 'paid', 'failed', 'cancelled'])
+  status: string;
+}
+

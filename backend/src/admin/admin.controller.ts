@@ -23,7 +23,9 @@ import {
   ProcessVerificationDto,
   CreateStaffDto,
   AnalyzeContentDto,
+  UpdateTransactionStatusDto,
 } from './dto/admin.dto';
+
 
 @Controller('admin')
 @UseGuards(AuthGuard, RoleGuard)
@@ -251,6 +253,17 @@ export class AdminController {
       search,
     });
   }
+
+  @Patch('transactions/:id/status')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  updateTransactionStatus(
+    @Param('id') id: string,
+    @Body() dto: UpdateTransactionStatusDto,
+    @Req() req: any,
+  ) {
+    return this.adminService.updateTransactionStatus(id, dto.status, req.user.id);
+  }
+
 
   // Refund Management
   @Get('refunds/pending')

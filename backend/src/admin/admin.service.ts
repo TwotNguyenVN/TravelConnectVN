@@ -717,6 +717,97 @@ export class AdminService {
     return { items, total };
   }
 
+  async updateTransactionStatus(
+    id: string,
+    status: string,
+    adminId: string,
+  ) {
+    const transaction = await this.prisma.payment_transactions.findUnique({
+      where: { id },
+    });
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    const oldStatus = transaction.status;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const updatedTx = await tx.payment_transactions.update({
+        where: { id },
+        data: {
+          status,
+          paid_at: status === 'paid' ? new Date() : transaction.paid_at,
+        },
+      });
+
+      if (status === 'paid') {
+        const tourRequest = await tx.tour_requests.findUnique({
+          where: { id: transaction.tour_request_id },
+          include: { tours: true },
+        });
+
+        if (tourRequest) {
+          const paidTransactions = await tx.payment_transactions.findMany({
+            where: {
+              tour_request_id: transaction.tour_request_id,
+              status: 'paid',
+            },
+          });
+
+          const currentPaidSum = paidTransactions.reduce(
+            (sum, t) => sum + Number(t.amount),
+            0,
+          );
+
+          const totalPaid = currentPaidSum;
+
+          const price = tourRequest.price_at_booking
+            ? Number(tourRequest.price_at_booking)
+            : tourRequest.schedule_id
+              ? Number(
+                  (
+                    await tx.tour_schedules.findUnique({
+                      where: { id: tourRequest.schedule_id },
+                    })
+                  )?.price || tourRequest.tours.price,
+                )
+              : Number(tourRequest.tours.price);
+          const totalAmount = price * tourRequest.participant_count;
+
+          let targetStatus = 'approved';
+          if (totalPaid >= totalAmount) {
+            targetStatus = 'paid';
+          } else if (totalPaid > 0) {
+            targetStatus = 'partially_paid';
+          }
+
+          await tx.tour_requests.update({
+            where: { id: transaction.tour_request_id },
+            data: { status: targetStatus },
+          });
+        }
+      }
+
+      await tx.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'transaction_management',
+          entity_type: 'payment_transactions',
+          entity_pk: id,
+          action_type: 'update_status',
+          reason: 'Manual reconciliation / admin override',
+          old_data: { status: oldStatus },
+          new_data: { status },
+        },
+      });
+
+      return updatedTx;
+    });
+
+    return updated;
+  }
+
+
   // Refund Management
   async getPendingRefunds() {
     return this.prisma.payment_transactions.findMany({
