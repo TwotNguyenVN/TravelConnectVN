@@ -108,7 +108,9 @@ export class PaymentsController {
       res.end(pdfBuffer);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      res.status(500).json({ success: false, message: 'Failed to generate PDF' });
+      res
+        .status(500)
+        .json({ success: false, message: 'Failed to generate PDF' });
     }
   }
 

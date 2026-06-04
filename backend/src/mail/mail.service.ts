@@ -48,7 +48,9 @@ export class MailService {
           },
         ],
       });
-      this.logger.log(`Invoice email sent to ${to} [Message ID: ${info.messageId}]`);
+      this.logger.log(
+        `Invoice email sent to ${to} [Message ID: ${info.messageId}]`,
+      );
       if (info.messageId && info.messageId.includes('ethereal')) {
         this.logger.log(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
       }

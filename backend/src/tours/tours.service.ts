@@ -3,7 +3,10 @@ import {
   NotFoundException,
   BadRequestException,
   OnApplicationBootstrap,
+  Inject,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 
@@ -114,7 +117,10 @@ async function resolveShortLink(
 
 @Injectable()
 export class ToursService implements OnApplicationBootstrap {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   onApplicationBootstrap() {
     // Run the check immediately on startup
@@ -126,6 +132,15 @@ export class ToursService implements OnApplicationBootstrap {
       },
       12 * 60 * 60 * 1000,
     );
+  }
+
+  private async invalidateCache() {
+    try {
+      await this.cacheManager.clear();
+      console.log('Tours cache invalidated');
+    } catch (e) {
+      console.error('Failed to invalidate cache:', e);
+    }
   }
 
   async autoCompleteTours() {
@@ -881,7 +896,7 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // 2. Thực hiện tạo tour và các dữ liệu liên quan trong một transaction
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // 2.1 Tạo tour cơ bản
       const tour = await tx.tours.create({
         data: {
@@ -1059,6 +1074,8 @@ export class ToursService implements OnApplicationBootstrap {
 
       return tour;
     });
+    await this.invalidateCache();
+    return result;
   }
 
   async updateTour(userId: string, tourId: string, data: any) {
@@ -1103,7 +1120,7 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // 3. Thực hiện cập nhật trong một transaction
-    return this.prisma
+    const result = await this.prisma
       .$transaction(async (tx) => {
         // 3.1 Cập nhật thông tin cơ bản của tour
         const updateData: any = {};
@@ -1302,6 +1319,8 @@ export class ToursService implements OnApplicationBootstrap {
         }
         throw error;
       });
+    await this.invalidateCache();
+    return result;
   }
 
   async getTourDetailForGuide(userId: string, tourId: string) {
@@ -1506,6 +1525,7 @@ export class ToursService implements OnApplicationBootstrap {
       },
     });
 
+    await this.invalidateCache();
     return { success: true, message: 'Xóa tour thành công' };
   }
 
@@ -1553,7 +1573,7 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // 3. Tạo mới
-    return this.prisma.tour_schedules.create({
+    const result = await this.prisma.tour_schedules.create({
       data: {
         tour_id: tourId,
         start_date: new Date(data.startDate),
@@ -1562,6 +1582,8 @@ export class ToursService implements OnApplicationBootstrap {
         status: 'available',
       },
     });
+    await this.invalidateCache();
+    return result;
   }
 
   async updateTourSchedule(
@@ -1641,7 +1663,8 @@ export class ToursService implements OnApplicationBootstrap {
               where: { id: tour.guide_profile_id },
               data: {
                 reputation_score: newRep,
-                visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status,
+                visibility_status:
+                  newRep < 50 ? 'hidden' : guide.visibility_status,
               },
             });
             if (newRep < 50) {
@@ -1675,40 +1698,50 @@ export class ToursService implements OnApplicationBootstrap {
         },
       });
 
-      for (const req of paidRequests) {
-        await this.prisma.tour_requests.update({
-          where: { id: req.id },
+      if (paidRequests.length > 0) {
+        const reqIds = paidRequests.map((r) => r.id);
+
+        await this.prisma.tour_requests.updateMany({
+          where: { id: { in: reqIds } },
           data: {
             status: 'refund_pending',
             cancellation_note: 'Lịch trình tour đã bị hủy. Đang chờ hoàn tiền.',
           },
         });
 
-        // Tính tổng tiền đã thanh toán để hoàn lại
         const paidTransactions =
           await this.prisma.payment_transactions.findMany({
-            where: { tour_request_id: req.id, status: 'paid' },
+            where: { tour_request_id: { in: reqIds }, status: 'paid' },
           });
-        const totalPaid = paidTransactions.reduce(
-          (sum, t) => sum + Number(t.amount),
-          0,
-        );
 
-        if (totalPaid > 0) {
-          await this.prisma.payment_transactions.create({
-            data: {
+        const refundsToCreate: any[] = [];
+        for (const req of paidRequests) {
+          const txs = paidTransactions.filter(
+            (t) => t.tour_request_id === req.id,
+          );
+          const totalPaid = txs.reduce((sum, t) => sum + Number(t.amount), 0);
+
+          if (totalPaid > 0) {
+            refundsToCreate.push({
               tour_request_id: req.id,
               user_id: req.user_id,
               amount: totalPaid,
               payment_method: 'vnpay',
               status: 'refund_pending',
               transaction_code: `REFUND-GUIDE-${req.id.substring(0, 8)}-${Date.now()}`,
-            },
+            });
+          }
+        }
+
+        if (refundsToCreate.length > 0) {
+          await this.prisma.payment_transactions.createMany({
+            data: refundsToCreate,
           });
         }
       }
     }
 
+    await this.invalidateCache();
     return updatedSchedule;
   }
 
@@ -1744,6 +1777,7 @@ export class ToursService implements OnApplicationBootstrap {
       where: { id: scheduleId },
     });
 
+    await this.invalidateCache();
     return { success: true, message: 'Xóa lịch thành công' };
   }
 }
