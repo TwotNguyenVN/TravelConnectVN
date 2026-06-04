@@ -30,8 +30,13 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { MaintenanceService, MaintenanceGuard } from './common/guards/maintenance.guard';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
+import { SosModule } from './sos/sos.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -72,13 +77,22 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     PaymentsModule,
     AiChatModule,
     TripExpensesModule,
+    SosModule,
+    TicketsModule,
+    DisputesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    MaintenanceService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: MaintenanceGuard,
     },
   ],
 })

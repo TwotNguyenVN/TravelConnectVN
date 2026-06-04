@@ -8,13 +8,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SocketGateway } from '../socket/socket.gateway';
+import { MailService } from '../mail/mail.service';
+import PDFDocument = require('pdfkit');
 
 @Injectable()
 export class PaymentsService {
   constructor(
-    private prisma: PrismaService,
-    private notificationsService: NotificationsService,
-    private socketGateway: SocketGateway,
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    private readonly socketGateway: SocketGateway,
+    private readonly mailService: MailService,
   ) {}
 
   private sortObject(obj: any): any {
@@ -346,6 +349,25 @@ export class PaymentsService {
               message: content,
               paymentStatus: paymentDesc,
             });
+
+            // 3. Generate PDF Invoice and Send Email to Customer
+            try {
+              const pdfBuffer = await this.generatePdfInvoiceBuffer(transaction.id);
+              const customerEmail = requestWithGuide.users_tour_requests_user_idTousers.email;
+              const customerNameFull = requestWithGuide.users_tour_requests_user_idTousers.full_name;
+              const invoiceNumber = `INV-${transaction.transaction_code || transaction.id.substring(0, 8)}`;
+              
+              if (customerEmail) {
+                await this.mailService.sendInvoiceEmail(
+                  customerEmail,
+                  customerNameFull || 'Quý khách',
+                  pdfBuffer,
+                  invoiceNumber
+                );
+              }
+            } catch (pdfErr) {
+              console.error('Error generating/sending PDF invoice:', pdfErr);
+            }
           }
         }
 
@@ -409,6 +431,219 @@ export class PaymentsService {
     return this.prisma.payment_transactions.update({
       where: { id },
       data: { status: 'cancelled' },
+    });
+  }
+
+  async generateInvoiceData(transactionId: string) {
+    const transaction = await this.prisma.payment_transactions.findUnique({
+      where: { id: transactionId },
+      include: {
+        users: true,
+        tour_requests: {
+          include: {
+            tours: {
+              include: {
+                guide_profiles: {
+                  include: { users: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Không tìm thấy giao dịch');
+    }
+
+    if (transaction.status !== 'paid') {
+      throw new BadRequestException('Chỉ có thể xuất hóa đơn cho giao dịch đã thanh toán');
+    }
+
+    const tour = transaction.tour_requests?.tours;
+    const customer = transaction.users;
+    const guide = tour?.guide_profiles?.users;
+    const amount = Number(transaction.amount);
+    const vatRate = 0.1;
+    const vatAmount = Math.round(amount * vatRate);
+    const totalWithVat = amount + vatAmount;
+
+    return {
+      invoiceNumber: `INV-${transaction.transaction_code || transaction.id.substring(0, 8)}`,
+      invoiceDate: transaction.paid_at || transaction.created_at,
+      customer: {
+        name: customer?.full_name || 'N/A',
+        email: customer?.email || 'N/A',
+        phone: customer?.phone || 'N/A',
+      },
+      tourInfo: {
+        title: tour?.title || 'N/A',
+        province: tour?.province || 'N/A',
+        guideName: guide?.full_name || 'N/A',
+      },
+      transactionCode: transaction.transaction_code,
+      paymentMethod: transaction.payment_method,
+      subtotal: amount,
+      vatRate: vatRate * 100,
+      vatAmount,
+      total: totalWithVat,
+      currency: 'VND',
+      companyInfo: {
+        name: 'TravelConnect Vietnam',
+        taxId: '0123456789',
+        address: 'TP. Hồ Chí Minh, Việt Nam',
+        email: 'contact@travelconnect.vn',
+      },
+    };
+  }
+
+  async getCashFlowForecast() {
+    const now = new Date();
+    const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    // Get upcoming tour bookings with paid status
+    const upcomingPaidRequests = await this.prisma.tour_requests.findMany({
+      where: {
+        status: { in: ['paid', 'completed'] },
+        tours: {
+          deleted_at: null,
+        },
+      },
+      include: {
+        tours: true,
+        tour_schedules: true,
+        payment_transactions: {
+          where: { status: 'paid' },
+        },
+      },
+    });
+
+    // Get pending refunds
+    const pendingRefunds = await this.prisma.payment_transactions.findMany({
+      where: {
+        status: 'refund_pending',
+      },
+    });
+
+    // Revenue from past 30 days (actual)
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const recentPaidTransactions = await this.prisma.payment_transactions.findMany({
+      where: {
+        status: 'paid',
+        paid_at: { gte: thirtyDaysAgo },
+      },
+    });
+
+    // Group by day for the past 30 days
+    const dailyRevenue: Record<string, number> = {};
+    for (const tx of recentPaidTransactions) {
+      const day = (tx.paid_at || tx.created_at).toISOString().split('T')[0];
+      dailyRevenue[day] = (dailyRevenue[day] || 0) + Number(tx.amount);
+    }
+
+    // Calculate upcoming revenue from booked tours
+    const upcomingRevenue: Record<string, number> = {};
+    for (const req of upcomingPaidRequests) {
+      const startDate = req.tour_schedules?.start_date || req.tours?.start_date;
+      if (startDate) {
+        const startDateObj = new Date(startDate);
+        if (startDateObj >= now && startDateObj <= thirtyDaysLater) {
+          const day = startDateObj.toISOString().split('T')[0];
+          const totalPaid = req.payment_transactions.reduce(
+            (sum, t) => sum + Number(t.amount),
+            0,
+          );
+          upcomingRevenue[day] = (upcomingRevenue[day] || 0) + totalPaid;
+        }
+      }
+    }
+
+    // Calculate pending refund total
+    const totalPendingRefunds = pendingRefunds.reduce(
+      (sum, t) => sum + Number(t.amount),
+      0,
+    );
+
+    // Summary stats
+    const totalRecentRevenue = Object.values(dailyRevenue).reduce((a, b) => a + b, 0);
+    const totalUpcomingRevenue = Object.values(upcomingRevenue).reduce((a, b) => a + b, 0);
+
+    return {
+      period: {
+        pastStart: thirtyDaysAgo.toISOString(),
+        now: now.toISOString(),
+        futureEnd: thirtyDaysLater.toISOString(),
+      },
+      summary: {
+        totalRecentRevenue,
+        totalUpcomingRevenue,
+        totalPendingRefunds,
+        netForecast: totalUpcomingRevenue - totalPendingRefunds,
+      },
+      dailyRevenue,
+      upcomingRevenue,
+      pendingRefundCount: pendingRefunds.length,
+    };
+  }
+
+  async generatePdfInvoiceBuffer(transactionId: string): Promise<Buffer> {
+    const data = await this.generateInvoiceData(transactionId);
+    
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50 });
+        const buffers: Buffer[] = [];
+        
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+        // Header
+        doc.fontSize(20).text(data.companyInfo.name, { align: 'center' });
+        doc.fontSize(10).text(data.companyInfo.address, { align: 'center' });
+        doc.text(`Email: ${data.companyInfo.email}`, { align: 'center' });
+        doc.moveDown();
+        
+        // Title
+        doc.fontSize(16).text('HOA DON THANH TOAN (VAT INVOICE)', { align: 'center' });
+        doc.moveDown();
+
+        // Invoice Info
+        doc.fontSize(10).text(`So hoa don: ${data.invoiceNumber}`);
+        doc.text(`Ngay: ${new Date(data.invoiceDate).toLocaleDateString('vi-VN')}`);
+        doc.text(`Ma giao dich: ${data.transactionCode || 'N/A'}`);
+        doc.text(`Phuong thuc: ${data.paymentMethod}`);
+        doc.moveDown();
+
+        // Customer Info
+        doc.fontSize(12).text('Thong tin khach hang:', { underline: true });
+        doc.fontSize(10).text(`Ho ten: ${data.customer.name}`);
+        doc.text(`Email: ${data.customer.email}`);
+        doc.text(`So dien thoai: ${data.customer.phone}`);
+        doc.moveDown();
+
+        // Tour Info
+        doc.fontSize(12).text('Thong tin Tour:', { underline: true });
+        doc.fontSize(10).text(`Ten Tour: ${data.tourInfo.title}`);
+        doc.text(`Dia diem: ${data.tourInfo.province}`);
+        doc.text(`Huong dan vien: ${data.tourInfo.guideName}`);
+        doc.moveDown();
+
+        // Financial Details
+        doc.fontSize(12).text('Chi tiet thanh toan:', { underline: true });
+        doc.fontSize(10).font('Helvetica').text(`Thanh tien: ${data.subtotal.toLocaleString('vi-VN')} VND`);
+        doc.text(`Thue VAT (${data.vatRate}%): ${data.vatAmount.toLocaleString('vi-VN')} VND`);
+        doc.fontSize(14).font('Helvetica-Bold').text(`Tong cong: ${data.total.toLocaleString('vi-VN')} VND`);
+        doc.font('Helvetica');
+        
+        // Footer
+        doc.moveDown(3);
+        doc.fontSize(10).font('Helvetica-Oblique').text('Cam on quy khach da su dung dich vu cua TravelConnect VN!', { align: 'center' });
+
+        doc.end();
+      } catch (err) {
+        reject(err);
+      }
     });
   }
 }
