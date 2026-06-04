@@ -70,4 +70,31 @@ export const adminApi = {
   // Soft Delete Recovery Console
   getDeletedItems: () => api.get('/admin/recovery/deleted'),
   restoreDeletedItem: (type: string, id: string) => api.post(`/admin/recovery/${type}/${id}/restore`),
+
+  // Phase 5: Maintenance Mode
+  getMaintenanceStatus: () => api.get('/admin/maintenance/status'),
+  toggleMaintenance: (enabled: boolean, bypassIps?: string[]) => api.post('/admin/maintenance/toggle', { enabled, bypassIps }),
+
+  // Phase 6: Anomaly Detection
+  getAnomalyAlerts: () => api.get('/admin/anomaly/alerts'),
+
+  // Phase 7: Report Heatmap
+  getReportHeatmapData: () => api.get('/admin/reports/heatmap'),
+
+  // Phase 8: FAQ & Quick Responses
+  getFaqItems: () => api.get('/admin/faq'),
+  createFaqItem: (data: { question: string; answer: string; category?: string }) => api.post('/admin/faq', data),
+  updateFaqItem: (id: string, data: { question?: string; answer?: string; category?: string }) => api.patch(`/admin/faq/${id}`, data),
+  deleteFaqItem: (id: string) => api.delete(`/admin/faq/${id}`),
+
+  // Phase 9: CSAT & SLA Analytics
+  getCsatAnalytics: () => api.get('/admin/analytics/csat'),
+
+  // Phase 10: Smart Reconciliation
+  reconcileTransactions: (formData: FormData) => api.post('/admin/finance/reconcile', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+
+  // Phase 11: Financial Export
+  exportFinancialReport: (params?: { startDate?: string; endDate?: string }) => api.get('/admin/finance/export', { params }),
 };

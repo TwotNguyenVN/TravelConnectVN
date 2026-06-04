@@ -8,13 +8,17 @@ import {
   Param,
   Query,
   UseGuards,
+  UploadedFile,
+  UseInterceptors,
   Req,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { MaintenanceService } from '../common/guards/maintenance.guard';
 import {
   UpdateUserStatusDto,
   AssignRoleDto,
@@ -29,7 +33,10 @@ import {
 @Controller('admin')
 @UseGuards(AuthGuard, RoleGuard)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly maintenanceService: MaintenanceService,
+  ) {}
 
   @Get('dashboard')
   @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR, Role.SUPPORT_STAFF)
@@ -326,5 +333,93 @@ export class AdminController {
     @Req() req: any,
   ) {
     return this.adminService.restoreDeletedItem(type, id, req.user.id);
+  }
+
+  // Phase 5: Maintenance Mode
+  @Get('settings/maintenance')
+  @Roles(Role.SYSTEM_ADMIN)
+  getMaintenanceStatus() {
+    return this.maintenanceService.getStatus();
+  }
+
+  @Post('settings/maintenance')
+  @Roles(Role.SYSTEM_ADMIN)
+  toggleMaintenance(@Body() dto: { enabled: boolean }, @Req() req: any) {
+    return this.maintenanceService.toggle(dto.enabled, req.user.id);
+  }
+
+  // Phase 6: Anomaly Detection
+  @Get('anomalies')
+  @Roles(Role.SYSTEM_ADMIN)
+  getAnomalyAlerts() {
+    return this.adminService.getAnomalyAlerts();
+  }
+
+  // Phase 7: Report Heatmap
+  @Get('reports/heatmap')
+  @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
+  getReportHeatmapData() {
+    return this.adminService.getReportHeatmapData();
+  }
+
+  // Phase 8: FAQ Management
+  @Get('faq')
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  getFaqItems() {
+    return this.adminService.getFaqItems();
+  }
+
+  @Post('faq')
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  createFaqItem(
+    @Body() dto: { question: string; answer: string; category?: string },
+    @Req() req: any,
+  ) {
+    return this.adminService.createFaqItem(dto, req.user.id);
+  }
+
+  @Patch('faq/:id')
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  updateFaqItem(
+    @Param('id') id: string,
+    @Body() dto: { question?: string; answer?: string; category?: string },
+  ) {
+    return this.adminService.updateFaqItem(id, dto);
+  }
+
+  @Delete('faq/:id')
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  deleteFaqItem(@Param('id') id: string) {
+    return this.adminService.deleteFaqItem(id);
+  }
+
+  // Phase 9: CSAT & SLA Analytics
+  @Get('analytics/csat')
+  @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
+  getCsatAnalytics() {
+    return this.adminService.getCsatAnalytics();
+  }
+
+  // Phase 10: Smart Reconciliation
+  @Post('finance/reconcile')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  @UseInterceptors(FileInterceptor('file'))
+  reconcileTransactions(@UploadedFile() file: any) {
+    if (!file) {
+      throw new Error('Vui lòng tải lên file sao kê');
+    }
+    return this.adminService.reconcileTransactions(file.buffer);
+  }
+
+  // Phase 11: Financial Export
+  @Get('finance/export')
+  @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
+  async exportFinancialReport(
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
+  ) {
+    // Return CSV string
+    const csv = await this.adminService.generateFinancialReport(startDate, endDate);
+    return { data: csv };
   }
 }

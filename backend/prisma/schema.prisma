@@ -1363,6 +1363,7 @@ model public_users {
   trip_expense_splits                                                   trip_expense_splits[]
   companion_reviews_written                                             companion_reviews[]           @relation("companion_reviewer")
   companion_reviews_received                                            companion_reviews[]           @relation("companion_host")
+  faq_created                                                           faq_items[]                   @relation("faq_creator")
 
   @@map("users")
   @@schema("public")
@@ -1584,6 +1585,20 @@ model tour_disputes {
   tour_requests       tour_requests @relation(fields: [tour_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   raised_by           public_users  @relation("dispute_creator", fields: [raised_by_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   resolved_by         public_users? @relation("dispute_resolver", fields: [resolved_by_user_id], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model faq_items {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question   String
+  answer     String
+  category   String?
+  created_by String?  @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  creator    public_users? @relation("faq_creator", fields: [created_by], references: [id], onUpdate: NoAction)
 
   @@schema("public")
 }

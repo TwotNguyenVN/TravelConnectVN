@@ -29,6 +29,8 @@ export const SupportSidebar: React.FC = () => {
     { to: '/support/reports', end: false, icon: '🚩', label: 'Báo cáo Vi phạm' },
     { to: '/support/disputes', end: false, icon: '⚖️', label: 'Tranh chấp Đặt Tour' },
     { to: '/support/broadcast', end: false, icon: '📢', label: 'Gửi Thông báo' },
+    { to: '/support/faq', end: false, icon: '💬', label: 'Quản lý FAQ' },
+    { to: '/support/analytics', end: false, icon: '📊', label: 'Phân tích CSAT' },
   ];
 
   return (
