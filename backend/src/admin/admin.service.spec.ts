@@ -113,7 +113,9 @@ describe('AdminService - updateTransactionStatus', () => {
       admin_activity_logs: {
         create: jest.fn(),
       },
-      $transaction: jest.fn((callback: (tx: any) => Promise<unknown>) => callback(mockPrisma) as Promise<unknown>),
+      $transaction: jest.fn((callback: (tx: any) => Promise<unknown>) =>
+        callback(mockPrisma),
+      ),
     };
     mockSupabase = {};
     mockConfig = {

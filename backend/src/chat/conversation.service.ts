@@ -400,25 +400,26 @@ export class ConversationService {
       return 0;
     }
 
-    let totalUnread = 0;
+    const unreadCounts = await Promise.all(
+      participants.map((p) =>
+        this.prisma.messages.count({
+          where: {
+            conversation_id: p.conversation_id,
+            sender_user_id: { not: userId },
+            deleted_at: null,
+            ...(p.last_read_at
+              ? {
+                  sent_at: {
+                    gt: p.last_read_at,
+                  },
+                }
+              : {}),
+          },
+        }),
+      ),
+    );
 
-    for (const p of participants) {
-      const unreadCount = await this.prisma.messages.count({
-        where: {
-          conversation_id: p.conversation_id,
-          sender_user_id: { not: userId },
-          deleted_at: null,
-          ...(p.last_read_at
-            ? {
-                sent_at: {
-                  gt: p.last_read_at,
-                },
-              }
-            : {}),
-        },
-      });
-      totalUnread += unreadCount;
-    }
+    let totalUnread = unreadCounts.reduce((sum, count) => sum + count, 0);
 
     return totalUnread;
   }

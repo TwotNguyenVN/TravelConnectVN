@@ -419,7 +419,10 @@ export class AdminController {
     @Query('endDate') endDate: string,
   ) {
     // Return CSV string
-    const csv = await this.adminService.generateFinancialReport(startDate, endDate);
+    const csv = await this.adminService.generateFinancialReport(
+      startDate,
+      endDate,
+    );
     return { data: csv };
   }
 }
