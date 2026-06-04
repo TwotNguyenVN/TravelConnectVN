@@ -438,33 +438,35 @@ export class AdminService {
         if (!guideProfileId && report.tour_id) {
           const tour = await tx.tours.findUnique({
             where: { id: report.tour_id },
-            include: { guide_profiles: true }
+            include: { guide_profiles: true },
           });
           if (tour?.guide_profiles) {
             guideProfileId = tour.guide_profiles.id;
           }
         }
         if (guideProfileId) {
-          const guide = await tx.guide_profiles.findUnique({ where: { id: guideProfileId } });
+          const guide = await tx.guide_profiles.findUnique({
+            where: { id: guideProfileId },
+          });
           if (guide) {
             const newRep = Math.max(0, guide.reputation_score - 15);
             await tx.guide_profiles.update({
               where: { id: guideProfileId },
               data: {
                 reputation_score: newRep,
-                visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status
-              }
+                visibility_status:
+                  newRep < 50 ? 'hidden' : guide.visibility_status,
+              },
             });
             if (newRep < 50) {
               await tx.public_users.update({
                 where: { id: guide.user_id },
-                data: { status: 'suspended' }
+                data: { status: 'suspended' },
               });
             }
           }
         }
       }
-
 
       await tx.report_processing_history.create({
         data: {
@@ -1395,7 +1397,8 @@ If no issues are found, flagged should be false, reason should be "No issues det
       const post = await this.prisma.companion_posts.findUnique({
         where: { id },
       });
-      if (!post) throw new NotFoundException('Không tìm thấy bài đăng ghép đoàn');
+      if (!post)
+        throw new NotFoundException('Không tìm thấy bài đăng ghép đoàn');
       const restored = await this.prisma.companion_posts.update({
         where: { id },
         data: { deleted_at: null },
@@ -1472,9 +1475,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
 
     for (const [actorId, logs] of Object.entries(actorGroups)) {
       // Check for bulk operations in 5 min windows
-      const recentBulk = logs.filter(
-        (l) => l.created_at >= fiveMinutesAgo,
-      );
+      const recentBulk = logs.filter((l) => l.created_at >= fiveMinutesAgo);
       if (recentBulk.length > 10) {
         const actorName = logs[0]?.users?.full_name || actorId;
         alerts.push({
@@ -1541,7 +1542,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
 
     for (const report of reports) {
       // By type
-      const type = 'unknown'; 
+      const type = 'unknown';
       typeDistribution[type] = (typeDistribution[type] || 0) + 1;
 
       // By week
@@ -1634,7 +1635,12 @@ If no issues are found, flagged should be false, reason should be "No issues det
     // Calculate average response/resolution time per staff
     const staffMetrics: Record<
       string,
-      { name: string; totalTime: number; count: number; totalSatisfaction: number }
+      {
+        name: string;
+        totalTime: number;
+        count: number;
+        totalSatisfaction: number;
+      }
     > = {};
 
     for (const ticket of resolvedTickets) {
@@ -1642,7 +1648,12 @@ If no issues are found, flagged should be false, reason should be "No issues det
       const staffName = ticket.assignee?.full_name || 'Chưa phân công';
 
       if (!staffMetrics[staffId]) {
-        staffMetrics[staffId] = { name: staffName, totalTime: 0, count: 0, totalSatisfaction: 0 };
+        staffMetrics[staffId] = {
+          name: staffName,
+          totalTime: 0,
+          count: 0,
+          totalSatisfaction: 0,
+        };
       }
 
       // Resolution time in hours
@@ -1660,7 +1671,8 @@ If no issues are found, flagged should be false, reason should be "No issues det
         staffId: id,
         name: m.name,
         ticketsResolved: m.count,
-        avgResolutionHours: m.count > 0 ? Math.round((m.totalTime / m.count) * 10) / 10 : 0,
+        avgResolutionHours:
+          m.count > 0 ? Math.round((m.totalTime / m.count) * 10) / 10 : 0,
       }))
       .sort((a, b) => b.ticketsResolved - a.ticketsResolved);
 
@@ -1789,7 +1801,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
     const rows = transactions
       .map(
         (t) =>
-          `${t.id},${t.created_at?.toISOString() || ''},${t.payment_method || ''},${t.amount || 0},${t.status},""`
+          `${t.id},${t.created_at?.toISOString() || ''},${t.payment_method || ''},${t.amount || 0},${t.status},""`,
       )
       .join('\n');
 

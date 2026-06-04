@@ -1641,7 +1641,8 @@ export class ToursService implements OnApplicationBootstrap {
               where: { id: tour.guide_profile_id },
               data: {
                 reputation_score: newRep,
-                visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status,
+                visibility_status:
+                  newRep < 50 ? 'hidden' : guide.visibility_status,
               },
             });
             if (newRep < 50) {

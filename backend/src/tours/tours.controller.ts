@@ -9,7 +9,9 @@ import {
   UseGuards,
   Request,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -21,6 +23,8 @@ export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60000) // Cache 1 minute
   async getTours(
     @Query('keyword') keyword?: string,
     @Query('province') province?: string,
@@ -113,6 +117,8 @@ export class ToursController {
   }
 
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60000) // Cache 1 minute
   async getTourDetail(@Param('id') id: string) {
     return this.toursService.getPublicTourDetail(id);
   }

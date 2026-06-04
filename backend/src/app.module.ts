@@ -30,13 +30,20 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { MaintenanceService, MaintenanceGuard } from './common/guards/maintenance.guard';
+import {
+  MaintenanceService,
+  MaintenanceGuard,
+} from './common/guards/maintenance.guard';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { DisputesModule } from './disputes/disputes.module';
 import { MailModule } from './mail/mail.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigService } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
 
 @Module({
   imports: [
@@ -44,10 +51,37 @@ import { MailModule } from './mail/mail.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          socket: {
+            host: configService.get('REDIS_HOST', 'localhost'),
+            port: configService.get<number>('REDIS_PORT', 6379),
+          },
+          ttl: 60 * 1000, // 1 minute default TTL
+        });
+        return {
+          store: store as unknown as any,
+        };
+      },
+      inject: [ConfigService],
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
-        limit: 60, // max 60 requests per minute
+        limit: 100, // max 100 requests per minute
       },
     ]),
     ScheduleModule.forRoot(),

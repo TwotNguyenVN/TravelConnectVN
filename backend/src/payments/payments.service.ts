@@ -10,6 +10,8 @@ import { NotificationsService } from '../notifications/notifications.service';
 import { SocketGateway } from '../socket/socket.gateway';
 import { MailService } from '../mail/mail.service';
 import PDFDocument = require('pdfkit');
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Injectable()
 export class PaymentsService {
@@ -18,6 +20,7 @@ export class PaymentsService {
     private readonly notificationsService: NotificationsService,
     private readonly socketGateway: SocketGateway,
     private readonly mailService: MailService,
+    @InjectQueue('mailQueue') private mailQueue: Queue,
   ) {}
 
   private sortObject(obj: any): any {
@@ -350,23 +353,27 @@ export class PaymentsService {
               paymentStatus: paymentDesc,
             });
 
-            // 3. Generate PDF Invoice and Send Email to Customer
+            // 3. Generate PDF Invoice and Send Email to Customer via Background Job
             try {
-              const pdfBuffer = await this.generatePdfInvoiceBuffer(transaction.id);
-              const customerEmail = requestWithGuide.users_tour_requests_user_idTousers.email;
-              const customerNameFull = requestWithGuide.users_tour_requests_user_idTousers.full_name;
+              const customerEmail =
+                requestWithGuide.users_tour_requests_user_idTousers.email;
+              const customerNameFull =
+                requestWithGuide.users_tour_requests_user_idTousers.full_name;
               const invoiceNumber = `INV-${transaction.transaction_code || transaction.id.substring(0, 8)}`;
-              
+
               if (customerEmail) {
-                await this.mailService.sendInvoiceEmail(
+                await this.mailQueue.add('send-invoice', {
+                  transactionId: transaction.id,
                   customerEmail,
-                  customerNameFull || 'Quý khách',
-                  pdfBuffer,
-                  invoiceNumber
+                  customerNameFull: customerNameFull || 'Quý khách',
+                  invoiceNumber,
+                });
+                console.log(
+                  `[PaymentsService] Đã đưa job gửi hóa đơn vào Queue cho ${customerEmail}`,
                 );
               }
-            } catch (pdfErr) {
-              console.error('Error generating/sending PDF invoice:', pdfErr);
+            } catch (queueErr) {
+              console.error('Error queuing PDF invoice job:', queueErr);
             }
           }
         }
@@ -458,7 +465,9 @@ export class PaymentsService {
     }
 
     if (transaction.status !== 'paid') {
-      throw new BadRequestException('Chỉ có thể xuất hóa đơn cho giao dịch đã thanh toán');
+      throw new BadRequestException(
+        'Chỉ có thể xuất hóa đơn cho giao dịch đã thanh toán',
+      );
     }
 
     const tour = transaction.tour_requests?.tours;
@@ -528,12 +537,13 @@ export class PaymentsService {
 
     // Revenue from past 30 days (actual)
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const recentPaidTransactions = await this.prisma.payment_transactions.findMany({
-      where: {
-        status: 'paid',
-        paid_at: { gte: thirtyDaysAgo },
-      },
-    });
+    const recentPaidTransactions =
+      await this.prisma.payment_transactions.findMany({
+        where: {
+          status: 'paid',
+          paid_at: { gte: thirtyDaysAgo },
+        },
+      });
 
     // Group by day for the past 30 days
     const dailyRevenue: Record<string, number> = {};
@@ -566,8 +576,14 @@ export class PaymentsService {
     );
 
     // Summary stats
-    const totalRecentRevenue = Object.values(dailyRevenue).reduce((a, b) => a + b, 0);
-    const totalUpcomingRevenue = Object.values(upcomingRevenue).reduce((a, b) => a + b, 0);
+    const totalRecentRevenue = Object.values(dailyRevenue).reduce(
+      (a, b) => a + b,
+      0,
+    );
+    const totalUpcomingRevenue = Object.values(upcomingRevenue).reduce(
+      (a, b) => a + b,
+      0,
+    );
 
     return {
       period: {
@@ -589,12 +605,12 @@ export class PaymentsService {
 
   async generatePdfInvoiceBuffer(transactionId: string): Promise<Buffer> {
     const data = await this.generateInvoiceData(transactionId);
-    
+
     return new Promise((resolve, reject) => {
       try {
         const doc = new PDFDocument({ margin: 50 });
         const buffers: Buffer[] = [];
-        
+
         doc.on('data', buffers.push.bind(buffers));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
 
@@ -603,14 +619,18 @@ export class PaymentsService {
         doc.fontSize(10).text(data.companyInfo.address, { align: 'center' });
         doc.text(`Email: ${data.companyInfo.email}`, { align: 'center' });
         doc.moveDown();
-        
+
         // Title
-        doc.fontSize(16).text('HOA DON THANH TOAN (VAT INVOICE)', { align: 'center' });
+        doc
+          .fontSize(16)
+          .text('HOA DON THANH TOAN (VAT INVOICE)', { align: 'center' });
         doc.moveDown();
 
         // Invoice Info
         doc.fontSize(10).text(`So hoa don: ${data.invoiceNumber}`);
-        doc.text(`Ngay: ${new Date(data.invoiceDate).toLocaleDateString('vi-VN')}`);
+        doc.text(
+          `Ngay: ${new Date(data.invoiceDate).toLocaleDateString('vi-VN')}`,
+        );
         doc.text(`Ma giao dich: ${data.transactionCode || 'N/A'}`);
         doc.text(`Phuong thuc: ${data.paymentMethod}`);
         doc.moveDown();
@@ -631,14 +651,27 @@ export class PaymentsService {
 
         // Financial Details
         doc.fontSize(12).text('Chi tiet thanh toan:', { underline: true });
-        doc.fontSize(10).font('Helvetica').text(`Thanh tien: ${data.subtotal.toLocaleString('vi-VN')} VND`);
-        doc.text(`Thue VAT (${data.vatRate}%): ${data.vatAmount.toLocaleString('vi-VN')} VND`);
-        doc.fontSize(14).font('Helvetica-Bold').text(`Tong cong: ${data.total.toLocaleString('vi-VN')} VND`);
+        doc
+          .fontSize(10)
+          .font('Helvetica')
+          .text(`Thanh tien: ${data.subtotal.toLocaleString('vi-VN')} VND`);
+        doc.text(
+          `Thue VAT (${data.vatRate}%): ${data.vatAmount.toLocaleString('vi-VN')} VND`,
+        );
+        doc
+          .fontSize(14)
+          .font('Helvetica-Bold')
+          .text(`Tong cong: ${data.total.toLocaleString('vi-VN')} VND`);
         doc.font('Helvetica');
-        
+
         // Footer
         doc.moveDown(3);
-        doc.fontSize(10).font('Helvetica-Oblique').text('Cam on quy khach da su dung dich vu cua TravelConnect VN!', { align: 'center' });
+        doc
+          .fontSize(10)
+          .font('Helvetica-Oblique')
+          .text('Cam on quy khach da su dung dich vu cua TravelConnect VN!', {
+            align: 'center',
+          });
 
         doc.end();
       } catch (err) {
