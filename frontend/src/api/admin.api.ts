@@ -9,53 +9,53 @@ export const adminApi = {
 
   
   // Users
-  getUsers: (params: any) => api.get('/admin/users', { params }),
-  updateUserStatus: (id: string, data: any) => api.patch(`/admin/users/${id}/status`, data),
-  assignRole: (id: string, data: any) => api.post(`/admin/users/${id}/roles`, data),
+  getUsers: (params: Record<string, unknown>) => api.get('/admin/users', { params }),
+  updateUserStatus: (id: string, data: Record<string, unknown>) => api.patch(`/admin/users/${id}/status`, data),
+  assignRole: (id: string, data: Record<string, unknown>) => api.post(`/admin/users/${id}/roles`, data),
   revokeRole: (userId: string, role: string) => api.delete(`/admin/users/${userId}/roles/${role}`),
-  createStaff: (data: any) => api.post('/admin/staff', data),
+  createStaff: (data: Record<string, unknown>) => api.post('/admin/staff', data),
 
   // Reports
-  getReports: (params: any) => api.get('/admin/reports', { params }),
-  processReport: (id: string, data: any) => api.patch(`/admin/reports/${id}`, data),
+  getReports: (params: Record<string, unknown>) => api.get('/admin/reports', { params }),
+  processReport: (id: string, data: Record<string, unknown>) => api.patch(`/admin/reports/${id}`, data),
 
   // Moderation
-  moderateTour: (id: string, data: any) => api.patch(`/admin/tours/${id}/moderation`, data),
-  getTours: (params: any) => api.get('/admin/tours', { params }),
-  moderateCompanionPost: (id: string, data: any) => api.patch(`/admin/companion-posts/${id}/moderation`, data),
-  getCompanionPosts: (params: any) => api.get('/admin/companion-posts', { params }),
+  moderateTour: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tours/${id}/moderation`, data),
+  getTours: (params: Record<string, unknown>) => api.get('/admin/tours', { params }),
+  moderateCompanionPost: (id: string, data: Record<string, unknown>) => api.patch(`/admin/companion-posts/${id}/moderation`, data),
+  getCompanionPosts: (params: Record<string, unknown>) => api.get('/admin/companion-posts', { params }),
 
   // Verification
   getVerificationRequests: () => api.get('/admin/guides/verification'),
-  processVerification: (id: string, data: any) => api.patch(`/admin/guides/verification/${id}`, data),
+  processVerification: (id: string, data: Record<string, unknown>) => api.patch(`/admin/guides/verification/${id}`, data),
 
   // Activity Logs
-  getActivityLogs: (params: any) => api.get('/admin/activity-logs', { params }),
+  getActivityLogs: (params: Record<string, unknown>) => api.get('/admin/activity-logs', { params }),
 
   // Refund Management
   getPendingRefunds: () => api.get('/admin/refunds/pending'),
-  processRefund: (id: string, data: any) => api.post(`/admin/refunds/${id}/process`, data),
-  getTransactions: (params?: any) => api.get('/admin/transactions', { params }),
+  processRefund: (id: string, data: Record<string, unknown>) => api.post(`/admin/refunds/${id}/process`, data),
+  getTransactions: (params?: Record<string, unknown>) => api.get('/admin/transactions', { params }),
 
   // SOS Alerts
   getSosAlerts: () => api.get('/admin/sos'),
   resolveSosAlert: (id: string, note: string) => api.patch(`/admin/sos/${id}/resolve`, { note }),
 
   // Support Tickets
-  getTickets: (params?: any) => api.get('/admin/tickets', { params }),
-  updateTicket: (id: string, data: any) => api.patch(`/admin/tickets/${id}`, data),
+  getTickets: (params?: Record<string, unknown>) => api.get('/admin/tickets', { params }),
+  updateTicket: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tickets/${id}`, data),
 
   // Tour Disputes
   getDisputes: () => api.get('/admin/disputes'),
   getDisputeChatHistory: (disputeId: string) => api.get(`/admin/disputes/${disputeId}/chat-history`),
-  resolveDispute: (id: string, data: any) => api.patch(`/admin/disputes/${id}/resolve`, data),
+  resolveDispute: (id: string, data: Record<string, unknown>) => api.patch(`/admin/disputes/${id}/resolve`, data),
 
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
   settleGuideTransactions: (id: string) => api.post(`/admin/guides/${id}/settle`),
 
   // Support Staff — Tour Requests (Disputes)
-  getTourRequests: (params?: any) => api.get('/admin/tour-requests', { params }),
+  getTourRequests: (params?: Record<string, unknown>) => api.get('/admin/tour-requests', { params }),
   getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
 
   // Support Staff — Notifications Broadcast
