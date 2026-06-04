@@ -1624,6 +1624,36 @@ export class ToursService implements OnApplicationBootstrap {
         },
       });
     } else if (data.status === 'cancelled') {
+      // Deduct 20 points if guide cancels within 24 hours of start date
+      const startDateVal = currentSchedule.start_date;
+      if (startDateVal) {
+        const start = new Date(startDateVal);
+        const now = new Date();
+        const diffTime = start.getTime() - now.getTime();
+        const diffHours = diffTime / (1000 * 60 * 60);
+        if (diffHours < 24) {
+          const guide = await this.prisma.guide_profiles.findUnique({
+            where: { id: tour.guide_profile_id },
+          });
+          if (guide) {
+            const newRep = Math.max(0, guide.reputation_score - 20);
+            await this.prisma.guide_profiles.update({
+              where: { id: tour.guide_profile_id },
+              data: {
+                reputation_score: newRep,
+                visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status,
+              },
+            });
+            if (newRep < 50) {
+              await this.prisma.public_users.update({
+                where: { id: guide.user_id },
+                data: { status: 'suspended' },
+              });
+            }
+          }
+        }
+      }
+
       // Cập nhật các yêu cầu chưa thanh toán thành bị từ chối
       await this.prisma.tour_requests.updateMany({
         where: {

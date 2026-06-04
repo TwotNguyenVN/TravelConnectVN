@@ -4,6 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { adminApi } from '../../api/admin.api';
 import { useToast } from '../../contexts/ToastContext';
 import { PageContainer, Card, Button, LoadingBlock } from '../../components/common';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+let DefaultIcon = L.icon({
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -105,6 +119,16 @@ const playSosBeep = () => {
   } catch (e) {
     console.error('Failed to play audio:', e);
   }
+};
+
+const createSosIcon = () => {
+  return L.divIcon({
+    className: 'sos-marker-custom',
+    html: `<div class="sos-pin"></div><div class="sos-pulse"></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15],
+    popupAnchor: [0, -15]
+  });
 };
 
 export const SupportDashboardPage: React.FC = () => {
@@ -253,6 +277,33 @@ export const SupportDashboardPage: React.FC = () => {
               0%, 100% { box-shadow: 0 0 0 4px rgba(220,38,38,0.25), 0 8px 24px rgba(220,38,38,0.3); }
               50% { box-shadow: 0 0 0 8px rgba(220,38,38,0.15), 0 8px 32px rgba(220,38,38,0.4); }
             }
+            .sos-marker-custom {
+              background: none;
+              border: none;
+            }
+            .sos-pin {
+              width: 14px;
+              height: 14px;
+              background-color: #dc2626;
+              border-radius: 50%;
+              border: 2px solid white;
+              box-shadow: 0 0 10px rgba(220,38,38,0.8);
+            }
+            .sos-pulse {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 14px;
+              height: 14px;
+              background-color: #dc2626;
+              border-radius: 50%;
+              animation: sosPulseRing 1.5s infinite ease-out;
+              pointer-events: none;
+            }
+            @keyframes sosPulseRing {
+              0% { transform: scale(1); opacity: 1; }
+              100% { transform: scale(3.5); opacity: 0; }
+            }
           `}</style>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
@@ -292,77 +343,111 @@ export const SupportDashboardPage: React.FC = () => {
             </button>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '4px' }}>
-            {activeSosAlerts.map(alert => (
-              <div
-                key={alert.id}
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.08)',
-                  padding: '12px 16px',
-                  borderRadius: '10px',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  flexWrap: 'wrap',
-                  gap: '12px',
-                }}
-              >
-                <div style={{ color: 'white', fontSize: '14px', flex: 1, minWidth: '250px' }}>
-                  <div>
-                    <strong>👤 {alert.users?.full_name}</strong>
-                    {alert.users?.phone && <span style={{ marginLeft: '10px', opacity: 0.9 }}>📞 {alert.users.phone}</span>}
-                    <span style={{ fontSize: '11px', opacity: 0.7, marginLeft: '12px' }}>
-                      ⏱ {new Date(alert.created_at).toLocaleTimeString('vi-VN')}
-                    </span>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '4px' }}>
+            {/* Left Column: List of alerts */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '350px', overflowY: 'auto' }}>
+              {activeSosAlerts.map(alert => (
+                <div
+                  key={alert.id}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.08)',
+                    padding: '12px 16px',
+                    borderRadius: '10px',
+                    border: '1px solid rgba(255,255,255,0.15)',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
+                  }}
+                >
+                  <div style={{ color: 'white', fontSize: '14px', flex: 1, minWidth: '200px' }}>
+                    <div>
+                      <strong>👤 {alert.users?.full_name}</strong>
+                      {alert.users?.phone && <span style={{ marginLeft: '10px', opacity: 0.9 }}>📞 {alert.users.phone}</span>}
+                      <div style={{ fontSize: '11px', opacity: 0.7, marginTop: '2px' }}>
+                        ⏱ {new Date(alert.created_at).toLocaleTimeString('vi-VN')}
+                      </div>
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span>📍 GPS: {alert.latitude.toFixed(6)}, {alert.longitude.toFixed(6)}</span>
+                      {alert.tours && (
+                        <span style={{ fontSize: '11px', alignSelf: 'flex-start', marginTop: '2px', backgroundColor: 'rgba(255,255,255,0.15)', padding: '2px 6px', borderRadius: '4px' }}>
+                          🗺️ Tour: {alert.tours.title}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.9)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span>📍 GPS: {alert.latitude.toFixed(6)}, {alert.longitude.toFixed(6)}</span>
-                    {alert.tours && (
-                      <span style={{ backgroundColor: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '4px', fontSize: '11px' }}>
-                        🗺️ Tour: {alert.tours.title} ({alert.tours.province})
-                      </span>
-                    )}
-                  </div>
-                </div>
 
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <a
-                    href={`https://maps.google.com/?q=${alert.latitude},${alert.longitude}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{
-                      padding: '8px 14px',
-                      backgroundColor: 'rgba(255,255,255,0.2)',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    🗺️ Xem Bản Đồ
-                  </a>
-                  <button
-                    onClick={() => handleOpenResolveSos(alert)}
-                    style={{
-                      padding: '8px 14px',
-                      backgroundColor: 'white',
-                      color: '#dc2626',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                    }}
-                  >
-                    ✅ Xử Lý
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <a
+                      href={`https://maps.google.com/?q=${alert.latitude},${alert.longitude}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: 'rgba(255,255,255,0.2)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      🗺️ Bản Đồ
+                    </a>
+                    <button
+                      onClick={() => handleOpenResolveSos(alert)}
+                      style={{
+                        padding: '8px 12px',
+                        backgroundColor: 'white',
+                        color: '#dc2626',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                      }}
+                    >
+                      ✅ Xử Lý
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Right Column: Leaflet Map */}
+            <div style={{ height: '350px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.2)', zIndex: 1 }}>
+              <MapContainer
+                center={[Number(activeSosAlerts[0].latitude), Number(activeSosAlerts[0].longitude)]}
+                zoom={12}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                {activeSosAlerts.map(alert => (
+                  <Marker
+                    key={alert.id}
+                    position={[Number(alert.latitude), Number(alert.longitude)]}
+                    icon={createSosIcon()}
+                  >
+                    <Popup>
+                      <div style={{ fontSize: '12px', color: '#1e293b', fontFamily: 'sans-serif' }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '13px', color: '#dc2626' }}>🆘 CẢNH BÁO SOS</div>
+                        <div style={{ marginTop: '4px' }}>Khách hàng: <strong>{alert.users?.full_name}</strong></div>
+                        {alert.users?.phone && <div>SĐT: <strong>{alert.users.phone}</strong></div>}
+                        <div style={{ marginTop: '4px', fontSize: '11px', color: '#64748b' }}>📍 {Number(alert.latitude).toFixed(5)}, {Number(alert.longitude).toFixed(5)}</div>
+                        {alert.tours && <div style={{ marginTop: '4px', fontStyle: 'italic' }}>Tour: {alert.tours.title}</div>}
+                      </div>
+                    </Popup>
+                  </Marker>
+                ))}
+              </MapContainer>
+            </div>
           </div>
         </div>
       )}

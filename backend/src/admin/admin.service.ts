@@ -433,6 +433,39 @@ export class AdminService {
         },
       });
 
+      if (dto.status === 'resolved') {
+        let guideProfileId = report.guide_profile_id;
+        if (!guideProfileId && report.tour_id) {
+          const tour = await tx.tours.findUnique({
+            where: { id: report.tour_id },
+            include: { guide_profiles: true }
+          });
+          if (tour?.guide_profiles) {
+            guideProfileId = tour.guide_profiles.id;
+          }
+        }
+        if (guideProfileId) {
+          const guide = await tx.guide_profiles.findUnique({ where: { id: guideProfileId } });
+          if (guide) {
+            const newRep = Math.max(0, guide.reputation_score - 15);
+            await tx.guide_profiles.update({
+              where: { id: guideProfileId },
+              data: {
+                reputation_score: newRep,
+                visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status
+              }
+            });
+            if (newRep < 50) {
+              await tx.public_users.update({
+                where: { id: guide.user_id },
+                data: { status: 'suspended' }
+              });
+            }
+          }
+        }
+      }
+
+
       await tx.report_processing_history.create({
         data: {
           report_id: id,
@@ -1255,6 +1288,155 @@ If no issues are found, flagged should be false, reason should be "No issues det
           : 'Không phát hiện lỗi (Fallback Scan).',
         highlights,
       };
+    }
+  }
+
+  async getDeletedItems() {
+    const [tours, companionPosts, users] = await Promise.all([
+      this.prisma.tours.findMany({
+        where: { deleted_at: { not: null } },
+        select: {
+          id: true,
+          title: true,
+          created_at: true,
+          deleted_at: true,
+          guide_profiles: {
+            select: {
+              users: {
+                select: {
+                  full_name: true,
+                },
+              },
+            },
+          },
+        },
+      }),
+      this.prisma.companion_posts.findMany({
+        where: { deleted_at: { not: null } },
+        select: {
+          id: true,
+          title: true,
+          created_at: true,
+          deleted_at: true,
+          users: {
+            select: {
+              full_name: true,
+            },
+          },
+        },
+      }),
+      this.prisma.public_users.findMany({
+        where: { status: { in: ['locked', 'suspended'] } },
+        select: {
+          id: true,
+          full_name: true,
+          email: true,
+          status: true,
+          created_at: true,
+        },
+      }),
+    ]);
+
+    const formattedTours = tours.map((t) => ({
+      id: t.id,
+      type: 'tour',
+      title: t.title,
+      owner: t.guide_profiles?.users?.full_name || 'N/A',
+      created_at: t.created_at,
+      deleted_at: t.deleted_at,
+    }));
+
+    const formattedPosts = companionPosts.map((p) => ({
+      id: p.id,
+      type: 'companion_post',
+      title: p.title,
+      owner: p.users?.full_name || 'N/A',
+      created_at: p.created_at,
+      deleted_at: p.deleted_at,
+    }));
+
+    const formattedUsers = users.map((u) => ({
+      id: u.id,
+      type: 'user',
+      title: u.full_name || u.email,
+      owner: u.email,
+      created_at: u.created_at,
+      deleted_at: null,
+      status: u.status,
+    }));
+
+    return [...formattedTours, ...formattedPosts, ...formattedUsers];
+  }
+
+  async restoreDeletedItem(type: string, id: string, adminId: string) {
+    if (type === 'tour') {
+      const tour = await this.prisma.tours.findUnique({
+        where: { id },
+      });
+      if (!tour) throw new NotFoundException('Không tìm thấy tour');
+      const restored = await this.prisma.tours.update({
+        where: { id },
+        data: { deleted_at: null },
+      });
+      await this.prisma.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'recovery',
+          entity_type: 'tours',
+          entity_pk: id,
+          action_type: 'restore',
+          reason: 'Khôi phục từ Console quản trị',
+          old_data: { deleted_at: tour.deleted_at },
+          new_data: { deleted_at: null },
+        },
+      });
+      return restored;
+    } else if (type === 'companion_post') {
+      const post = await this.prisma.companion_posts.findUnique({
+        where: { id },
+      });
+      if (!post) throw new NotFoundException('Không tìm thấy bài đăng ghép đoàn');
+      const restored = await this.prisma.companion_posts.update({
+        where: { id },
+        data: { deleted_at: null },
+      });
+      await this.prisma.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'recovery',
+          entity_type: 'companion_posts',
+          entity_pk: id,
+          action_type: 'restore',
+          reason: 'Khôi phục từ Console quản trị',
+          old_data: { deleted_at: post.deleted_at },
+          new_data: { deleted_at: null },
+        },
+      });
+      return restored;
+    } else if (type === 'user') {
+      const user = await this.prisma.public_users.findUnique({
+        where: { id },
+      });
+      if (!user) throw new NotFoundException('Không tìm thấy người dùng');
+      const restored = await this.prisma.public_users.update({
+        where: { id },
+        data: { status: 'active' },
+      });
+      await this.prisma.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'recovery',
+          entity_type: 'users',
+          entity_pk: id,
+          action_type: 'restore',
+          reason: 'Khôi phục tài khoản từ Console quản trị',
+          old_data: { status: user.status },
+          new_data: { status: 'active' },
+        },
+      });
+      return restored;
+    } else {
+      throw new BadRequestException('Loại bản ghi không hợp lệ');
     }
   }
 }

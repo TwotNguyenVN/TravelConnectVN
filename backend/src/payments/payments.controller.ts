@@ -61,6 +61,17 @@ export class PaymentsController {
   }
 
   @UseGuards(AuthGuard)
+  @Get('forecast/cashflow')
+  async getCashFlowForecast() {
+    const data = await this.paymentsService.getCashFlowForecast();
+    return {
+      success: true,
+      message: 'Lấy dự báo dòng tiền thành công',
+      data: data,
+    };
+  }
+
+  @UseGuards(AuthGuard)
   @Get(':id')
   async getPaymentById(@Req() req: Request, @Param('id') id: string) {
     const userId = (req as any).user.id;
@@ -71,6 +82,18 @@ export class PaymentsController {
       data: data,
     };
   }
+
+  @UseGuards(AuthGuard)
+  @Get(':id/invoice')
+  async getInvoiceData(@Param('id') id: string) {
+    const data = await this.paymentsService.generateInvoiceData(id);
+    return {
+      success: true,
+      message: 'Tạo dữ liệu hóa đơn thành công',
+      data: data,
+    };
+  }
+
   @UseGuards(AuthGuard)
   @Post(':id/cancel')
   async cancelTransaction(@Req() req: Request, @Param('id') id: string) {

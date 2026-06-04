@@ -66,5 +66,8 @@ export const adminApi = {
 
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
-};
 
+  // Soft Delete Recovery Console
+  getDeletedItems: () => api.get('/admin/recovery/deleted'),
+  restoreDeletedItem: (type: string, id: string) => api.post(`/admin/recovery/${type}/${id}/restore`),
+};

@@ -411,4 +411,157 @@ export class PaymentsService {
       data: { status: 'cancelled' },
     });
   }
+
+  async generateInvoiceData(transactionId: string) {
+    const transaction = await this.prisma.payment_transactions.findUnique({
+      where: { id: transactionId },
+      include: {
+        users: true,
+        tour_requests: {
+          include: {
+            tours: {
+              include: {
+                guide_profiles: {
+                  include: { users: true },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!transaction) {
+      throw new NotFoundException('Không tìm thấy giao dịch');
+    }
+
+    if (transaction.status !== 'paid') {
+      throw new BadRequestException('Chỉ có thể xuất hóa đơn cho giao dịch đã thanh toán');
+    }
+
+    const tour = transaction.tour_requests?.tours;
+    const customer = transaction.users;
+    const guide = tour?.guide_profiles?.users;
+    const amount = Number(transaction.amount);
+    const vatRate = 0.1;
+    const vatAmount = Math.round(amount * vatRate);
+    const totalWithVat = amount + vatAmount;
+
+    return {
+      invoiceNumber: `INV-${transaction.transaction_code || transaction.id.substring(0, 8)}`,
+      invoiceDate: transaction.paid_at || transaction.created_at,
+      customer: {
+        name: customer?.full_name || 'N/A',
+        email: customer?.email || 'N/A',
+        phone: customer?.phone || 'N/A',
+      },
+      tourInfo: {
+        title: tour?.title || 'N/A',
+        province: tour?.province || 'N/A',
+        guideName: guide?.full_name || 'N/A',
+      },
+      transactionCode: transaction.transaction_code,
+      paymentMethod: transaction.payment_method,
+      subtotal: amount,
+      vatRate: vatRate * 100,
+      vatAmount,
+      total: totalWithVat,
+      currency: 'VND',
+      companyInfo: {
+        name: 'TravelConnect Vietnam',
+        taxId: '0123456789',
+        address: 'TP. Hồ Chí Minh, Việt Nam',
+        email: 'contact@travelconnect.vn',
+      },
+    };
+  }
+
+  async getCashFlowForecast() {
+    const now = new Date();
+    const thirtyDaysLater = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+    // Get upcoming tour bookings with paid status
+    const upcomingPaidRequests = await this.prisma.tour_requests.findMany({
+      where: {
+        status: { in: ['paid', 'completed'] },
+        tours: {
+          deleted_at: null,
+        },
+      },
+      include: {
+        tours: true,
+        tour_schedules: true,
+        payment_transactions: {
+          where: { status: 'paid' },
+        },
+      },
+    });
+
+    // Get pending refunds
+    const pendingRefunds = await this.prisma.payment_transactions.findMany({
+      where: {
+        status: 'refund_pending',
+      },
+    });
+
+    // Revenue from past 30 days (actual)
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const recentPaidTransactions = await this.prisma.payment_transactions.findMany({
+      where: {
+        status: 'paid',
+        paid_at: { gte: thirtyDaysAgo },
+      },
+    });
+
+    // Group by day for the past 30 days
+    const dailyRevenue: Record<string, number> = {};
+    for (const tx of recentPaidTransactions) {
+      const day = (tx.paid_at || tx.created_at).toISOString().split('T')[0];
+      dailyRevenue[day] = (dailyRevenue[day] || 0) + Number(tx.amount);
+    }
+
+    // Calculate upcoming revenue from booked tours
+    const upcomingRevenue: Record<string, number> = {};
+    for (const req of upcomingPaidRequests) {
+      const startDate = req.tour_schedules?.start_date || req.tours?.start_date;
+      if (startDate) {
+        const startDateObj = new Date(startDate);
+        if (startDateObj >= now && startDateObj <= thirtyDaysLater) {
+          const day = startDateObj.toISOString().split('T')[0];
+          const totalPaid = req.payment_transactions.reduce(
+            (sum, t) => sum + Number(t.amount),
+            0,
+          );
+          upcomingRevenue[day] = (upcomingRevenue[day] || 0) + totalPaid;
+        }
+      }
+    }
+
+    // Calculate pending refund total
+    const totalPendingRefunds = pendingRefunds.reduce(
+      (sum, t) => sum + Number(t.amount),
+      0,
+    );
+
+    // Summary stats
+    const totalRecentRevenue = Object.values(dailyRevenue).reduce((a, b) => a + b, 0);
+    const totalUpcomingRevenue = Object.values(upcomingRevenue).reduce((a, b) => a + b, 0);
+
+    return {
+      period: {
+        pastStart: thirtyDaysAgo.toISOString(),
+        now: now.toISOString(),
+        futureEnd: thirtyDaysLater.toISOString(),
+      },
+      summary: {
+        totalRecentRevenue,
+        totalUpcomingRevenue,
+        totalPendingRefunds,
+        netForecast: totalUpcomingRevenue - totalPendingRefunds,
+      },
+      dailyRevenue,
+      upcomingRevenue,
+      pendingRefundCount: pendingRefunds.length,
+    };
+  }
 }

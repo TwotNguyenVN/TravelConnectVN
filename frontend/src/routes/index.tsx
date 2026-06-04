@@ -10,6 +10,7 @@ import { FinanceDashboardPage } from '../pages/finance/FinanceDashboardPage';
 import { FinanceRefundsPage } from '../pages/finance/FinanceRefundsPage';
 import { FinanceTransactionsPage } from '../pages/finance/FinanceTransactionsPage';
 import { FinanceSettlementsPage } from '../pages/finance/FinanceSettlementsPage';
+import { FinanceForecastingPage } from '../pages/finance/FinanceForecastingPage';
 
 import { HomePage } from '../pages/public/HomePage';
 import { TourListPage } from '../pages/public/TourListPage';
@@ -59,6 +60,7 @@ import { AdminTourManagementPage } from '../pages/admin/AdminTourManagementPage'
 import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManagementPage';
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
+import { AdminRecoveryConsolePage } from '../pages/admin/AdminRecoveryConsolePage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
@@ -162,6 +164,7 @@ export const router = createBrowserRouter([
       { path: 'users', element: <AdminUserManagementPage /> },
       { path: 'activity-logs', element: <AdminActivityLogPage /> },
       { path: 'statistics', element: <AdminStatisticsPage /> },
+      { path: 'recovery', element: <AdminRecoveryConsolePage /> },
     ],
   },
   {
@@ -207,6 +210,7 @@ export const router = createBrowserRouter([
       { path: 'refunds', element: <FinanceRefundsPage /> },
       { path: 'transactions', element: <FinanceTransactionsPage /> },
       { path: 'settlements', element: <FinanceSettlementsPage /> },
+      { path: 'forecast', element: <FinanceForecastingPage /> },
     ],
   },
 ]);

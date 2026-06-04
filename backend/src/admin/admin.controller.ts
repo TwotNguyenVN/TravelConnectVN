@@ -310,4 +310,21 @@ export class AdminController {
   ) {
     return this.adminService.sendBroadcastNotification(dto, req.user.id);
   }
+
+  // Soft Delete Recovery Console
+  @Get('recovery/deleted')
+  @Roles(Role.SYSTEM_ADMIN)
+  getDeletedItems() {
+    return this.adminService.getDeletedItems();
+  }
+
+  @Post('recovery/:type/:id/restore')
+  @Roles(Role.SYSTEM_ADMIN)
+  restoreDeletedItem(
+    @Param('type') type: string,
+    @Param('id') id: string,
+    @Req() req: any,
+  ) {
+    return this.adminService.restoreDeletedItem(type, id, req.user.id);
+  }
 }

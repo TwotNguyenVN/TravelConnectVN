@@ -45,6 +45,7 @@ export const FinanceSidebar: React.FC = () => {
         <NavLink to="/accountant/refunds" style={navLinkStyle}>Yêu cầu hoàn tiền</NavLink>
         <NavLink to="/accountant/transactions" style={navLinkStyle}>Lịch sử giao dịch</NavLink>
         <NavLink to="/accountant/settlements" style={navLinkStyle}>Quyết toán HDV</NavLink>
+        <NavLink to="/accountant/forecast" style={navLinkStyle}>📊 Dự báo dòng tiền</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

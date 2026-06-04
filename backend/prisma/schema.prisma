@@ -725,7 +725,9 @@ model guide_profiles {
   avatar_url                  String?
   verification_status         String                        @default("not_submitted")
   visibility_status           String                        @default("visible")
+  reputation_score            Int                           @default(100)
   is_accepting_tours          Boolean                       @default(true)
+
   created_at                  DateTime                      @default(now()) @db.Timestamptz(6)
   updated_at                  DateTime                      @default(now()) @db.Timestamptz(6)
   deleted_at                  DateTime?                     @db.Timestamptz(6)
