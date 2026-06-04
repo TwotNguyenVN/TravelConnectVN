@@ -25,6 +25,7 @@ export const SupportSidebar: React.FC = () => {
 
   const navItems = [
     { to: '/support', end: true, icon: '🏠', label: 'Dashboard' },
+    { to: '/support/tickets', end: false, icon: '🛟', label: 'Yêu cầu Hỗ trợ' },
     { to: '/support/reports', end: false, icon: '🚩', label: 'Báo cáo Vi phạm' },
     { to: '/support/disputes', end: false, icon: '⚖️', label: 'Tranh chấp Đặt Tour' },
     { to: '/support/broadcast', end: false, icon: '📢', label: 'Gửi Thông báo' },

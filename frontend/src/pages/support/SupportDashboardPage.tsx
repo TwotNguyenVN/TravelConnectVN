@@ -224,6 +224,7 @@ export const SupportDashboardPage: React.FC = () => {
   ];
 
   const quickLinks = [
+    { title: 'Yêu cầu Hỗ trợ', description: 'Tiếp nhận và giải quyết phản hồi thắc mắc, sự cố tài khoản, lỗi thanh toán.', icon: '🛟', color: '#2563eb', link: '/support/tickets' },
     { title: 'Xử lý Báo cáo Vi phạm', description: 'Xem và phân xử các báo cáo từ người dùng về tour, HDV, bình luận.', icon: '🚩', color: '#ef4444', link: '/support/reports' },
     { title: 'Tranh chấp Đặt Tour', description: 'Tra cứu lịch sử đặt tour, phân xử khiếu nại giữa khách và HDV.', icon: '⚖️', color: '#f59e0b', link: '/support/disputes' },
     { title: 'Gửi Thông báo', description: 'Phát thông báo hệ thống đến khách hàng, HDV hoặc nhóm cụ thể.', icon: '📢', color: '#3b82f6', link: '/support/broadcast' },

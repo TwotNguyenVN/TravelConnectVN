@@ -64,6 +64,7 @@ import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
 import { SupportDisputePage } from '../pages/support/SupportDisputePage';
 import { SupportBroadcastPage } from '../pages/support/SupportBroadcastPage';
+import { SupportTicketsPage } from '../pages/support/SupportTicketsPage';
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
@@ -189,6 +190,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <SupportDashboardPage /> },
       { path: 'reports', element: <AdminReportManagementPage /> },
+      { path: 'tickets', element: <SupportTicketsPage /> },
       { path: 'disputes', element: <SupportDisputePage /> },
       { path: 'broadcast', element: <SupportBroadcastPage /> },
     ],
