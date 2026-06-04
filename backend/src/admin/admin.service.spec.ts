@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unused-vars */
 import { Test, TestingModule } from '@nestjs/testing';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -54,8 +54,12 @@ describe('AdminService - analyzeContent', () => {
       flagged: true,
       reason: 'Phát hiện số điện thoại liên hệ',
       highlights: [
-        { text: '0912345678', type: 'contact_info', explanation: 'Số điện thoại' }
-      ]
+        {
+          text: '0912345678',
+          type: 'contact_info',
+          explanation: 'Số điện thoại',
+        },
+      ],
     });
 
     const mockGenAIInstance = (service as any).client;
@@ -63,7 +67,9 @@ describe('AdminService - analyzeContent', () => {
       text: mockResponseText,
     });
 
-    const result = await service.analyzeContent('Liên hệ tôi qua số 0912345678');
+    const result = await service.analyzeContent(
+      'Liên hệ tôi qua số 0912345678',
+    );
     expect(result.flagged).toBe(true);
     expect(result.highlights).toHaveLength(1);
     expect(result.highlights[0].text).toBe('0912345678');
@@ -72,9 +78,13 @@ describe('AdminService - analyzeContent', () => {
 
   it('should fallback to regex parsing if generateContent throws error', async () => {
     const mockGenAIInstance = (service as any).client;
-    mockGenAIInstance.models.generateContent.mockRejectedValue(new Error('API Failure'));
+    mockGenAIInstance.models.generateContent.mockRejectedValue(
+      new Error('API Failure'),
+    );
 
-    const result = await service.analyzeContent('Liên hệ email: test@example.com hoặc số 0912345678');
+    const result = await service.analyzeContent(
+      'Liên hệ email: test@example.com hoặc số 0912345678',
+    );
     expect(result.flagged).toBe(true);
     expect(result.highlights).toHaveLength(2);
     expect(result.highlights[0].text).toBe('0912345678');
