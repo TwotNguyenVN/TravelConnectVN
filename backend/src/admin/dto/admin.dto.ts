@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsEnum, IsOptional } from 'class-validator';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -74,4 +74,3 @@ export class UpdateTransactionStatusDto {
   @IsEnum(['pending', 'paid', 'failed', 'cancelled'])
   status: string;
 }
-

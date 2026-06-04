@@ -26,7 +26,6 @@ import {
   UpdateTransactionStatusDto,
 } from './dto/admin.dto';
 
-
 @Controller('admin')
 @UseGuards(AuthGuard, RoleGuard)
 export class AdminController {
@@ -261,9 +260,12 @@ export class AdminController {
     @Body() dto: UpdateTransactionStatusDto,
     @Req() req: any,
   ) {
-    return this.adminService.updateTransactionStatus(id, dto.status, req.user.id);
+    return this.adminService.updateTransactionStatus(
+      id,
+      dto.status,
+      req.user.id,
+    );
   }
-
 
   // Refund Management
   @Get('refunds/pending')

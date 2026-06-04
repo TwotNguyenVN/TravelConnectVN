@@ -717,11 +717,7 @@ export class AdminService {
     return { items, total };
   }
 
-  async updateTransactionStatus(
-    id: string,
-    status: string,
-    adminId: string,
-  ) {
+  async updateTransactionStatus(id: string, status: string, adminId: string) {
     const transaction = await this.prisma.payment_transactions.findUnique({
       where: { id },
     });
@@ -806,7 +802,6 @@ export class AdminService {
 
     return updated;
   }
-
 
   // Refund Management
   async getPendingRefunds() {
@@ -1219,13 +1214,20 @@ If no issues are found, flagged should be false, reason should be "No issues det
       });
 
       const resText = response.text || '';
-      const cleanJson = resText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const cleanJson = resText
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
       const parsed = JSON.parse(cleanJson);
       return parsed;
     } catch (error) {
       console.error('Gemini Moderation Error, falling back to regex:', error);
-      const highlights: Array<{ text: string; type: string; explanation: string }> = [];
-      
+      const highlights: Array<{
+        text: string;
+        type: string;
+        explanation: string;
+      }> = [];
+
       const phoneRegex = /(?:\+?84|0)(?:\s*\d){9,10}/g;
       let match;
       while ((match = phoneRegex.exec(text)) !== null) {
@@ -1248,7 +1250,9 @@ If no issues are found, flagged should be false, reason should be "No issues det
       const flagged = highlights.length > 0;
       return {
         flagged,
-        reason: flagged ? 'Phát hiện thông tin liên hệ cá nhân (Fallback Scan).' : 'Không phát hiện lỗi (Fallback Scan).',
+        reason: flagged
+          ? 'Phát hiện thông tin liên hệ cá nhân (Fallback Scan).'
+          : 'Không phát hiện lỗi (Fallback Scan).',
         highlights,
       };
     }
