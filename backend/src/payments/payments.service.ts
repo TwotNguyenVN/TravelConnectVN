@@ -8,13 +8,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SocketGateway } from '../socket/socket.gateway';
+import { MailService } from '../mail/mail.service';
+import PDFDocument = require('pdfkit');
 
 @Injectable()
 export class PaymentsService {
   constructor(
-    private prisma: PrismaService,
-    private notificationsService: NotificationsService,
-    private socketGateway: SocketGateway,
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+    private readonly socketGateway: SocketGateway,
+    private readonly mailService: MailService,
   ) {}
 
   private sortObject(obj: any): any {
@@ -346,6 +349,25 @@ export class PaymentsService {
               message: content,
               paymentStatus: paymentDesc,
             });
+
+            // 3. Generate PDF Invoice and Send Email to Customer
+            try {
+              const pdfBuffer = await this.generatePdfInvoiceBuffer(transaction.id);
+              const customerEmail = requestWithGuide.users_tour_requests_user_idTousers.email;
+              const customerNameFull = requestWithGuide.users_tour_requests_user_idTousers.full_name;
+              const invoiceNumber = `INV-${transaction.transaction_code || transaction.id.substring(0, 8)}`;
+              
+              if (customerEmail) {
+                await this.mailService.sendInvoiceEmail(
+                  customerEmail,
+                  customerNameFull || 'Quý khách',
+                  pdfBuffer,
+                  invoiceNumber
+                );
+              }
+            } catch (pdfErr) {
+              console.error('Error generating/sending PDF invoice:', pdfErr);
+            }
           }
         }
 
@@ -563,5 +585,65 @@ export class PaymentsService {
       upcomingRevenue,
       pendingRefundCount: pendingRefunds.length,
     };
+  }
+
+  async generatePdfInvoiceBuffer(transactionId: string): Promise<Buffer> {
+    const data = await this.generateInvoiceData(transactionId);
+    
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({ margin: 50 });
+        const buffers: Buffer[] = [];
+        
+        doc.on('data', buffers.push.bind(buffers));
+        doc.on('end', () => resolve(Buffer.concat(buffers)));
+
+        // Header
+        doc.fontSize(20).text(data.companyInfo.name, { align: 'center' });
+        doc.fontSize(10).text(data.companyInfo.address, { align: 'center' });
+        doc.text(`Email: ${data.companyInfo.email}`, { align: 'center' });
+        doc.moveDown();
+        
+        // Title
+        doc.fontSize(16).text('HOA DON THANH TOAN (VAT INVOICE)', { align: 'center' });
+        doc.moveDown();
+
+        // Invoice Info
+        doc.fontSize(10).text(`So hoa don: ${data.invoiceNumber}`);
+        doc.text(`Ngay: ${new Date(data.invoiceDate).toLocaleDateString('vi-VN')}`);
+        doc.text(`Ma giao dich: ${data.transactionCode || 'N/A'}`);
+        doc.text(`Phuong thuc: ${data.paymentMethod}`);
+        doc.moveDown();
+
+        // Customer Info
+        doc.fontSize(12).text('Thong tin khach hang:', { underline: true });
+        doc.fontSize(10).text(`Ho ten: ${data.customer.name}`);
+        doc.text(`Email: ${data.customer.email}`);
+        doc.text(`So dien thoai: ${data.customer.phone}`);
+        doc.moveDown();
+
+        // Tour Info
+        doc.fontSize(12).text('Thong tin Tour:', { underline: true });
+        doc.fontSize(10).text(`Ten Tour: ${data.tourInfo.title}`);
+        doc.text(`Dia diem: ${data.tourInfo.province}`);
+        doc.text(`Huong dan vien: ${data.tourInfo.guideName}`);
+        doc.moveDown();
+
+        // Financial Details
+        doc.fontSize(12).text('Chi tiet thanh toan:', { underline: true });
+        doc.fontSize(10).font('Helvetica').text(`Thanh tien: ${data.subtotal.toLocaleString('vi-VN')} VND`);
+        doc.text(`Thue VAT (${data.vatRate}%): ${data.vatAmount.toLocaleString('vi-VN')} VND`);
+        doc.fontSize(14).font('Helvetica-Bold').text(`Tong cong: ${data.total.toLocaleString('vi-VN')} VND`);
+        doc.font('Helvetica');
+        
+        // Footer
+        doc.moveDown(3);
+        doc.fontSize(10).font('Helvetica-Oblique').text('Cam on quy khach da su dung dich vu cua TravelConnect VN!', { align: 'center' });
+
+        doc.end();
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 }

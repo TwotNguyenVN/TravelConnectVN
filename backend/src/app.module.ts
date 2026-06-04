@@ -36,6 +36,7 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
 import { SosModule } from './sos/sos.module';
 import { TicketsModule } from './tickets/tickets.module';
 import { DisputesModule } from './disputes/disputes.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -79,6 +80,7 @@ import { DisputesModule } from './disputes/disputes.module';
     SosModule,
     TicketsModule,
     DisputesModule,
+    MailModule,
   ],
   controllers: [AppController],
   providers: [

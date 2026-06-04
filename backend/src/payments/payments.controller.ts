@@ -7,6 +7,7 @@ import {
   UseGuards,
   Query,
   Param,
+  Res,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -92,6 +93,23 @@ export class PaymentsController {
       message: 'Tạo dữ liệu hóa đơn thành công',
       data: data,
     };
+  }
+
+  @UseGuards(AuthGuard)
+  @Get(':id/invoice/pdf')
+  async getInvoicePdf(@Param('id') id: string, @Res() res: any) {
+    try {
+      const pdfBuffer = await this.paymentsService.generatePdfInvoiceBuffer(id);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="invoice-${id}.pdf"`,
+        'Content-Length': pdfBuffer.length,
+      });
+      res.end(pdfBuffer);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      res.status(500).json({ success: false, message: 'Failed to generate PDF' });
+    }
   }
 
   @UseGuards(AuthGuard)
