@@ -183,16 +183,19 @@ export class SchedulerService {
     });
 
     let closedPostsCount = 0;
-    for (const post of openPosts) {
-      await this.prisma.companion_posts.update({
-        where: { id: post.id },
+    if (openPosts.length > 0) {
+      const openPostIds = openPosts.map((p) => p.id);
+
+      // A1. Cập nhật tất cả các bài thành 'closed'
+      await this.prisma.companion_posts.updateMany({
+        where: { id: { in: openPostIds } },
         data: { business_status: 'closed' },
       });
 
-      // B. Tự động từ chối (reject) các yêu cầu gia nhập đoàn vẫn đang ở trạng thái pending
+      // B. Tự động từ chối (reject) tất cả các yêu cầu gia nhập đoàn vẫn đang ở trạng thái pending của các bài này
       await this.prisma.companion_requests.updateMany({
         where: {
-          post_id: post.id,
+          post_id: { in: openPostIds },
           status: 'pending',
         },
         data: {
@@ -203,9 +206,9 @@ export class SchedulerService {
         },
       });
 
-      closedPostsCount++;
+      closedPostsCount = openPosts.length;
       this.logger.log(
-        `Đã đóng bài viết Bạn đồng hành ID: ${post.id} (${post.title}) và từ chối các yêu cầu chờ duyệt.`,
+        `Đã đóng ${closedPostsCount} bài viết Bạn đồng hành và từ chối các yêu cầu chờ duyệt.`,
       );
     }
 
