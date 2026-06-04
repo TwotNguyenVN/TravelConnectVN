@@ -22,6 +22,7 @@ import {
   ProcessReportDto,
   ProcessVerificationDto,
   CreateStaffDto,
+  AnalyzeContentDto,
 } from './dto/admin.dto';
 
 @Controller('admin')
@@ -160,6 +161,12 @@ export class AdminController {
     @Req() req: any,
   ) {
     return this.adminService.moderateCompanionPost(id, dto, req.user.id);
+  }
+
+  @Post('moderation/analyze')
+  @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR)
+  analyzeContent(@Body() dto: AnalyzeContentDto) {
+    return this.adminService.analyzeContent(dto.text);
   }
 
   @Get('tours')

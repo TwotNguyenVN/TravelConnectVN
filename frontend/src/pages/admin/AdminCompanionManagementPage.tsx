@@ -9,6 +9,7 @@ interface CompanionPost {
   visibility_status: string;
   destination: string;
   start_date: string;
+  description?: string;
   users: {
     full_name: string;
     avatar_url?: string;
@@ -21,7 +22,30 @@ export const AdminCompanionManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [visibility, setVisibility] = useState('');
+  const [scanningPostId, setScanningPostId] = useState<string | null>(null);
+  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
+
+  const handleAiScan = async (post: CompanionPost) => {
+    try {
+      setScanningPostId(post.id);
+      const textToAnalyze = `${post.title}. Điểm đến: ${post.destination}. Mô tả: ${post.description || ''}`;
+      const response = await adminApi.analyzeContent(textToAnalyze);
+      setAiScanResults(prev => ({
+        ...prev,
+        [post.id]: response.data
+      }));
+      if (response.data.flagged) {
+        toast.warning('AI phát hiện nghi vấn vi phạm chính sách!');
+      } else {
+        toast.success('AI quét hoàn tất: Nội dung an toàn.');
+      }
+    } catch {
+      toast.error('AI quét thất bại');
+    } finally {
+      setScanningPostId(null);
+    }
+  };
 
   const fetchPosts = async () => {
     try {
@@ -145,50 +169,126 @@ export const AdminCompanionManagementPage: React.FC = () => {
             ) : posts.map(post => {
               const status = statusConfig[post.visibility_status] || statusConfig.visible;
               return (
-                <tr key={post.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <div>
-                      <div style={{ fontWeight: 700, color: '#1e293b', fontSize: 'var(--tc-font-size-sm)' }}>{post.title}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>📍 {post.destination}</div>
-                    </div>
-                  </td>
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
-                        {post.users?.avatar_url ? <img src={post.users.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : 'U'}
+                <React.Fragment key={post.id}>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <div>
+                        <div style={{ fontWeight: 700, color: '#1e293b', fontSize: 'var(--tc-font-size-sm)' }}>{post.title}</div>
+                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>📍 {post.destination}</div>
                       </div>
-                      <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>{post.users?.full_name}</span>
-                    </div>
-                  </td>
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <div style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 600 }}>{new Date(post.start_date).toLocaleDateString('vi-VN')}</div>
-                    <div style={{ fontSize: '10px', color: '#94a3b8' }}>Đăng lúc: {new Date(post.created_at).toLocaleDateString('vi-VN')}</div>
-                  </td>
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '6px',
-                      padding: '4px 10px', borderRadius: '20px', backgroundColor: status.bg, color: status.color,
-                      fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'
-                    }}>
-                      <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'currentColor' }}></span>
-                      {status.label}
-                    </span>
-                  </td>
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      {post.visibility_status !== 'visible' && (
-                        <button onClick={() => handleModerate(post.id, 'visible')} title="Hiển thị" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>👁️</button>
-                      )}
-                      {post.visibility_status !== 'hidden' && (
-                        <button onClick={() => handleModerate(post.id, 'hidden')} title="Ẩn" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🙈</button>
-                      )}
-                      {post.visibility_status !== 'flagged' && (
-                        <button onClick={() => handleModerate(post.id, 'flagged')} title="Cảnh báo" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🚩</button>
-                      )}
-                      <button onClick={() => window.open(`/companion/${post.id}`, '_blank')} title="Xem chi tiết" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🔗</button>
-                    </div>
-                  </td>
-                </tr>
+                    </td>
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
+                          {post.users?.avatar_url ? <img src={post.users.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : 'U'}
+                        </div>
+                        <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>{post.users?.full_name}</span>
+                      </div>
+                    </td>
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <div style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 600 }}>{new Date(post.start_date).toLocaleDateString('vi-VN')}</div>
+                      <div style={{ fontSize: '10px', color: '#94a3b8' }}>Đăng lúc: {new Date(post.created_at).toLocaleDateString('vi-VN')}</div>
+                    </td>
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '4px 10px', borderRadius: '20px', backgroundColor: status.bg, color: status.color,
+                        fontSize: '10px', fontWeight: 700, textTransform: 'uppercase'
+                      }}>
+                        <span style={{ width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'currentColor' }}></span>
+                        {status.label}
+                      </span>
+                    </td>
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        {post.visibility_status !== 'visible' && (
+                          <button onClick={() => handleModerate(post.id, 'visible')} title="Hiển thị" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>👁️</button>
+                        )}
+                        {post.visibility_status !== 'hidden' && (
+                          <button onClick={() => handleModerate(post.id, 'hidden')} title="Ẩn" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🙈</button>
+                        )}
+                        {post.visibility_status !== 'flagged' && (
+                          <button onClick={() => handleModerate(post.id, 'flagged')} title="Cảnh báo" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🚩</button>
+                        )}
+                        <button 
+                          onClick={() => handleAiScan(post)}
+                          disabled={scanningPostId === post.id}
+                          title="Quét AI"
+                          style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc', cursor: 'pointer', opacity: scanningPostId === post.id ? 0.6 : 1 }}
+                        >
+                          {scanningPostId === post.id ? '⏳' : '🤖'}
+                        </button>
+                        <button onClick={() => window.open(`/companion/${post.id}`, '_blank')} title="Xem chi tiết" style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}>🔗</button>
+                      </div>
+                    </td>
+                  </tr>
+                  {aiScanResults[post.id] && (
+                    <tr key={`${post.id}-ai`}>
+                      <td colSpan={5} style={{ padding: '12px 24px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '8px',
+                          backgroundColor: 'white',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: `1px solid ${aiScanResults[post.id].flagged ? '#fca5a5' : '#cbd5e1'}`,
+                          boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                        }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span style={{ fontSize: '18px' }}>🤖</span>
+                              <span style={{ fontWeight: 700, fontSize: '14px', color: '#1e293b' }}>Kết quả Quét AI</span>
+                              <span style={{
+                                padding: '2px 8px',
+                                borderRadius: '12px',
+                                fontSize: '10px',
+                                fontWeight: 700,
+                                backgroundColor: aiScanResults[post.id].flagged ? '#fef2f2' : '#f0fdf4',
+                                color: aiScanResults[post.id].flagged ? '#ef4444' : '#16a34a'
+                              }}>
+                                {aiScanResults[post.id].flagged ? 'Nghi vấn vi phạm' : 'An toàn'}
+                              </span>
+                            </div>
+                            <button 
+                              onClick={() => setAiScanResults(prev => {
+                                const copy = { ...prev };
+                                delete copy[post.id];
+                                return copy;
+                              })}
+                              style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer', color: '#64748b', fontSize: '14px' }}
+                            >✕</button>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '13px', color: '#475569' }}>
+                            <strong>Lý do:</strong> {aiScanResults[post.id].reason}
+                          </p>
+                          {aiScanResults[post.id].highlights && aiScanResults[post.id].highlights.length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                              <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>Chi tiết nghi vấn:</div>
+                              {aiScanResults[post.id].highlights.map((h: { text: string; type: string; explanation: string }, idx: number) => (
+                                <div key={idx} style={{ 
+                                  display: 'flex', 
+                                  alignItems: 'center', 
+                                  gap: '8px',
+                                  padding: '6px 12px',
+                                  backgroundColor: '#fffbeb',
+                                  borderLeft: '4px solid #f59e0b',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  color: '#78350f'
+                                }}>
+                                  <span style={{ fontWeight: 700, textDecoration: 'underline' }}>"{h.text}"</span>
+                                  <span>({h.type === 'contact_info' ? 'Thông tin liên hệ' : h.type === 'offensive' ? 'Ngôn từ nhạy cảm' : 'Spam/Khác'}):</span>
+                                  <span>{h.explanation}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               );
             })}
           </tbody>

@@ -64,3 +64,8 @@ export class CreateStaffDto {
   @IsEnum(['CONTENT_MODERATOR', 'SUPPORT_STAFF', 'ACCOUNTANT'])
   roleCode: string;
 }
+
+export class AnalyzeContentDto {
+  @IsString()
+  text: string;
+}

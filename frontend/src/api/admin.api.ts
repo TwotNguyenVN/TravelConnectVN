@@ -61,5 +61,8 @@ export const adminApi = {
   // Support Staff — Notifications Broadcast
   sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
     api.post('/admin/notifications/broadcast', data),
+
+  // Content Moderation AI Scanner
+  analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
 };
 

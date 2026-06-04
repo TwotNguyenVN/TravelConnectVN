@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
+import { ConfigService } from '@nestjs/config';
+import { GoogleGenAI } from '@google/genai';
 import {
   UpdateUserStatusDto,
   AssignRoleDto,
@@ -16,10 +18,16 @@ import {
 
 @Injectable()
 export class AdminService {
+  private client: GoogleGenAI;
+
   constructor(
     private prisma: PrismaService,
     private supabaseService: SupabaseService,
-  ) {}
+    private configService: ConfigService,
+  ) {
+    const apiKey = this.configService.get<string>('GEMINI_API_KEY');
+    this.client = new GoogleGenAI({ apiKey: apiKey || '' });
+  }
 
   async getDashboardStats() {
     const [
@@ -1085,5 +1093,73 @@ export class AdminService {
       success: true,
       message: `Đã gửi thông báo tới ${targetUserIds.length} người dùng thành công`,
     };
+  }
+
+  async analyzeContent(text: string) {
+    if (!text || text.trim() === '') {
+      return { flagged: false, reason: 'Nội dung rỗng', highlights: [] };
+    }
+
+    try {
+      const prompt = `Analyze the following text for moderation issues in TravelConnectVN (a travel platform). We are scanning for:
+1. Phone numbers, personal email addresses, or social media handles/links (e.g. Zalo, FB, Viber, Telegram) where users might attempt to coordinate off-platform to bypass fees.
+2. Offensive language, profanity, or hate speech in Vietnamese or English.
+3. Scam, spam, or suspicious pricing claims.
+
+Text to analyze: "${text}"
+
+You MUST respond strictly with a valid JSON object of this structure:
+{
+  "flagged": true/false,
+  "reason": "Short summary of issues found, in Vietnamese",
+  "highlights": [
+    {
+      "text": "the exact text segment found containing the violation",
+      "type": "contact_info" or "offensive" or "spam" or "other",
+      "explanation": "Brief explanation in Vietnamese of why this is flagged"
+    }
+  ]
+}
+If no issues are found, flagged should be false, reason should be "No issues detected", and highlights should be an empty array. Do not include any Markdown wrap (like \`\`\`json) or extra text. Just return the raw JSON string.`;
+
+      const response = await this.client.models.generateContent({
+        model: 'gemini-flash-latest',
+        contents: prompt,
+      });
+
+      const resText = response.text || '';
+      const cleanJson = resText.replace(/```json/g, '').replace(/```/g, '').trim();
+      const parsed = JSON.parse(cleanJson);
+      return parsed;
+    } catch (error) {
+      console.error('Gemini Moderation Error, falling back to regex:', error);
+      const highlights: Array<{ text: string; type: string; explanation: string }> = [];
+      
+      const phoneRegex = /(?:\+?84|0)(?:\s*\d){9,10}/g;
+      let match;
+      while ((match = phoneRegex.exec(text)) !== null) {
+        highlights.push({
+          text: match[0],
+          type: 'contact_info',
+          explanation: 'Phát hiện số điện thoại liên hệ cá nhân.',
+        });
+      }
+
+      const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+      while ((match = emailRegex.exec(text)) !== null) {
+        highlights.push({
+          text: match[0],
+          type: 'contact_info',
+          explanation: 'Phát hiện địa chỉ email cá nhân.',
+        });
+      }
+
+      const flagged = highlights.length > 0;
+      return {
+        flagged,
+        reason: flagged ? 'Phát hiện thông tin liên hệ cá nhân (Fallback Scan).' : 'Không phát hiện lỗi (Fallback Scan).',
+        highlights,
+      };
+    }
   }
 }
