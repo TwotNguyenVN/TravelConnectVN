@@ -46,6 +46,7 @@ export const ContentSidebar: React.FC = () => {
         <NavLink to="/content/guides" style={navLinkStyle}>Xác minh HDV</NavLink>
         <NavLink to="/content/companion-posts" style={navLinkStyle}>Bài đồng hành</NavLink>
         <NavLink to="/content/reviews" style={navLinkStyle}>Đánh giá & Bình luận</NavLink>
+        <NavLink to="/content/heatmap" style={navLinkStyle}>🗺️ Bản đồ nhiệt báo cáo</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

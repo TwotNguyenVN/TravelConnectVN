@@ -10,6 +10,8 @@ import { FinanceDashboardPage } from '../pages/finance/FinanceDashboardPage';
 import { FinanceRefundsPage } from '../pages/finance/FinanceRefundsPage';
 import { FinanceTransactionsPage } from '../pages/finance/FinanceTransactionsPage';
 import { FinanceSettlementsPage } from '../pages/finance/FinanceSettlementsPage';
+import { FinanceForecastingPage } from '../pages/finance/FinanceForecastingPage';
+import { FinanceReconciliationPage } from '../pages/finance/FinanceReconciliationPage';
 
 import { HomePage } from '../pages/public/HomePage';
 import { TourListPage } from '../pages/public/TourListPage';
@@ -59,11 +61,21 @@ import { AdminTourManagementPage } from '../pages/admin/AdminTourManagementPage'
 import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManagementPage';
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
+import { AdminRecoveryConsolePage } from '../pages/admin/AdminRecoveryConsolePage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
 import { SupportDisputePage } from '../pages/support/SupportDisputePage';
 import { SupportBroadcastPage } from '../pages/support/SupportBroadcastPage';
+import { SupportTicketsPage } from '../pages/support/SupportTicketsPage';
+
+// Phase 5-9 new imports
+import { AdminMaintenancePage } from '../pages/admin/AdminMaintenancePage';
+import { AdminAnomalyPage } from '../pages/admin/AdminAnomalyPage';
+import { ContentReportHeatmapPage } from '../pages/admin/ContentReportHeatmapPage';
+import { SupportFaqPage } from '../pages/admin/SupportFaqPage';
+import { SupportAnalyticsPage } from '../pages/admin/SupportAnalyticsPage';
+
 import ChatPage from '../pages/chat/ChatPage';
 import AiChatPage from '../pages/user/AiChatPage';
 import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
@@ -161,6 +173,9 @@ export const router = createBrowserRouter([
       { path: 'users', element: <AdminUserManagementPage /> },
       { path: 'activity-logs', element: <AdminActivityLogPage /> },
       { path: 'statistics', element: <AdminStatisticsPage /> },
+      { path: 'recovery', element: <AdminRecoveryConsolePage /> },
+      { path: 'maintenance', element: <AdminMaintenancePage /> },
+      { path: 'anomaly', element: <AdminAnomalyPage /> },
     ],
   },
   {
@@ -177,6 +192,7 @@ export const router = createBrowserRouter([
       { path: 'guides', element: <AdminVerificationPage /> },
       { path: 'companion-posts', element: <AdminCompanionManagementPage /> },
       { path: 'reviews', element: <AdminReviewManagementPage /> },
+      { path: 'heatmap', element: <ContentReportHeatmapPage /> },
     ],
   },
   {
@@ -189,8 +205,11 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <SupportDashboardPage /> },
       { path: 'reports', element: <AdminReportManagementPage /> },
+      { path: 'tickets', element: <SupportTicketsPage /> },
       { path: 'disputes', element: <SupportDisputePage /> },
       { path: 'broadcast', element: <SupportBroadcastPage /> },
+      { path: 'faq', element: <SupportFaqPage /> },
+      { path: 'analytics', element: <SupportAnalyticsPage /> },
     ],
   },
   {
@@ -205,6 +224,8 @@ export const router = createBrowserRouter([
       { path: 'refunds', element: <FinanceRefundsPage /> },
       { path: 'transactions', element: <FinanceTransactionsPage /> },
       { path: 'settlements', element: <FinanceSettlementsPage /> },
+      { path: 'forecast', element: <FinanceForecastingPage /> },
+      { path: 'reconciliation', element: <FinanceReconciliationPage /> },
     ],
   },
 ]);

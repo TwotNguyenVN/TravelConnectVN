@@ -78,6 +78,10 @@ export class ReviewsService {
       { tour_title: tourRequest.tours.title, rating: dto.rating },
     );
 
+    if (dto.rating <= 2) {
+      await this.deductReputation(tourRequest.tours.guide_profile_id, 10);
+    }
+
     return review;
   }
 
@@ -190,6 +194,10 @@ export class ReviewsService {
       review.id,
       { tour_title: tourRequest.tours.title, rating: dto.rating },
     );
+
+    if (dto.rating <= 2) {
+      await this.deductReputation(tourRequest.tours.guide_profile_id, 10);
+    }
 
     return review;
   }
@@ -365,4 +373,29 @@ export class ReviewsService {
       });
     }
   }
+
+  private async deductReputation(guideProfileId: string, points: number) {
+    const guide = await this.prisma.guide_profiles.findUnique({
+      where: { id: guideProfileId },
+    });
+    if (guide) {
+      const newRep = Math.max(0, guide.reputation_score - points);
+      await this.prisma.$transaction(async (tx) => {
+        await tx.guide_profiles.update({
+          where: { id: guideProfileId },
+          data: {
+            reputation_score: newRep,
+            visibility_status: newRep < 50 ? 'hidden' : guide.visibility_status,
+          },
+        });
+        if (newRep < 50) {
+          await tx.public_users.update({
+            where: { id: guide.user_id },
+            data: { status: 'suspended' },
+          });
+        }
+      });
+    }
+  }
 }
+
