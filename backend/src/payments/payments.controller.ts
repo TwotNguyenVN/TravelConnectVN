@@ -10,8 +10,9 @@ import {
   Res,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import type { Response } from 'express';
 import { AuthGuard } from '../common/guards/auth.guard';
-import { Request as ExpressRequest, Response } from 'express';
+import { Request as ExpressRequest } from 'express';
 
 interface AuthenticatedRequest extends ExpressRequest {
   user: { id: string; role: string };

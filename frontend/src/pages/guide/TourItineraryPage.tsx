@@ -33,7 +33,7 @@ const TourItineraryPage: React.FC = () => {
       
       // Map backend naming to frontend naming
       if (Array.isArray(data)) {
-        const mappedData = data.map((loc: any) => ({
+        const mappedData = data.map((loc: unknown) => ({
           id: loc.id,
           locationName: loc.location_name,
           address: loc.address || '',

@@ -65,8 +65,8 @@ const GuideSchedulesPage: React.FC = () => {
         // Build tour options list for the create flow
         // Only include tours that are published AND visible (not draft / hidden)
         const options: TourOption[] = toursList
-          .filter((t: any) => t.businessStatus === 'published' && t.visibilityStatus === 'visible')
-          .map((t: any) => ({
+          .filter((t: unknown) => t.businessStatus === 'published' && t.visibilityStatus === 'visible')
+          .map((t: unknown) => ({
             id: t.id,
             title: t.title,
             cover: t.cover,
@@ -76,12 +76,12 @@ const GuideSchedulesPage: React.FC = () => {
         setTourOptions(options);
 
         const details = await Promise.all(
-          toursList.map(async (t: any) => {
+          toursList.map(async (t: unknown) => {
             try {
               const res = await tourService.getTourDetailForGuide(t.id);
               const tourDetail = res.data || res;
-              const tourSchedules = (tourDetail.tour_schedules || []).map((s: any) => {
-                const bookedCount = s.tour_requests?.reduce((sum: number, req: any) => sum + req.participant_count, 0) || 0;
+              const tourSchedules = (tourDetail.tour_schedules || []).map((s: unknown) => {
+                const bookedCount = s.tour_requests?.reduce((sum: number, req: unknown) => sum + req.participant_count, 0) || 0;
                 return {
                   id: s.id,
                   start_date: s.start_date,
@@ -125,7 +125,7 @@ const formatDateLocal = (date: Date): string => {
 };
 
   // --- View schedule detail handler (existing) ---
-  const handleDateClick = (date: Date, _schedule?: any) => {
+  const handleDateClick = (date: Date, _schedule?: unknown) => {
     const dateString = formatDateLocal(date);
     const daySchedules = schedules.filter(s => {
       const sDate = new Date(s.start_date);
@@ -179,7 +179,7 @@ const formatDateLocal = (date: Date): string => {
       toast.success(`Đã tạo lịch khởi hành ngày ${createDate.toLocaleDateString('vi-VN')} cho tour "${selectedTour.title}"!`);
       setIsCreateModalOpen(false);
       await fetchAllSchedules();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating schedule:', err);
       toast.error(err?.response?.data?.message || 'Không thể tạo lịch trình. Vui lòng thử lại.');
     } finally {

@@ -23,7 +23,7 @@ export class MailProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<unknown, unknown, string>): Promise<unknown> {
+  async process(job: Job<unknown, unknown, string>): Promise<void> {
     console.log(`[MailProcessor] Xử lý job ${job.id} - ${job.name}`);
 
     switch (job.name) {

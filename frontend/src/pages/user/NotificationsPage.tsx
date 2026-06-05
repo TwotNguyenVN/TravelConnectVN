@@ -26,7 +26,7 @@ export const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleNewNotification = (data: any) => {
+      const handleNewNotification = (data: Record<string, unknown>) => {
         setNotifications(prev => [data, ...prev]);
         toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
       };

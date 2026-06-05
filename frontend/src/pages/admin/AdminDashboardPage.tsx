@@ -19,10 +19,10 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 
 export function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [userStats, setUserStats] = useState<any>(null);
-  const [tourStats, setTourStats] = useState<any>(null);
-  const [reportStats, setReportStats] = useState<any>(null);
-  const [revenueStats, setRevenueStats] = useState<any>(null);
+  const [userStats, setUserStats] = useState<unknown>(null);
+  const [tourStats, setTourStats] = useState<unknown>(null);
+  const [reportStats, setReportStats] = useState<unknown>(null);
+  const [revenueStats, setRevenueStats] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -139,7 +139,7 @@ export function AdminDashboardPage() {
                   tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
                 />
                 <Tooltip 
-                  formatter={(value: any) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']}
+                  formatter={(value: unknown) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']}
                   contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
                 />
                 <Bar dataKey="amount" fill="#10b981" radius={[4, 4, 0, 0]} barSize={40} />
@@ -163,7 +163,7 @@ export function AdminDashboardPage() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {(tourStats?.categories || []).map((_entry: any, index: number) => (
+                  {(tourStats?.categories || []).map((_entry: unknown, index: number) => (
 
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
@@ -188,7 +188,7 @@ export function AdminDashboardPage() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                 <Tooltip />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                  {(userStats?.roles || []).map((_entry: any, index: number) => (
+                  {(userStats?.roles || []).map((_entry: unknown, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>

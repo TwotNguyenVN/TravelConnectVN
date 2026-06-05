@@ -116,7 +116,7 @@ const CompanionFormPage: React.FC = () => {
 
       setFormData(prev => ({ ...prev, images: newImages }));
       toast.success('Tải ảnh lên thành công');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error uploading images:', error);
       toast.error('Có lỗi xảy ra khi tải ảnh lên');
     } finally {
@@ -157,7 +157,7 @@ const CompanionFormPage: React.FC = () => {
     setSubmitting(true);
     try {
       // Prepare data for backend DTO
-      const payload: any = {
+      const payload: unknown = {
         title: formData.title,
         destination: formData.destination,
         startDate: new Date(formData.start_date).toISOString(),
@@ -181,7 +181,7 @@ const CompanionFormPage: React.FC = () => {
         toast.success('Tạo bài đăng thành công!');
       }
       navigate('/user/companion-posts');
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('DEBUG - Post submission error:', error.response?.data);
       const errorMsg = error.response?.data?.message;
       if (Array.isArray(errorMsg)) {

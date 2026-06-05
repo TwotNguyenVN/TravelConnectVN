@@ -89,7 +89,7 @@ const TourFormPage: React.FC = () => {
 
   // System States
   const [categories, setCategories] = useState<Category[]>([]);
-  const [allAccommodations, setAllAccommodations] = useState<any[]>([]);
+  const [allAccommodations, setAllAccommodations] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -109,7 +109,7 @@ const TourFormPage: React.FC = () => {
     title: "",
     categoryId: "",
     price: 0,
-    maxParticipants: "" as any,
+    maxParticipants: "" as unknown,
     description: "",
     participantRequirements: "",
     province: "",
@@ -122,8 +122,8 @@ const TourFormPage: React.FC = () => {
     meetLatitude: undefined as number | undefined,
     meetLongitude: undefined as number | undefined,
     duration: "",
-    numDays: "" as any,
-    numNights: "" as any,
+    numDays: "" as unknown,
+    numNights: "" as unknown,
     startDate: "",
     endDate: "",
     businessStatus: "draft",
@@ -171,7 +171,7 @@ const TourFormPage: React.FC = () => {
           navigate('/guide/tours');
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update status error:', error);
       toast.error('Không thể cập nhật trạng thái tour');
     } finally {
@@ -293,7 +293,7 @@ const TourFormPage: React.FC = () => {
         meetTime: tour.meet_time || tour.meetTime || "",
         googleMapsLink: tour.google_maps_link || tour.googleMapsLink || "",
         duration: tour.duration || "",
-        itinerary: tour.tour_locations ? tour.tour_locations.map((loc: any) => ({
+        itinerary: tour.tour_locations ? tour.tour_locations.map((loc: unknown) => ({
           locationName: loc.location_name || '',
           address: loc.address || '',
           visitTime: loc.visit_time ? new Date(loc.visit_time).toISOString().slice(0, 16) : '',
@@ -306,7 +306,7 @@ const TourFormPage: React.FC = () => {
           latitude: loc.latitude,
           longitude: loc.longitude
         })) : [],
-        destinations: tour.tour_destinations ? tour.tour_destinations.map((d: any) => ({
+        destinations: tour.tour_destinations ? tour.tour_destinations.map((d: unknown) => ({
           name: d.name || '',
           address: d.address || '',
           googleMapsLink: d.google_maps_link || ''
@@ -316,12 +316,12 @@ const TourFormPage: React.FC = () => {
         numNights: tour.num_nights ?? tour.numNights ?? "",
         meetLatitude: tour.meet_latitude ?? tour.meetLatitude ?? "",
         meetLongitude: tour.meet_longitude ?? tour.meetLongitude ?? "",
-        images: tour.tour_images ? tour.tour_images.map((img: any) => ({
+        images: tour.tour_images ? tour.tour_images.map((img: unknown) => ({
           imageUrl: img.image_url,
           caption: img.caption || "",
           isCover: img.is_cover
         })) : [],
-        accommodations: tour.tour_accommodations ? tour.tour_accommodations.map((acc: any) => ({
+        accommodations: tour.tour_accommodations ? tour.tour_accommodations.map((acc: unknown) => ({
           accommodationId: acc.accommodation_id,
           name: acc.accommodations?.name || "",
           checkInDate: acc.check_in_date ? new Date(acc.check_in_date).toISOString().split("T")[0] : "",
@@ -568,7 +568,7 @@ const TourFormPage: React.FC = () => {
   const handleItineraryChange = (
     index: number,
     field: keyof ItineraryItem,
-    value: any,
+    value: unknown,
   ) => {
     setFormData((prev) => {
       const newItinerary = [...prev.itinerary];

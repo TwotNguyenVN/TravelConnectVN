@@ -14,7 +14,7 @@ export interface AiSession {
   id: string;
   user_id: string;
   status: string;
-  context?: any;
+  context?: unknown;
   started_at: string;
   last_interaction_at: string;
   created_at?: string;
@@ -38,11 +38,11 @@ const aiChatService = {
     return await api.post(`/ai-chat/sessions/${sessionId}/messages`, { content }, { signal });
   },
 
-  deleteSession: async (sessionId: string): Promise<ApiResponse<any>> => {
+  deleteSession: async (sessionId: string): Promise<ApiResponse<unknown>> => {
     return await api.delete(`/ai-chat/sessions/${sessionId}`);
   },
 
-  updateSessionContext: async (sessionId: string, context: any): Promise<ApiResponse<AiSession>> => {
+  updateSessionContext: async (sessionId: string, context: unknown): Promise<ApiResponse<AiSession>> => {
     return await api.patch(`/ai-chat/sessions/${sessionId}/context`, { context });
   },
 };

@@ -36,7 +36,7 @@ const GuideProfilePage: React.FC = () => {
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [languages, setLanguages] = useState<MasterData[]>([]);
   const [skills, setSkills] = useState<MasterData[]>([]);
-  const [provinces, setProvinces] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<unknown[]>([]);
   const [selectedLanguages, setSelectedLanguages] = useState<number[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<number[]>([]);
 
@@ -124,10 +124,10 @@ const GuideProfilePage: React.FC = () => {
           homeProvinceId: profileRes.data.homeProvince?.id,
         });
         setSelectedLanguages(
-          profileRes.data.guideLanguages.map((l: any) => l.language.id),
+          profileRes.data.guideLanguages.map((l: unknown) => l.language.id),
         );
         setSelectedSkills(
-          profileRes.data.guideSkills.map((s: any) => s.skill.id),
+          profileRes.data.guideSkills.map((s: unknown) => s.skill.id),
         );
 
         // Pre-fill search if already has a province
@@ -151,7 +151,7 @@ const GuideProfilePage: React.FC = () => {
           avatarUrl: uData.avatar_url || "",
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching guide profile data:", err);
       toast.error("Không thể tải dữ liệu hồ sơ. Vui lòng thử lại sau.");
     } finally {
@@ -182,11 +182,11 @@ const GuideProfilePage: React.FC = () => {
   const fetchDefaultCovers = async () => {
     try {
       setIsLoadingCovers(true);
-      const res: any = await guideService.getDefaultCovers();
+      const res: unknown = await guideService.getDefaultCovers();
 
       if (res && res.success && res.data) {
         // Map the database objects to a simple array of URLs
-        const urls = res.data.map((item: any) => item.url);
+        const urls = res.data.map((item: unknown) => item.url);
         setDefaultCovers(urls);
       } else {
         // Ultimate fallback if database is empty (showing all 5 as requested)
@@ -298,7 +298,7 @@ const GuideProfilePage: React.FC = () => {
 
       setProfile((prev) => ({ ...prev, avatarUrl: data.publicUrl }));
       toast.success("Cập nhật ảnh đại diện thành công!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error uploading avatar:", err);
       toast.error("Lỗi khi tải ảnh lên: " + err.message);
     } finally {
@@ -332,7 +332,7 @@ const GuideProfilePage: React.FC = () => {
 
       setProfile((prev) => ({ ...prev, coverUrl: data.publicUrl }));
       toast.success("Tải ảnh hồ sơ lên thành công!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error uploading cover:", err);
       toast.error("Lỗi khi tải ảnh lên: " + err.message);
     } finally {
@@ -428,7 +428,7 @@ const GuideProfilePage: React.FC = () => {
 
       toast.success("Cập nhật hồ sơ hướng dẫn viên thành công!");
       window.scrollTo({ top: 0, behavior: "smooth" });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error saving profile:", err);
       toast.error(err.message || "Có lỗi xảy ra khi lưu hồ sơ.");
     } finally {
@@ -493,7 +493,7 @@ const GuideProfilePage: React.FC = () => {
               <img
                 src={
                   profile.avatarUrl ||
-                  (profile as any).avatar_url ||
+                  (profile as unknown).avatar_url ||
                   DEFAULT_AVATAR
                 }
                 alt="Avatar"

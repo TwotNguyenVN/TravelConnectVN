@@ -86,7 +86,7 @@ export const TourListPage: React.FC = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res: any = await tourService.getCategories();
+        const res: unknown = await tourService.getCategories();
         if (res && res.data) {
           setCategories(res.data);
         }
@@ -325,7 +325,7 @@ export const TourListPage: React.FC = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 'var(--tc-spacing-5)' }}>
             {tours.length > 0 ? (
-              tours.map((tour: any) => (
+              tours.map((tour: unknown) => (
                 <TourCard 
                   key={tour.id} 
                   tour={tour} 

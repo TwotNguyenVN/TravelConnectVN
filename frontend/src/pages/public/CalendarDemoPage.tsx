@@ -11,7 +11,7 @@ const mockSchedules = [
 ];
 
 export const CalendarDemoPage: React.FC = () => {
-  const handleSelect = (schedule: any) => {
+  const handleSelect = (schedule: unknown) => {
     console.log('Selected schedule:', schedule);
     alert(`Bạn đã chọn ngày khởi hành: ${schedule.date}\nGiá: ${schedule.price.toLocaleString()}đ`);
   };

@@ -156,14 +156,14 @@ export class PaymentsService {
       let vnp_Params: Record<string, string | number> = {};
       vnp_Params['vnp_Version'] = '2.1.0';
       vnp_Params['vnp_Command'] = 'pay';
-      vnp_Params['vnp_TmnCode'] = tmnCode;
+      vnp_Params['vnp_TmnCode'] = tmnCode || '';
       vnp_Params['vnp_Locale'] = 'vn';
       vnp_Params['vnp_CurrCode'] = 'VND';
       vnp_Params['vnp_TxnRef'] = transactionId;
       vnp_Params['vnp_OrderInfo'] = 'Thanh toan don hang ' + transactionId;
       vnp_Params['vnp_OrderType'] = 'other';
       vnp_Params['vnp_Amount'] = amount * 100; // VNPAY yêu cầu nhân 100
-      vnp_Params['vnp_ReturnUrl'] = returnUrl;
+      vnp_Params['vnp_ReturnUrl'] = returnUrl || '';
       vnp_Params['vnp_IpAddr'] = ipAddr;
       vnp_Params['vnp_CreateDate'] = createDate;
 
@@ -198,7 +198,7 @@ export class PaymentsService {
   async vnpayIpn(vnp_Params: Record<string, string | number>) {
     try {
       console.log('IPN Params:', vnp_Params);
-      const secureHash = vnp_Params['vnp_SecureHash'];
+      const secureHash = String(vnp_Params['vnp_SecureHash'] || '');
       delete vnp_Params['vnp_SecureHash'];
       delete vnp_Params['vnp_SecureHashType'];
 
@@ -217,8 +217,8 @@ export class PaymentsService {
       const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 
       if (secureHash === signed) {
-        const orderId = vnp_Params['vnp_TxnRef'];
-        const rspCode = vnp_Params['vnp_ResponseCode'];
+        const orderId = vnp_Params['vnp_TxnRef'] as string;
+        const rspCode = vnp_Params['vnp_ResponseCode'] as string;
 
         // Tìm transaction
         const transaction = await this.prisma.payment_transactions.findUnique({

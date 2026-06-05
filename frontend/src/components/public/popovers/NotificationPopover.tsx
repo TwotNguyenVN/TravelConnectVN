@@ -18,7 +18,7 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
 
   useEffect(() => {
     if (socket) {
-      const handleNewNotification = (data: any) => {
+      const handleNewNotification = (data: Record<string, unknown>) => {
         setNotifications(prev => [data, ...prev].slice(0, 10)); // Keep top 10
       };
 

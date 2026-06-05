@@ -23,7 +23,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [visibility, setVisibility] = useState('');
   const [scanningPostId, setScanningPostId] = useState<string | null>(null);
-  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
+  const [aiScanResults, setAiScanResults] = useState<Record<string, unknown>>({});
   const { toast } = useToast();
 
   const handleAiScan = async (post: CompanionPost) => {
@@ -52,7 +52,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
       setLoading(true);
       const response = await adminApi.getCompanionPosts({ search, visibility, take: 50 });
       setPosts(response.data?.items || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Không thể tải danh sách bài viết');
     } finally {
       setLoading(false);
@@ -75,7 +75,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
       });
       toast.success('Cập nhật thành công');
       fetchPosts();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.response?.data?.message || 'Thao tác thất bại');
     }
   };

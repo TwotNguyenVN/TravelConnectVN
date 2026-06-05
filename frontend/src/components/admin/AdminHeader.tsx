@@ -33,7 +33,7 @@ export const AdminHeader: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleNewNotification = (data: any) => {
+      const handleNewNotification = (data: Record<string, unknown>) => {
         setUnreadCount(prev => prev + 1);
         toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
       };

@@ -11,7 +11,7 @@ import axios from 'axios';
 import './AiChatPage.css';
 
 // Helper to replace <br> tags with actual JSX <br /> elements in rendered Markdown nodes
-const replaceBr = (node: any): any => {
+const replaceBr = (node: unknown): unknown => {
   if (typeof node === 'string') {
     if (/<br\s*\/?>/gi.test(node)) {
       const parts = node.split(/<br\s*\/?>/gi);
@@ -53,7 +53,7 @@ const AiChatPage: React.FC = () => {
   const [editTitleText, setEditTitleText] = useState('');
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [upcomingTour, setUpcomingTour] = useState<any>(null);
+  const [upcomingTour, setUpcomingTour] = useState<unknown>(null);
   
   // States and refs for message editing and aborting
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -62,7 +62,7 @@ const AiChatPage: React.FC = () => {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const streamingIntervalRef = useRef<any>(null);
+  const streamingIntervalRef = useRef<unknown>(null);
   const isCreatingSessionRef = useRef(false);
 
   const scrollToBottom = () => {
@@ -77,7 +77,7 @@ const AiChatPage: React.FC = () => {
         const res = await tourRequestService.getMyRequests({ limit: 20 });
         if (res.success && res.data?.data) {
           const tours = res.data.data;
-          const upcoming = tours.find((t: any) => 
+          const upcoming = tours.find((t: unknown) => 
             ['paid', 'approved'].includes(t.status) && 
             new Date(t.startDate).getTime() > Date.now() - 24 * 60 * 60 * 1000
           );
@@ -281,7 +281,7 @@ const AiChatPage: React.FC = () => {
           }
         }, 15);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (axios.isCancel(error) || error.name === 'CanceledError' || error.message === 'canceled') {
         console.log('Gemini request canceled by user');
       } else {

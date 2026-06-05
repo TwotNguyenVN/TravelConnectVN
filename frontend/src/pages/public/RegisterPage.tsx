@@ -61,7 +61,7 @@ export const RegisterPage: React.FC = () => {
       
       toast.success('Đăng ký thành công! Hãy hoàn thiện hồ sơ của bạn.');
       navigate('/onboarding');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(err.message || 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);

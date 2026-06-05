@@ -66,7 +66,7 @@ export const FinanceSettlementsPage: React.FC = () => {
       } else {
         toast.error(res.message || 'Quyết toán thất bại');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to process guide settlement', err);
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi thực hiện quyết toán');
     } finally {

@@ -23,7 +23,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
   const { user } = useAuth();
   const { toast } = useToast();
   
-  const [post, setPost] = useState<any>(null);
+  const [post, setPost] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [myRequest, setMyRequest] = useState<CompanionRequest | null>(null);
@@ -36,11 +36,11 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
 
   // Expense Splitter States
   const [activeTab, setActiveTab] = useState<'info' | 'expenses'>(isEmbedded ? 'expenses' : 'info');
-  const [expenseData, setExpenseData] = useState<any>(null);
+  const [expenseData, setExpenseData] = useState<unknown>(null);
   const [expensesLoading, setExpensesLoading] = useState(false);
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
-  const [selectedSettlement, setSelectedQrSettlement] = useState<any>(null);
+  const [selectedSettlement, setSelectedQrSettlement] = useState<unknown>(null);
   
   // Expense Form State
   const [expenseTitle, setExpenseTitle] = useState('');
@@ -113,10 +113,10 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
 
       // Set initial active image
       if (postRes.success && postRes.data.images?.length > 0) {
-        const cover = postRes.data.images.find((img: any) => img.isCover);
+        const cover = postRes.data.images.find((img: unknown) => img.isCover);
         setActiveImage(cover?.imageUrl || postRes.data.images[0].imageUrl);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching companion detail:', err);
       if (err.response?.status === 404) {
         setError('Bài đăng không tồn tại hoặc đã bị gỡ bỏ.');
@@ -146,7 +146,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
 
   useEffect(() => {
     if (expenseData?.members && user) {
-      const myMember = expenseData.members.find((m: any) => m.id === user.id);
+      const myMember = expenseData.members.find((m: unknown) => m.id === user.id);
       if (myMember) {
         setMyBankId(myMember.bankId || 'ICB');
         setMyAccountNo(myMember.accountNo || '');
@@ -200,7 +200,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
         setShowRequestModal(false);
         toast.success('Gửi yêu cầu thành công!');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi gửi yêu cầu');
     } finally {
       setSubmitting(false);
@@ -217,7 +217,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
       } else {
         toast.error('Không thể mở nhóm chat.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error opening group chat:', err);
       toast.error('Có lỗi xảy ra. Bạn chưa được duyệt hoặc nhóm chưa có đủ điều kiện.');
     } finally {
@@ -228,7 +228,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
   const openAddExpenseModal = () => {
     if (!expenseData?.members) return;
     const initialShares: { [key: string]: string } = {};
-    expenseData.members.forEach((m: any) => {
+    expenseData.members.forEach((m: unknown) => {
       initialShares[m.id] = 'true'; // Checked by default for equally splitting
     });
     setSplitShares(initialShares);
@@ -301,7 +301,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
         setShowAddExpenseModal(false);
         fetchExpenses();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating expense:', err);
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi tạo khoản chi');
     }
@@ -316,7 +316,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
         toast.success('Xóa khoản chi thành công!');
         fetchExpenses();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error deleting expense:', err);
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi xóa khoản chi');
     }
@@ -334,7 +334,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
       } else {
         toast.error(res.message || 'Có lỗi xảy ra khi quyết toán');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error settling debt:', err);
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi quyết toán');
     }
@@ -416,13 +416,13 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                 <div className="detail-gallery">
                   <div className="main-image">
                     <img 
-                      src={activeImage || (post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl)} 
+                      src={activeImage || (post.images.find((img: unknown) => img.isCover)?.imageUrl || post.images[0].imageUrl)} 
                       alt={post.title} 
                     />
                   </div>
                   {post.images.length > 1 && (
                     <div className="thumbnail-grid">
-                      {post.images.map((img: any, idx: number) => (
+                      {post.images.map((img: unknown, idx: number) => (
                         <div 
                           key={idx} 
                           className={`thumbnail-item ${activeImage === img.imageUrl ? 'active' : ''}`}
@@ -504,7 +504,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
               <h3>Danh sách thành viên ({post.companion_requests?.length || 0})</h3>
               <div className="members-list">
                 {post.companion_requests && post.companion_requests.length > 0 ? (
-                  post.companion_requests.map((req: any) => (
+                  post.companion_requests.map((req: unknown) => (
                     <div key={req.id} className="member-item">
                       <img src={req.users_companion_requests_user_idTousers?.avatar_url || DEFAULT_AVATAR} alt="Avatar" />
                       <div className="member-info">
@@ -615,7 +615,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                     <span className="card-value">{formatCurrency(expenseData?.summary?.totalAmount || 0)}</span>
                   </div>
                   {(() => {
-                    const myBalance = expenseData?.summary?.memberBalances?.find((b: any) => b.userId === user?.id);
+                    const myBalance = expenseData?.summary?.memberBalances?.find((b: unknown) => b.userId === user?.id);
                     const val = myBalance?.netBalance || 0;
                     return (
                       <div className={`overview-card balance-card ${val > 0 ? 'positive' : val < 0 ? 'negative' : ''}`}>
@@ -638,7 +638,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                   </div>
                   <div className="settlements-list">
                     {expenseData?.summary?.suggestedSettlements?.length > 0 ? (
-                      expenseData.summary.suggestedSettlements.map((s: any, idx: number) => {
+                      expenseData.summary.suggestedSettlements.map((s: unknown, idx: number) => {
                         const isMyDebt = s.debtorId === user?.id;
                         return (
                           <div key={idx} className="settlement-row">
@@ -710,7 +710,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                       </thead>
                       <tbody>
                         {expenseData?.expenses?.length > 0 ? (
-                          expenseData.expenses.map((exp: any) => (
+                          expenseData.expenses.map((exp: unknown) => (
                             <tr key={exp.id}>
                               <td>{new Date(exp.expense_date).toLocaleDateString('vi-VN')}</td>
                               <td className="expense-title-col">
@@ -720,7 +720,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                               <td className="expense-amount-col">{formatCurrency(exp.amount)}</td>
                               <td>
                                 <div className="split-chips">
-                                  {exp.splits.map((sp: any) => (
+                                  {exp.splits.map((sp: unknown) => (
                                     <span key={sp.user_id} className={`split-chip ${sp.status}`}>
                                       {sp.user?.full_name}: {formatCurrency(sp.amount)}
                                     </span>
@@ -753,7 +753,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                 <Card className="balances-list-card">
                   <h3>Số dư toàn bộ thành viên</h3>
                   <div className="balances-list">
-                    {expenseData?.summary?.memberBalances?.map((member: any) => (
+                    {expenseData?.summary?.memberBalances?.map((member: unknown) => (
                       <div key={member.userId} className="member-balance-row">
                         <div className="member-info">
                           <img src={member.avatarUrl || DEFAULT_AVATAR} alt="Avatar" />
@@ -915,7 +915,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
               value={paidByUserId}
               onChange={(e) => setPaidByUserId(e.target.value)}
             >
-              {expenseData?.members?.map((m: any) => (
+              {expenseData?.members?.map((m: unknown) => (
                 <option key={m.id} value={m.id}>{m.fullName} {m.id === user?.id ? '(Bạn)' : ''}</option>
               ))}
             </select>
@@ -944,7 +944,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
           <div className="form-group mb-4">
             <label>Chia cho ai trong đoàn?</label>
             <div className="members-checkbox-list">
-              {expenseData?.members?.map((m: any) => {
+              {expenseData?.members?.map((m: unknown) => {
                 const isSelected = splitShares[m.id] !== 'false' && splitShares[m.id] !== '';
                 return (
                   <div key={m.id} className="member-checkbox-row">

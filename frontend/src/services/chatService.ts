@@ -99,7 +99,7 @@ const chatService = {
     return await api.get(`/conversations/${conversationId}/participants`);
   },
 
-  markAsRead: async (conversationId: string): Promise<ApiResponse<any>> => {
+  markAsRead: async (conversationId: string): Promise<ApiResponse<unknown>> => {
     return await api.patch(`/conversations/${conversationId}/read`);
   },
 };

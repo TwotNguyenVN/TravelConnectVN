@@ -58,16 +58,16 @@ const GuideDetailPage: React.FC = () => {
   const fetchGuideDetail = async () => {
     try {
       setLoading(true);
-      const res: any = await guideService.getPublicGuideDetail(id!);
+      const res: unknown = await guideService.getPublicGuideDetail(id!);
       if (res.success) {
         const guideData = res.data;
         setGuide(guideData);
 
         // Fetch favorite status using the ACTUAL guide profile ID
         if (user && guideData.id) {
-          const favRes: any = await favoriteService.getMyFavoriteGuides();
+          const favRes: unknown = await favoriteService.getMyFavoriteGuides();
           if (favRes.success) {
-            setIsFavorited(favRes.data.some((f: any) => f.id === guideData.id));
+            setIsFavorited(favRes.data.some((f: unknown) => f.id === guideData.id));
           }
         }
       } else {
@@ -97,19 +97,19 @@ const GuideDetailPage: React.FC = () => {
     try {
       setFavoriteLoading(true);
       if (isFavorited) {
-        const res: any = await favoriteService.removeGuideFavorite(id);
+        const res: unknown = await favoriteService.removeGuideFavorite(id);
         if (res.success) {
           setIsFavorited(false);
           toast.success('Đã bỏ lưu hướng dẫn viên');
         }
       } else {
-        const res: any = await favoriteService.addGuideFavorite(id);
+        const res: unknown = await favoriteService.addGuideFavorite(id);
         if (res.success) {
           setIsFavorited(true);
           toast.success('Đã lưu hướng dẫn viên vào danh sách yêu thích');
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error toggling favorite:', err);
     } finally {
       setFavoriteLoading(false);
@@ -130,7 +130,7 @@ const GuideDetailPage: React.FC = () => {
         toast.error('Không tìm thấy ID người dùng của hướng dẫn viên');
         return;
       }
-      const res: any = await chatService.createDirect(guide.userId);
+      const res: unknown = await chatService.createDirect(guide.userId);
       if (res.success) {
         navigate('/user/messages', { state: { conversationId: res.data.id } });
       }

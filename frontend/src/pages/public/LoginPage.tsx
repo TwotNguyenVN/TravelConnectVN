@@ -52,7 +52,7 @@ export const LoginPage: React.FC = () => {
           .select('role_code')
           .eq('user_id', data.user.id);
           
-        const userRoles = roleData ? roleData.map((r: any) => r.role_code) : [];
+        const userRoles = roleData ? roleData.map((r: unknown) => r.role_code) : [];
         
         if (userRoles.includes('SYSTEM_ADMIN')) {
           navigate('/admin');
@@ -68,7 +68,7 @@ export const LoginPage: React.FC = () => {
       } else {
         navigate('/');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(err.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
     } finally {
       setIsLoading(false);
@@ -85,7 +85,7 @@ export const LoginPage: React.FC = () => {
         },
       });
       if (error) throw error;
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(err.message || 'Lỗi đăng nhập Google. Vui lòng thử lại.');
     }
   };

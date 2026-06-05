@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: icon,
     shadowUrl: iconShadow,
     iconSize: [25, 41],
@@ -152,7 +152,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
         displayTitle: p.title || p.name || 'Điểm đến',
         displayNumber: p.sequenceNo || p.day || 0
       };
-    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as any[];
+    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as unknown[];
   }, []);
 
   // Process points and extract coordinates

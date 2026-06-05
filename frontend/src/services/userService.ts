@@ -5,7 +5,7 @@ export const userService = {
     return api.get('/me');
   },
 
-  updateProfile: async (data: any) => {
+  updateProfile: async (data: Record<string, unknown>) => {
     return api.patch('/me', data);
   },
 

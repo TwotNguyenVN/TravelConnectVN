@@ -10,7 +10,7 @@ export interface Notification {
   content: string;
   entity_type: string | null;
   entity_id: string | null;
-  payload: any;
+  payload: unknown;
   is_read: boolean;
   created_at: string;
   read_at: string | null;
@@ -38,17 +38,17 @@ const notificationService = {
     return response;
   },
 
-  markAsRead: async (id: string): Promise<ApiResponse<any>> => {
+  markAsRead: async (id: string): Promise<ApiResponse<unknown>> => {
     const response = await api.patch(`/notifications/${id}/read`);
     return response;
   },
 
-  markAllAsRead: async (): Promise<ApiResponse<any>> => {
+  markAllAsRead: async (): Promise<ApiResponse<unknown>> => {
     const response = await api.patch('/notifications/read-all');
     return response;
   },
 
-  deleteNotification: async (id: string): Promise<ApiResponse<any>> => {
+  deleteNotification: async (id: string): Promise<ApiResponse<unknown>> => {
     const response = await api.delete(`/notifications/${id}`);
     return response;
   },

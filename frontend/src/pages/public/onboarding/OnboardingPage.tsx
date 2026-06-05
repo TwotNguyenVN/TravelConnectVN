@@ -49,14 +49,14 @@ export const OnboardingPage: React.FC = () => {
   const [selectedSkills, setSelectedSkills] = useState<number[]>([]);
 
   // Step 3 Data: Verification
-  const [verificationFiles, setVerificationFiles] = useState<{ [key: string]: any }>({
+  const [verificationFiles, setVerificationFiles] = useState<{ [key: string]: unknown }>({
     national_id_front: null,
     national_id_back: null,
     tour_guide_card: null,
     certificate: [],
   });
   const [submissionNote, setSubmissionNote] = useState('');
-  const [previews, setPreviews] = useState<{ [key: string]: any }>({
+  const [previews, setPreviews] = useState<{ [key: string]: unknown }>({
     certificate: [],
   });
 
@@ -187,7 +187,7 @@ export const OnboardingPage: React.FC = () => {
         toast.success('Hồ sơ của bạn đã được gửi đi để phê duyệt!');
         navigate('/');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Có lỗi xảy ra, vui lòng thử lại.');
     } finally {
       setIsLoading(false);
@@ -416,8 +416,8 @@ export const OnboardingPage: React.FC = () => {
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  setVerificationFiles(prev => ({ ...prev, certificate: prev.certificate.filter((_: any, i: number) => i !== index) }));
-                  setPreviews(prev => ({ ...prev, certificate: prev.certificate.filter((_: any, i: number) => i !== index) }));
+                  setVerificationFiles(prev => ({ ...prev, certificate: prev.certificate.filter((_: unknown, i: number) => i !== index) }));
+                  setPreviews(prev => ({ ...prev, certificate: prev.certificate.filter((_: unknown, i: number) => i !== index) }));
                 }}
                 style={{ position: 'absolute', top: '5px', right: '5px', background: 'rgba(212, 17, 30, 0.8)', color: 'white', border: 'none', borderRadius: '50%', width: '20px', height: '20px', fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
               >

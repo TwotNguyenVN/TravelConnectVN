@@ -11,10 +11,10 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'
 export function AdminStatisticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userStats, setUserStats] = useState<any>(null);
-  const [tourStats, setTourStats] = useState<any>(null);
-  const [reportStats, setReportStats] = useState<any>(null);
-  const [revenueStats, setRevenueStats] = useState<any>(null);
+  const [userStats, setUserStats] = useState<unknown>(null);
+  const [tourStats, setTourStats] = useState<unknown>(null);
+  const [reportStats, setReportStats] = useState<unknown>(null);
+  const [revenueStats, setRevenueStats] = useState<unknown>(null);
 
   const fetchStats = async () => {
     try {
@@ -91,7 +91,7 @@ export function AdminStatisticsPage() {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`} />
-              <Tooltip formatter={(value: any) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']} />
+              <Tooltip formatter={(value: unknown) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']} />
               <Legend />
               <Area type="monotone" dataKey="revenue" stroke="#10b981" fillOpacity={1} fill="url(#colorRevenue)" name="Doanh thu (VND)" />
             </AreaChart>
@@ -111,7 +111,7 @@ export function AdminStatisticsPage() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748b' }} />
                 <Tooltip />
                 <Bar dataKey="value" radius={[4, 4, 0, 0]} name="Số lượng">
-                  {(userStats?.roles || []).map((_entry: any, index: number) => (
+                  {(userStats?.roles || []).map((_entry: unknown, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Bar>
@@ -137,7 +137,7 @@ export function AdminStatisticsPage() {
                   nameKey="name"
                   label
                 >
-                  {(tourStats?.categories || []).map((_entry: any, index: number) => (
+                  {(tourStats?.categories || []).map((_entry: unknown, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>

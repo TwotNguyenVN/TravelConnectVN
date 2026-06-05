@@ -20,9 +20,9 @@ export const TourScheduleDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const [tour, setTour] = useState<any>(null);
-  const [schedule, setSchedule] = useState<any>(null);
-  const [requests, setRequests] = useState<any[]>([]);
+  const [tour, setTour] = useState<unknown>(null);
+  const [schedule, setSchedule] = useState<unknown>(null);
+  const [requests, setRequests] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   
   // Edit State
@@ -45,7 +45,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       const tourData = tourRes.data || tourRes;
       setTour(tourData);
       
-      const foundSchedule = tourData.tour_schedules?.find((s: any) => s.id === scheduleId);
+      const foundSchedule = tourData.tour_schedules?.find((s: unknown) => s.id === scheduleId);
       if (foundSchedule) {
         setSchedule(foundSchedule);
         setMaxParticipants(foundSchedule.max_participants ?? foundSchedule.maxParticipants);
@@ -108,7 +108,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       await tourService.deleteTourSchedule(tourId, scheduleId);
       toast.success('Xóa lịch khởi hành thành công!');
       navigate(`/guide/tours/edit/${tourId}?tab=schedules`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Lỗi khi xóa lịch khởi hành');
     } finally {
       setIsSaving(false);
@@ -130,7 +130,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       toast.success('Đã đánh dấu tour hoàn thành!');
       setIsCompleteModalOpen(false);
       navigate(`/guide/tours/edit/${tourId}?tab=schedules`);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     } finally {
       setIsSaving(false);
@@ -149,7 +149,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       await tourService.updateTourSchedule(tourId, scheduleId, { status: 'ongoing' });
       toast.success('Bắt đầu hành trình thành công! Chúc bạn có một chuyến đi an toàn.');
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi bắt đầu tour');
     } finally {
       setIsSaving(false);
@@ -172,7 +172,7 @@ export const TourScheduleDetailPage: React.FC = () => {
       });
       toast.success(`Đã ${actionText} thành công!`);
       fetchData();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Lỗi khi cập nhật trạng thái');
     } finally {
       setIsSaving(false);

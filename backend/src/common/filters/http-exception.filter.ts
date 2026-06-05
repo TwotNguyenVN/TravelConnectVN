@@ -21,7 +21,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal server error';
-    let errors = null;
+    let errors: unknown = null;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();

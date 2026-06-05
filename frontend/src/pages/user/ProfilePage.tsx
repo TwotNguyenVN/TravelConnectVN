@@ -38,8 +38,8 @@ export const ProfilePage: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   
-  const [provinces, setProvinces] = useState<any[]>([]);
-  const [languages, setLanguages] = useState<any[]>([]);
+  const [provinces, setProvinces] = useState<unknown[]>([]);
+  const [languages, setLanguages] = useState<unknown[]>([]);
   const [provinceSearch, setProvinceSearch] = useState('');
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
 
@@ -92,11 +92,11 @@ export const ProfilePage: React.FC = () => {
         });
 
         if (data.home_province_id && provincesRes.data) {
-          const prov = provincesRes.data.find((p: any) => p.id.toString() === data.home_province_id.toString());
+          const prov = provincesRes.data.find((p: unknown) => p.id.toString() === data.home_province_id.toString());
           if (prov) setProvinceSearch(prov.name);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching profile data:', err);
     } finally {
       setIsFetching(false);
@@ -113,10 +113,10 @@ export const ProfilePage: React.FC = () => {
   const fetchDefaultCovers = async () => {
     try {
       setIsLoadingCovers(true);
-      const res: any = await guideService.getDefaultCovers();
+      const res: unknown = await guideService.getDefaultCovers();
       
       if (res && res.success && res.data) {
-        const urls = res.data.map((item: any) => item.url);
+        const urls = res.data.map((item: unknown) => item.url);
         setDefaultCovers(urls);
       } else {
         const baseUrl = 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/';
@@ -178,7 +178,7 @@ export const ProfilePage: React.FC = () => {
         await refreshProfile();
         toast.success('Cập nhật ảnh đại diện thành công!');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Lỗi khi tải ảnh lên.');
     } finally {
       setIsUploading(false);
@@ -212,7 +212,7 @@ export const ProfilePage: React.FC = () => {
 
       setFormData(prev => ({ ...prev, coverUrl: data.publicUrl }));
       toast.success('Cập nhật ảnh bìa thành công!');
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error('Lỗi khi tải ảnh bìa.');
     } finally {
       setIsUploadingCover(false);
@@ -246,7 +246,7 @@ export const ProfilePage: React.FC = () => {
       if (error) throw error;
       toast.success('Đổi mật khẩu thành công!');
       setPasswordData({ newPassword: '', confirmPassword: '' });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Lỗi khi cập nhật mật khẩu.');
     } finally {
       setPasswordLoading(false);
@@ -321,7 +321,7 @@ export const ProfilePage: React.FC = () => {
       await refreshProfile();
       toast.success('Cập nhật hồ sơ cá nhân thành công!');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message || 'Lỗi khi cập nhật hồ sơ.');
     } finally {
       setIsLoading(false);

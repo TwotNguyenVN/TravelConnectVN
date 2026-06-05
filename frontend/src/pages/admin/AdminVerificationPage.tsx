@@ -139,7 +139,7 @@ export function AdminVerificationPage() {
       render: (row: VerificationRequest) => {
         const variant = row.status === 'approved' ? 'success' : row.status === 'pending' ? 'warning' : 'danger';
         const label = row.status === 'approved' ? 'Đã duyệt' : row.status === 'pending' ? 'Chờ xử lý' : 'Từ chối';
-        return <Badge variant={variant as any}>{label}</Badge>;
+        return <Badge variant={variant as unknown}>{label}</Badge>;
       }
     },
     {

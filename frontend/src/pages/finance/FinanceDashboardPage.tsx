@@ -11,7 +11,7 @@ const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 export const FinanceDashboardPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [revenueStats, setRevenueStats] = useState<any>(null);
+  const [revenueStats, setRevenueStats] = useState<unknown>(null);
   const [pendingRefundsCount, setPendingRefundsCount] = useState(0);
   const [exporting, setExporting] = useState(false);
 
@@ -104,7 +104,7 @@ export const FinanceDashboardPage: React.FC = () => {
     { name: 'Tiền mặt', value: 5000000 },
   ];
 
-  const totalRevenueValue = formattedRevenueGrowth.reduce((acc: number, curr: any) => acc + (curr.revenue || 0), 0);
+  const totalRevenueValue = formattedRevenueGrowth.reduce((acc: number, curr: unknown) => acc + (curr.revenue || 0), 0);
 
   return (
     <div style={{ padding: 'var(--tc-spacing-2)' }}>
@@ -190,7 +190,7 @@ export const FinanceDashboardPage: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} dy={10} />
               <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`} />
-              <Tooltip formatter={(value: any) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']} />
+              <Tooltip formatter={(value: unknown) => [new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value), 'Doanh thu']} />
               <Legend />
               <Area type="monotone" dataKey="revenue" stroke="#3b82f6" fillOpacity={1} fill="url(#colorRevenue)" name="Doanh thu (VND)" />
             </AreaChart>
@@ -216,11 +216,11 @@ export const FinanceDashboardPage: React.FC = () => {
                   nameKey="name"
                   label={(entry) => `${entry.name}: ${(entry.value / 1000000).toFixed(1)}M`}
                 >
-                  {paymentMethods.map((_entry: any, index: number) => (
+                  {paymentMethods.map((_entry: unknown, index: number) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: any) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)} />
+                <Tooltip formatter={(value: unknown) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

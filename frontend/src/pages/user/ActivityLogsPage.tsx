@@ -173,7 +173,7 @@ export const ActivityLogsPage: React.FC = () => {
                       </span>
                     </div>
                     <div className="log-description">
-                      {(log as any).description}
+                      {(log as unknown).description}
                     </div>
                   </div>
                 </div>

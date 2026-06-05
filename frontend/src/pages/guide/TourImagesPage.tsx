@@ -35,7 +35,7 @@ const TourImagesPage: React.FC = () => {
       const data = response.data || response;
       
       if (Array.isArray(data)) {
-        const mappedData = data.map((img: any) => ({
+        const mappedData = data.map((img: unknown) => ({
           id: img.id,
           imageUrl: img.image_url,
           caption: img.caption || '',

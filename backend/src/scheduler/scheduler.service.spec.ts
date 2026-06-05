@@ -35,7 +35,6 @@ describe('SchedulerService', () => {
     }).compile();
 
     service = module.get<SchedulerService>(SchedulerService);
-    prisma = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
   });

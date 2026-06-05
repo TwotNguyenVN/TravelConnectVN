@@ -13,11 +13,11 @@ const CompanionRequestManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const [post, setPost] = useState<any>(null);
-  const [requests, setRequests] = useState<any[]>([]);
+  const [post, setPost] = useState<unknown>(null);
+  const [requests, setRequests] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<unknown>(null);
   const [showProcessModal, setShowProcessModal] = useState(false);
   const [processType, setProcessType] = useState<'approve' | 'reject'>('approve');
   const [responseNote, setResponseNote] = useState('');
@@ -60,7 +60,7 @@ const CompanionRequestManagementPage: React.FC = () => {
         fetchData();
         toast.success(processType === 'approve' ? 'Đã duyệt yêu cầu' : 'Đã từ chối yêu cầu');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xử lý yêu cầu');
     } finally {
       setSubmitting(false);

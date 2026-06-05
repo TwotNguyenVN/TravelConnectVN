@@ -6,7 +6,7 @@ interface TourReviewsTabProps {
 }
 
 export const TourReviewsTab: React.FC<TourReviewsTabProps> = ({ tourId }) => {
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export const TourReviewsTab: React.FC<TourReviewsTabProps> = ({ tourId }) => {
         <p style={{ color: 'var(--tc-text-secondary)' }}>Tour này chưa có đánh giá nào.</p>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {reviews.map((review: any) => (
+          {reviews.map((review: unknown) => (
             <div key={review.id} style={{ borderBottom: '1px solid #eee', paddingBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                 <strong style={{ fontSize: '1.1rem' }}>{review.users?.full_name || 'Khách hàng'}</strong>

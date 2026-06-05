@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { GoogleGenAI } from '@google/genai';
 
 @Injectable()
@@ -169,7 +170,7 @@ export class AiChatService {
 
     return this.prisma.ai_chat_sessions.update({
       where: { id: sessionId },
-      data: { context },
+      data: { context: context as Prisma.InputJsonValue },
     });
   }
 

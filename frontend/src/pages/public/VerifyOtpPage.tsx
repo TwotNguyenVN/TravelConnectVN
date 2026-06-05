@@ -42,7 +42,7 @@ export const VerifyOtpPage: React.FC = () => {
       
       // Verification success, Supabase automatically logs user in for recovery
       navigate('/reset-password');
-    } catch (err: any) {
+    } catch (err: unknown) {
       setErrorMsg(err.message || 'Mã xác thực không chính xác hoặc đã hết hạn.');
     } finally {
       setIsLoading(false);

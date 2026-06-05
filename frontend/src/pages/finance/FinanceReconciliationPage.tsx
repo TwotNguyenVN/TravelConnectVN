@@ -6,9 +6,9 @@ interface ReconciliationResult {
   matchedCount: number;
   unmatchedCount: number;
   discrepancyCount: number;
-  matched: any[];
-  unmatched: any[];
-  discrepancies: any[];
+  matched: unknown[];
+  unmatched: unknown[];
+  discrepancies: unknown[];
 }
 
 export function FinanceReconciliationPage() {
@@ -37,7 +37,7 @@ export function FinanceReconciliationPage() {
       if (res?.success) {
         setResult(res.data);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setError(err?.response?.data?.message || 'Có lỗi xảy ra trong quá trình đối soát.');
     } finally {
@@ -177,7 +177,7 @@ export function FinanceReconciliationPage() {
                     {result.discrepancies.length === 0 ? (
                       <tr><td colSpan={5} style={{ padding: '16px', textAlign: 'center' }}>Không có dữ liệu</td></tr>
                     ) : (
-                      result.discrepancies.map((d: any) => (
+                      result.discrepancies.map((d: unknown) => (
                         <tr key={d.id} style={{ borderBottom: '1px solid var(--tc-border)' }}>
                           <td style={{ padding: '8px', fontFamily: 'monospace' }}>{d.id.substring(0, 8)}...</td>
                           <td style={{ padding: '8px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.systemAmount)}</td>
@@ -207,7 +207,7 @@ export function FinanceReconciliationPage() {
                     {result.unmatched.length === 0 ? (
                       <tr><td colSpan={4} style={{ padding: '16px', textAlign: 'center' }}>Không có dữ liệu</td></tr>
                     ) : (
-                      result.unmatched.map((d: any) => (
+                      result.unmatched.map((d: unknown) => (
                         <tr key={d.id} style={{ borderBottom: '1px solid var(--tc-border)' }}>
                           <td style={{ padding: '8px', fontFamily: 'monospace' }}>{d.id.substring(0, 8)}...</td>
                           <td style={{ padding: '8px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.amount)}</td>
@@ -234,7 +234,7 @@ export function FinanceReconciliationPage() {
                     {result.matched.length === 0 ? (
                       <tr><td colSpan={4} style={{ padding: '16px', textAlign: 'center' }}>Không có dữ liệu</td></tr>
                     ) : (
-                      result.matched.map((d: any) => (
+                      result.matched.map((d: unknown) => (
                         <tr key={d.id} style={{ borderBottom: '1px solid var(--tc-border)' }}>
                           <td style={{ padding: '8px', fontFamily: 'monospace' }}>{d.id.substring(0, 8)}...</td>
                           <td style={{ padding: '8px' }}>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(d.amount)}</td>

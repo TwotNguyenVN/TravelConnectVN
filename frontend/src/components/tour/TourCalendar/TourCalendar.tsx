@@ -28,17 +28,17 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
       const month = currentDate.getMonth();
 
       const hasSchedulesThisMonth = schedules.some(s => {
-        const sDate = new Date(s.startDate || (s as any).date);
+        const sDate = new Date(s.startDate || (s as unknown).date);
         return sDate.getMonth() === month && sDate.getFullYear() === year;
       });
 
       if (!hasSchedulesThisMonth) {
         const futureSchedules = [...schedules]
-          .filter(s => new Date(s.startDate || (s as any).date) >= today)
-          .sort((a, b) => new Date(a.startDate || (a as any).date).getTime() - new Date(b.startDate || (b as any).date).getTime());
+          .filter(s => new Date(s.startDate || (s as unknown).date) >= today)
+          .sort((a, b) => new Date(a.startDate || (a as unknown).date).getTime() - new Date(b.startDate || (b as unknown).date).getTime());
 
         if (futureSchedules.length > 0) {
-          const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as any).date);
+          const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as unknown).date);
           setCurrentDate(new Date(firstDate.getFullYear(), firstDate.getMonth(), 1));
         }
       }
@@ -52,11 +52,11 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
 
     if (schedules && schedules.length > 0) {
       const futureSchedules = [...schedules]
-        .filter(s => new Date(s.startDate || (s as any).date) >= startMonth)
-        .sort((a, b) => new Date(a.startDate || (a as any).date).getTime() - new Date(b.startDate || (b as any).date).getTime());
+        .filter(s => new Date(s.startDate || (s as unknown).date) >= startMonth)
+        .sort((a, b) => new Date(a.startDate || (a as unknown).date).getTime() - new Date(b.startDate || (b as unknown).date).getTime());
 
       if (futureSchedules.length > 0) {
-        const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as any).date);
+        const firstDate = new Date(futureSchedules[0].startDate || (futureSchedules[0] as unknown).date);
         startMonth = new Date(firstDate.getFullYear(), firstDate.getMonth(), 1);
       }
     }
@@ -109,7 +109,7 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
       
       // Match schedule by date components to avoid timezone shifts
       const schedule = schedules.find(s => {
-        const sDate = new Date(s.startDate || (s as any).date);
+        const sDate = new Date(s.startDate || (s as unknown).date);
         const sYear = sDate.getFullYear();
         const sMonth = sDate.getMonth();
         const sDay = sDate.getDate();
@@ -151,7 +151,7 @@ export const TourCalendar: React.FC<TourCalendarProps> = ({ schedules, onDateSel
     return (price / 1000).toLocaleString() + 'K';
   };
 
-  const handleDayClick = (dayData: any) => {
+  const handleDayClick = (dayData: unknown) => {
     if (dayData.isOtherMonth) {
       setCurrentDate(new Date(dayData.dateObj.getFullYear(), dayData.dateObj.getMonth(), 1));
       return;

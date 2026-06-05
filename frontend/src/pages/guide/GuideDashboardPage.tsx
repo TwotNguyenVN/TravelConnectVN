@@ -141,7 +141,7 @@ const GuideDashboardPage: React.FC = () => {
               <h4>Các phần còn thiếu cần bổ sung (Nhấp để đi đến thiết lập):</h4>
               <div className="completeness-checklist-grid">
                 {completion.missing.map((item, idx) => {
-                  let action = () => navigate('/guide/profile');
+                  const action = () => navigate('/guide/profile');
                   let icon = "📝";
                   if (item === 'Họ và tên') {
                     icon = "👤";

@@ -34,7 +34,7 @@ interface PublicProfile {
     startDate: string;
     endDate: string;
     status: string;
-    images: any;
+    images: unknown;
   }[];
 }
 
@@ -67,7 +67,7 @@ export const PublicProfilePage: React.FC = () => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
-        const res: any = await userService.getPublicProfile(id!);
+        const res: unknown = await userService.getPublicProfile(id!);
         if (res.success) {
           setProfile(res.data);
         } else {

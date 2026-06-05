@@ -51,7 +51,7 @@ const MyToursPage: React.FC = () => {
         } else {
           toast.error(response.message || 'Xóa tour thất bại');
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Delete tour error:', error);
         toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi xóa tour');
       }
@@ -65,7 +65,7 @@ const MyToursPage: React.FC = () => {
         toast.success(successMsg);
         fetchTours();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Update status error:', error);
       toast.error('Không thể cập nhật trạng thái tour');
     }
