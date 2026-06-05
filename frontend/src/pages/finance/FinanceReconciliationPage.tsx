@@ -18,13 +18,13 @@ export function FinanceReconciliationPage() {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'discrepancies' | 'unmatched' | 'matched'>('discrepancies');
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
     }
   };
 
-  const handleReconcile = async () => {
+  async function handleReconcile() {
     if (!file) return;
 
     const formData = new FormData();

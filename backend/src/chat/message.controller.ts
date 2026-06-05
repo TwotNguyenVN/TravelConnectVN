@@ -11,6 +11,12 @@ import {
 import { MessageService } from './message.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ApiResponse } from '../common/interfaces/response.interface';
+import { SendMessageDto } from './dto/chat.dto';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('conversations')
 @UseGuards(AuthGuard)
@@ -23,7 +29,7 @@ export class MessageController {
    */
   @Get(':id/messages')
   async findMessages(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Query('page') page = 1,
     @Query('limit') limit = 30,
@@ -48,9 +54,9 @@ export class MessageController {
    */
   @Post(':id/messages')
   async sendMessage(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Body() body: { content: string; messageType?: string },
+    @Body() body: SendMessageDto,
   ): Promise<ApiResponse<any>> {
     const result = await this.messageService.sendMessage(id, req.user.id, body);
     return {

@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../enums/role.enum';
+import { Request } from 'express';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -23,7 +24,9 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: { roles?: Role[] } }>();
     const user = request.user;
 
     // Skeleton kiểm tra
@@ -31,7 +34,7 @@ export class RoleGuard implements CanActivate {
       throw new ForbiddenException('Access denied. No roles found for user.');
     }
 
-    const hasRole = requiredRoles.some((role) => user.roles.includes(role));
+    const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
 
     if (!hasRole) {
       throw new ForbiddenException('Access denied. Insufficient permissions.');

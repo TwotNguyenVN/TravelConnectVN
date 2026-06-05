@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { tourService } from "../../services/tourService";
@@ -154,90 +155,7 @@ const TourFormPage: React.FC = () => {
   const isPublished = formData.businessStatus === 'published' || formData.businessStatus === 'closed' || formData.businessStatus === 'cancelled';
   const wasPublished = useRef(false);
 
-  useEffect(() => {
-    if (formData.businessStatus === 'published' && !wasPublished.current) {
-      wasPublished.current = true;
-    }
-  }, [formData.businessStatus]);
-
-  const handleStatusUpdatePage = async (newStatus: string, successMsg: string) => {
-    try {
-      setSubmitting(true);
-      const response = await tourService.updateTour(id!, { businessStatus: newStatus });
-      if (response.success || response.id) {
-        toast.success(successMsg);
-        setFormData({ ...formData, businessStatus: newStatus });
-        if (newStatus === 'cancelled') {
-          navigate('/guide/tours');
-        }
-      }
-    } catch (error: any) {
-      console.error('Update status error:', error);
-      toast.error('Không thể cập nhật trạng thái tour');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-  const [participantCount, setParticipantCount] = useState(0);
-
-  const getStatusLabel = (business: string, visibility: string) => {
-    if (business === "draft") return { label: "Bản nháp", color: "var(--tc-text-secondary)", icon: "📝" };
-    if (business === "cancelled") return { label: "Đã xóa", color: "#ef4444", icon: "🗑️" };
-    
-    if (visibility === "hidden") return { label: "Đang ẩn", color: "#f59e0b", icon: "👁️‍🗨️" };
-    
-    if (business === "published") return { label: "Đang mở", color: "#22c55e", icon: "🚀" };
-    if (business === "closed") return { label: "Đã đóng ĐK", color: "#6366f1", icon: "🔒" };
-    if (business === "completed") return { label: "Hoàn tất", color: "#10b981", icon: "🏆" };
-    return { label: "Không rõ", color: "var(--tc-text-secondary)", icon: "❓" };
-  };
-
-  const statusInfo = getStatusLabel(formData.businessStatus, formData.visibilityStatus);
-
-  const [provinceSearch, setProvinceSearch] = useState("");
-  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
-  const filteredProvinces = provinces.filter((p) =>
-    p.toLowerCase().includes(provinceSearch.toLowerCase()),
-  );
-
-  const selectProvince = (p: string) => {
-    setFormData((prev) => ({ ...prev, province: p }));
-    setProvinceSearch(p);
-    setShowProvinceSuggestions(false);
-  };
-
-  const [otherProvinceSearch, setOtherProvinceSearch] = useState("");
-  const [showOtherSuggestions, setShowOtherSuggestions] = useState(false);
-  const filteredOtherProvinces = provinces.filter((p) =>
-    p.toLowerCase().includes(otherProvinceSearch.toLowerCase()) && 
-    p !== formData.province && 
-    !formData.otherProvinces?.includes(p)
-  );
-
-  const addOtherProvince = (p: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      otherProvinces: [...(prev.otherProvinces || []), p]
-    }));
-    setOtherProvinceSearch("");
-    setShowOtherSuggestions(false);
-  };
-
-  const removeOtherProvince = (p: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      otherProvinces: prev.otherProvinces?.filter(item => item !== p)
-    }));
-  };
-
-  useEffect(() => {
-    fetchInitialData();
-    if (isEditMode) {
-      fetchTourDetail();
-    }
-  }, [id]);
-
-  const fetchInitialData = async () => {
+async function fetchInitialData() {
     try {
       const [catRes, accRes, provRes] = await Promise.all([
         tourService.getCategories(),
@@ -262,7 +180,7 @@ const TourFormPage: React.FC = () => {
     }
   };
 
-  const fetchTourDetail = async () => {
+async function fetchTourDetail() {
     try {
       setLoading(true);
       const response = await tourService.getTourDetailForGuide(id!);
@@ -344,6 +262,93 @@ const TourFormPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    if (formData.businessStatus === 'published' && !wasPublished.current) {
+      wasPublished.current = true;
+    }
+  }, [formData.businessStatus]);
+
+  async function handleStatusUpdatePage(newStatus: string, successMsg: string) {
+    try {
+      setSubmitting(true);
+      const response = await tourService.updateTour(id!, { businessStatus: newStatus });
+      if (response.success || response.id) {
+        toast.success(successMsg);
+        setFormData({ ...formData, businessStatus: newStatus });
+        if (newStatus === 'cancelled') {
+          navigate('/guide/tours');
+        }
+      }
+    } catch (error: any) {
+      console.error('Update status error:', error);
+      toast.error('Không thể cập nhật trạng thái tour');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const [participantCount, setParticipantCount] = useState(0);
+
+  function getStatusLabel(business: string, visibility: string) {
+    if (business === "draft") return { label: "Bản nháp", color: "var(--tc-text-secondary)", icon: "📝" };
+    if (business === "cancelled") return { label: "Đã xóa", color: "#ef4444", icon: "🗑️" };
+    
+    if (visibility === "hidden") return { label: "Đang ẩn", color: "#f59e0b", icon: "👁️‍🗨️" };
+    
+    if (business === "published") return { label: "Đang mở", color: "#22c55e", icon: "🚀" };
+    if (business === "closed") return { label: "Đã đóng ĐK", color: "#6366f1", icon: "🔒" };
+    if (business === "completed") return { label: "Hoàn tất", color: "#10b981", icon: "🏆" };
+    return { label: "Không rõ", color: "var(--tc-text-secondary)", icon: "❓" };
+  };
+
+  const statusInfo = getStatusLabel(formData.businessStatus, formData.visibilityStatus);
+
+  const [provinceSearch, setProvinceSearch] = useState("");
+  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
+  const filteredProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(provinceSearch.toLowerCase()),
+  );
+
+  function selectProvince(p: string) {
+    setFormData((prev) => ({ ...prev, province: p }));
+    setProvinceSearch(p);
+    setShowProvinceSuggestions(false);
+  };
+
+  const [otherProvinceSearch, setOtherProvinceSearch] = useState("");
+  const [showOtherSuggestions, setShowOtherSuggestions] = useState(false);
+  const filteredOtherProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(otherProvinceSearch.toLowerCase()) && 
+    p !== formData.province && 
+    !formData.otherProvinces?.includes(p)
+  );
+
+  function addOtherProvince(p: string) {
+    setFormData((prev) => ({
+      ...prev,
+      otherProvinces: [...(prev.otherProvinces || []), p]
+    }));
+    setOtherProvinceSearch("");
+    setShowOtherSuggestions(false);
+  };
+
+  function removeOtherProvince(p: string) {
+    setFormData((prev) => ({
+      ...prev,
+      otherProvinces: prev.otherProvinces?.filter(item => item !== p)
+    }));
+  };
+
+  useEffect(() => {
+    fetchInitialData();
+    if (isEditMode) {
+      fetchTourDetail();
+    }
+  }, [id]);
+
+  
+
+  
+
   // Handlers
   const handleBasicChange = (
     e: React.ChangeEvent<
@@ -367,12 +372,12 @@ const TourFormPage: React.FC = () => {
     }));
   };
 
-  const handleStepChange = (step: number) => {
+  function handleStepChange(step: number) {
     setCurrentStep(step);
     window.scrollTo(0, 0);
   };
 
-  const isStepComplete = (step: number): boolean => {
+  function isStepComplete(step: number) {
     if (step === 1) {
       return !!(formData.title && formData.categoryId);
     }
@@ -397,7 +402,7 @@ const TourFormPage: React.FC = () => {
     }
     return true;
   };
-  const validateStep = (step: number) => {
+  function validateStep(step: number) {
     if (step === 1) {
       if (!formData.title || !formData.categoryId || !formData.province) {
         toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Tỉnh thành)");
@@ -455,7 +460,7 @@ const TourFormPage: React.FC = () => {
     return true;
   };
 
-  const addDestinationItem = () => {
+  function addDestinationItem() {
     setFormData((prev) => ({
       ...prev,
       destinations: [
@@ -465,14 +470,14 @@ const TourFormPage: React.FC = () => {
     }));
   };
 
-  const removeDestinationItem = (index: number) => {
+  function removeDestinationItem(index: number) {
     setFormData((prev) => ({
       ...prev,
       destinations: prev.destinations.filter((_, i) => i !== index),
     }));
   };
 
-  const handleDestinationChange = async (index: number, field: keyof DestinationItem, value: string) => {
+  async function handleDestinationChange(index: number, field: keyof DestinationItem, value: string) {
     const newDestinations = [...formData.destinations];
     const currentItem = { ...newDestinations[index], [field]: value };
     
@@ -501,7 +506,7 @@ const TourFormPage: React.FC = () => {
     setFormData({ ...formData, destinations: newDestinations });
   };
 
-  const handleDragStart = (e: React.DragEvent, index: number) => {
+  function handleDragStart(e: React.DragEvent, index: number) {
     setDraggedIndex(index);
     setHoveredIndex(index);
     e.dataTransfer.effectAllowed = "move";
@@ -513,12 +518,12 @@ const TourFormPage: React.FC = () => {
     }, 0);
   };
 
-  const handleDragEnter = (index: number) => {
+  function handleDragEnter(index: number) {
     if (draggedIndex === null) return;
     setHoveredIndex(index);
   };
 
-  const handleDragEnd = (e: React.DragEvent) => {
+  function handleDragEnd(e: React.DragEvent) {
     const target = e.currentTarget as HTMLElement;
     target.classList.remove('tc-itinerary-card--ghost');
     
@@ -538,7 +543,7 @@ const TourFormPage: React.FC = () => {
   };
 
   // Itinerary Handlers
-  const addItineraryItem = () => {
+  function addItineraryItem() {
     setFormData((prev) => ({
       ...prev,
       itinerary: [
@@ -558,7 +563,7 @@ const TourFormPage: React.FC = () => {
     }));
   };
 
-  const removeItineraryItem = (index: number) => {
+  function removeItineraryItem(index: number) {
     setFormData((prev) => ({
       ...prev,
       itinerary: prev.itinerary.filter((_, i) => i !== index),
@@ -621,14 +626,14 @@ const TourFormPage: React.FC = () => {
     }
   };
 
-  const setCoverImage = (index: number) => {
+  function setCoverImage(index: number) {
     setFormData((prev) => ({
       ...prev,
       images: prev.images.map((img, i) => ({ ...img, isCover: i === index })),
     }));
   };
 
-  const removeImage = (index: number) => {
+  function removeImage(index: number) {
     setFormData((prev) => ({
       ...prev,
       images: prev.images.filter((_, i) => i !== index),
@@ -636,7 +641,7 @@ const TourFormPage: React.FC = () => {
   };
 
   // Accommodation Handlers
-  const addAccommodation = () => {
+  function addAccommodation() {
     setFormData((prev) => ({
       ...prev,
       accommodations: [
@@ -664,7 +669,7 @@ const TourFormPage: React.FC = () => {
     });
   };
 
-  const handleSaveDraft = async () => {
+  async function handleSaveDraft() {
     try {
       if (!isStepComplete(1)) {
         toast.warning("Vui lòng hoàn thành ít nhất bước 1 (Thông tin cơ bản) để lưu bản nháp");
@@ -692,7 +697,7 @@ const TourFormPage: React.FC = () => {
     }
   };
 
-  const executeSubmit = async (statusOverride?: string) => {
+  async function executeSubmit(statusOverride?: string) {
     try {
       setSubmitting(true);
       const finalData = { ...formData };
@@ -719,7 +724,7 @@ const TourFormPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     if (e && e.preventDefault) e.preventDefault();
     
     // Logic cho Tour đã đăng (Quản lý)

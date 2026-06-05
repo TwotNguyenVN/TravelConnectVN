@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext } from '@nestjs/common';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 
 const mockAuthGuard = {
-  canActivate: (_context: ExecutionContext) => true,
+  canActivate: jest.fn(() => true),
 };
 
 describe('PaymentsController', () => {

@@ -20,7 +20,7 @@ const MyToursPage: React.FC = () => {
     fetchTours();
   }, [statusFilter, searchKeyword]);
 
-  const fetchTours = async () => {
+  async function fetchTours() {
     try {
       setLoading(true);
       const params = {
@@ -41,7 +41,7 @@ const MyToursPage: React.FC = () => {
     }
   };
 
-  const handleTourDelete = async (tourId: string, tourTitle: string) => {
+  async function handleTourDelete(tourId: string, tourTitle: string) {
     if (window.confirm(`Bạn có chắc chắn muốn xóa tour "${tourTitle}"?`)) {
       try {
         const response = await tourService.deleteTour(tourId);
@@ -58,7 +58,7 @@ const MyToursPage: React.FC = () => {
     }
   };
 
-  const handleStatusUpdate = async (tourId: string, newStatus: string, successMsg: string) => {
+  async function handleStatusUpdate(tourId: string, newStatus: string, successMsg: string) {
     try {
       const response = await tourService.updateTour(tourId, { businessStatus: newStatus });
       if (response.success || response.id) {
@@ -71,7 +71,7 @@ const MyToursPage: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (business: string, visibility: string = 'visible') => {
+  function getStatusLabel(business: string, visibility: string = 'visible') {
     if (business === 'draft') return 'Bản nháp';
     if (business === 'published') return 'Đang mở';
     if (business === 'closed') {
@@ -83,11 +83,11 @@ const MyToursPage: React.FC = () => {
     return 'Không rõ';
   };
 
-  const formatPrice = (price: number) => {
+  function formatPrice(price: number) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  const formatDate = (dateStr: string) => {
+  function formatDate(dateStr: string) {
     return new Date(dateStr).toLocaleDateString('vi-VN');
   };
 

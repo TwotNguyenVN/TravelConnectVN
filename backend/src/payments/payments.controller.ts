@@ -10,8 +10,13 @@ import {
   Res,
 } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
+import type { Response } from 'express';
 import { AuthGuard } from '../common/guards/auth.guard';
-import type { Request } from 'express';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('payments')
 export class PaymentsController {
@@ -20,11 +25,11 @@ export class PaymentsController {
   @UseGuards(AuthGuard)
   @Post('create-vnpay-url')
   async createPaymentUrl(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body('tourRequestId') tourRequestId: string,
     @Body('paymentType') paymentType: 'full' | 'deposit' = 'full',
   ) {
-    const userId = (req as any).user.id;
+    const userId = req.user.id;
     // VNPAY cần IP Address của user thực hiện thanh toán
     const ipAddr =
       req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
@@ -44,15 +49,15 @@ export class PaymentsController {
 
   // IPN Endpoint (Không dùng Auth Guard vì VNPAY gọi server-to-server)
   @Get('vnpay-ipn')
-  async vnpayIpn(@Query() query: any) {
+  async vnpayIpn(@Query() query: Record<string, string>) {
     const result = await this.paymentsService.vnpayIpn(query);
     return result; // Phải trả về chuẩn RspCode và Message theo tài liệu VNPAY
   }
 
   @UseGuards(AuthGuard)
   @Get('my-transactions')
-  async getMyTransactions(@Req() req: Request) {
-    const userId = (req as any).user.id;
+  async getMyTransactions(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
     const data = await this.paymentsService.getMyTransactions(userId);
     return {
       success: true,
@@ -74,8 +79,11 @@ export class PaymentsController {
 
   @UseGuards(AuthGuard)
   @Get(':id')
-  async getPaymentById(@Req() req: Request, @Param('id') id: string) {
-    const userId = (req as any).user.id;
+  async getPaymentById(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    const userId = req.user.id;
     const data = await this.paymentsService.getPaymentById(userId, id);
     return {
       success: true,
@@ -97,7 +105,7 @@ export class PaymentsController {
 
   @UseGuards(AuthGuard)
   @Get(':id/invoice/pdf')
-  async getInvoicePdf(@Param('id') id: string, @Res() res: any) {
+  async getInvoicePdf(@Param('id') id: string, @Res() res: Response) {
     try {
       const pdfBuffer = await this.paymentsService.generatePdfInvoiceBuffer(id);
       res.set({
@@ -116,8 +124,11 @@ export class PaymentsController {
 
   @UseGuards(AuthGuard)
   @Post(':id/cancel')
-  async cancelTransaction(@Req() req: Request, @Param('id') id: string) {
-    const userId = (req as any).user.id;
+  async cancelTransaction(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    const userId = req.user.id;
     const data = await this.paymentsService.cancelTransaction(userId, id);
     return {
       success: true,

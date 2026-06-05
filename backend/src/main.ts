@@ -1,15 +1,27 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { RedisIoAdapter } from './socket/redis.adapter';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   // Support for BigInt serialization
-  (BigInt.prototype as any).toJSON = function () {
+  (BigInt.prototype as unknown as { toJSON: () => string }).toJSON = function (
+    this: bigint,
+  ) {
     return this.toString();
   };
   const app = await NestFactory.create(AppModule);
 
   // Global Request Logger & Manual CORS Middleware
-  app.use((req, res, next) => {
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
+
+  app.use((req: Request, res: Response, next: NextFunction) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header(
       'Access-Control-Allow-Methods',
@@ -23,25 +35,19 @@ async function bootstrap() {
     console.log(`[GLOBAL LOG] ${req.method} ${req.url}`);
 
     if (req.method === 'OPTIONS') {
-      return res.sendStatus(200);
+      res.sendStatus(200);
+      return;
     }
     next();
   });
 
   // Standardization: Global Exception Filter
-  const {
-    HttpExceptionFilter,
-  } = require('./common/filters/http-exception.filter');
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Standardization: Global Transform Interceptor
-  const {
-    TransformInterceptor,
-  } = require('./common/interceptors/transform.interceptor');
   app.useGlobalInterceptors(new TransformInterceptor());
 
   // Standardization: Global Validation Pipe
-  const { ValidationPipe } = require('@nestjs/common');
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -58,7 +64,6 @@ async function bootstrap() {
   });
 
   // Swagger Setup
-  const { DocumentBuilder, SwaggerModule } = require('@nestjs/swagger');
   const config = new DocumentBuilder()
     .setTitle('TravelConnectVN API')
     .setDescription('The TravelConnectVN API description')
@@ -70,4 +75,4 @@ async function bootstrap() {
 
   await app.listen(process.env.PORT ?? 3000);
 }
-bootstrap();
+bootstrap().catch(console.error);

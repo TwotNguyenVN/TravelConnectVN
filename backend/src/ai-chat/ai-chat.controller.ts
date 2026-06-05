@@ -11,7 +11,11 @@ import {
 } from '@nestjs/common';
 import { AiChatService } from './ai-chat.service';
 import { AuthGuard } from '../common/guards/auth.guard';
-import type { Request } from 'express';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('ai-chat')
 @UseGuards(AuthGuard)
@@ -19,8 +23,8 @@ export class AiChatController {
   constructor(private readonly aiChatService: AiChatService) {}
 
   @Get('sessions')
-  async getSessions(@Req() req: Request) {
-    const userId = (req as any).user.id;
+  async getSessions(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
     const data = await this.aiChatService.getSessions(userId);
     return {
       success: true,
@@ -30,8 +34,8 @@ export class AiChatController {
   }
 
   @Post('sessions')
-  async createSession(@Req() req: Request) {
-    const userId = (req as any).user.id;
+  async createSession(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
     const data = await this.aiChatService.createSession(userId);
     return {
       success: true,
@@ -41,8 +45,8 @@ export class AiChatController {
   }
 
   @Get('sessions/:id/messages')
-  async getMessages(@Req() req: Request, @Param('id') id: string) {
-    const userId = (req as any).user.id;
+  async getMessages(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+    const userId = req.user.id;
     const data = await this.aiChatService.getMessages(id, userId);
     return {
       success: true,
@@ -53,11 +57,11 @@ export class AiChatController {
 
   @Post('sessions/:id/messages')
   async sendMessage(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() body: { content: string },
   ) {
-    const userId = (req as any).user.id;
+    const userId = req.user.id;
     const data = await this.aiChatService.sendMessage(id, userId, body.content);
     return {
       success: true,
@@ -67,8 +71,11 @@ export class AiChatController {
   }
 
   @Delete('sessions/:id')
-  async deleteSession(@Req() req: Request, @Param('id') id: string) {
-    const userId = (req as any).user.id;
+  async deleteSession(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    const userId = req.user.id;
     const data = await this.aiChatService.deleteSession(id, userId);
     return {
       success: true,
@@ -79,11 +86,11 @@ export class AiChatController {
 
   @Patch('sessions/:id/context')
   async updateSessionContext(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Body() body: { context: any },
+    @Body() body: { context: unknown },
   ) {
-    const userId = (req as any).user.id;
+    const userId = req.user.id;
     const data = await this.aiChatService.updateSessionContext(
       id,
       userId,

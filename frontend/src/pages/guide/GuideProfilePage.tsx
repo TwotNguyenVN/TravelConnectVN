@@ -79,7 +79,7 @@ const GuideProfilePage: React.FC = () => {
   const familiarDropdownRef = React.useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    function handleClickOutside(event: MouseEvent) {
       if (genderDropdownRef.current && !genderDropdownRef.current.contains(event.target as Node)) {
         setShowGenderDropdown(false);
       }
@@ -101,7 +101,7 @@ const GuideProfilePage: React.FC = () => {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
 
@@ -179,7 +179,7 @@ const GuideProfilePage: React.FC = () => {
     }));
   };
 
-  const fetchDefaultCovers = async () => {
+  async function fetchDefaultCovers() {
     try {
       setIsLoadingCovers(true);
       const res: any = await guideService.getDefaultCovers();
@@ -217,30 +217,30 @@ const GuideProfilePage: React.FC = () => {
     }
   };
 
-  const handleCoverClick = () => {
+  function handleCoverClick() {
     setIsCoverModalOpen(true);
     if (defaultCovers.length === 0) {
       fetchDefaultCovers();
     }
   };
 
-  const handleSelectDefaultCover = (url: string) => {
+  function handleSelectDefaultCover(url: string) {
     setProfile((prev) => ({ ...prev, coverUrl: url }));
     setIsCoverModalOpen(false);
     toast.success("Đã chọn ảnh bìa mặc định!");
   };
 
-  const handleUploadNewCover = () => {
+  function handleUploadNewCover() {
     setIsCoverModalOpen(false);
     coverInputRef.current?.click();
   };
 
-  const handleAvatarClick = (e: React.MouseEvent) => {
+  function handleAvatarClick(e: React.MouseEvent) {
     e.stopPropagation(); // Don't trigger cover click
     avatarInputRef.current?.click();
   };
 
-  const toggleFamiliarProvince = (name: string) => {
+  function toggleFamiliarProvince(name: string) {
     setProfile((prev) => {
       const current = prev.familiarProvinces
         ? prev.familiarProvinces
@@ -259,7 +259,7 @@ const GuideProfilePage: React.FC = () => {
     setFamiliarSearch("");
   };
 
-  const removeFamiliarProvince = (name: string) => {
+  function removeFamiliarProvince(name: string) {
     setProfile((prev) => {
       const current = prev.familiarProvinces
         ? prev.familiarProvinces
@@ -272,7 +272,7 @@ const GuideProfilePage: React.FC = () => {
     });
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
@@ -306,7 +306,7 @@ const GuideProfilePage: React.FC = () => {
     }
   };
 
-  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
@@ -340,7 +340,7 @@ const GuideProfilePage: React.FC = () => {
     }
   };
 
-  const handleUseAccountAvatar = () => {
+  function handleUseAccountAvatar() {
     if (user?.user_metadata?.avatar_url) {
       setProfile((prev) => ({
         ...prev,
@@ -352,7 +352,7 @@ const GuideProfilePage: React.FC = () => {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
 
     // 1. Phone number validation

@@ -26,7 +26,7 @@ export const AdminRecoveryConsolePage: React.FC = () => {
   const [restoringId, setRestoringId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const fetchItems = async () => {
+  async function fetchItems() {
     try {
       setLoading(true);
       const response = await adminApi.getDeletedItems();
@@ -42,7 +42,7 @@ export const AdminRecoveryConsolePage: React.FC = () => {
     fetchItems();
   }, []);
 
-  const handleRestore = async (type: string, id: string) => {
+  async function handleRestore(type: string, id: string) {
     try {
       setRestoringId(id);
       await adminApi.restoreDeletedItem(type, id);

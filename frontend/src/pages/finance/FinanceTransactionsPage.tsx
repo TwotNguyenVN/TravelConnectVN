@@ -14,7 +14,7 @@ interface Transaction {
   created_at: string;
   paid_at: string | null;
   currency_code: string;
-  gateway_response: unknown;
+  gateway_response: any;
   provider_transaction_code: string | null;
   users?: {
     id: string;
@@ -51,7 +51,7 @@ export const FinanceTransactionsPage: React.FC = () => {
   const [reconLoading, setReconLoading] = useState(false);
   const [reconFile, setReconFile] = useState<File | null>(null);
   const [reconHeaders, setReconHeaders] = useState<string[]>([]);
-  const [reconRows, setReconRows] = useState<unknown[][]>([]);
+  const [reconRows, setReconRows] = useState<any[][]>([]);
   const [codeColIdx, setCodeColIdx] = useState<number>(0);
   const [amountColIdx, setAmountColIdx] = useState<number>(1);
   const [activeTab, setActiveTab] = useState<'matched' | 'mismatched' | 'missing_system' | 'missing_statement' | 'unknown'>('matched');
@@ -66,7 +66,7 @@ export const FinanceTransactionsPage: React.FC = () => {
 
   const limit = 10;
 
-  const fetchTransactions = async () => {
+  async function fetchTransactions() {
     try {
       Promise.resolve().then(() => setLoading(true));
       const skip = (currentPage - 1) * limit;
@@ -94,13 +94,13 @@ export const FinanceTransactionsPage: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, statusFilter]);
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
+  function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();
     setCurrentPage(1);
     fetchTransactions();
   };
 
-  const getStatusBadgeStyle = (status: string) => {
+  function getStatusBadgeStyle(status: string) {
     const base = {
       display: 'inline-block',
       padding: '4px 8px',
@@ -129,7 +129,7 @@ export const FinanceTransactionsPage: React.FC = () => {
     }
   };
 
-  const getStatusLabel = (status: string) => {
+  function getStatusLabel(status: string) {
     switch (status) {
       case 'paid':
       case 'success':
@@ -149,7 +149,7 @@ export const FinanceTransactionsPage: React.FC = () => {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setReconFile(file);
@@ -161,7 +161,7 @@ export const FinanceTransactionsPage: React.FC = () => {
         const wb = XLSX.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
         const ws = wb.Sheets[wsname];
-        const data = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1 });
+        const data = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1 });
 
         if (data.length > 0) {
           const headers = data[0] as string[];
@@ -191,7 +191,7 @@ export const FinanceTransactionsPage: React.FC = () => {
     reader.readAsBinaryString(file);
   };
 
-  const runReconciliation = async () => {
+  async function runReconciliation() {
     if (reconRows.length === 0) return;
     setReconLoading(true);
     try {
@@ -268,7 +268,7 @@ export const FinanceTransactionsPage: React.FC = () => {
     }
   };
 
-  const handleQuickApprove = async (txId: string) => {
+  async function handleQuickApprove(txId: string) {
     try {
       const res = await adminApi.updateTransactionStatus(txId, 'paid');
       if (res.success) {
@@ -306,7 +306,7 @@ export const FinanceTransactionsPage: React.FC = () => {
     }
   };
 
-  const resetRecon = () => {
+  function resetRecon() {
     setReconFile(null);
     setReconHeaders([]);
     setReconRows([]);

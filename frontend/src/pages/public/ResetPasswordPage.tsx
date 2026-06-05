@@ -16,7 +16,7 @@ export const ResetPasswordPage: React.FC = () => {
 
   useEffect(() => {
     // Check if user is authenticated (they should be after verifyOtp recovery)
-    const checkSession = async () => {
+    async function checkSession() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         navigate('/login');
@@ -25,7 +25,7 @@ export const ResetPasswordPage: React.FC = () => {
     checkSession();
   }, [navigate]);
 
-  const handleResetPassword = async (e: React.FormEvent) => {
+  async function handleResetPassword(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);

@@ -23,7 +23,7 @@ const CompanionRequestManagementPage: React.FC = () => {
   const [responseNote, setResponseNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const fetchData = async () => {
+  async function fetchData() {
     if (!id) return;
     setLoading(true);
     try {
@@ -45,7 +45,7 @@ const CompanionRequestManagementPage: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const handleProcess = async () => {
+  async function handleProcess() {
     if (!selectedRequest) return;
     
     setSubmitting(true);
@@ -67,7 +67,7 @@ const CompanionRequestManagementPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',

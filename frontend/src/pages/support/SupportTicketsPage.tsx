@@ -77,12 +77,12 @@ export const SupportTicketsPage: React.FC = () => {
     fetchTickets();
   }, [fetchTickets]);
 
-  const handleOpenTicket = (ticket: SupportTicket) => {
+  function handleOpenTicket(ticket: SupportTicket) {
     setSelectedTicket(ticket);
     setShowModal(true);
   };
 
-  const handleUpdateTicket = async (status: 'processing' | 'resolved' | 'closed', assignToMe = false) => {
+  async function handleUpdateTicket(status: 'processing' | 'resolved' | 'closed', assignToMe = false) {
     if (!selectedTicket) return;
 
     try {

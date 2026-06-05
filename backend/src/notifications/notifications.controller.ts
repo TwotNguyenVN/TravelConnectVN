@@ -11,6 +11,11 @@ import {
 import { NotificationsService } from './notifications.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ApiResponse } from '../common/interfaces/response.interface';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('notifications')
 @UseGuards(AuthGuard)
@@ -19,10 +24,10 @@ export class NotificationsController {
 
   @Get('me')
   async findAll(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const result = await this.notificationsService.findAll(
       req.user.id,
       page,
@@ -36,7 +41,9 @@ export class NotificationsController {
   }
 
   @Get('unread-count')
-  async getUnreadCount(@Request() req): Promise<ApiResponse<any>> {
+  async getUnreadCount(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<unknown>> {
     const result = await this.notificationsService.getUnreadCount(req.user.id);
     return {
       success: true,
@@ -46,7 +53,9 @@ export class NotificationsController {
   }
 
   @Patch('read-all')
-  async markAllAsRead(@Request() req): Promise<ApiResponse<any>> {
+  async markAllAsRead(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<unknown>> {
     await this.notificationsService.markAllAsRead(req.user.id);
     return {
       success: true,
@@ -56,9 +65,9 @@ export class NotificationsController {
 
   @Patch(':id/read')
   async markAsRead(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     await this.notificationsService.markAsRead(req.user.id, id);
     return {
       success: true,
@@ -68,9 +77,9 @@ export class NotificationsController {
 
   @Delete(':id')
   async delete(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     await this.notificationsService.delete(req.user.id, id);
     return {
       success: true,

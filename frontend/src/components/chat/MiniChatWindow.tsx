@@ -5,6 +5,7 @@ import { useSocket } from '../../contexts/SocketContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMiniChat } from '../../contexts/MiniChatContext';
 import { DEFAULT_AVATAR } from '../../constants/images';
+import { throttle } from 'lodash';
 
 interface MiniChatWindowProps {
   conversation: Conversation;
@@ -18,11 +19,22 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [inputValue, setInputValue] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const isMinimized = minimizedChats[conversation.id];
   
   const otherParticipant = conversation.participants.find(p => !p.isOwner) || conversation.participants[0];
+  const { onlineUsers } = useSocket();
+  const isOnline = otherParticipant?.userId ? onlineUsers.has(otherParticipant.userId) : false;
+  
+  const [otherLastReadAt, setOtherLastReadAt] = useState<string | null>(otherParticipant?.lastReadAt || null);
+
+  useEffect(() => {
+    if (otherParticipant?.lastReadAt) {
+      setOtherLastReadAt(otherParticipant.lastReadAt);
+    }
+  }, [otherParticipant?.lastReadAt]);
   const title = conversation.title || otherParticipant?.fullName || 'Cuộc trò chuyện';
   const avatar = conversation.conversationType === 'group_companion' 
     ? conversation.companionPost?.coverUrl || DEFAULT_AVATAR 
@@ -71,9 +83,33 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
       }
     };
 
+    const handleMessageRead = (data: { conversationId: string, userId: string, lastReadAt: string }) => {
+      if (data.conversationId === conversation.id && data.userId !== user?.id) {
+        setOtherLastReadAt(data.lastReadAt);
+      }
+    };
+
+    const handleTypingStart = (data: { conversationId: string, userId: string }) => {
+      if (data.conversationId === conversation.id && data.userId !== user?.id) {
+        setIsTyping(true);
+      }
+    };
+
+    const handleTypingEnd = (data: { conversationId: string, userId: string }) => {
+      if (data.conversationId === conversation.id && data.userId !== user?.id) {
+        setIsTyping(false);
+      }
+    };
+
     socket.on('new_message', handleNewMessage);
+    socket.on('message_read', handleMessageRead);
+    socket.on('typing_start', handleTypingStart);
+    socket.on('typing_end', handleTypingEnd);
     return () => {
       socket.off('new_message', handleNewMessage);
+      socket.off('message_read', handleMessageRead);
+      socket.off('typing_start', handleTypingStart);
+      socket.off('typing_end', handleTypingEnd);
     };
   }, [socket, conversation.id, user, isMinimized]);
 
@@ -91,6 +127,18 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
     const tempId = `temp-${Date.now()}`;
     const text = inputValue;
     setInputValue('');
+
+    // Clear typing indicator when sent
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    if (socket && otherParticipant?.userId) {
+      socket.emit('typing_end', { 
+        conversationId: conversation.id, 
+        targetUserId: otherParticipant.userId,
+        senderId: user?.id 
+      });
+    }
 
     // Optimistic UI
     const optimisticMsg: Message = {
@@ -131,6 +179,45 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
     }
   };
 
+  // Memoized throttle function to emit typing
+  const emitTypingStart = useRef(
+    throttle(() => {
+      if (socket && otherParticipant?.userId) {
+        socket.emit('typing_start', { 
+          conversationId: conversation.id, 
+          targetUserId: otherParticipant.userId,
+          senderId: user?.id 
+        });
+      }
+    }, 2000, { trailing: false })
+  ).current;
+
+  // Debounce for typing end
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
+    
+    // Emit typing start
+    emitTypingStart();
+
+    // Clear previous timeout
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+    
+    // Set timeout to emit typing_end after 3s of inactivity
+    typingTimeoutRef.current = setTimeout(() => {
+      if (socket && otherParticipant?.userId) {
+        socket.emit('typing_end', { 
+          conversationId: conversation.id, 
+          targetUserId: otherParticipant.userId,
+          senderId: user?.id 
+        });
+      }
+    }, 3000);
+  };
+
   return (
     <div className={`mini-chat-window ${isMinimized ? 'minimized' : ''}`}>
       {/* Header */}
@@ -141,7 +228,7 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
         <div className="mini-chat-header-info">
           <div className="mini-chat-avatar">
             <img src={avatar} alt={title} />
-            <div className="status-dot"></div>
+            <div className="status-dot" style={{ backgroundColor: isOnline ? '#10B981' : '#9CA3AF' }}></div>
           </div>
           <div className="mini-chat-title">{title}</div>
         </div>
@@ -184,22 +271,45 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
               <div className="mini-chat-messages">
                 {messages.map((msg, index) => {
                   const isLastOwn = msg.isOwn && (index === messages.length - 1 || !messages[index + 1].isOwn);
+                  // Check if this is the last read message by the other participant
+                  const isLastRead = msg.isOwn && otherLastReadAt && msg.id === [...messages].reverse().find(m => m.isOwn && new Date(m.sentAt) <= new Date(otherLastReadAt!))?.id;
                   return (
-                    <div key={msg.id} className={`message-row ${msg.isOwn ? 'own' : 'other'}`}>
-                      {!msg.isOwn && (
-                        <div className="message-avatar">
-                          <img src={msg.sender?.avatarUrl || DEFAULT_AVATAR} alt="avatar" />
-                        </div>
-                      )}
-                      <div className="message-bubble-wrapper">
-                        {!msg.isOwn && <div className="message-sender">{msg.sender?.fullName}</div>}
-                        <div className={`message-bubble ${msg.isOwn ? 'own' : 'other'} ${isLastOwn ? 'last-own' : ''}`}>
-                          {msg.content}
+                    <div key={msg.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                      <div className={`message-row ${msg.isOwn ? 'own' : 'other'}`}>
+                        {!msg.isOwn && (
+                          <div className="message-avatar">
+                            <img src={msg.sender?.avatarUrl || DEFAULT_AVATAR} alt="avatar" />
+                          </div>
+                        )}
+                        <div className="message-bubble-wrapper">
+                          {!msg.isOwn && <div className="message-sender">{msg.sender?.fullName}</div>}
+                          <div className={`message-bubble ${msg.isOwn ? 'own' : 'other'} ${isLastOwn ? 'last-own' : ''}`}>
+                            {msg.content}
+                          </div>
                         </div>
                       </div>
+                      {isLastRead && (
+                        <div className="message-read-receipt" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '2px', marginRight: '4px' }}>
+                          <img src={otherParticipant?.avatarUrl || DEFAULT_AVATAR} alt="Đã xem" style={{ width: 14, height: 14, borderRadius: '50%' }} title="Đã xem" />
+                        </div>
+                      )}
                     </div>
                   );
                 })}
+                {isTyping && (
+                  <div className="message-row other" style={{ alignItems: 'flex-end', gap: '8px' }}>
+                    <div className="message-avatar" style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                      <img src={otherParticipant?.avatarUrl || DEFAULT_AVATAR} alt="avatar" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                    </div>
+                    <div className="message-bubble-wrapper">
+                      <div className="message-bubble other typing-indicator" style={{ display: 'flex', gap: '4px', padding: '12px 16px', alignItems: 'center' }}>
+                        <span className="dot" style={{ width: '6px', height: '6px', backgroundColor: '#9CA3AF', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both' }}></span>
+                        <span className="dot" style={{ width: '6px', height: '6px', backgroundColor: '#9CA3AF', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.2s' }}></span>
+                        <span className="dot" style={{ width: '6px', height: '6px', backgroundColor: '#9CA3AF', borderRadius: '50%', animation: 'bounce 1.4s infinite ease-in-out both', animationDelay: '0.4s' }}></span>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div ref={messagesEndRef} />
               </div>
             )}
@@ -217,7 +327,7 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
               <textarea 
                 placeholder="Aa"
                 value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
+                onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
                 rows={1}
               />

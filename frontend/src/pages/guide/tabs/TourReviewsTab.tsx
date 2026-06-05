@@ -9,11 +9,7 @@ export const TourReviewsTab: React.FC<TourReviewsTabProps> = ({ tourId }) => {
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchReviews();
-  }, [tourId]);
-
-  const fetchReviews = async () => {
+async function fetchReviews() {
     try {
       setLoading(true);
       const res = await tourService.getTourReviews(tourId);
@@ -24,6 +20,12 @@ export const TourReviewsTab: React.FC<TourReviewsTabProps> = ({ tourId }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchReviews();
+  }, [tourId]);
+
+  
 
   if (loading) return <div>Đang tải đánh giá...</div>;
 

@@ -8,6 +8,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 import { AuthGuard } from '../common/guards/auth.guard';
 import { FavoritesService } from './favorites.service';
 
@@ -24,7 +29,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a tour to favorites' })
-  async addTourFavorite(@Request() req, @Param('tourId') tourId: string) {
+  async addTourFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('tourId') tourId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.addTourFavorite(userId, tourId);
   }
@@ -33,7 +41,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove a tour from favorites' })
-  async removeTourFavorite(@Request() req, @Param('tourId') tourId: string) {
+  async removeTourFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('tourId') tourId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.removeTourFavorite(userId, tourId);
   }
@@ -42,7 +53,7 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user favorite tours' })
-  async getMyFavoriteTours(@Request() req) {
+  async getMyFavoriteTours(@Request() req: AuthenticatedRequest) {
     const userId = req.user.id;
     return this.favoritesService.getMyFavoriteTours(userId);
   }
@@ -51,7 +62,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check if a tour is favorited' })
-  async checkTourFavorite(@Request() req, @Param('tourId') tourId: string) {
+  async checkTourFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('tourId') tourId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.isTourFavorited(userId, tourId);
   }
@@ -64,7 +78,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Add a guide to favorites' })
-  async addGuideFavorite(@Request() req, @Param('guideId') guideId: string) {
+  async addGuideFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('guideId') guideId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.addGuideFavorite(userId, guideId);
   }
@@ -73,7 +90,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove a guide from favorites' })
-  async removeGuideFavorite(@Request() req, @Param('guideId') guideId: string) {
+  async removeGuideFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('guideId') guideId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.removeGuideFavorite(userId, guideId);
   }
@@ -82,7 +102,7 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user favorite guides' })
-  async getMyFavoriteGuides(@Request() req) {
+  async getMyFavoriteGuides(@Request() req: AuthenticatedRequest) {
     const userId = req.user.id;
     return this.favoritesService.getMyFavoriteGuides(userId);
   }
@@ -91,7 +111,10 @@ export class FavoritesController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Check if a guide is favorited' })
-  async checkGuideFavorite(@Request() req, @Param('guideId') guideId: string) {
+  async checkGuideFavorite(
+    @Request() req: AuthenticatedRequest,
+    @Param('guideId') guideId: string,
+  ) {
     const userId = req.user.id;
     return this.favoritesService.isGuideFavorited(userId, guideId);
   }

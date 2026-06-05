@@ -11,7 +11,7 @@ export const VnpayReturnPage: React.FC = () => {
   const [message, setMessage] = useState('Đang xử lý kết quả thanh toán...');
 
   useEffect(() => {
-    const processReturn = async () => {
+    async function processReturn() {
       // VNPAY Return URL chứa các tham số query parameters
       // Theo luồng chuẩn, ta gửi lại tham số này cho backend IPN, hoặc Backend sẽ tự nhận IPN.
       // Vì là môi trường thử nghiệm, ReturnUrl chỉ để hiển thị. Trạng thái thực tế do IPN xử lý.

@@ -10,7 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
     iconUrl: markerIcon,
     shadowUrl: markerShadow,
     iconSize: [25, 41],
@@ -81,10 +81,10 @@ const STATUS_COLOR: Record<string, string> = {
 };
 
 // Web Audio siren tone generator
-const playSosBeep = () => {
+function playSosBeep() {
   if (typeof window === 'undefined') return;
   try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    const AudioContextClass = window.AudioContext || (window as any as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
     const ctx = new AudioContextClass();
     const osc1 = ctx.createOscillator();
@@ -121,7 +121,7 @@ const playSosBeep = () => {
   }
 };
 
-const createSosIcon = () => {
+function createSosIcon() {
   return L.divIcon({
     className: 'sos-marker-custom',
     html: `<div class="sos-pin"></div><div class="sos-pulse"></div>`,
@@ -194,13 +194,13 @@ export const SupportDashboardPage: React.FC = () => {
     }
   }, [hasActiveSos, soundEnabled]);
 
-  const handleOpenResolveSos = (alert: SosAlert) => {
+  function handleOpenResolveSos(alert: SosAlert) {
     setSelectedSos(alert);
     setResolveNote('');
     setShowSosModal(true);
   };
 
-  const handleResolveSos = async () => {
+  async function handleResolveSos() {
     if (!selectedSos) return;
     if (!resolveNote.trim()) {
       toast.error('Vui lòng nhập ghi chú xử lý');

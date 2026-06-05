@@ -18,16 +18,16 @@ export class TransformInterceptor<T> implements NestInterceptor<
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data) => {
+      map((data: unknown) => {
         // If data is already wrapped in ApiResponse format, don't wrap again
         if (data && typeof data === 'object' && 'success' in data) {
-          return data;
+          return data as ApiResponse<T>;
         }
 
         return {
           success: true,
           message: 'Operation successful',
-          data,
+          data: data as T,
         };
       }),
     );

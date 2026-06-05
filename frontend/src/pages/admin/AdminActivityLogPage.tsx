@@ -24,7 +24,7 @@ export const AdminActivityLogPage: React.FC = () => {
   const [module, setModule] = useState('');
   const { toast } = useToast();
 
-  const fetchLogs = async () => {
+  async function fetchLogs() {
     try {
       setLoading(true);
       const response = await adminApi.getActivityLogs({ module, take: 50 });
@@ -48,7 +48,7 @@ export const AdminActivityLogPage: React.FC = () => {
     report_handling: { label: 'Báo cáo', color: '#ef4444', bg: '#fef2f2', icon: '🚩' },
   };
 
-  const getActionStyle = (action: string) => {
+  function getActionStyle(action: string) {
     const a = action.toLowerCase();
     if (a.includes('approve') || a.includes('unlock') || a.includes('visible') || a.includes('unhide')) return { color: '#10b981', bg: '#ecfdf5' };
     if (a.includes('reject') || a.includes('lock') || a.includes('hidden') || a.includes('hide')) return { color: '#ef4444', bg: '#fef2f2' };

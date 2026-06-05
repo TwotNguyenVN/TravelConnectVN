@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   ServiceUnavailableException,
 } from '@nestjs/common';
+import { Request } from 'express';
 
 /**
  * Singleton service to hold maintenance mode state in-memory.
@@ -48,7 +49,7 @@ export class MaintenanceGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const method = request.method?.toUpperCase();
     const url: string = request.originalUrl || request.url || '';
 
