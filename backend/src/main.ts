@@ -9,6 +9,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global Request Logger & Manual CORS Middleware
+  const { RedisIoAdapter } = require('./socket/redis.adapter');
+  const redisIoAdapter = new RedisIoAdapter(app);
+  await redisIoAdapter.connectToRedis();
+  app.useWebSocketAdapter(redisIoAdapter);
+
   app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
     res.header(

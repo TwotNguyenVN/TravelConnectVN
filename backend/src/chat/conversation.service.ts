@@ -364,6 +364,7 @@ export class ConversationService {
   async markAsRead(conversationId: string, userId: string) {
     await this.assertParticipant(conversationId, userId);
 
+    const now = new Date();
     await this.prisma.conversation_participants.update({
       where: {
         conversation_id_user_id: {
@@ -371,8 +372,26 @@ export class ConversationService {
           user_id: userId,
         },
       },
-      data: { last_read_at: new Date() },
+      data: { last_read_at: now },
     });
+
+    // Phát sự kiện message_read cho các thành viên khác
+    const otherParticipants = await this.prisma.conversation_participants.findMany({
+      where: {
+        conversation_id: conversationId,
+        user_id: { not: userId },
+        left_at: null,
+      },
+      select: { user_id: true },
+    });
+
+    for (const p of otherParticipants) {
+      this.socketGateway.sendToUser(p.user_id, 'message_read', {
+        conversationId,
+        userId,
+        lastReadAt: now,
+      });
+    }
 
     // Tính lại tổng số unread messages của user này và emit qua socket
     const newUnreadCount = await this.getUnreadMessageCount(userId);
