@@ -3,6 +3,8 @@ import { PaymentsService } from './payments.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SocketGateway } from '../socket/socket.gateway';
+import { MailService } from '../mail/mail.service';
+import { getQueueToken } from '@nestjs/bullmq';
 
 describe('PaymentsService', () => {
   let service: PaymentsService;
@@ -10,6 +12,7 @@ describe('PaymentsService', () => {
   const mockPrismaService = {
     tour_requests: {
       findUnique: jest.fn(),
+      update: jest.fn(),
     },
     payment_transactions: {
       findMany: jest.fn(),
@@ -26,6 +29,12 @@ describe('PaymentsService', () => {
   const mockSocketGateway = {
     sendToUser: jest.fn(),
   };
+  const mockMailService = {
+    sendPaymentSuccessEmail: jest.fn(),
+  };
+  const mockMailQueue = {
+    add: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -35,6 +44,8 @@ describe('PaymentsService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: NotificationsService, useValue: mockNotificationsService },
         { provide: SocketGateway, useValue: mockSocketGateway },
+        { provide: MailService, useValue: mockMailService },
+        { provide: getQueueToken('mailQueue'), useValue: mockMailQueue },
       ],
     }).compile();
 
@@ -99,6 +110,54 @@ describe('PaymentsService', () => {
 
       const result = await service.vnpayIpn(vnp_Params);
       expect(result).toEqual({ RspCode: '04', Message: 'Invalid amount' });
+    });
+
+    it('should process payment successfully when parameters are correct', async () => {
+      process.env.VNP_HASHSECRET = 'secret';
+
+      const vnp_Params = {
+        vnp_TxnRef: 'tx_123',
+        vnp_ResponseCode: '00',
+        vnp_Amount: '5000000', 
+      };
+
+      mockPrismaService.payment_transactions.findUnique.mockResolvedValue({
+        id: 'tx_123',
+        amount: 50000,
+        status: 'pending',
+        tour_request_id: 'req_123',
+      });
+      
+      mockPrismaService.payment_transactions.findMany.mockResolvedValue([]);
+
+      mockPrismaService.tour_requests.findUnique.mockResolvedValue({
+        id: 'req_123',
+        user_id: 'user_123',
+        participant_count: 1,
+        tours: { 
+          price: 5000000,
+          title: 'Test Tour',
+          guide_profiles: { user_id: 'guide_123' },
+        },
+        users_tour_requests_user_idTousers: {
+          full_name: 'Test User',
+          email: 'test@example.com',
+        },
+      });
+
+      const signData = 'vnp_Amount=5000000&vnp_ResponseCode=00&vnp_TxnRef=tx_123';
+      const crypto = require('crypto');
+      const hmac = crypto.createHmac('sha512', 'secret');
+      (vnp_Params as any).vnp_SecureHash = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
+
+      const result = await service.vnpayIpn(vnp_Params);
+      expect(result).toEqual({ RspCode: '00', Message: 'Confirm Success' });
+      expect(mockPrismaService.payment_transactions.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'tx_123' },
+          data: expect.objectContaining({ status: 'paid' }),
+        })
+      );
     });
   });
 });

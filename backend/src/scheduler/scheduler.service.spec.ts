@@ -18,6 +18,7 @@ describe('SchedulerService', () => {
     companion_posts: {
       findMany: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     companion_requests: {
       findMany: jest.fn(),
@@ -189,8 +190,8 @@ describe('SchedulerService', () => {
 
       await service.completeEndedCompanions();
 
-      expect(mockPrismaService.companion_posts.update).toHaveBeenCalledWith({
-        where: { id: 'post-1' },
+      expect(mockPrismaService.companion_posts.updateMany).toHaveBeenCalledWith({
+        where: { id: { in: ['post-1'] } },
         data: { business_status: 'closed' },
       });
 
@@ -198,7 +199,7 @@ describe('SchedulerService', () => {
         mockPrismaService.companion_requests.updateMany,
       ).toHaveBeenCalledWith({
         where: {
-          post_id: 'post-1',
+          post_id: { in: ['post-1'] },
           status: 'pending',
         },
         data: expect.objectContaining({

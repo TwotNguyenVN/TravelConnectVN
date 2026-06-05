@@ -75,6 +75,12 @@ jobs:
       - name: Build Application (Type Check & Bundle)
         run: npm run build
 
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright E2E Tests
+        run: npx playwright test
+
   docker-build:
     name: Test Build Docker Images
     runs-on: ubuntu-latest

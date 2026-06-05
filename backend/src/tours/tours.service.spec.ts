@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ToursService } from './tours.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
 /**
  * Unit Tests cho ToursService
@@ -44,11 +45,18 @@ describe('ToursService', () => {
     $transaction: jest.fn(),
   };
 
+  const mockCacheManager = {
+    get: jest.fn(),
+    set: jest.fn(),
+    del: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ToursService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
       ],
     }).compile();
 
