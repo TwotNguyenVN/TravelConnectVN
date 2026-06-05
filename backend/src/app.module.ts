@@ -44,6 +44,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -115,6 +116,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     TicketsModule,
     DisputesModule,
     MailModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
