@@ -193,7 +193,7 @@ export const MiniChatWindow: React.FC<MiniChatWindowProps> = ({ conversation }) 
   ).current;
 
   // Debounce for typing end
-  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
