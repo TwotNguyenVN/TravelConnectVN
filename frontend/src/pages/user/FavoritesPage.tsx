@@ -14,7 +14,7 @@ const FavoritesPage: React.FC = () => {
   const [guides, setGuides] = useState<FavoriteGuide[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchFavorites = async () => {
+  async function fetchFavorites() {
     try {
       setLoading(true);
       const [toursRes, guidesRes]: [any, any] = await Promise.all([
@@ -36,7 +36,7 @@ const FavoritesPage: React.FC = () => {
     fetchFavorites();
   }, []);
 
-  const handleRemoveTour = async (e: React.MouseEvent, tourId: string) => {
+  async function handleRemoveTour(e: React.MouseEvent, tourId: string) {
     e.preventDefault();
     e.stopPropagation();
     try {
@@ -50,7 +50,7 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  const handleRemoveGuide = async (e: React.MouseEvent, guideId: string) => {
+  async function handleRemoveGuide(e: React.MouseEvent, guideId: string) {
     e.preventDefault();
     e.stopPropagation();
     try {

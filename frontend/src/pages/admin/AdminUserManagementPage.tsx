@@ -98,13 +98,13 @@ export function AdminUserManagementPage() {
     fetchRoleStats();
   }, [fetchRoleStats]);
 
-  const getRoleCount = (code: string) => {
+  function getRoleCount(code: string) {
     if (!code) return roleStats.reduce((sum, r) => sum + r.value, 0);
     const stat = roleStats.find(r => r.name === code);
     return stat ? stat.value : 0;
   };
 
-  const handleStatusChange = async (userId: string, currentStatus: string) => {
+  async function handleStatusChange(userId: string, currentStatus: string) {
     const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
     const reason = window.prompt(`Lý do thay đổi trạng thái sang ${newStatus}:`);
     if (reason === null) return;
@@ -118,7 +118,7 @@ export function AdminUserManagementPage() {
     }
   };
 
-  const handleCreateStaff = async (e: React.FormEvent) => {
+  async function handleCreateStaff(e: React.FormEvent) {
     e.preventDefault();
     if (!staffEmail.trim() || !staffPassword.trim() || !staffFullName.trim()) {
       toast.error('Vui lòng điền đầy đủ thông tin');
@@ -140,7 +140,7 @@ export function AdminUserManagementPage() {
       setStaffRole('CONTENT_MODERATOR');
       fetchUsers();
       fetchRoleStats();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       toast.error((err as ApiError)?.response?.data?.message || 'Tạo nhân viên thất bại');
     } finally {
@@ -148,7 +148,7 @@ export function AdminUserManagementPage() {
     }
   };
 
-  const handleRoleToggle = async (roleCode: string, roleLabel: string) => {
+  async function handleRoleToggle(roleCode: string, roleLabel: string) {
     if (!selectedUser) return;
     const hasRole = userRoles.includes(roleCode);
     const confirmMsg = hasRole 
@@ -170,7 +170,7 @@ export function AdminUserManagementPage() {
       }
       fetchUsers();
       fetchRoleStats();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       toast.error((err as ApiError)?.response?.data?.message || 'Cập nhật vai trò thất bại');
     } finally {

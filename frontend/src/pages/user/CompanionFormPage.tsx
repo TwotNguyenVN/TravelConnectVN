@@ -32,13 +32,7 @@ const CompanionFormPage: React.FC = () => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    if (isEdit) {
-      fetchDetail();
-    }
-  }, [id]);
-
-  const fetchDetail = async () => {
+async function fetchDetail() {
     try {
       const response = await companionService.getPostDetail(id!);
       if (response.success) {
@@ -67,7 +61,15 @@ const CompanionFormPage: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  useEffect(() => {
+    if (isEdit) {
+      fetchDetail();
+    }
+  }, [id]);
+
+  
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -75,7 +77,7 @@ const CompanionFormPage: React.FC = () => {
     }));
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -125,7 +127,7 @@ const CompanionFormPage: React.FC = () => {
     }
   };
 
-  const removeImage = (index: number) => {
+  function removeImage(index: number) {
     setFormData(prev => {
       const newImages = prev.images.filter((_, i) => i !== index);
       // If we removed the cover image, set the first one as cover
@@ -136,7 +138,7 @@ const CompanionFormPage: React.FC = () => {
     });
   };
 
-  const setCoverImage = (index: number) => {
+  function setCoverImage(index: number) {
     setFormData(prev => ({
       ...prev,
       images: prev.images.map((img, i) => ({
@@ -146,7 +148,7 @@ const CompanionFormPage: React.FC = () => {
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
     if (formData.title.length < 10) {

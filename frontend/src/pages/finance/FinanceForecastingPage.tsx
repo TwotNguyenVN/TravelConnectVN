@@ -29,7 +29,7 @@ export const FinanceForecastingPage: React.FC = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchForecast = async () => {
+    async function fetchForecast() {
       try {
         setLoading(true);
         const response = await api.get('/payments/forecast/cashflow');

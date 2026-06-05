@@ -24,7 +24,7 @@ export function SupportFaqPage() {
   const [answer, setAnswer] = useState('');
   const [category, setCategory] = useState('Chung');
 
-  const fetchFaqs = async () => {
+  async function fetchFaqs() {
     try {
       setLoading(true);
       setError(null);
@@ -44,14 +44,14 @@ export function SupportFaqPage() {
     fetchFaqs();
   }, []);
 
-  const resetForm = () => {
+  function resetForm() {
     setQuestion('');
     setAnswer('');
     setCategory('Chung');
     setEditingId(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!question.trim() || !answer.trim()) return;
 
@@ -78,14 +78,14 @@ export function SupportFaqPage() {
     }
   };
 
-  const handleEdit = (faq: FaqItem) => {
+  function handleEdit(faq: FaqItem) {
     setEditingId(faq.id);
     setQuestion(faq.question);
     setAnswer(faq.answer);
     setCategory(faq.category || 'Chung');
   };
 
-  const handleDelete = async (id: string) => {
+  async function handleDelete(id: string) {
     if (!window.confirm('Bạn có chắc chắn muốn xoá câu hỏi thường gặp này?')) return;
     try {
       setError(null);

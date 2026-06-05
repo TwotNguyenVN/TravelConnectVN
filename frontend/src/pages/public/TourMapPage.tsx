@@ -44,7 +44,7 @@ export const TourMapPage: React.FC = () => {
   const [mapZoom, setMapZoom] = useState(13);
 
   useEffect(() => {
-    const fetchTourMapData = async () => {
+    async function fetchTourMapData() {
       if (!id) return;
       try {
         setLoading(true);
@@ -73,7 +73,7 @@ export const TourMapPage: React.FC = () => {
     fetchTourMapData();
   }, [id]);
 
-  const handleLocationClick = (loc: any) => {
+  function handleLocationClick(loc: any) {
     if (loc.lat && loc.lng) {
       setMapCenter([loc.lat, loc.lng]);
       setSelectedLocation(loc);

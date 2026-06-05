@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UserActivityLogsService {
@@ -10,7 +11,7 @@ export class UserActivityLogsService {
     activityType: string,
     entityType?: string,
     entityId?: string,
-    metadata: any = {},
+    metadata: Record<string, unknown> = {},
   ) {
     return this.prisma.user_activity_logs.create({
       data: {
@@ -18,7 +19,7 @@ export class UserActivityLogsService {
         activity_type: activityType,
         entity_type: entityType,
         entity_id: entityId,
-        metadata: metadata,
+        metadata: metadata as Prisma.InputJsonValue,
       },
     });
   }
@@ -30,7 +31,9 @@ export class UserActivityLogsService {
     activityType?: string,
   ) {
     const skip = (page - 1) * limit;
-    const where: any = { user_id: userId };
+    const where: { user_id: string; activity_type?: { startsWith: string } } = {
+      user_id: userId,
+    };
     if (activityType && activityType !== 'all') {
       // Support prefix matching e.g. 'auth' matches 'auth.registered', 'auth.logged_in'
       where.activity_type = { startsWith: activityType };
@@ -60,9 +63,12 @@ export class UserActivityLogsService {
     };
   }
 
-  private generateDescription(log: any): string {
+  private generateDescription(log: {
+    activity_type: string;
+    metadata?: unknown;
+  }): string {
     const { activity_type, metadata } = log;
-    const m = metadata;
+    const m = (metadata || {}) as Record<string, string>;
 
     switch (activity_type) {
       case 'auth.registered':

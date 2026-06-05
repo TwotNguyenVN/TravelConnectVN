@@ -15,7 +15,7 @@ export const FinanceDashboardPage: React.FC = () => {
   const [pendingRefundsCount, setPendingRefundsCount] = useState(0);
   const [exporting, setExporting] = useState(false);
 
-  const fetchFinanceData = async () => {
+  async function fetchFinanceData() {
     try {
       setLoading(true);
       setError(null);
@@ -38,7 +38,7 @@ export const FinanceDashboardPage: React.FC = () => {
     }
   };
 
-  const handleExport = async () => {
+  async function handleExport() {
     try {
       setExporting(true);
       const res = await adminApi.exportFinancialReport();

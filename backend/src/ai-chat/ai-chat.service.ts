@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { GoogleGenAI } from '@google/genai';
 
 @Injectable()
@@ -131,10 +132,11 @@ export class AiChatService {
       });
 
       return aiMessage;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Gemini API Error:', error);
+      const err = error as { message?: string };
       throw new InternalServerErrorException(
-        `Lỗi AI: ${error.message || 'Không xác định'}`,
+        `Lỗi AI: ${err.message || 'Không xác định'}`,
       );
     }
   }
@@ -153,7 +155,11 @@ export class AiChatService {
     });
   }
 
-  async updateSessionContext(sessionId: string, userId: string, context: any) {
+  async updateSessionContext(
+    sessionId: string,
+    userId: string,
+    context: unknown,
+  ) {
     const session = await this.prisma.ai_chat_sessions.findUnique({
       where: { id: sessionId },
     });
@@ -164,7 +170,7 @@ export class AiChatService {
 
     return this.prisma.ai_chat_sessions.update({
       where: { id: sessionId },
-      data: { context },
+      data: { context: context as Prisma.InputJsonValue },
     });
   }
 
@@ -186,7 +192,7 @@ QUY TẮC QUAN TRỌNG:
     let roleSpecificPrompt = '';
 
     switch (role) {
-      case 'SYSTEM_ADMIN':
+      case 'SYSTEM_ADMIN': {
         const adminContext = await this.fetchAdminContext();
         roleSpecificPrompt = `BẠN ĐANG HỖ TRỢ QUẢN TRỊ VIÊN. 
 PHONG CÁCH: Ngắn gọn, số liệu chính xác, chuyên nghiệp. Không dùng emoji.
@@ -206,8 +212,9 @@ ${adminContext.verifications}
 
 Nhiệm vụ: Cung cấp thông tin nhanh để Admin ra quyết định. Nếu không có gì gấp, hãy tóm tắt ngắn gọn tình hình.`;
         break;
+      }
 
-      case 'GUIDE':
+      case 'GUIDE': {
         const guideContext = await this.fetchGuideContext(userId);
         const publicContext = await this.fetchUserContext();
         roleSpecificPrompt = `BẠN ĐANG HỖ TRỢ HƯỚNG DẪN VIÊN. 🤝
@@ -229,8 +236,10 @@ ${publicContext.companions}
 
 Nhiệm vụ: Giúp Guide nắm bắt lịch trình cá nhân VÀ các bài đăng tìm bạn của khách hàng. Nếu khách hỏi về bài đăng tìm bạn, hãy sử dụng danh sách trên.`;
         break;
+      }
 
-      default: // user
+      default: {
+        // user
         const userContext = await this.fetchUserContext();
         roleSpecificPrompt = `BẠN ĐANG HỖ TRỢ KHÁCH DU LỊCH. ✈️🏖️
 PHONG CÁCH: Truyền cảm hứng, nhiệt tình, tư vấn chuyên sâu. Sử dụng emoji phù hợp.
@@ -243,6 +252,7 @@ ${userContext.companions}
 
 Nhiệm vụ: Giúp người dùng lên kế hoạch chuyến đi. Nếu họ hỏi về một nơi, hãy giới thiệu các Tour hoặc Bạn đồng hành liên quan từ danh sách trên.`;
         break;
+      }
     }
 
     return basePrompt + roleSpecificPrompt;

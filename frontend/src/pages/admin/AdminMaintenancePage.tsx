@@ -9,7 +9,7 @@ export function AdminMaintenancePage() {
   const [error, setError] = useState<string | null>(null);
   const [newIp, setNewIp] = useState('');
 
-  const fetchStatus = async () => {
+  async function fetchStatus() {
     try {
       setLoading(true);
       setError(null);
@@ -29,7 +29,7 @@ export function AdminMaintenancePage() {
     fetchStatus();
   }, []);
 
-  const handleToggle = async () => {
+  async function handleToggle() {
     if (!maintenance) return;
     try {
       setSaving(true);
@@ -46,7 +46,7 @@ export function AdminMaintenancePage() {
     }
   };
 
-  const handleAddIp = async (e: React.FormEvent) => {
+  async function handleAddIp(e: React.FormEvent) {
     e.preventDefault();
     if (!maintenance || !newIp.trim()) return;
     const ip = newIp.trim();
@@ -71,7 +71,7 @@ export function AdminMaintenancePage() {
     }
   };
 
-  const handleRemoveIp = async (ipToRemove: string) => {
+  async function handleRemoveIp(ipToRemove: string) {
     if (!maintenance) return;
     const updatedIps = maintenance.bypassIps.filter(ip => ip !== ipToRemove);
     try {

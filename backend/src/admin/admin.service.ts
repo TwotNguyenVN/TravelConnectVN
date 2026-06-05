@@ -4,6 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { SupabaseService } from '../supabase/supabase.service';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
@@ -161,8 +162,9 @@ export class AdminService {
     sevenDaysAgo.setHours(0, 0, 0, 0);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6); // Total 7 days including today
 
-    const dailyRevenue: any[] = await this.prisma.$queryRaw`
-      SELECT 
+    const dailyRevenue = await this.prisma.$queryRaw<
+      Array<{ date: Date | string; total: unknown }>
+    >`SELECT 
         DATE(paid_at) as date, 
         SUM(amount) as total 
       FROM payment_transactions 
@@ -172,14 +174,14 @@ export class AdminService {
     `;
 
     // Map existing data for quick lookup
-    const revenueMap = new Map();
+    const revenueMap = new Map<string, number>();
     dailyRevenue.forEach((d) => {
       const dateStr = new Date(d.date).toLocaleDateString('vi-VN');
       revenueMap.set(dateStr, Number(d.total));
     });
 
     // Fill in all 7 days
-    const daily: any[] = [];
+    const daily: Array<{ date: string; amount: number }> = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(sevenDaysAgo);
       date.setDate(sevenDaysAgo.getDate() + i);
@@ -204,7 +206,7 @@ export class AdminService {
   }) {
     const { skip, take, role, status, search } = params;
 
-    const where: any = {};
+    const where: Prisma.public_usersWhereInput = {};
     if (status) where.status = status;
     if (role) {
       where.user_roles_user_roles_user_idTousers = {
@@ -257,7 +259,7 @@ export class AdminService {
         entity_type: 'users',
         entity_pk: id,
         action_type:
-          dto.status === 'locked' ? 'lock_account' : 'unlock_account',
+          String(dto.status) === 'locked' ? 'lock_account' : 'unlock_account',
         reason: dto.reason,
         old_data: { status: user.status },
         new_data: { status: dto.status },
@@ -391,7 +393,7 @@ export class AdminService {
     targetType?: string;
   }) {
     const { skip, take, status, targetType } = params;
-    const where: any = {};
+    const where: Prisma.reportsWhereInput = {};
     if (status) where.status = status;
     if (targetType) where.target_type = targetType;
 
@@ -560,7 +562,7 @@ export class AdminService {
     search?: string;
   }) {
     const { skip, take, status, visibility, search } = params;
-    const where: any = { deleted_at: null };
+    const where: Prisma.toursWhereInput = { deleted_at: null };
     if (status) where.business_status = status;
     if (visibility) where.visibility_status = visibility;
     if (search) {
@@ -594,7 +596,7 @@ export class AdminService {
     search?: string;
   }) {
     const { skip, take, visibility, search } = params;
-    const where: any = { deleted_at: null };
+    const where: Prisma.companion_postsWhereInput = { deleted_at: null };
     if (visibility) where.visibility_status = visibility;
     if (search) {
       where.title = { contains: search, mode: 'insensitive' };
@@ -688,7 +690,7 @@ export class AdminService {
     module?: string;
   }) {
     const { skip, take, module } = params;
-    const where: any = {};
+    const where: Prisma.admin_activity_logsWhereInput = {};
     if (module) where.module_name = module;
 
     const [items, total] = await Promise.all([
@@ -715,7 +717,7 @@ export class AdminService {
     search?: string;
   }) {
     const { skip, take, status, search } = params;
-    const where: any = {};
+    const where: Prisma.payment_transactionsWhereInput = {};
 
     if (status && status !== 'all') {
       where.status = status;
@@ -1205,7 +1207,7 @@ export class AdminService {
             targetRole,
             targetUserId,
             total_recipients: targetUserIds.length,
-          } as any,
+          } as Prisma.InputJsonValue,
         },
       });
     });
@@ -1253,7 +1255,11 @@ If no issues are found, flagged should be false, reason should be "No issues det
         .replace(/```json/g, '')
         .replace(/```/g, '')
         .trim();
-      const parsed = JSON.parse(cleanJson);
+      const parsed = JSON.parse(cleanJson) as {
+        flagged: boolean;
+        reason: string;
+        highlights: Array<{ text: string; type: string; explanation: string }>;
+      };
       return parsed;
     } catch (error) {
       console.error('Gemini Moderation Error, falling back to regex:', error);
@@ -1264,7 +1270,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
       }> = [];
 
       const phoneRegex = /(?:\+?84|0)(?:\s*\d){9,10}/g;
-      let match;
+      let match: RegExpExecArray | null;
       while ((match = phoneRegex.exec(text)) !== null) {
         highlights.push({
           text: match[0],
@@ -1723,6 +1729,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
 
   // Phase 10: Smart Reconciliation
   async reconcileTransactions(fileBuffer: Buffer) {
+    void fileBuffer;
     // In a real scenario, we would parse the CSV buffer
     // and match with our database transactions.
     // Here we provide a mock logic.
@@ -1801,7 +1808,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
     const rows = transactions
       .map(
         (t) =>
-          `${t.id},${t.created_at?.toISOString() || ''},${t.payment_method || ''},${t.amount || 0},${t.status},""`,
+          `${t.id},${t.created_at?.toISOString() || ''},${t.payment_method || ''},${t.amount?.toString() || 0},${t.status},""`,
       )
       .join('\n');
 

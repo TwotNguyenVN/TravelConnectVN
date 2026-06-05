@@ -23,7 +23,7 @@ export const AdminReviewManagementPage: React.FC = () => {
   const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
-  const fetchReviews = async () => {
+  async function fetchReviews() {
     try {
       setLoading(true);
       const response = await reviewService.getAllReviewsAdmin();
@@ -42,7 +42,7 @@ export const AdminReviewManagementPage: React.FC = () => {
     }
   };
 
-  const handleAiScan = async (review: ReviewItem) => {
+  async function handleAiScan(review: ReviewItem) {
     try {
       setScanningReviewId(review.id);
       const textToAnalyze = `Đánh giá của ${review.userName} cho ${review.targetName} (${review.rating} sao): ${review.comment}`;
@@ -67,7 +67,7 @@ export const AdminReviewManagementPage: React.FC = () => {
     fetchReviews();
   }, []);
 
-  const handleToggleVisibility = async (review: ReviewItem) => {
+  async function handleToggleVisibility(review: ReviewItem) {
     try {
       const newStatus = review.visibilityStatus === 'visible' ? 'hidden' : 'visible';
       await reviewService.updateReviewVisibility(review.type as any, review.id, newStatus);

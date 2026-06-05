@@ -1,4 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -30,10 +31,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import {
-  MaintenanceService,
-  MaintenanceGuard,
-} from './common/guards/maintenance.guard';
+import { MaintenanceGuard } from './common/guards/maintenance.guard';
+import { MaintenanceModule } from './common/maintenance.module';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
@@ -44,6 +43,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -53,7 +53,7 @@ import { redisStore } from 'cache-manager-redis-yet';
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         connection: {
           host: configService.get('REDIS_HOST', 'localhost'),
           port: configService.get('REDIS_PORT', 6379),
@@ -115,11 +115,12 @@ import { redisStore } from 'cache-manager-redis-yet';
     TicketsModule,
     DisputesModule,
     MailModule,
+    MaintenanceModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    MaintenanceService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
@@ -133,7 +134,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply((req, res, next) => {
+      .apply((req: Request, res: Response, next: NextFunction) => {
         const { method, originalUrl } = req;
         const start = Date.now();
         res.on('finish', () => {

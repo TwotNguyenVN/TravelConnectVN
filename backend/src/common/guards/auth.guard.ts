@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -15,7 +16,9 @@ export class AuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: unknown }>();
     const authHeader = request.headers.authorization;
     console.log(
       'DEBUG - AuthGuard: Received Authorization header:',
@@ -56,15 +59,16 @@ export class AuthGuard implements CanActivate {
       );
 
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('DEBUG - AuthGuard Error:', error);
-      if (error.code === 'P2021') {
+      const err = error as { code?: string; message?: string };
+      if (err.code === 'P2021') {
         throw new UnauthorizedException(
           'Database table not found. Please contact admin.',
         );
       }
       throw new UnauthorizedException(
-        `Authentication failed: ${error.message || 'Invalid or expired token'}`,
+        `Authentication failed: ${err.message || 'Invalid or expired token'}`,
       );
     }
   }

@@ -22,7 +22,7 @@ export const VerifyOtpPage: React.FC = () => {
     setEmail(storedEmail);
   }, [navigate]);
 
-  const handleVerifyOTP = async (e: React.FormEvent) => {
+  async function handleVerifyOTP(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
     setIsLoading(true);

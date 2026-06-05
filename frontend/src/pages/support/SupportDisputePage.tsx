@@ -93,7 +93,7 @@ export const SupportDisputePage: React.FC = () => {
     fetchDisputes();
   }, [fetchDisputes]);
 
-  const handleOpenDispute = async (dispute: TourDispute) => {
+  async function handleOpenDispute(dispute: TourDispute) {
     setSelectedDispute(dispute);
     setResolution(dispute.resolution_note || '');
     setRefundAmount(dispute.refund_amount || 0);
@@ -115,7 +115,7 @@ export const SupportDisputePage: React.FC = () => {
     }
   };
 
-  const handleResolve = async () => {
+  async function handleResolve() {
     if (!selectedDispute) return;
     if (!resolution.trim()) {
       toast.error('Vui lòng nhập phán quyết tranh chấp');

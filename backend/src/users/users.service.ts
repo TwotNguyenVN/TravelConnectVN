@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SupabaseService } from '../supabase/supabase.service';
-
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -28,7 +29,7 @@ export class UsersService {
       });
       if (!user) throw new NotFoundException('User profile not found');
       return user;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('DEBUG - Error in UsersService.findOne:', error);
       throw error;
     }
@@ -132,7 +133,7 @@ export class UsersService {
     };
   }
 
-  async update(id: string, data: any) {
+  async update(id: string, data: UpdateProfileDto) {
     try {
       // 1. Kiểm tra sự tồn tại của người dùng và lấy dữ liệu hiện tại
       const currentUser = await this.prisma.public_users.findUnique({
@@ -145,7 +146,7 @@ export class UsersService {
       }
 
       // 2. Validate và chuẩn hóa dữ liệu
-      const updateData: any = {
+      const updateData: Prisma.public_usersUncheckedUpdateInput = {
         updated_at: new Date(),
       };
 
@@ -277,10 +278,10 @@ export class UsersService {
       }
 
       // 5. Đồng bộ Metadata & Logging (Chạy background để không làm chậm response)
-      this.syncAndLog(id, data);
+      await this.syncAndLog(id, data);
 
       return updatedUser;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('ERROR - UsersService.update:', error);
       if (
         error instanceof BadRequestException ||
@@ -289,7 +290,10 @@ export class UsersService {
         throw error;
       }
       // Xử lý lỗi Unique constraint từ Prisma nếu lọt qua bước validate
-      if (error.code === 'P2002') {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
         throw new BadRequestException(
           'Dữ liệu (số điện thoại hoặc email) đã tồn tại trong hệ thống',
         );
@@ -301,7 +305,7 @@ export class UsersService {
   }
 
   // Phương thức phụ để đồng bộ metadata và ghi log
-  private async syncAndLog(id: string, data: any) {
+  private async syncAndLog(id: string, data: UpdateProfileDto) {
     try {
       // Sync to Supabase Auth
       if (data.fullName || data.avatarUrl) {
@@ -319,7 +323,7 @@ export class UsersService {
       await this.activityLogsService.log(id, 'profile.updated', 'PROFILE', id, {
         updated_fields: Object.keys(data).filter((k) => data[k] !== undefined),
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error('Failed to sync/log profile update:', err);
     }
   }
@@ -332,7 +336,7 @@ export class UsersService {
     return roles.map((r) => r.role_code);
   }
 
-  async updateAvatar(id: string, file: any) {
+  async updateAvatar(id: string, file: Express.Multer.File) {
     console.log('DEBUG - UsersService.updateAvatar started for user:', id);
 
     // 1. Tìm thông tin avatar cũ để xóa
@@ -349,10 +353,10 @@ export class UsersService {
         );
         await this.supabaseService.deleteAvatar(currentUser.avatar_url);
       }
-    } catch (findError) {
+    } catch (findError: unknown) {
       console.warn(
         'Could not find user for old avatar cleanup, skipping deletion:',
-        findError.message,
+        findError instanceof Error ? findError.message : 'Unknown error',
       );
     }
 
@@ -360,7 +364,7 @@ export class UsersService {
     try {
       avatarUrl = await this.supabaseService.uploadAvatar(id, file);
       console.log('DEBUG - Successfully uploaded to storage. URL:', avatarUrl);
-    } catch (uploadError) {
+    } catch (uploadError: unknown) {
       console.error('DEBUG - Upload to storage failed:', uploadError);
       throw uploadError;
     }
@@ -392,7 +396,7 @@ export class UsersService {
           'Skipping Auth Metadata sync: SUPABASE_SERVICE_ROLE_KEY is missing',
         );
       }
-    } catch (authError) {
+    } catch (authError: unknown) {
       console.error('Failed to sync avatar to Supabase Auth:', authError);
     }
 

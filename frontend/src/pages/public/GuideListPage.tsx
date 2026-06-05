@@ -21,7 +21,7 @@ const GuideListPage: React.FC = () => {
     fetchGuides();
   }, [filters.page, filters.workingArea]);
 
-  const fetchGuides = async () => {
+  async function fetchGuides() {
     try {
       setLoading(true);
       const res = await guideService.getPublicGuides(filters);
@@ -36,13 +36,13 @@ const GuideListPage: React.FC = () => {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     setFilters(prev => ({ ...prev, page: 1 }));
     fetchGuides();
   };
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleFilterChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };

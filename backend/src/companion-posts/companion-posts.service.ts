@@ -4,6 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { CreateCompanionPostDto } from './dto/create-companion-post.dto';
 import { UpdateCompanionPostDto } from './dto/update-companion-post.dto';
 import { CompanionPostQueryDto } from './dto/companion-post-query.dto';
@@ -27,7 +28,7 @@ export class CompanionPostsService {
 
   async getPublicCompanionPosts(
     query: CompanionPostQueryDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const {
       destination,
       startDateFrom,
@@ -41,7 +42,7 @@ export class CompanionPostsService {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    const where: any = {
+    const where: Prisma.companion_postsWhereInput = {
       deleted_at: null,
     };
 
@@ -103,7 +104,7 @@ export class CompanionPostsService {
     };
   }
 
-  async getCompanionPostDetail(id: string): Promise<ApiResponse<any>> {
+  async getCompanionPostDetail(id: string): Promise<ApiResponse<unknown>> {
     const post = await this.prisma.companion_posts.findFirst({
       where: { id, deleted_at: null },
       include: {
@@ -176,7 +177,7 @@ export class CompanionPostsService {
   async createCompanionPost(
     userId: string,
     data: CreateCompanionPostDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const post = await this.prisma.companion_posts.create({
       data: {
         user_id: userId,
@@ -215,7 +216,7 @@ export class CompanionPostsService {
     userId: string,
     id: string,
     data: UpdateCompanionPostDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const post = await this.prisma.companion_posts.findUnique({
       where: { id },
     });
@@ -246,7 +247,7 @@ export class CompanionPostsService {
         visibility_status: data.visibilityStatus,
         images: data.images,
         updated_at: new Date(),
-      } as any,
+      },
     });
 
     // 3. Ghi log hoạt động
@@ -268,7 +269,7 @@ export class CompanionPostsService {
   async softDeleteCompanionPost(
     userId: string,
     id: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const post = await this.prisma.companion_posts.findUnique({
       where: { id },
     });
@@ -298,13 +299,13 @@ export class CompanionPostsService {
 
   async getMyCompanionPosts(
     userId: string,
-    query: any,
-  ): Promise<ApiResponse<any>> {
+    query: { page?: string; limit?: string; status?: string; keyword?: string },
+  ): Promise<ApiResponse<unknown>> {
     const { page = '1', limit = '10', status, keyword } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    const where: any = {
+    const where: Prisma.companion_postsWhereInput = {
       user_id: userId,
       deleted_at: null,
     };
@@ -361,7 +362,7 @@ export class CompanionPostsService {
   async sendJoinRequest(
     userId: string,
     data: CreateCompanionRequestDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const { postId, message } = data;
 
     // 1. Check if post exists and is open
@@ -442,13 +443,13 @@ export class CompanionPostsService {
 
   async getMySentRequests(
     userId: string,
-    query: any,
-  ): Promise<ApiResponse<any>> {
+    query: { page?: string; limit?: string; status?: string },
+  ): Promise<ApiResponse<unknown>> {
     const { page = '1', limit = '10', status } = query;
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    const where: any = {
+    const where: Prisma.companion_requestsWhereInput = {
       user_id: userId,
     };
 
@@ -498,8 +499,8 @@ export class CompanionPostsService {
   async getPostRequests(
     userId: string,
     postId: string,
-    query: any,
-  ): Promise<ApiResponse<any>> {
+    query: { page?: string; limit?: string; status?: string },
+  ): Promise<ApiResponse<unknown>> {
     // 1. Check if post exists and user is owner
     const post = await this.prisma.companion_posts.findUnique({
       where: { id: postId },
@@ -519,7 +520,7 @@ export class CompanionPostsService {
     const skip = (Number(page) - 1) * Number(limit);
     const take = Number(limit);
 
-    const where: any = {
+    const where: Prisma.companion_requestsWhereInput = {
       post_id: postId,
     };
 
@@ -564,7 +565,7 @@ export class CompanionPostsService {
   async cancelJoinRequest(
     userId: string,
     requestId: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
     });
@@ -602,7 +603,7 @@ export class CompanionPostsService {
     userId: string,
     requestId: string,
     data: ProcessCompanionRequestDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
       include: { companion_posts: true },
@@ -738,7 +739,7 @@ export class CompanionPostsService {
     userId: string,
     requestId: string,
     data: ProcessCompanionRequestDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const request = await this.prisma.companion_requests.findUnique({
       where: { id: requestId },
       include: { companion_posts: true },
@@ -778,7 +779,7 @@ export class CompanionPostsService {
   async getMyRequestForPost(
     userId: string,
     postId: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const request = await this.prisma.companion_requests.findFirst({
       where: { post_id: postId, user_id: userId },
       orderBy: { requested_at: 'desc' },

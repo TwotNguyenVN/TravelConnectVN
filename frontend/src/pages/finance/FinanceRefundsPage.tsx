@@ -11,7 +11,7 @@ export const FinanceRefundsPage: React.FC = () => {
   const [note, setNote] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
 
-  const fetchRefunds = async () => {
+  async function fetchRefunds() {
     try {
       setLoading(true);
       const res = await adminApi.getPendingRefunds();
@@ -30,13 +30,13 @@ export const FinanceRefundsPage: React.FC = () => {
     fetchRefunds();
   }, []);
 
-  const handleProcessRefund = async (id: string, action: 'approve' | 'reject') => {
+  async function handleProcessRefund(id: string, action: 'approve' | 'reject') {
     setProcessingId(id);
     setActionType(action);
     setNote('');
   };
 
-  const submitProcess = async () => {
+  async function submitProcess() {
     if (!processingId || !actionType) return;
     try {
       const res = await adminApi.processRefund(processingId, { action: actionType, note });

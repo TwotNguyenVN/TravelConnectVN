@@ -19,7 +19,7 @@ export const AdminReportManagementPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  const fetchReports = async () => {
+  async function fetchReports() {
     try {
       setLoading(true);
       const response = await adminApi.getReports({ take: 50 });
@@ -35,7 +35,7 @@ export const AdminReportManagementPage: React.FC = () => {
     fetchReports();
   }, []);
 
-  const handleProcess = async (reportId: string, action: 'resolved' | 'rejected') => {
+  async function handleProcess(reportId: string, action: 'resolved' | 'rejected') {
     const actionLabel = action === 'resolved' ? 'GIẢI QUYẾT' : 'BÁC BỎ';
     const note = window.prompt(`Nhập ghi chú xử lý (${actionLabel}):`);
     if (note === null) return;
