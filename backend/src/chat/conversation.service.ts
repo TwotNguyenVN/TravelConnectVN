@@ -7,6 +7,11 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { SocketGateway } from '../socket/socket.gateway';
 
+interface CompanionPostImage {
+  imageUrl: string;
+  isCover?: boolean;
+}
+
 @Injectable()
 export class ConversationService {
   constructor(
@@ -107,9 +112,10 @@ export class ConversationService {
         relatedTourId: conv.related_tour_id,
         companionPost: conv.companion_posts
           ? (() => {
-              const images = (conv.companion_posts.images as any[]) || [];
-              const coverImg =
-                images.find((img: any) => img.isCover) || images[0];
+              const images =
+                (conv.companion_posts
+                  .images as unknown as CompanionPostImage[]) || [];
+              const coverImg = images.find((img) => img.isCover) || images[0];
               return {
                 id: conv.companion_posts.id,
                 title: conv.companion_posts.title,
@@ -186,7 +192,7 @@ export class ConversationService {
       guideUserId,
     );
     if (existing) {
-      return this.enrichConversation(existing.id, currentUserId);
+      return this.enrichConversation(existing.id);
     }
 
     // Tạo mới
@@ -201,7 +207,7 @@ export class ConversationService {
       },
     });
 
-    return this.enrichConversation(conversation.id, currentUserId);
+    return this.enrichConversation(conversation.id);
   }
 
   /**
@@ -287,7 +293,7 @@ export class ConversationService {
         }
       }
 
-      return this.enrichConversation(existingConvId, currentUserId);
+      return this.enrichConversation(existingConvId);
     }
 
     // Tập hợp participants: chủ bài + approved members
@@ -306,7 +312,7 @@ export class ConversationService {
       },
     });
 
-    return this.enrichConversation(conversation.id, currentUserId);
+    return this.enrichConversation(conversation.id);
   }
 
   /**
@@ -376,14 +382,15 @@ export class ConversationService {
     });
 
     // Phát sự kiện message_read cho các thành viên khác
-    const otherParticipants = await this.prisma.conversation_participants.findMany({
-      where: {
-        conversation_id: conversationId,
-        user_id: { not: userId },
-        left_at: null,
-      },
-      select: { user_id: true },
-    });
+    const otherParticipants =
+      await this.prisma.conversation_participants.findMany({
+        where: {
+          conversation_id: conversationId,
+          user_id: { not: userId },
+          left_at: null,
+        },
+        select: { user_id: true },
+      });
 
     for (const p of otherParticipants) {
       this.socketGateway.sendToUser(p.user_id, 'message_read', {
@@ -438,7 +445,7 @@ export class ConversationService {
       ),
     );
 
-    let totalUnread = unreadCounts.reduce((sum, count) => sum + count, 0);
+    const totalUnread = unreadCounts.reduce((sum, count) => sum + count, 0);
 
     return totalUnread;
   }
@@ -468,10 +475,7 @@ export class ConversationService {
     return matched;
   }
 
-  private async enrichConversation(
-    conversationId: string,
-    currentUserId: string,
-  ) {
+  private async enrichConversation(conversationId: string) {
     const conv = await this.prisma.conversations.findUnique({
       where: { id: conversationId },
       include: {
@@ -509,9 +513,10 @@ export class ConversationService {
       relatedTourId: conv.related_tour_id,
       companionPost: conv.companion_posts
         ? (() => {
-            const images = (conv.companion_posts.images as any[]) || [];
-            const coverImg =
-              images.find((img: any) => img.isCover) || images[0];
+            const images =
+              (conv.companion_posts
+                .images as unknown as CompanionPostImage[]) || [];
+            const coverImg = images.find((img) => img.isCover) || images[0];
             return {
               id: conv.companion_posts.id,
               title: conv.companion_posts.title,
@@ -525,7 +530,7 @@ export class ConversationService {
         fullName: p.users.full_name,
         avatarUrl: p.users.avatar_url,
         lastSeenAt: p.users.last_seen_at,
-        guideProfileId: (p.users as any).guide_profiles?.id || null,
+        guideProfileId: p.users.guide_profiles?.id || null,
         joinedAt: p.joined_at,
       })),
       lastMessage: conv.messages[0] ?? null,

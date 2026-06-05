@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { SocketGateway } from '../socket/socket.gateway';
 import { MailService } from '../mail/mail.service';
-import PDFDocument = require('pdfkit');
+import PDFDocument from 'pdfkit';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
@@ -23,18 +23,20 @@ export class PaymentsService {
     @InjectQueue('mailQueue') private mailQueue: Queue,
   ) {}
 
-  private sortObject(obj: any): any {
+  private sortObject(obj: Record<string, any>): Record<string, string> {
     const sorted: Record<string, string> = {};
     const str: string[] = [];
-    let key;
-    for (key in obj) {
+    for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         str.push(encodeURIComponent(key));
       }
     }
     str.sort();
-    for (key = 0; key < str.length; key++) {
-      sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
+    for (let i = 0; i < str.length; i++) {
+      sorted[str[i]] = encodeURIComponent(String(obj[str[i]])).replace(
+        /%20/g,
+        '+',
+      );
     }
     return sorted;
   }
@@ -151,7 +153,7 @@ export class PaymentsService {
         ('0' + date.getMinutes()).slice(-2) +
         ('0' + date.getSeconds()).slice(-2);
 
-      let vnp_Params: any = {};
+      let vnp_Params: Record<string, string | number> = {};
       vnp_Params['vnp_Version'] = '2.1.0';
       vnp_Params['vnp_Command'] = 'pay';
       vnp_Params['vnp_TmnCode'] = tmnCode;
@@ -168,7 +170,7 @@ export class PaymentsService {
       vnp_Params = this.sortObject(vnp_Params);
       let signData = '';
       for (const key in vnp_Params) {
-        if (vnp_Params.hasOwnProperty(key)) {
+        if (Object.prototype.hasOwnProperty.call(vnp_Params, key)) {
           signData += key + '=' + vnp_Params[key] + '&';
         }
       }
@@ -193,7 +195,7 @@ export class PaymentsService {
   }
 
   // 2. IPN Listener (Dùng để VNPAY gọi về báo kết quả ngầm)
-  async vnpayIpn(vnp_Params: any) {
+  async vnpayIpn(vnp_Params: Record<string, string | number>) {
     try {
       console.log('IPN Params:', vnp_Params);
       const secureHash = vnp_Params['vnp_SecureHash'];
@@ -382,11 +384,11 @@ export class PaymentsService {
       } else {
         return { RspCode: '97', Message: 'Invalid Checksum' };
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('IPN Error:', error);
       return {
         RspCode: '99',
-        Message: error?.message || 'Unknown error',
+        Message: error instanceof Error ? error.message : 'Unknown error',
         ReceivedParams: vnp_Params,
       };
     }
@@ -611,7 +613,7 @@ export class PaymentsService {
         const doc = new PDFDocument({ margin: 50 });
         const buffers: Buffer[] = [];
 
-        doc.on('data', buffers.push.bind(buffers));
+        doc.on('data', (chunk: Buffer) => buffers.push(chunk));
         doc.on('end', () => resolve(Buffer.concat(buffers)));
 
         // Header
@@ -675,7 +677,7 @@ export class PaymentsService {
 
         doc.end();
       } catch (err) {
-        reject(err);
+        reject(err instanceof Error ? err : new Error(String(err)));
       }
     });
   }

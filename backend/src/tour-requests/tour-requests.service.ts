@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { tour_schedules } from '@prisma/client';
 import { CreateTourRequestDto } from './dto/create-tour-request.dto';
 import { TourRequestQueryDto } from './dto/tour-request-query.dto';
 import {
@@ -79,7 +80,7 @@ export class TourRequestsService {
 
     // 3. Kiểm tra số lượng chỗ còn lại
     let maxParticipants = tour.max_participants;
-    let schedule: any = null;
+    let schedule: tour_schedules | null = null;
 
     if (scheduleId) {
       schedule = await this.prisma.tour_schedules.findUnique({
@@ -143,7 +144,9 @@ export class TourRequestsService {
     const { status, tourId, page = 1, limit = 10 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = { user_id: userId };
+    const where: { user_id: string; status?: string; tour_id?: string } = {
+      user_id: userId,
+    };
     if (status) where.status = status;
     if (tourId) where.tour_id = tourId;
 
@@ -250,7 +253,12 @@ export class TourRequestsService {
       throw new ForbiddenException('Bạn không phải là hướng dẫn viên');
     }
 
-    const where: any = {
+    const where: {
+      tours: { guide_profile_id: string };
+      status?: string;
+      tour_id?: string;
+      schedule_id?: string;
+    } = {
       tours: {
         guide_profile_id: guideProfile.id,
       },

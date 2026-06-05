@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ToursService } from './tours.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 
@@ -10,7 +11,6 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
  */
 describe('ToursService', () => {
   let service: ToursService;
-  let prisma: PrismaService;
 
   // Mock PrismaService — không kết nối DB thật
   const mockPrismaService = {
@@ -61,10 +61,14 @@ describe('ToursService', () => {
     }).compile();
 
     service = module.get<ToursService>(ToursService);
-    prisma = module.get<PrismaService>(PrismaService);
 
     // Mock private validation check
-    jest.spyOn(service as any, 'isGuideProfileComplete').mockReturnValue(true);
+    jest
+      .spyOn(
+        service as unknown as { isGuideProfileComplete: () => boolean },
+        'isGuideProfileComplete',
+      )
+      .mockReturnValue(true);
 
     // Reset mocks
     jest.clearAllMocks();
@@ -184,7 +188,7 @@ describe('ToursService', () => {
       expect(result).toHaveProperty('guide');
       expect(mockPrismaService.tours.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ id: 'tour-1' }),
+          where: { id: 'tour-1' },
         }),
       );
     });
@@ -249,10 +253,14 @@ describe('ToursService', () => {
 
       mockPrismaService.tour_schedules.findFirst.mockResolvedValue(null);
       mockPrismaService.tour_schedules.create.mockImplementation(
-        ({ data }) => ({
-          id: 'sched-1',
-          ...data,
-        }),
+        (args: { data: Record<string, unknown> }) => {
+          return {
+            id: 'sched-1',
+            ...args.data,
+          } as unknown as Prisma.tour_schedulesGetPayload<
+            Record<string, never>
+          >;
+        },
       );
 
       const res = await service.createTourSchedule(userId, tourId, {

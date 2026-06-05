@@ -137,6 +137,7 @@ describe('ReviewsService', () => {
 
       expect(result).toEqual(mockReview);
       expect(mockPrismaService.tour_reviews.create).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data: expect.objectContaining({
           tour_id: 'tour-1',
           user_id: userId,

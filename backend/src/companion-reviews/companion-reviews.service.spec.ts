@@ -177,6 +177,7 @@ describe('CompanionReviewsService', () => {
 
       expect(result).toEqual(mockReview);
       expect(mockPrismaService.companion_reviews.create).toHaveBeenCalledWith({
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data: expect.objectContaining({
           post_id: 'post-1',
           request_id: 'req-1',

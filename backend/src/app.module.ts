@@ -1,4 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -54,7 +55,7 @@ import { MetricsModule } from './metrics/metrics.module';
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         connection: {
           host: configService.get('REDIS_HOST', 'localhost'),
           port: configService.get('REDIS_PORT', 6379),
@@ -135,7 +136,7 @@ import { MetricsModule } from './metrics/metrics.module';
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply((req, res, next) => {
+      .apply((req: Request, res: Response, next: NextFunction) => {
         const { method, originalUrl } = req;
         const start = Date.now();
         res.on('finish', () => {

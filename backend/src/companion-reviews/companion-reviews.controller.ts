@@ -13,6 +13,12 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { CompanionReviewsService } from './companion-reviews.service';
 import { CreateCompanionReviewDto } from './dto/create-companion-review.dto';
 
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
+
 @ApiTags('companion-reviews')
 @Controller('companion-reviews')
 export class CompanionReviewsController {
@@ -24,7 +30,10 @@ export class CompanionReviewsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a companion review' })
-  async create(@Request() req, @Body() dto: CreateCompanionReviewDto) {
+  async create(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreateCompanionReviewDto,
+  ) {
     const userId = req.user.id;
     return this.companionReviewsService.create(userId, dto);
   }

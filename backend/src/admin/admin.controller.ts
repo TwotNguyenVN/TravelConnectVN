@@ -12,6 +12,14 @@ import {
   UseInterceptors,
   Req,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    role: string;
+  };
+}
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AdminService } from './admin.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -92,7 +100,7 @@ export class AdminController {
   updateUserStatus(
     @Param('id') id: string,
     @Body() dto: UpdateUserStatusDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.updateUserStatus(id, dto, req.user.id);
   }
@@ -102,7 +110,7 @@ export class AdminController {
   assignRole(
     @Param('id') id: string,
     @Body() dto: AssignRoleDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.assignRole(id, dto, req.user.id);
   }
@@ -112,14 +120,14 @@ export class AdminController {
   revokeRole(
     @Param('id') id: string,
     @Param('role') role: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.revokeRole(id, role, req.user.id);
   }
 
   @Post('staff')
   @Roles(Role.SYSTEM_ADMIN)
-  createStaff(@Body() dto: CreateStaffDto, @Req() req: any) {
+  createStaff(@Body() dto: CreateStaffDto, @Req() req: AuthenticatedRequest) {
     return this.adminService.createStaff(dto, req.user.id);
   }
 
@@ -145,7 +153,7 @@ export class AdminController {
   processReport(
     @Param('id') id: string,
     @Body() dto: ProcessReportDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.processReport(id, dto, req.user.id);
   }
@@ -156,7 +164,7 @@ export class AdminController {
   moderateTour(
     @Param('id') id: string,
     @Body() dto: ModerationDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.moderateTour(id, dto, req.user.id);
   }
@@ -166,7 +174,7 @@ export class AdminController {
   moderateCompanionPost(
     @Param('id') id: string,
     @Body() dto: ModerationDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.moderateCompanionPost(id, dto, req.user.id);
   }
@@ -223,7 +231,7 @@ export class AdminController {
   processVerification(
     @Param('id') id: string,
     @Body() dto: ProcessVerificationDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.processVerification(id, dto, req.user.id);
   }
@@ -265,7 +273,7 @@ export class AdminController {
   updateTransactionStatus(
     @Param('id') id: string,
     @Body() dto: UpdateTransactionStatusDto,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.updateTransactionStatus(
       id,
@@ -299,7 +307,10 @@ export class AdminController {
 
   @Post('guides/:id/settle')
   @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
-  settleGuideTransactions(@Param('id') id: string, @Req() req: any) {
+  settleGuideTransactions(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.adminService.settleGuideTransactions(id, req.user.id);
   }
 
@@ -313,7 +324,7 @@ export class AdminController {
       targetRole?: string;
       targetUserId?: string;
     },
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.sendBroadcastNotification(dto, req.user.id);
   }
@@ -330,7 +341,7 @@ export class AdminController {
   restoreDeletedItem(
     @Param('type') type: string,
     @Param('id') id: string,
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.restoreDeletedItem(type, id, req.user.id);
   }
@@ -344,7 +355,10 @@ export class AdminController {
 
   @Post('settings/maintenance')
   @Roles(Role.SYSTEM_ADMIN)
-  toggleMaintenance(@Body() dto: { enabled: boolean }, @Req() req: any) {
+  toggleMaintenance(
+    @Body() dto: { enabled: boolean },
+    @Req() req: AuthenticatedRequest,
+  ) {
     return this.maintenanceService.toggle(dto.enabled, req.user.id);
   }
 
@@ -373,7 +387,7 @@ export class AdminController {
   @Roles(Role.SYSTEM_ADMIN, Role.SUPPORT_STAFF)
   createFaqItem(
     @Body() dto: { question: string; answer: string; category?: string },
-    @Req() req: any,
+    @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.createFaqItem(dto, req.user.id);
   }
@@ -404,7 +418,7 @@ export class AdminController {
   @Post('finance/reconcile')
   @Roles(Role.SYSTEM_ADMIN, Role.ACCOUNTANT)
   @UseInterceptors(FileInterceptor('file'))
-  reconcileTransactions(@UploadedFile() file: any) {
+  reconcileTransactions(@UploadedFile() file: { buffer: Buffer }) {
     if (!file) {
       throw new Error('Vui lòng tải lên file sao kê');
     }

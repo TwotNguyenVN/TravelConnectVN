@@ -21,6 +21,11 @@ import {
   UpdateTourRequestStatusDto,
   CancelTourRequestDto,
 } from './dto/update-tour-request-status.dto';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @ApiTags('Tour Requests')
 @ApiBearerAuth()
@@ -31,14 +36,20 @@ export class TourRequestsController {
 
   @Post()
   @ApiOperation({ summary: 'Gửi yêu cầu tham gia tour' })
-  async createRequest(@Request() req, @Body() dto: CreateTourRequestDto) {
+  async createRequest(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreateTourRequestDto,
+  ) {
     const userId = req.user.id;
     return this.tourRequestsService.createRequest(userId, dto);
   }
 
   @Get('me')
   @ApiOperation({ summary: 'Lấy danh sách yêu cầu đã gửi của tôi' })
-  async getMyRequests(@Request() req, @Query() query: TourRequestQueryDto) {
+  async getMyRequests(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: TourRequestQueryDto,
+  ) {
     const userId = req.user.id;
     return this.tourRequestsService.getUserRequests(userId, query);
   }
@@ -49,7 +60,10 @@ export class TourRequestsController {
   @ApiOperation({
     summary: 'Lấy danh sách yêu cầu tham gia các tour của tôi (Guide view)',
   })
-  async getGuideRequests(@Request() req, @Query() query: TourRequestQueryDto) {
+  async getGuideRequests(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: TourRequestQueryDto,
+  ) {
     const userId = req.user.id;
     return this.tourRequestsService.getGuideRequests(userId, query);
   }
@@ -57,7 +71,7 @@ export class TourRequestsController {
   @Patch(':id/cancel')
   @ApiOperation({ summary: 'Hủy yêu cầu tham gia tour (User action)' })
   async cancelRequest(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: CancelTourRequestDto,
   ) {
@@ -70,7 +84,7 @@ export class TourRequestsController {
   @Roles(Role.GUIDE)
   @ApiOperation({ summary: 'Chấp nhận yêu cầu tham gia tour (Guide action)' })
   async approveRequest(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: UpdateTourRequestStatusDto,
   ) {
@@ -83,7 +97,7 @@ export class TourRequestsController {
   @Roles(Role.GUIDE)
   @ApiOperation({ summary: 'Từ chối yêu cầu tham gia tour (Guide action)' })
   async rejectRequest(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() dto: UpdateTourRequestStatusDto,
   ) {

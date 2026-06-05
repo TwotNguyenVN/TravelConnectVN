@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { Role } from '../enums/role.enum';
+import { Request } from 'express';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -23,7 +24,9 @@ export class RoleGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context
+      .switchToHttp()
+      .getRequest<Request & { user?: { roles?: Role[] } }>();
     const user = request.user;
 
     // Skeleton kiểm tra

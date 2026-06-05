@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
@@ -73,7 +69,7 @@ export class FavoritesService {
         },
       });
       return { success: true };
-    } catch (error) {
+    } catch {
       // If not found, we can consider it "removed" or throw
       return { success: true };
     }
@@ -172,7 +168,7 @@ export class FavoritesService {
         },
       });
       return { success: true };
-    } catch (error) {
+    } catch {
       return { success: true };
     }
   }

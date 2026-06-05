@@ -12,6 +12,15 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../common/guards/auth.guard';
+import { Request } from 'express';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+
+interface AuthenticatedRequest extends Request {
+  user: {
+    id: string;
+    [key: string]: unknown;
+  };
+}
 
 @Controller('me')
 @UseGuards(AuthGuard)
@@ -19,7 +28,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get()
-  async getProfile(@Req() req) {
+  async getProfile(@Req() req: AuthenticatedRequest) {
     const user = await this.usersService.findOne(req.user.id);
     return {
       success: true,
@@ -28,7 +37,10 @@ export class UsersController {
   }
 
   @Patch()
-  async updateProfile(@Req() req, @Body() body) {
+  async updateProfile(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: UpdateProfileDto,
+  ) {
     const user = await this.usersService.update(req.user.id, body);
     return {
       success: true,
@@ -45,7 +57,10 @@ export class UsersController {
       },
     }),
   )
-  async updateAvatar(@Req() req, @UploadedFile() file) {
+  async updateAvatar(
+    @Req() req: AuthenticatedRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     console.log(
       'DEBUG - Controller received avatar upload request for user:',
       req.user.id,
@@ -74,7 +89,7 @@ export class UsersController {
   }
 
   @Get('roles')
-  async getRoles(@Req() req) {
+  async getRoles(@Req() req: AuthenticatedRequest) {
     const roles = await this.usersService.getRoles(req.user.id);
     return {
       success: true,

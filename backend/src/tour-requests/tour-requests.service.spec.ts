@@ -157,13 +157,19 @@ describe('TourRequestsService', () => {
       mockPrismaService.tour_requests.aggregate.mockResolvedValue({
         _sum: { participant_count: 0 },
       });
-      mockPrismaService.tour_requests.create.mockImplementation(({ data }) => ({
-        id: 'req-1',
-        ...data,
-      }));
+      mockPrismaService.tour_requests.create.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          ({
+            id: 'req-1',
+            ...data,
+          }) as never,
+      );
 
-      const res: any = await service.createRequest(userId, dto);
-      expect(res.price_at_booking).toBe(tourPrice);
+      const res = (await service.createRequest(userId, dto)) as Record<
+        string,
+        unknown
+      >;
+      expect(res['price_at_booking']).toBe(tourPrice);
     });
 
     it('should save price_at_booking as schedule price if schedule is provided', async () => {
@@ -185,13 +191,19 @@ describe('TourRequestsService', () => {
       mockPrismaService.tour_requests.aggregate.mockResolvedValue({
         _sum: { participant_count: 0 },
       });
-      mockPrismaService.tour_requests.create.mockImplementation(({ data }) => ({
-        id: 'req-1',
-        ...data,
-      }));
+      mockPrismaService.tour_requests.create.mockImplementation(
+        ({ data }: { data: Record<string, unknown> }) =>
+          ({
+            id: 'req-1',
+            ...data,
+          }) as never,
+      );
 
-      const res: any = await service.createRequest(userId, dtoWithSchedule);
-      expect(res.price_at_booking).toBe(schedulePrice);
+      const res = (await service.createRequest(
+        userId,
+        dtoWithSchedule,
+      )) as Record<string, unknown>;
+      expect(res['price_at_booking']).toBe(schedulePrice);
     });
   });
 

@@ -9,6 +9,14 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    role: string;
+  };
+}
 import { AuthGuard } from '../common/guards/auth.guard';
 import { TripExpensesService } from './trip-expenses.service';
 import { CreateExpenseDto } from './dto/create-expense.dto';
@@ -25,7 +33,10 @@ export class TripExpensesController {
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh sách chi tiêu và bảng quyết toán nợ' })
-  async getExpenses(@Request() req, @Param('postId') postId: string) {
+  async getExpenses(
+    @Request() req: AuthenticatedRequest,
+    @Param('postId') postId: string,
+  ) {
     const userId = req.user.id;
     return this.tripExpensesService.getExpenses(userId, postId);
   }
@@ -33,7 +44,7 @@ export class TripExpensesController {
   @Post()
   @ApiOperation({ summary: 'Thêm khoản chi tiêu mới cho nhóm' })
   async createExpense(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('postId') postId: string,
     @Body() data: CreateExpenseDto,
   ) {
@@ -44,7 +55,7 @@ export class TripExpensesController {
   @Delete(':expenseId')
   @ApiOperation({ summary: 'Xóa một khoản chi tiêu' })
   async deleteExpense(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('postId') postId: string,
     @Param('expenseId') expenseId: string,
   ) {
@@ -55,7 +66,7 @@ export class TripExpensesController {
   @Post('settle')
   @ApiOperation({ summary: 'Quyết toán nợ chéo giữa hai thành viên' })
   async settleDebts(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('postId') postId: string,
     @Body() data: SettleExpenseDto,
   ) {
@@ -65,7 +76,10 @@ export class TripExpensesController {
 
   @Put('bank')
   @ApiOperation({ summary: 'Cập nhật tài khoản ngân hàng nhận tiền của tôi' })
-  async updateMyBank(@Request() req, @Body() data: UpdateBankDto) {
+  async updateMyBank(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: UpdateBankDto,
+  ) {
     const userId = req.user.id;
     return this.tripExpensesService.updateMyBank(userId, data);
   }

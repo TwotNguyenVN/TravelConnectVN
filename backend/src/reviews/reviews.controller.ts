@@ -16,6 +16,12 @@ import {
   CreateGuideReviewDto,
 } from './dto/create-review.dto';
 
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
+
 @ApiTags('reviews')
 @Controller('reviews')
 export class ReviewsController {
@@ -25,7 +31,10 @@ export class ReviewsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a tour review' })
-  async createTourReview(@Request() req, @Body() dto: CreateTourReviewDto) {
+  async createTourReview(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreateTourReviewDto,
+  ) {
     const userId = req.user.id;
     return this.reviewsService.createTourReview(userId, dto);
   }
@@ -34,7 +43,10 @@ export class ReviewsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a guide review' })
-  async createGuideReview(@Request() req, @Body() dto: CreateGuideReviewDto) {
+  async createGuideReview(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: CreateGuideReviewDto,
+  ) {
     const userId = req.user.id;
     return this.reviewsService.createGuideReview(userId, dto);
   }
@@ -43,7 +55,7 @@ export class ReviewsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user reviews' })
-  async getMyReviews(@Request() req) {
+  async getMyReviews(@Request() req: AuthenticatedRequest) {
     const userId = req.user.id;
     return this.reviewsService.getMyReviews(userId);
   }

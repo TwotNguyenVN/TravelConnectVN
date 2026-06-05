@@ -35,7 +35,7 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
-    
+
     let disconnectedUserId: string | null = null;
 
     for (const [userId, socketIds] of this.userSockets.entries()) {
@@ -53,7 +53,10 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Xóa khỏi Redis
       await this.cacheManager.del(`online_user:${disconnectedUserId}`);
       // Thông báo cho tất cả biết user này offline
-      this.broadcast('user_status_change', { userId: disconnectedUserId, status: 'offline' });
+      this.broadcast('user_status_change', {
+        userId: disconnectedUserId,
+        status: 'offline',
+      });
     }
   }
 
@@ -69,20 +72,32 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
     this.userSockets.get(data.userId)?.add(client.id);
 
-    client.join(`user_${data.userId}`);
+    void client.join(`user_${data.userId}`);
 
     // Lưu vào Redis (TTL = 1 day, user hoạt động sẽ reconnect/refresh)
-    await this.cacheManager.set(`online_user:${data.userId}`, 'online', 86400000);
-    
+    await this.cacheManager.set(
+      `online_user:${data.userId}`,
+      'online',
+      86400000,
+    );
+
     // Broadcast status change
-    this.broadcast('user_status_change', { userId: data.userId, status: 'online' });
+    this.broadcast('user_status_change', {
+      userId: data.userId,
+      status: 'online',
+    });
 
     return { status: 'ok' };
   }
 
   @SubscribeMessage('typing_start')
   handleTypingStart(
-    @MessageBody() data: { conversationId: string, targetUserId: string, senderId: string },
+    @MessageBody()
+    data: {
+      conversationId: string;
+      targetUserId: string;
+      senderId: string;
+    },
   ) {
     // Forward typing event to target user
     this.sendToUser(data.targetUserId, 'typing_start', {
@@ -93,7 +108,12 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('typing_end')
   handleTypingEnd(
-    @MessageBody() data: { conversationId: string, targetUserId: string, senderId: string },
+    @MessageBody()
+    data: {
+      conversationId: string;
+      targetUserId: string;
+      senderId: string;
+    },
   ) {
     // Forward typing end event to target user
     this.sendToUser(data.targetUserId, 'typing_end', {

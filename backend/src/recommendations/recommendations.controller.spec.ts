@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext } from '@nestjs/common';
 import { RecommendationsController } from './recommendations.controller';
 import { RecommendationsService } from './recommendations.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 
 const mockAuthGuard = {
-  canActivate: (_context: ExecutionContext) => true,
+  canActivate: () => true,
 };
 
 describe('RecommendationsController', () => {

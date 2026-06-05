@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 
 @Injectable()
 export class SupabaseService {
   private readonly logger = new Logger(SupabaseService.name);
-  private client: SupabaseClient;
-  private adminClient: SupabaseClient;
+  private client: ReturnType<typeof createClient>;
+  private adminClient: ReturnType<typeof createClient>;
 
   constructor() {
     const url = process.env.SUPABASE_URL;
@@ -26,11 +26,11 @@ export class SupabaseService {
     }
   }
 
-  getClient(): SupabaseClient {
+  getClient(): ReturnType<typeof createClient> {
     return this.client;
   }
 
-  getAdminClient(): SupabaseClient {
+  getAdminClient(): ReturnType<typeof createClient> {
     if (!this.adminClient) {
       this.logger.error(
         'SUPABASE_SERVICE_ROLE_KEY is missing! Admin operations will fail.',
@@ -61,7 +61,10 @@ export class SupabaseService {
     return user;
   }
 
-  async uploadAvatar(userId: string, file: any): Promise<string> {
+  async uploadAvatar(
+    userId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
     const fileExt = file.originalname.split('.').pop();
     const fileName = `${userId}-${Date.now()}.${fileExt}`;
     const filePath = `public/${fileName}`;

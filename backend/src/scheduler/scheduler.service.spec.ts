@@ -4,7 +4,6 @@ import { PrismaService } from '../prisma/prisma.service';
 
 describe('SchedulerService', () => {
   let service: SchedulerService;
-  let prisma: PrismaService;
 
   const mockPrismaService = {
     tour_requests: {
@@ -71,6 +70,7 @@ describe('SchedulerService', () => {
 
       expect(mockPrismaService.tour_requests.update).toHaveBeenCalledWith({
         where: { id: 'req-1' },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data: expect.objectContaining({
           status: 'cancelled_by_user',
         }),
@@ -190,10 +190,12 @@ describe('SchedulerService', () => {
 
       await service.completeEndedCompanions();
 
-      expect(mockPrismaService.companion_posts.updateMany).toHaveBeenCalledWith({
-        where: { id: { in: ['post-1'] } },
-        data: { business_status: 'closed' },
-      });
+      expect(mockPrismaService.companion_posts.updateMany).toHaveBeenCalledWith(
+        {
+          where: { id: { in: ['post-1'] } },
+          data: { business_status: 'closed' },
+        },
+      );
 
       expect(
         mockPrismaService.companion_requests.updateMany,
@@ -202,6 +204,7 @@ describe('SchedulerService', () => {
           post_id: { in: ['post-1'] },
           status: 'pending',
         },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         data: expect.objectContaining({
           status: 'rejected',
         }),

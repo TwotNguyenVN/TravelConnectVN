@@ -5,6 +5,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { PaymentsService } from '../payments/payments.service';
 import { Inject, forwardRef } from '@nestjs/common';
 
+interface InvoiceData {
+  transactionId: string;
+  customerEmail: string;
+  customerNameFull: string;
+  invoiceNumber: string;
+}
+
 @Processor('mailQueue')
 export class MailProcessor extends WorkerHost {
   constructor(
@@ -16,12 +23,12 @@ export class MailProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
+  async process(job: Job<unknown, unknown, string>): Promise<unknown> {
     console.log(`[MailProcessor] Xử lý job ${job.id} - ${job.name}`);
 
     switch (job.name) {
       case 'send-invoice':
-        await this.handleSendInvoice(job.data);
+        await this.handleSendInvoice(job.data as InvoiceData);
         break;
       // Add more mail tasks here (e.g. 'send-welcome-email')
       default:
@@ -29,12 +36,7 @@ export class MailProcessor extends WorkerHost {
     }
   }
 
-  private async handleSendInvoice(data: {
-    transactionId: string;
-    customerEmail: string;
-    customerNameFull: string;
-    invoiceNumber: string;
-  }) {
+  private async handleSendInvoice(data: InvoiceData) {
     const { transactionId, customerEmail, customerNameFull, invoiceNumber } =
       data;
     try {

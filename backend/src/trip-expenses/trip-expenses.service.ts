@@ -50,10 +50,13 @@ export class TripExpensesService {
     return post;
   }
 
-  async getExpenses(userId: string, postId: string): Promise<ApiResponse<any>> {
+  async getExpenses(
+    userId: string,
+    postId: string,
+  ): Promise<ApiResponse<unknown>> {
     // Cast to any: Prisma include inference is correct at compile time (tsc passes),
     // but the IDE TS server doesn't properly infer bank_id and included relations.
-    const post = (await this.prisma.companion_posts.findUnique({
+    const post = await this.prisma.companion_posts.findUnique({
       where: { id: postId },
       include: {
         users: {
@@ -64,7 +67,7 @@ export class TripExpensesService {
             bank_id: true,
             account_no: true,
             account_name: true,
-          } as any,
+          },
         },
         companion_requests: {
           where: { status: 'approved' },
@@ -77,12 +80,12 @@ export class TripExpensesService {
                 bank_id: true,
                 account_no: true,
                 account_name: true,
-              } as any,
+              },
             },
           },
         },
       },
-    })) as any;
+    });
 
     if (!post) {
       throw new NotFoundException('Không tìm thấy bài đăng đồng hành');
@@ -193,7 +196,16 @@ export class TripExpensesService {
       .filter((m) => m.netBalance < -0.01)
       .map((m) => ({ ...m, netBalance: Math.abs(m.netBalance) }));
 
-    const suggestedSettlements: any[] = [];
+    const suggestedSettlements: Array<{
+      debtorId: string;
+      debtorName: string;
+      creditorId: string;
+      creditorName: string;
+      creditorBankId: string | null;
+      creditorAccountNo: string | null;
+      creditorAccountName: string | null;
+      amount: number;
+    }> = [];
 
     let cIdx = 0;
     let dIdx = 0;
@@ -244,7 +256,7 @@ export class TripExpensesService {
     userId: string,
     postId: string,
     data: CreateExpenseDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     await this.validateAccess(userId, postId);
 
     // Tạo bản ghi chi tiêu chính
@@ -284,7 +296,7 @@ export class TripExpensesService {
     userId: string,
     postId: string,
     expenseId: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     await this.validateAccess(userId, postId);
 
     const expense = await this.prisma.trip_expenses.findUnique({
@@ -326,7 +338,7 @@ export class TripExpensesService {
     userId: string,
     postId: string,
     data: SettleExpenseDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     await this.validateAccess(userId, postId);
 
     // 1. Lấy dữ liệu expenses để tính toán netBalance thực tế giống getExpenses
@@ -526,17 +538,17 @@ export class TripExpensesService {
   async updateMyBank(
     userId: string,
     data: UpdateBankDto,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     // Cast data to any: bank_id/account_no/account_name exist in schema but
     // IDE TS server doesn't detect them due to skipLibCheck difference.
-    const updatedUser = (await this.prisma.public_users.update({
+    const updatedUser = await this.prisma.public_users.update({
       where: { id: userId },
       data: {
         bank_id: data.bankId,
         account_no: data.accountNo,
         account_name: data.accountName,
-      } as any,
-    })) as any;
+      },
+    });
 
     return {
       success: true,

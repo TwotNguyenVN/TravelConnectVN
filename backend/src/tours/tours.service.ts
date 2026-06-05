@@ -7,8 +7,38 @@ import {
 } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
+import {
+  CreateTourDto,
+  UpdateTourDto,
+  TourFilterDto,
+  TourItineraryItemDto,
+  TourImageItemDto,
+} from './dto/tours.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+
+export type TourWithIncludes = Prisma.toursGetPayload<{
+  include: {
+    tour_categories: true;
+    tour_images: true;
+    tour_schedules: {
+      include: {
+        tour_requests: true;
+      };
+    };
+    guide_profiles: {
+      include: {
+        users: true;
+        guide_languages: { include: { languages: true } };
+      };
+    };
+    tour_locations: true;
+    tour_destinations: true;
+    _count: {
+      select: { tour_reviews: true };
+    };
+  };
+}>;
 
 // Helper to extract coordinates from Google Maps URL
 function extractLatLngFromUrl(
@@ -57,7 +87,7 @@ function extractLatLngFromUrl(
         return { lat, lng };
       }
     }
-  } catch (e) {
+  } catch {
     // Ignore parsing errors
   }
 
@@ -106,8 +136,12 @@ async function resolveShortLink(
       // If not in URL, maybe it's in the body (meta tags or script)
       const body = await response.text();
       return extractLatLngFromUrl(body);
-    } catch (e) {
-      console.error('Error resolving short link:', url, e.message);
+    } catch (e: unknown) {
+      console.error(
+        'Error resolving short link:',
+        url,
+        e instanceof Error ? e.message : String(e),
+      );
       return null;
     }
   }
@@ -124,11 +158,11 @@ export class ToursService implements OnApplicationBootstrap {
 
   onApplicationBootstrap() {
     // Run the check immediately on startup
-    this.autoCompleteTours();
+    void this.autoCompleteTours();
     // Run every 12 hours
     setInterval(
       () => {
-        this.autoCompleteTours();
+        void this.autoCompleteTours();
       },
       12 * 60 * 60 * 1000,
     );
@@ -138,8 +172,11 @@ export class ToursService implements OnApplicationBootstrap {
     try {
       await this.cacheManager.clear();
       console.log('Tours cache invalidated');
-    } catch (e) {
-      console.error('Failed to invalidate cache:', e);
+    } catch (e: unknown) {
+      console.error(
+        'Failed to invalidate cache:',
+        e instanceof Error ? e.message : String(e),
+      );
     }
   }
 
@@ -208,8 +245,11 @@ export class ToursService implements OnApplicationBootstrap {
         }
       }
       console.log('=== Automated Tour Completion Check Finished ===');
-    } catch (error) {
-      console.error('Error running automated tour completion:', error);
+    } catch (error: unknown) {
+      console.error(
+        'Error running automated tour completion:',
+        error instanceof Error ? error.message : String(error),
+      );
     }
   }
 
@@ -219,12 +259,12 @@ export class ToursService implements OnApplicationBootstrap {
   // Khi kết nối Prisma ổn định, chỉ cần thay thế logic lấy dữ liệu dưới đây.
   // ==========================================
 
-  async getPublicTours(filter: any) {
+  async getPublicTours(filter: TourFilterDto) {
     const limit = Number(filter.limit) || 10;
     const page = Number(filter.page) || 1;
     const skip = (page - 1) * limit;
 
-    const where: any = {
+    const where: Prisma.toursWhereInput = {
       business_status: 'published',
       visibility_status: 'visible',
       deleted_at: null,
@@ -252,7 +292,7 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     if (filter.keyword) {
-      where.AND.push({
+      (where.AND as Prisma.toursWhereInput[]).push({
         OR: [
           { title: { contains: filter.keyword, mode: 'insensitive' } },
           { province: { contains: filter.keyword, mode: 'insensitive' } },
@@ -303,7 +343,11 @@ export class ToursService implements OnApplicationBootstrap {
     const allFormattedTours = tours
       .map((t) => {
         // Chặn hiển thị Tour nếu Guide chưa đạt 100% độ hoàn thiện
-        if (!this.isGuideProfileComplete(t.guide_profiles)) {
+        if (
+          !this.isGuideProfileComplete(
+            t.guide_profiles as unknown as TourWithIncludes['guide_profiles'],
+          )
+        ) {
           return null;
         }
 
@@ -320,12 +364,15 @@ export class ToursService implements OnApplicationBootstrap {
             t.tour_schedules.length === 0 &&
             (t.start_date === null || t.start_date >= new Date())
           ) {
-            return this.formatTourData(t, null);
+            return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
           return null;
         }
 
-        return this.formatTourData(t, nextAvailableSchedule);
+        return this.formatTourData(
+          t as unknown as TourWithIncludes,
+          nextAvailableSchedule as unknown as TourWithIncludes['tour_schedules'][0],
+        );
       })
       .filter((t) => t !== null);
 
@@ -405,7 +452,9 @@ export class ToursService implements OnApplicationBootstrap {
         _avg: { rating: true },
       }),
       this.prisma.guide_reviews.aggregate({
-        where: { guide_profile_id: (tour as any).guide_profiles?.user_id },
+        where: {
+          guide_profile_id: (tour as TourWithIncludes).guide_profiles?.user_id,
+        },
         _avg: { rating: true },
       }),
     ]);
@@ -428,7 +477,7 @@ export class ToursService implements OnApplicationBootstrap {
       endDate: tour.end_date,
       category: tour.tour_categories?.name || 'Chưa phân loại',
       categoryId: tour.category_id?.toString(),
-      reviewsCount: (tour as any)._count?.tour_reviews || 0,
+      reviewsCount: (tour as TourWithIncludes)._count?.tour_reviews || 0,
       maxParticipants: tour.max_participants,
       meetPoint: tour.meet_point || tour.province,
       meetAddress: tour.meet_address,
@@ -438,67 +487,80 @@ export class ToursService implements OnApplicationBootstrap {
       description: tour.description || 'Chưa có mô tả chi tiết.',
       participantRequirements: tour.participant_requirements,
       images: images,
-      guideId: (tour as any).guide_profiles?.user_id,
+      guideId: (tour as TourWithIncludes).guide_profiles?.user_id,
       guide: {
         name:
-          (tour as any).guide_profiles?.users?.full_name || 'Hướng dẫn viên',
-        avatar: (tour as any).guide_profiles?.avatar_url || '',
-        exp: `${(tour as any).guide_profiles?.years_of_experience || 0} năm`,
-        bio: (tour as any).guide_profiles?.bio || 'Chưa có giới thiệu.',
+          (tour as TourWithIncludes).guide_profiles?.users?.full_name ||
+          'Hướng dẫn viên',
+        avatar: (tour as TourWithIncludes).guide_profiles?.avatar_url || '',
+        exp: `${(tour as TourWithIncludes).guide_profiles?.years_of_experience || 0} năm`,
+        bio:
+          (tour as TourWithIncludes).guide_profiles?.bio ||
+          'Chưa có giới thiệu.',
         rating: guideRating._avg.rating || 5.0,
       },
       destinations: await Promise.all(
-        ((tour as any).tour_destinations || []).map(async (dest: any) => {
-          // Log the first one to verify data presence (invisible to user but helps debug)
-          if (dest.sequence_no === 1) {
-            console.log('DEBUG - Destination 1:', {
+        ((tour as TourWithIncludes).tour_destinations || []).map(
+          async (
+            dest: Prisma.tour_destinationsGetPayload<Record<string, never>>,
+          ) => {
+            // Log the first one to verify data presence (invisible to user but helps debug)
+            if (dest.sequence_no === 1) {
+              console.log('DEBUG - Destination 1:', {
+                name: dest.name,
+                lat: dest.latitude,
+                lng: dest.longitude,
+                hasLat: 'latitude' in dest,
+              });
+            }
+
+            let lat = dest.latitude ? Number(dest.latitude.toString()) : null;
+            let lng = dest.longitude ? Number(dest.longitude.toString()) : null;
+
+            // Fallback: If no coordinates in DB, try to resolve from link
+            if ((lat === null || isNaN(lat)) && dest.google_maps_link) {
+              const coords = await resolveShortLink(dest.google_maps_link);
+              lat = coords?.lat || null;
+              lng = coords?.lng || null;
+            }
+
+            return {
+              id: dest.id,
               name: dest.name,
-              lat: dest.latitude,
-              lng: dest.longitude,
-              hasLat: 'latitude' in dest,
-            });
-          }
-
-          let lat = dest.latitude ? Number(dest.latitude.toString()) : null;
-          let lng = dest.longitude ? Number(dest.longitude.toString()) : null;
-
-          // Fallback: If no coordinates in DB, try to resolve from link
-          if ((lat === null || isNaN(lat)) && dest.google_maps_link) {
-            const coords = await resolveShortLink(dest.google_maps_link);
-            lat = coords?.lat || null;
-            lng = coords?.lng || null;
-          }
-
-          return {
-            id: dest.id,
-            name: dest.name,
-            address: dest.address,
-            googleMapsLink: dest.google_maps_link,
-            sequenceNo: dest.sequence_no,
-            lat: lat !== null && !isNaN(lat) ? lat : null,
-            lng: lng !== null && !isNaN(lng) ? lng : null,
-          };
+              address: dest.address,
+              googleMapsLink: dest.google_maps_link,
+              sequenceNo: dest.sequence_no,
+              lat: lat !== null && !isNaN(lat) ? lat : null,
+              lng: lng !== null && !isNaN(lng) ? lng : null,
+            };
+          },
+        ),
+      ),
+      itinerary: ((tour as TourWithIncludes).tour_locations || []).map(
+        (loc: Prisma.tour_locationsGetPayload<Record<string, never>>) => ({
+          day: loc.sequence_no,
+          title: loc.location_name,
+          address: loc.address,
+          notes: loc.notes,
+          hasBreakfast: !!loc.has_breakfast,
+          hasLunch: !!loc.has_lunch,
+          hasDinner: !!loc.has_dinner,
+          accommodation: loc.accommodation_info,
+          highlight: loc.highlight_note,
+          lat: loc.latitude ? Number(loc.latitude) : null,
+          lng: loc.longitude ? Number(loc.longitude) : null,
+          detail:
+            loc.notes ||
+            `Tham quan ${loc.location_name} tại ${loc.address || tour.province}.`,
         }),
       ),
-      itinerary: ((tour as any).tour_locations || []).map((loc: any) => ({
-        day: loc.sequence_no,
-        title: loc.location_name,
-        address: loc.address,
-        notes: loc.notes,
-        hasBreakfast: !!loc.has_breakfast,
-        hasLunch: !!loc.has_lunch,
-        hasDinner: !!loc.has_dinner,
-        accommodation: loc.accommodation_info,
-        highlight: loc.highlight_note,
-        lat: loc.latitude ? Number(loc.latitude) : null,
-        lng: loc.longitude ? Number(loc.longitude) : null,
-        detail:
-          loc.notes ||
-          `Tham quan ${loc.location_name} tại ${loc.address || tour.province}.`,
-      })),
       schedules: (tour.tour_schedules || []).map((s) => {
         const bookedCount =
-          (s as any).tour_requests?.reduce(
+          (
+            s as Prisma.tour_schedulesGetPayload<{
+              include: { tour_requests: true };
+            }>
+          ).tour_requests?.reduce(
             (sum, req) => sum + req.participant_count,
             0,
           ) || 0;
@@ -610,7 +672,11 @@ export class ToursService implements OnApplicationBootstrap {
     const formattedTours = tours
       .map((t) => {
         // Chặn hiển thị Tour nếu Guide chưa đạt 100% độ hoàn thiện
-        if (!this.isGuideProfileComplete(t.guide_profiles)) {
+        if (
+          !this.isGuideProfileComplete(
+            t.guide_profiles as unknown as TourWithIncludes['guide_profiles'],
+          )
+        ) {
           return null;
         }
 
@@ -631,12 +697,15 @@ export class ToursService implements OnApplicationBootstrap {
             t.tour_schedules.length === 0 &&
             (t.start_date === null || t.start_date >= new Date())
           ) {
-            return this.formatTourData(t, null);
+            return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
           return null;
         }
 
-        return this.formatTourData(t, nextAvailableSchedule);
+        return this.formatTourData(
+          t as unknown as TourWithIncludes,
+          nextAvailableSchedule as unknown as TourWithIncludes['tour_schedules'][0],
+        );
       })
       .filter((t) => t !== null) // Loại bỏ các tour đã hết chỗ hoặc hết ngày
       .slice(0, 4); // Lấy 4 tour nổi bật nhất
@@ -645,7 +714,12 @@ export class ToursService implements OnApplicationBootstrap {
   }
 
   // Hàm helper để định dạng dữ liệu tour đồng nhất
-  private formatTourData(t: any, schedule: any) {
+  private formatTourData(
+    t: TourWithIncludes,
+    schedule: Prisma.tour_schedulesGetPayload<{
+      include: { tour_requests: true };
+    }> | null,
+  ) {
     const bookedCount = schedule
       ? schedule.tour_requests.reduce(
           (sum, req) => sum + req.participant_count,
@@ -685,7 +759,9 @@ export class ToursService implements OnApplicationBootstrap {
     };
   }
 
-  private isGuideProfileComplete(g: any): boolean {
+  private isGuideProfileComplete(
+    g: TourWithIncludes['guide_profiles'],
+  ): boolean {
     if (!g) return false;
 
     // 1. Họ và tên
@@ -774,8 +850,9 @@ export class ToursService implements OnApplicationBootstrap {
 
     return posts.map((p) => {
       // images is a Json field, cast it to any[]
-      const images = (p.images as any[]) || [];
-      const coverImg = images.find((img: any) => img.isCover) || images[0];
+      const images =
+        (p.images as { imageUrl: string; isCover?: boolean }[]) || [];
+      const coverImg = images.find((img) => img.isCover) || images[0];
 
       return {
         id: p.id,
@@ -802,7 +879,7 @@ export class ToursService implements OnApplicationBootstrap {
   // GUIDE MANAGEMENT ENDPOINTS
   // ==========================================
 
-  async getMyGuidedTours(userId: string, filter: any) {
+  async getMyGuidedTours(userId: string, filter: TourFilterDto) {
     const limit = Number(filter.limit) || 10;
     const page = Number(filter.page) || 1;
     const skip = (page - 1) * limit;
@@ -816,7 +893,7 @@ export class ToursService implements OnApplicationBootstrap {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
-    const where: any = {
+    const where: Prisma.toursWhereInput = {
       guide_profile_id: guideProfile.id,
       deleted_at: null,
     };
@@ -850,7 +927,7 @@ export class ToursService implements OnApplicationBootstrap {
         id: t.id,
         title: t.title,
         cover:
-          (t as any).tour_images?.[0]?.image_url ||
+          (t as TourWithIncludes).tour_images?.[0]?.image_url ||
           'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image',
         price: Number(t.price),
         startDate: t.start_date,
@@ -867,7 +944,7 @@ export class ToursService implements OnApplicationBootstrap {
     };
   }
 
-  async createTour(userId: string, data: any) {
+  async createTour(userId: string, data: CreateTourDto) {
     // 1. Tìm guide profile
     const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
@@ -1078,7 +1155,7 @@ export class ToursService implements OnApplicationBootstrap {
     return result;
   }
 
-  async updateTour(userId: string, tourId: string, data: any) {
+  async updateTour(userId: string, tourId: string, data: UpdateTourDto) {
     // 1. Tìm guide profile
     const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
@@ -1123,7 +1200,7 @@ export class ToursService implements OnApplicationBootstrap {
     const result = await this.prisma
       .$transaction(async (tx) => {
         // 3.1 Cập nhật thông tin cơ bản của tour
-        const updateData: any = {};
+        const updateData: Prisma.toursUncheckedUpdateInput = {};
         if (data.title) updateData.title = data.title;
         if (data.categoryId) updateData.category_id = BigInt(data.categoryId);
         if (data.province) updateData.province = data.province;
@@ -1303,19 +1380,26 @@ export class ToursService implements OnApplicationBootstrap {
 
         return updatedTour;
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (
-          error.code === 'P2002' ||
-          error.message?.includes('violates check constraint')
+          error instanceof Prisma.PrismaClientKnownRequestError &&
+          error.code === 'P2002'
         ) {
-          if (error.message?.includes('tours_check')) {
-            throw new BadRequestException(
-              'Ngày kết thúc không thể trước ngày bắt đầu',
-            );
-          }
           throw new BadRequestException(
             'Dữ liệu không hợp lệ: ' + error.message,
           );
+        }
+        if (error instanceof Error) {
+          if (error.message.includes('violates check constraint')) {
+            if (error.message.includes('tours_check')) {
+              throw new BadRequestException(
+                'Ngày kết thúc không thể trước ngày bắt đầu',
+              );
+            }
+            throw new BadRequestException(
+              'Dữ liệu không hợp lệ: ' + error.message,
+            );
+          }
         }
         throw error;
       });
@@ -1394,7 +1478,11 @@ export class ToursService implements OnApplicationBootstrap {
     });
   }
 
-  async updateTourItinerary(userId: string, tourId: string, locations: any[]) {
+  async updateTourItinerary(
+    userId: string,
+    tourId: string,
+    locations: TourItineraryItemDto[],
+  ) {
     // 1. Tìm guide profile
     const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
@@ -1451,7 +1539,11 @@ export class ToursService implements OnApplicationBootstrap {
     });
   }
 
-  async updateTourImages(userId: string, tourId: string, images: any[]) {
+  async updateTourImages(
+    userId: string,
+    tourId: string,
+    images: TourImageItemDto[],
+  ) {
     // 1. Tìm guide profile
     const guideProfile = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
@@ -1714,7 +1806,8 @@ export class ToursService implements OnApplicationBootstrap {
             where: { tour_request_id: { in: reqIds }, status: 'paid' },
           });
 
-        const refundsToCreate: any[] = [];
+        const refundsToCreate: Prisma.payment_transactionsCreateManyInput[] =
+          [];
         for (const req of paidRequests) {
           const txs = paidTransactions.filter(
             (t) => t.tour_request_id === req.id,
