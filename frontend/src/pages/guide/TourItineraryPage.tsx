@@ -21,11 +21,7 @@ const TourItineraryPage: React.FC = () => {
   const [locations, setLocations] = useState<ItineraryLocation[]>([]);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchItinerary();
-  }, [id]);
-
-  const fetchItinerary = async () => {
+async function fetchItinerary() {
     try {
       setLoading(true);
       const response = await tourService.getTourItinerary(id!);
@@ -51,20 +47,26 @@ const TourItineraryPage: React.FC = () => {
     }
   };
 
-  const addLocation = () => {
+  useEffect(() => {
+    fetchItinerary();
+  }, [id]);
+
+  
+
+  function addLocation() {
     setLocations([
       ...locations,
       { locationName: '', address: '', notes: '', visitTime: '' }
     ]);
   };
 
-  const removeLocation = (index: number) => {
+  function removeLocation(index: number) {
     const newLocations = [...locations];
     newLocations.splice(index, 1);
     setLocations(newLocations);
   };
 
-  const moveLocation = (index: number, direction: 'up' | 'down') => {
+  function moveLocation(index: number, direction: 'up' | 'down') {
     if (direction === 'up' && index === 0) return;
     if (direction === 'down' && index === locations.length - 1) return;
 
@@ -74,13 +76,13 @@ const TourItineraryPage: React.FC = () => {
     setLocations(newLocations);
   };
 
-  const handleLocationChange = (index: number, field: keyof ItineraryLocation, value: string) => {
+  function handleLocationChange(index: number, field: keyof ItineraryLocation, value: string) {
     const newLocations = [...locations];
     newLocations[index] = { ...newLocations[index], [field]: value };
     setLocations(newLocations);
   };
 
-  const handleSave = async () => {
+  async function handleSave() {
     // Basic validation
     if (locations.some(loc => !loc.locationName)) {
       toast.warning('Vui lòng điền tên địa điểm cho tất cả các mục');

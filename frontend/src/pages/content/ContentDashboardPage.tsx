@@ -46,7 +46,7 @@ export const ContentDashboardPage: React.FC = () => {
   const [tourStats, setTourStats] = useState<unknown>(null);
   const [pendingRequests, setPendingRequests] = useState<VerificationRequest[]>([]);
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
       const [statsRes, tourStatsRes, verificationRequestsRes] = await Promise.all([

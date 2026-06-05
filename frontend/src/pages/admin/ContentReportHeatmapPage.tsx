@@ -17,7 +17,7 @@ export function ContentReportHeatmapPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchHeatmap = async () => {
+  async function fetchHeatmap() {
     try {
       setLoading(true);
       setError(null);
@@ -47,7 +47,7 @@ export function ContentReportHeatmapPage() {
     );
   }
 
-  const translateStatus = (status: string) => {
+  function translateStatus(status: string) {
     switch (status.toLowerCase()) {
       case 'pending': return 'Đang chờ';
       case 'resolved': return 'Đã xử lý';
@@ -56,7 +56,7 @@ export function ContentReportHeatmapPage() {
     }
   };
 
-  const translateType = (type: string) => {
+  function translateType(type: string) {
     switch (type.toLowerCase()) {
       case 'tour': return 'Tours';
       case 'companion': return 'Bài đồng hành';

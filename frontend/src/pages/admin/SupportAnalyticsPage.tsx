@@ -26,7 +26,7 @@ export function SupportAnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAnalytics = async () => {
+  async function fetchAnalytics() {
     try {
       setLoading(true);
       setError(null);

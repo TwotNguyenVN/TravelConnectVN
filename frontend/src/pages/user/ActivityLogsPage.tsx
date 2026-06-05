@@ -21,7 +21,7 @@ const FILTER_OPTIONS = [
   { key: 'guide',            label: 'Xác minh HDV',  icon: '🛡️' },
 ];
 
-const getActivityIcon = (type: string): string => {
+function getActivityIcon(type: string) {
   if (type.startsWith('auth'))              return '🔐';
   if (type.startsWith('profile'))          return '👤';
   if (type.startsWith('tour_request'))     return '🎫';
@@ -34,7 +34,7 @@ const getActivityIcon = (type: string): string => {
   return '📌';
 };
 
-const formatRelativeTime = (dateStr: string): string => {
+function formatRelativeTime(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return 'Vừa xong';
@@ -82,12 +82,12 @@ export const ActivityLogsPage: React.FC = () => {
     fetchLogs(1, activeFilter);
   }, [activeFilter, fetchLogs]);
 
-  const handleFilterChange = (key: string) => {
+  function handleFilterChange(key: string) {
     if (key === activeFilter) return;
     setActiveFilter(key);
   };
 
-  const loadMore = () => {
+  function loadMore() {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchLogs(nextPage, activeFilter, true);

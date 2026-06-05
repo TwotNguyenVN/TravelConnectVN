@@ -27,7 +27,7 @@ const MyCompanionPostsPage: React.FC = () => {
     postTitle: '',
   });
 
-  const fetchMyPosts = async () => {
+  async function fetchMyPosts() {
     setLoading(true);
     try {
       const params = {
@@ -50,7 +50,7 @@ const MyCompanionPostsPage: React.FC = () => {
     fetchMyPosts();
   }, [statusFilter, searchKeyword]);
 
-  const handleStatusUpdate = async (id: string, newStatus: string, successMsg: string) => {
+  async function handleStatusUpdate(id: string, newStatus: string, successMsg: string) {
     try {
       const response = await companionService.updatePost(id, { businessStatus: newStatus });
       if (response.success) {
@@ -64,7 +64,7 @@ const MyCompanionPostsPage: React.FC = () => {
 
 
 
-  const handleConfirmAction = async () => {
+  async function handleConfirmAction() {
     const { type, postId } = confirmModal;
     setConfirmModal(prev => ({ ...prev, show: false }));
     
@@ -83,15 +83,15 @@ const MyCompanionPostsPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('vi-VN');
   };
 
-  const formatCurrency = (amount: number) => {
+  function formatCurrency(amount: number) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const getStatusLabel = (status: string) => {
+  function getStatusLabel(status: string) {
     switch (status) {
       case 'open': return 'Đang tuyển';
       case 'closed': return 'Đang tạm ngưng';

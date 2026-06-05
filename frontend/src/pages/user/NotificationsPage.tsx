@@ -26,7 +26,7 @@ export const NotificationsPage: React.FC = () => {
 
   useEffect(() => {
     if (socket) {
-      const handleNewNotification = (data: Record<string, unknown>) => {
+      function handleNewNotification(data: Record<string, unknown>) {
         setNotifications(prev => [data, ...prev]);
         toast.info(`🔔 ${data.title || 'Thông báo mới'}`);
       };
@@ -38,7 +38,7 @@ export const NotificationsPage: React.FC = () => {
     }
   }, [socket, toast]);
 
-  const fetchNotifications = async (pageNum: number, append = false) => {
+  async function fetchNotifications(pageNum: number, append = false) {
     try {
       if (!append) setLoading(true);
       const res = await notificationService.getMyNotifications(pageNum, 10);
@@ -62,7 +62,7 @@ export const NotificationsPage: React.FC = () => {
     fetchNotifications(1);
   }, []);
 
-  const handleMarkAsRead = async (id: string, isRead: boolean) => {
+  async function handleMarkAsRead(id: string, isRead: boolean) {
     if (isRead) return;
     try {
       const res = await notificationService.markAsRead(id);
@@ -76,7 +76,7 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleMarkAllAsRead = async () => {
+  async function handleMarkAllAsRead() {
     try {
       const res = await notificationService.markAllAsRead();
       if (res.success) {
@@ -89,7 +89,7 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  async function handleDelete(e: React.MouseEvent, id: string) {
     e.stopPropagation();
     try {
       const res = await notificationService.deleteNotification(id);
@@ -103,12 +103,12 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const handleNotificationClick = (notification: Notification) => {
+  function handleNotificationClick(notification: Notification) {
     handleMarkAsRead(notification.id, notification.is_read);
     
     // Navigate based on notification type
     switch (notification.entity_type) {
-      case 'TOUR_REQUEST':
+      case 'TOUR_REQUEST': {
         // Logic to distinguish guide-side vs user-side
         const titleLower = notification.title.toLowerCase();
         const contentLower = notification.content.toLowerCase();
@@ -126,6 +126,7 @@ export const NotificationsPage: React.FC = () => {
           navigate('/user/requests');
         }
         break;
+      }
       case 'COMPANION_REQUEST':
         navigate('/user/companion-requests');
         break;
@@ -138,7 +139,7 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const getIcon = (type: string) => {
+  function getIcon(type: string) {
     switch (type) {
       case 'tour_request': return '🎫';
       case 'companion_request': return '🤝';
@@ -149,7 +150,7 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const getVariant = (type: string) => {
+  function getVariant(type: string) {
     switch (type) {
       case 'tour_request': return 'primary';
       case 'companion_request': return 'secondary';
@@ -159,7 +160,7 @@ export const NotificationsPage: React.FC = () => {
     }
   };
 
-  const loadMore = () => {
+  function loadMore() {
     const nextPage = page + 1;
     setPage(nextPage);
     fetchNotifications(nextPage, true);

@@ -26,7 +26,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
   const [aiScanResults, setAiScanResults] = useState<Record<string, unknown>>({});
   const { toast } = useToast();
 
-  const handleAiScan = async (post: CompanionPost) => {
+  async function handleAiScan(post: CompanionPost) {
     try {
       setScanningPostId(post.id);
       const textToAnalyze = `${post.title}. Điểm đến: ${post.destination}. Mô tả: ${post.description || ''}`;
@@ -47,7 +47,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
     }
   };
 
-  const fetchPosts = async () => {
+  async function fetchPosts() {
     try {
       setLoading(true);
       const response = await adminApi.getCompanionPosts({ search, visibility, take: 50 });
@@ -63,7 +63,7 @@ export const AdminCompanionManagementPage: React.FC = () => {
     fetchPosts();
   }, [visibility]);
 
-  const handleModerate = async (id: string, status: string) => {
+  async function handleModerate(id: string, status: string) {
     const actionLabel = status === 'visible' ? 'HIỂN THỊ' : status === 'hidden' ? 'ẨN' : 'CẢNH BÁO';
     const reason = window.prompt(`Nhập lý do thực hiện thao tác ${actionLabel}:`);
     if (reason === null) return;

@@ -12,7 +12,7 @@ const CompanionManagementPage: React.FC = () => {
   const queryParams = new URLSearchParams(location.search);
   
   const isRequestsRoute = location.pathname.endsWith('/requests');
-  const getInitialTab = () => {
+  function getInitialTab() {
     if (isRequestsRoute) return 'requests';
     const tabParam = queryParams.get('tab');
     if (tabParam === 'requests' || tabParam === 'view') return tabParam;
@@ -28,7 +28,7 @@ const CompanionManagementPage: React.FC = () => {
     }
   }, [location.pathname, location.search]);
 
-  const handleTabChange = (tab: 'details' | 'requests' | 'view') => {
+  function handleTabChange(tab: 'details' | 'requests' | 'view') {
     setActiveTab(tab);
     if (tab === 'requests') {
       navigate(`/user/companion-posts/${id}/requests`, { replace: true });

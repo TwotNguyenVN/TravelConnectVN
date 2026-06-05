@@ -51,11 +51,7 @@ export const ProfilePage: React.FC = () => {
   const [defaultCovers, setDefaultCovers] = useState<string[]>([]);
   const [isLoadingCovers, setIsLoadingCovers] = useState(false);
 
-  useEffect(() => {
-    fetchData();
-  }, [user]);
-
-  const fetchData = async () => {
+async function fetchData() {
     if (!user) return;
     try {
       setIsFetching(true);
@@ -103,14 +99,20 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    fetchData();
+  }, [user]);
+
+  
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleAvatarClick = () => fileInputRef.current?.click();
 
-  const fetchDefaultCovers = async () => {
+  async function fetchDefaultCovers() {
     try {
       setIsLoadingCovers(true);
       const res: unknown = await guideService.getDefaultCovers();
@@ -143,25 +145,25 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleCoverClick = () => {
+  function handleCoverClick() {
     setIsCoverModalOpen(true);
     if (defaultCovers.length === 0) {
       fetchDefaultCovers();
     }
   };
 
-  const handleSelectDefaultCover = (url: string) => {
+  function handleSelectDefaultCover(url: string) {
     setFormData(prev => ({ ...prev, coverUrl: url }));
     setIsCoverModalOpen(false);
     toast.success('Đã chọn ảnh bìa mặc định!');
   };
 
-  const handleUploadNewCover = () => {
+  function handleUploadNewCover() {
     setIsCoverModalOpen(false);
     coverInputRef.current?.click();
   };
 
-  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -185,7 +187,7 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleCoverChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
@@ -225,7 +227,7 @@ export const ProfilePage: React.FC = () => {
   });
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  async function handlePasswordChange(e: React.FormEvent) {
     if (e) e.preventDefault();
     
     if (passwordData.newPassword.length < 6) {
@@ -253,7 +255,7 @@ export const ProfilePage: React.FC = () => {
     }
   };
 
-  const toggleTravelStyle = (style: string) => {
+  function toggleTravelStyle(style: string) {
     const currentStyles = formData.travelStyle ? formData.travelStyle.split(',').map(s => s.trim()).filter(Boolean) : [];
     let newStyles;
     if (currentStyles.includes(style)) {
@@ -264,7 +266,7 @@ export const ProfilePage: React.FC = () => {
     setFormData(prev => ({ ...prev, travelStyle: newStyles.join(', ') }));
   };
 
-  const toggleLanguage = (langId: string | number) => {
+  function toggleLanguage(langId: string | number) {
     // If it's the primary language, we don't toggle it here unless we have a better UI
     // For now, let's allow multiple selection for "Ngôn ngữ giao tiếp"
     const currentLangs = formData.otherLanguages ? formData.otherLanguages.split(',').map(s => s.trim()).filter(Boolean) : [];
@@ -279,13 +281,13 @@ export const ProfilePage: React.FC = () => {
     setFormData(prev => ({ ...prev, otherLanguages: newLangs.join(', ') }));
   };
 
-  const handleAddCustomStyle = () => {
+  function handleAddCustomStyle() {
     if (!customStyle.trim()) return;
     toggleTravelStyle(customStyle.trim());
     setCustomStyle('');
   };
 
-  const handleSave = async (e: React.FormEvent) => {
+  async function handleSave(e: React.FormEvent) {
     if (e) e.preventDefault();
     if (!user) return;
     

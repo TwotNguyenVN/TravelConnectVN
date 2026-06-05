@@ -7,7 +7,7 @@ export const RoleSelectionPage: React.FC = () => {
   const navigate = useNavigate();
   const bannerUrl = 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner-select-role.png';
 
-  const handleSelectRole = (role: 'USER' | 'GUIDE') => {
+  function handleSelectRole(role: 'USER' | 'GUIDE') {
     navigate(`/register?role=${role}`);
   };
 

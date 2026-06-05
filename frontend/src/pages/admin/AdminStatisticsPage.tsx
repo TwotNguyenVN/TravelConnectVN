@@ -16,7 +16,7 @@ export function AdminStatisticsPage() {
   const [reportStats, setReportStats] = useState<unknown>(null);
   const [revenueStats, setRevenueStats] = useState<unknown>(null);
 
-  const fetchStats = async () => {
+  async function fetchStats() {
     try {
       setLoading(true);
       setError(null);

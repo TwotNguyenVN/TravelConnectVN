@@ -93,7 +93,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   }, [id, toast]);
 
-  const fetchData = async () => {
+  async function fetchData() {
     if (!id) return;
     setLoading(true);
     setError(null);
@@ -155,7 +155,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   }, [expenseData, user]);
 
-  const handleSaveBankInfo = async () => {
+  async function handleSaveBankInfo() {
     if (!id) return;
     if (!myAccountNo.trim()) {
       toast.error('Vui lòng nhập số tài khoản ngân hàng');
@@ -183,7 +183,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const handleSendRequest = async () => {
+  async function handleSendRequest() {
     if (!user) {
       navigate('/login');
       return;
@@ -207,7 +207,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const handleOpenGroupChat = async () => {
+  async function handleOpenGroupChat() {
     if (!id) return;
     try {
       setChatLoading(true);
@@ -225,7 +225,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const openAddExpenseModal = () => {
+  function openAddExpenseModal() {
     if (!expenseData?.members) return;
     const initialShares: { [key: string]: string } = {};
     expenseData.members.forEach((m: unknown) => {
@@ -240,7 +240,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     setShowAddExpenseModal(true);
   };
 
-  const handleAddExpense = async () => {
+  async function handleAddExpense() {
     if (!id) return;
     if (!expenseTitle.trim()) {
       toast.error('Vui lòng nhập tên khoản chi');
@@ -307,7 +307,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const handleDeleteExpense = async (expenseId: string) => {
+  async function handleDeleteExpense(expenseId: string) {
     if (!id) return;
     if (!window.confirm('Bạn có chắc chắn muốn xóa khoản chi này?')) return;
     try {
@@ -322,7 +322,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const handleSettle = async (debtorId: string, creditorId: string) => {
+  async function handleSettle(debtorId: string, creditorId: string) {
     if (!id) return;
     if (!window.confirm('Xác nhận nợ đã được thanh toán và quyết toán sòng phẳng?')) return;
     try {
@@ -340,7 +340,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     }
   };
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
@@ -348,11 +348,11 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     });
   };
 
-  const formatCurrency = (amount: number) => {
+  function formatCurrency(amount: number) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const isPostExpired = (startDateStr: string) => {
+  function isPostExpired(startDateStr: string) {
     if (!startDateStr) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -380,7 +380,7 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
     </PageContainer>
   );
 
-  const getStatusLabel = (status: string) => {
+  function getStatusLabel(status: string) {
     switch (status) {
       case 'open': return 'Đang tuyển';
       case 'closed': return 'Đã đủ người';

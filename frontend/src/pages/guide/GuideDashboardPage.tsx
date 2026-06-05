@@ -22,11 +22,7 @@ const GuideDashboardPage: React.FC = () => {
     avatarUrl: '',
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+async function fetchData() {
     try {
       setLoading(true);
       const [guideRes, userRes] = await Promise.all([
@@ -55,7 +51,13 @@ const GuideDashboardPage: React.FC = () => {
     }
   };
 
-  const handleToggleVisibility = async (status: 'visible' | 'hidden') => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  
+
+  async function handleToggleVisibility(status: 'visible' | 'hidden') {
     if (!profile) return;
     try {
       const response = await guideService.updateProfile({
@@ -70,7 +72,7 @@ const GuideDashboardPage: React.FC = () => {
     }
   };
 
-  const calculateCompletion = () => {
+  function calculateCompletion() {
     const missing: string[] = [];
     let score = 0;
     const total = 8; // 8 items to check

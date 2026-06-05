@@ -30,7 +30,7 @@ export const AdminTourManagementPage: React.FC = () => {
   const [aiScanResults, setAiScanResults] = useState<Record<string, unknown>>({});
   const { toast } = useToast();
 
-  const handleAiScan = async (tour: Tour) => {
+  async function handleAiScan(tour: Tour) {
     try {
       setScanningTourId(tour.id);
       const textToAnalyze = `${tour.title}. Địa điểm: ${tour.province}. Mô tả: ${tour.description || ''}`;
@@ -51,7 +51,7 @@ export const AdminTourManagementPage: React.FC = () => {
     }
   };
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
       const [toursRes, statsRes] = await Promise.all([
@@ -71,7 +71,7 @@ export const AdminTourManagementPage: React.FC = () => {
     fetchData();
   }, [visibility]);
 
-  const handleModerate = async (id: string, status: string) => {
+  async function handleModerate(id: string, status: string) {
     const actionLabel = status === 'visible' ? 'HIỂN THỊ' : status === 'hidden' ? 'ẨN' : 'CẢNH BÁO';
     const reason = window.prompt(`Nhập lý do thực hiện thao tác ${actionLabel}:`);
     if (reason === null) return;
@@ -94,7 +94,7 @@ export const AdminTourManagementPage: React.FC = () => {
     flagged: { label: 'Cảnh báo', color: '#d97706', bg: '#fffbeb' },
   };
 
-  const getTourImage = (images: unknown) => {
+  function getTourImage(images: unknown) {
     if (!images) return '/default-tour.jpg';
     try {
       const imgs = typeof images === 'string' ? JSON.parse(images) : images;

@@ -24,11 +24,7 @@ const TourImagesPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchImages();
-  }, [id]);
-
-  const fetchImages = async () => {
+async function fetchImages() {
     try {
       setLoading(true);
       const response = await tourService.getTourImages(id!);
@@ -52,7 +48,13 @@ const TourImagesPage: React.FC = () => {
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    fetchImages();
+  }, [id]);
+
+  
+
+  async function handleFileUpload(event: React.ChangeEvent<HTMLInputElement>) {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -94,7 +96,7 @@ const TourImagesPage: React.FC = () => {
     }
   };
 
-  const setCover = (index: number) => {
+  function setCover(index: number) {
     const newImages = images.map((img, i) => ({
       ...img,
       isCover: i === index
@@ -102,7 +104,7 @@ const TourImagesPage: React.FC = () => {
     setImages(newImages);
   };
 
-  const removeImage = (index: number) => {
+  function removeImage(index: number) {
     const newImages = [...images];
     newImages.splice(index, 1);
     // If we removed the cover, set the first one as cover
@@ -112,7 +114,7 @@ const TourImagesPage: React.FC = () => {
     setImages(newImages);
   };
 
-  const handleSave = async () => {
+  async function handleSave() {
     try {
       setSaving(true);
       await tourService.updateTourImages(id!, images);

@@ -189,7 +189,7 @@ export const GuideIncomePage: React.FC = () => {
     });
   }, [tourReportData]);
 
-  const exportToExcel = () => {
+  function exportToExcel() {
     if (monthlySchedules.length === 0) {
       toast.warning('Không có dữ liệu để xuất file Excel');
       return;
@@ -201,7 +201,7 @@ export const GuideIncomePage: React.FC = () => {
     let sheetData: unknown[] = [];
     let fileName = '';
 
-    const getStatusLabelText = (item: unknown) => {
+    function getStatusLabelText(item: unknown) {
       if (item.status === 'cancelled') return 'Đã hủy';
       if (item.status === 'completed') return 'Hoàn thành';
       if (item.status === 'ongoing' || item.status === 'in_progress') return 'Đang đi';
@@ -292,19 +292,7 @@ export const GuideIncomePage: React.FC = () => {
     }
   };
 
-
-
-  useEffect(() => {
-    fetchAllData();
-  }, []);
-
-  useEffect(() => {
-    if (allSchedules.length > 0 || allRequests.length > 0) {
-      calculateStats(selectedFilter, allSchedules);
-    }
-  }, [selectedFilter, allSchedules, allRequests]);
-
-  const fetchAllData = async () => {
+async function fetchAllData() {
     try {
       setLoading(true);
       
@@ -358,7 +346,7 @@ export const GuideIncomePage: React.FC = () => {
     }
   };
 
-  const calculateStats = (filterVal: string, schedules: CombinedSchedule[]) => {
+function calculateStats(filterVal: string, schedules: CombinedSchedule[]) {
     const [yearStr, monthStr] = filterVal.split('-');
     const year = parseInt(yearStr);
     const monthIndex = parseInt(monthStr) - 1; // 0-indexed month
@@ -402,11 +390,27 @@ export const GuideIncomePage: React.FC = () => {
     });
   };
 
-  const formatPrice = (price: number) => {
+
+
+  useEffect(() => {
+    fetchAllData();
+  }, []);
+
+  useEffect(() => {
+    if (allSchedules.length > 0 || allRequests.length > 0) {
+      calculateStats(selectedFilter, allSchedules);
+    }
+  }, [selectedFilter, allSchedules, allRequests]);
+
+  
+
+  
+
+  function formatPrice(price: number) {
     return price.toLocaleString('vi-VN') + ' đ';
   };
 
-  const getScheduleStatusLabel = (sch: CombinedSchedule) => {
+  function getScheduleStatusLabel(sch: CombinedSchedule) {
     if (sch.status === 'cancelled') return <Badge variant="danger">Đã hủy</Badge>;
     if (sch.status === 'completed') return <Badge variant="success">Hoàn thành</Badge>;
     if (sch.status === 'ongoing' || sch.status === 'in_progress') {

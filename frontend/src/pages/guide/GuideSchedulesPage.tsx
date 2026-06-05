@@ -55,7 +55,7 @@ const GuideSchedulesPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const fetchAllSchedules = async () => {
+  async function fetchAllSchedules() {
     try {
       setLoading(true);
       const toursRes = await tourService.getMyGuidedTours({ limit: 100 });
@@ -80,8 +80,8 @@ const GuideSchedulesPage: React.FC = () => {
             try {
               const res = await tourService.getTourDetailForGuide(t.id);
               const tourDetail = res.data || res;
-              const tourSchedules = (tourDetail.tour_schedules || []).map((s: unknown) => {
-                const bookedCount = s.tour_requests?.reduce((sum: number, req: unknown) => sum + req.participant_count, 0) || 0;
+              const tourSchedules = (tourDetail.tour_schedules || []).map((s: any) => {
+                const bookedCount = s.tour_requests?.reduce((sum: number, req: any) => sum + req.participant_count, 0) || 0;
                 return {
                   id: s.id,
                   start_date: s.start_date,
@@ -117,7 +117,7 @@ const GuideSchedulesPage: React.FC = () => {
   }, []);
 
 // Helper to format date in YYYY-MM-DD using local timezone
-const formatDateLocal = (date: Date): string => {
+function formatDateLocal(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -125,7 +125,7 @@ const formatDateLocal = (date: Date): string => {
 };
 
   // --- View schedule detail handler (existing) ---
-  const handleDateClick = (date: Date, _schedule?: unknown) => {
+  function handleDateClick(date: Date, _schedule?: unknown) {
     const dateString = formatDateLocal(date);
     const daySchedules = schedules.filter(s => {
       const sDate = new Date(s.start_date);
@@ -138,7 +138,7 @@ const formatDateLocal = (date: Date): string => {
   };
 
   // --- Create schedule handlers ---
-  const handleCreateSchedule = (date: Date) => {
+  function handleCreateSchedule(date: Date) {
     setCreateDate(date);
     setSelectedTour(null);
     setCreatePrice(0);
@@ -147,14 +147,14 @@ const formatDateLocal = (date: Date): string => {
     setIsCreateModalOpen(true);
   };
 
-  const handleSelectTour = (tour: TourOption) => {
+  function handleSelectTour(tour: TourOption) {
     setSelectedTour(tour);
     setCreatePrice(tour.defaultPrice);
     setCreateMaxParticipants(tour.defaultMaxParticipants || 10);
     setCreateStep('configure');
   };
 
-  const handleConfigureConfirm = () => {
+  function handleConfigureConfirm() {
     if (createPrice <= 0) {
       toast.error('Giá tour phải lớn hơn 0');
       return;
@@ -166,7 +166,7 @@ const formatDateLocal = (date: Date): string => {
     setCreateStep('confirm');
   };
 
-  const handleFinalConfirm = async () => {
+  async function handleFinalConfirm() {
     if (!selectedTour || !createDate) return;
     try {
       setIsCreating(true);
@@ -187,14 +187,14 @@ const formatDateLocal = (date: Date): string => {
     }
   };
 
-  const handleCloseCreateModal = () => {
+  function handleCloseCreateModal() {
     setIsCreateModalOpen(false);
     setSelectedTour(null);
     setCreateStep('select-tour');
   };
 
   // --- Status helpers ---
-  const getScheduleStatus = (sch: CombinedSchedule) => {
+  function getScheduleStatus(sch: CombinedSchedule) {
     if (!sch) return 'empty';
     if (sch.status === 'cancelled') return 'cancelled';
     if (sch.status === 'completed') {
@@ -219,7 +219,7 @@ const formatDateLocal = (date: Date): string => {
     return 'full';
   };
 
-  const getStatusLabel = (status: string) => {
+  function getStatusLabel(status: string) {
     if (status === 'cancelled') return 'Đã hủy';
     if (status === 'completed') return 'Đã hoàn thành';
     if (status === 'expired') return 'Quá hạn';
@@ -232,7 +232,7 @@ const formatDateLocal = (date: Date): string => {
   };
 
   // --- Weekly view helpers ---
-  const getStartOfWeek = (date: Date) => {
+  function getStartOfWeek(date: Date) {
     const temp = new Date(date);
     const day = temp.getDay();
     const diff = temp.getDate() - day + (day === 0 ? -6 : 1);
@@ -241,7 +241,7 @@ const formatDateLocal = (date: Date): string => {
     return start;
   };
 
-  const getWeekDays = () => {
+  function getWeekDays() {
     const start = getStartOfWeek(currentWeekDate);
     return Array.from({ length: 7 }).map((_, idx) => {
       const d = new Date(start);
@@ -250,13 +250,13 @@ const formatDateLocal = (date: Date): string => {
     });
   };
 
-  const handlePrevWeek = () => {
+  function handlePrevWeek() {
     const prev = new Date(currentWeekDate);
     prev.setDate(currentWeekDate.getDate() - 7);
     setCurrentWeekDate(prev);
   };
 
-  const handleNextWeek = () => {
+  function handleNextWeek() {
     const next = new Date(currentWeekDate);
     next.setDate(currentWeekDate.getDate() + 7);
     setCurrentWeekDate(next);
@@ -264,7 +264,7 @@ const formatDateLocal = (date: Date): string => {
 
   const handleCurrentWeek = () => setCurrentWeekDate(new Date());
 
-  const getDayName = (dayIndex: number) => {
+  function getDayName(dayIndex: number) {
     const names = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chủ Nhật'];
     return names[dayIndex];
   };
@@ -274,7 +274,7 @@ const formatDateLocal = (date: Date): string => {
   const endOfWeek = weekDays[6];
 
   // --- Create Modal title based on step ---
-  const getCreateModalTitle = () => {
+  function getCreateModalTitle() {
     if (!createDate) return 'Tạo lịch khởi hành';
     const dateLabel = createDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     if (createStep === 'select-tour') return `📅 Chọn tour — ${dateLabel}`;

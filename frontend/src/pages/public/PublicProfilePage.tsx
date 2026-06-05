@@ -45,7 +45,7 @@ export const PublicProfilePage: React.FC = () => {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     if (!dateString) return 'Chưa cập nhật';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: 'numeric',
@@ -54,7 +54,7 @@ export const PublicProfilePage: React.FC = () => {
     });
   };
 
-  const formatBirthDate = (dateString: string) => {
+  function formatBirthDate(dateString: string) {
     if (!dateString) return 'Chưa cập nhật';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: 'numeric',
@@ -64,7 +64,7 @@ export const PublicProfilePage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    async function fetchProfile() {
       try {
         setLoading(true);
         const res: unknown = await userService.getPublicProfile(id!);
@@ -321,7 +321,9 @@ export const PublicProfilePage: React.FC = () => {
                           const firstImg = parsed[0];
                           coverImage = typeof firstImg === 'string' ? firstImg : (firstImg.imageUrl || coverImage);
                         }
-                      } catch (e) {}
+                      } catch (e) {
+                        // Ignore parse error
+                      }
                     } else if (Array.isArray(post.images) && post.images.length > 0) {
                       const firstImg = post.images[0];
                       coverImage = typeof firstImg === 'string' ? firstImg : (firstImg.imageUrl || coverImage);

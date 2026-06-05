@@ -39,7 +39,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
     certificate: [],
   });
 
-  const fetchStatus = async () => {
+  async function fetchStatus() {
     try {
       setLoading(true);
       const response: unknown = await verificationService.getStatus();
@@ -57,7 +57,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
     fetchStatus();
   }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: string) {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setFiles(prev => ({ ...prev, [type]: file }));
@@ -70,7 +70,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
     }
   };
 
-  const handleMultipleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  function handleMultipleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: string) {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setFiles(prev => ({ ...prev, [type]: [...(prev[type] || []), ...newFiles] }));
@@ -88,7 +88,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     
     if (!files.national_id_front || !files.national_id_back || !files.tour_guide_card || files.certificate.length === 0) {
@@ -154,7 +154,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
     }
   };
 
-  const getStatusBadge = (statusStr: string) => {
+  function getStatusBadge(statusStr: string) {
     switch (statusStr) {
       case 'approved':
         return <Badge variant="success">Đã xác minh</Badge>;

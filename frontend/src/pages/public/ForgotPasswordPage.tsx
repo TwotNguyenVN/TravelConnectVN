@@ -13,7 +13,7 @@ export const ForgotPasswordPage: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleRequestOTP = async (e: React.FormEvent) => {
+  async function handleRequestOTP(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);

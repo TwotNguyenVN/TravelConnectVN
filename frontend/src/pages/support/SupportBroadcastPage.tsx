@@ -50,12 +50,12 @@ export const SupportBroadcastPage: React.FC = () => {
   const [sentHistory, setSentHistory] = useState<SentNotification[]>([]);
   const [showPreview, setShowPreview] = useState(false);
 
-  const handleApplyTemplate = (tpl: { title: string; message: string }) => {
+  function handleApplyTemplate(tpl: { title: string; message: string }) {
     setTitle(tpl.title);
     setMessage(tpl.message);
   };
 
-  const handleSend = async () => {
+  async function handleSend() {
     if (!title.trim() || !message.trim()) {
       toast.error('Vui lòng nhập tiêu đề và nội dung thông báo');
       return;

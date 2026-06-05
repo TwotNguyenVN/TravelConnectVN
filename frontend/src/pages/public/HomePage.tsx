@@ -18,7 +18,7 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
 
-  const getDynamicBanner = () => {
+  function getDynamicBanner() {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 10) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_sang.png";
     if (hour >= 10 && hour < 14) return "https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/banner_home/bannerhome_trua.png";
@@ -40,7 +40,7 @@ export const HomePage: React.FC = () => {
     p.toLowerCase().includes(location.toLowerCase())
   );
 
-  const handleSearch = () => {
+  function handleSearch() {
     const params = new URLSearchParams();
     if (location) params.set('province', location);
     if (startDate) params.set('startDate', startDate);
@@ -51,27 +51,27 @@ export const HomePage: React.FC = () => {
     navigate(`/tours?${params.toString()}`);
   };
 
-  const handleMinBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleMinBudgetChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = parseInt(e.target.value, 10);
     if (maxBudget - value >= minGap) {
       setMinBudget(value);
     }
   };
 
-  const handleMaxBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleMaxBudgetChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = parseInt(e.target.value, 10);
     if (value - minBudget >= minGap) {
       setMaxBudget(value);
     }
   };
 
-  const formatPrice = (price: number) => {
+  function formatPrice(price: number) {
     if (price === 0) return '0đ';
     if (price >= 100000000) return '100tr+';
     return `${(price / 1000000).toFixed(1).replace('.0', '')}tr`;
   };
 
-  const isPostExpired = (startDateStr: string) => {
+  function isPostExpired(startDateStr: string) {
     if (!startDateStr) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -81,7 +81,7 @@ export const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
+    function handleClickOutside(event: MouseEvent) {
       if (budgetRef.current && !budgetRef.current.contains(event.target as Node)) {
         setIsBudgetOpen(false);
       }
@@ -94,7 +94,7 @@ export const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchPublicData = async () => {
+    async function fetchPublicData() {
       try {
         setLoading(true);
         const [toursRes, guidesRes, postsRes] = await Promise.all([
@@ -117,7 +117,7 @@ export const HomePage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    const fetchRecommendations = async () => {
+    async function fetchRecommendations() {
       if (user && recommendedTours.length === 0) {
         try {
           const recRes = await getRecommendedTours();

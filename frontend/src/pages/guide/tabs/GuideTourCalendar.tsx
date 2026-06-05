@@ -18,7 +18,7 @@ interface GuideTourCalendarProps {
 }
 
 // Helper to format date in YYYY-MM-DD using local timezone
-const formatDateLocal = (date: Date): string => {
+function formatDateLocal(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
@@ -156,11 +156,11 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
   const handlePrevMonth = () => setCurrentDate(new Date(year, month - 1, 1));
   const handleNextMonth = () => setCurrentDate(new Date(year, month + 1, 1));
 
-  const formatPrice = (price: number) => {
+  function formatPrice(price: number) {
     return (price / 1000).toLocaleString() + 'K';
   };
 
-  const handleDayClick = (dayData: unknown) => {
+  function handleDayClick(dayData: unknown) {
     if (!dayData.dateObj) return;
 
     if (dayData.isOtherMonth) {
@@ -182,7 +182,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     }
   };
 
-  const getScheduleStatus = (sch: Schedule) => {
+  function getScheduleStatus(sch: Schedule) {
     if (!sch) return "available";
     if (sch.status === 'cancelled') return "cancelled";
     if (sch.status === 'completed') {
@@ -207,7 +207,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     return sch.status || "available";
   };
 
-  const getScheduleStatusClass = (schedule: Schedule) => {
+  function getScheduleStatusClass(schedule: Schedule) {
     if (!schedule) return "";
     const status = getScheduleStatus(schedule);
     
@@ -225,7 +225,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     return "tc-day--full";
   };
 
-  const renderDayStatusIcon = (schedule: Schedule) => {
+  function renderDayStatusIcon(schedule: Schedule) {
     if (!schedule) return null;
     const status = getScheduleStatus(schedule);
 

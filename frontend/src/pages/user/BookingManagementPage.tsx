@@ -151,7 +151,7 @@ export const BookingManagementPage: React.FC = () => {
     fetchData();
   }, [fetchData]);
 
-  const handlePayment = async (requestId: string) => {
+  async function handlePayment(requestId: string) {
     try {
       const response = await paymentService.createVnpayUrl(requestId, 'full');
       if (response.success && response.data.paymentUrl) {
@@ -164,7 +164,7 @@ export const BookingManagementPage: React.FC = () => {
     }
   };
 
-  const handleCancelTour = async (activity: NormalizedActivity) => {
+  async function handleCancelTour(activity: NormalizedActivity) {
     const hasPaid = activity.amountPaid && activity.amountPaid > 0;
     let confirmMsg = 'Bạn có chắc chắn muốn hủy yêu cầu đặt tour này?';
     
@@ -192,7 +192,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
     }
   };
 
-  const handleOpenGroupChat = async (companionPostId: string) => {
+  async function handleOpenGroupChat(companionPostId: string) {
     try {
       const res = await chatService.createGroupCompanion(companionPostId);
       if (res.success && res.data) {
@@ -206,7 +206,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
     }
   };
 
-  const handleOpenDirectChat = async (userId: string) => {
+  async function handleOpenDirectChat(userId: string) {
     try {
       const res = await chatService.createDirect(userId);
       if (res.success && res.data) {
@@ -220,7 +220,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
     }
   };
 
-  const handleCancelCompanion = async (id: string) => {
+  async function handleCancelCompanion(id: string) {
     if (window.confirm('Bạn có chắc chắn muốn hủy yêu cầu tham gia này?')) {
       try {
         const response = await companionService.cancelRequest(id);
@@ -234,7 +234,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
     }
   };
 
-  const getStatusInfo = (status: string, type: 'tour' | 'companion', payPercent: number = 100) => {
+  function getStatusInfo(status: string, type: 'tour' | 'companion', payPercent: number = 100) {
     switch (status) {
       case 'paid':
         if (payPercent < 100) {
@@ -266,19 +266,19 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
     }
   };
 
-  const handleReviewTour = (activity: NormalizedActivity) => {
+  function handleReviewTour(activity: NormalizedActivity) {
     setReviewModal({ isOpen: true, type: 'tour', activity });
   };
 
-  const handleReviewGuide = (activity: NormalizedActivity) => {
+  function handleReviewGuide(activity: NormalizedActivity) {
     setReviewModal({ isOpen: true, type: 'guide', activity });
   };
 
-  const handleReviewCompanion = (activity: NormalizedActivity) => {
+  function handleReviewCompanion(activity: NormalizedActivity) {
     setReviewModal({ isOpen: true, type: 'companion', activity });
   };
 
-  const handleReviewSuccess = () => {
+  function handleReviewSuccess() {
     setReviewModal({ isOpen: false, type: 'tour', activity: null });
     fetchData();
   };

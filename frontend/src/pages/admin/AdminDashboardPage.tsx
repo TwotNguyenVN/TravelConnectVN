@@ -26,7 +26,7 @@ export function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
       setError(null);

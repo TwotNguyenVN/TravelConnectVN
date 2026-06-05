@@ -39,18 +39,14 @@ export const ActiveTourPage: React.FC = () => {
   const [requests, setRequests] = useState<unknown[]>([]);
   const [candidateTours, setCandidateTours] = useState<CombinedSchedule[]>([]);
 
-  const formatDateLocal = (date: Date): string => {
+  function formatDateLocal(date: Date) {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+async function fetchData() {
     try {
       setLoading(true);
       setActiveTour(null);
@@ -125,7 +121,13 @@ export const ActiveTourPage: React.FC = () => {
     }
   };
 
-  const handleStartTour = async (tourId: string, scheduleId: string) => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  
+
+  async function handleStartTour(tourId: string, scheduleId: string) {
     if (!window.confirm('Bạn có chắc chắn muốn BẮT ĐẦU hành trình này? Trạng thái tour sẽ được cập nhật thành Đang diễn ra.')) return;
     try {
       setIsSaving(true);
@@ -139,7 +141,7 @@ export const ActiveTourPage: React.FC = () => {
     }
   };
 
-  const handleCompleteTour = async (tourId: string, scheduleId: string) => {
+  async function handleCompleteTour(tourId: string, scheduleId: string) {
     if (!window.confirm('Xác nhận HOÀN THÀNH hành trình này? Trạng thái tour và các booking liên quan sẽ được cập nhật thành Đã hoàn thành.')) return;
     try {
       setIsSaving(true);
@@ -153,7 +155,7 @@ export const ActiveTourPage: React.FC = () => {
     }
   };
 
-  const parsePassengersFromNote = (note: string): Passenger[] => {
+  function parsePassengersFromNote(note: string) {
     if (!note) return [];
     const lines = note.split('\n');
     const passengers: Passenger[] = [];
@@ -191,7 +193,7 @@ export const ActiveTourPage: React.FC = () => {
     return passengers;
   };
 
-  const formatDate = (dateString: string | Date) => {
+  function formatDate(dateString: string | Date) {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       weekday: 'long',

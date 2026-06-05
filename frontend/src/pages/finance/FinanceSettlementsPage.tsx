@@ -31,7 +31,7 @@ export const FinanceSettlementsPage: React.FC = () => {
   const [selectedSettlement, setSelectedSettlement] = useState<GuideSettlement | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const fetchSettlements = async () => {
+  async function fetchSettlements() {
     try {
       setLoading(true);
       const res = await adminApi.getGuideSettlements();
@@ -54,7 +54,7 @@ export const FinanceSettlementsPage: React.FC = () => {
     fetchSettlements();
   }, []);
 
-  const handleSettleSubmit = async () => {
+  async function handleSettleSubmit() {
     if (!selectedSettlement) return;
     try {
       setIsProcessing(true);

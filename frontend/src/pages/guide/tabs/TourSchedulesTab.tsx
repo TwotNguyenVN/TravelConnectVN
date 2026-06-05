@@ -28,7 +28,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     fetchTourDetail();
   }, [tourId]);
 
-  const fetchTourDetail = async () => {
+  async function fetchTourDetail() {
     try {
       setLoading(true);
       const res = await tourService.getTourDetailForGuide(tourId);
@@ -45,7 +45,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     }
   };
 
-  const handleDateClick = (date: Date, schedule: unknown) => {
+  function handleDateClick(date: Date, schedule: unknown) {
     if (schedule) {
       navigate(`/guide/tours/${tourId}/schedules/${schedule.id}`);
       return;
@@ -58,7 +58,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     setIsModalOpen(true);
   };
 
-  const handleSaveSchedule = async () => {
+  async function handleSaveSchedule() {
     if (!selectedDate || price <= 0 || maxParticipants <= 0) {
       toast.warning('Vui lòng nhập giá và số chỗ hợp lệ');
       return;
@@ -92,7 +92,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     }
   };
 
-  const handleDeleteSchedule = async () => {
+  async function handleDeleteSchedule() {
     if (!editingSchedule) return;
     if (!window.confirm('Bạn có chắc muốn xóa lịch này không?')) return;
 

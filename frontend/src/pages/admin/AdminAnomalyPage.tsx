@@ -18,7 +18,7 @@ export function AdminAnomalyPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAlerts = async () => {
+  async function fetchAlerts() {
     try {
       setLoading(true);
       setError(null);
