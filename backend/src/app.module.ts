@@ -31,10 +31,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import {
-  MaintenanceService,
-  MaintenanceGuard,
-} from './common/guards/maintenance.guard';
+import { MaintenanceGuard } from './common/guards/maintenance.guard';
 import { MaintenanceModule } from './common/maintenance.module';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
