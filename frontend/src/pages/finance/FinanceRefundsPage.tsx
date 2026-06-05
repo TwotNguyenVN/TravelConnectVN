@@ -6,7 +6,7 @@ import { useToast } from '../../contexts/ToastContext';
 export const FinanceRefundsPage: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
-  const [refunds, setRefunds] = useState<unknown[]>([]);
+  const [refunds, setRefunds] = useState<any[]>([]);
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [note, setNote] = useState('');
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
@@ -48,7 +48,7 @@ export const FinanceRefundsPage: React.FC = () => {
       } else {
         toast.error(res.message || 'Xử lý hoàn tiền thất bại');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Failed to process refund', err);
       toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi xử lý hoàn tiền');
     }

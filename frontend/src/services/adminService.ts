@@ -21,7 +21,7 @@ export const adminService = {
     return api.get('/admin/statistics/revenue');
   },
 
-  getUsers: async (params: Record<string, unknown>) => {
+  getUsers: async (params: any) => {
     return api.get('/admin/users', { params });
   },
 
@@ -37,7 +37,7 @@ export const adminService = {
     return api.patch(`/admin/guides/verification/${id}`, data);
   },
 
-  getReports: async (params: Record<string, unknown>) => {
+  getReports: async (params: any) => {
     return api.get('/admin/reports', { params });
   },
 
@@ -45,7 +45,7 @@ export const adminService = {
     return api.patch(`/admin/reports/${id}`, data);
   },
 
-  getTours: async (params: Record<string, unknown>) => {
+  getTours: async (params: any) => {
     return api.get('/admin/tours', { params });
   },
 
@@ -53,7 +53,7 @@ export const adminService = {
     return api.patch(`/admin/tours/${id}/moderation`, data);
   },
 
-  getCompanionPosts: async (params: Record<string, unknown>) => {
+  getCompanionPosts: async (params: any) => {
     return api.get('/admin/companion-posts', { params });
   },
 
@@ -61,7 +61,7 @@ export const adminService = {
     return api.patch(`/admin/companion-posts/${id}/moderation`, data);
   },
 
-  getActivityLogs: async (params: Record<string, unknown>) => {
+  getActivityLogs: async (params: any) => {
     return api.get('/admin/activity-logs', { params });
   },
 };

@@ -36,7 +36,7 @@ export const ActiveTourPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [activeTour, setActiveTour] = useState<CombinedSchedule | null>(null);
-  const [requests, setRequests] = useState<unknown[]>([]);
+  const [requests, setRequests] = useState<any[]>([]);
   const [candidateTours, setCandidateTours] = useState<CombinedSchedule[]>([]);
 
   function formatDateLocal(date: Date) {
@@ -59,12 +59,12 @@ async function fetchData() {
         const allSchedules: CombinedSchedule[] = [];
 
         await Promise.all(
-          toursList.map(async (t: unknown) => {
+          toursList.map(async (t: any) => {
             try {
               const res = await tourService.getTourDetailForGuide(t.id);
               const tourDetail = res.data || res;
-              (tourDetail.tour_schedules || []).forEach((s: unknown) => {
-                const bookedCount = s.tour_requests?.reduce((sum: number, req: unknown) => sum + req.participant_count, 0) || 0;
+              (tourDetail.tour_schedules || []).forEach((s: any) => {
+                const bookedCount = s.tour_requests?.reduce((sum: number, req: any) => sum + req.participant_count, 0) || 0;
                 allSchedules.push({
                   id: s.id,
                   start_date: s.start_date,
@@ -134,7 +134,7 @@ async function fetchData() {
       await tourService.updateTourSchedule(tourId, scheduleId, { status: 'ongoing' });
       toast.success('Bắt đầu hành trình thành công! Chúc bạn có một chuyến đi an toàn.');
       await fetchData();
-    } catch (error: unknown) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi bắt đầu tour');
     } finally {
       setIsSaving(false);
@@ -148,7 +148,7 @@ async function fetchData() {
       await tourService.updateTourSchedule(tourId, scheduleId, { status: 'completed' });
       toast.success('Hành trình đã hoàn thành xuất sắc!');
       await fetchData();
-    } catch (error: unknown) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi hoàn thành tour');
     } finally {
       setIsSaving(false);

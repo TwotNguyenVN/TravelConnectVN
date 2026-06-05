@@ -46,11 +46,11 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 
 interface CustomAxiosInstance extends Omit<AxiosInstance, 'get' | 'post' | 'put' | 'patch' | 'delete'> {
-  get<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
-  post<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
-  put<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
-  patch<T = unknown>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T>;
-  delete<T = unknown>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  get<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
+  post<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  put<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  patch<T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T>;
+  delete<T = any>(url: string, config?: AxiosRequestConfig): Promise<T>;
 }
 
 export default api as unknown as CustomAxiosInstance;

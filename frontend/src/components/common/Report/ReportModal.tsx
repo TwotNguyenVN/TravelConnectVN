@@ -31,7 +31,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({ targetType, targetId, 
 
     try {
       setSubmitting(true);
-      const payload: unknown = {
+      const payload: any = {
         target_type: targetType,
         reason,
         description

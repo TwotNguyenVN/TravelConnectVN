@@ -14,7 +14,7 @@ export interface CompanionPost {
   requirements?: string;
   business_status: 'open' | 'closed' | 'cancelled' | 'completed';
   visibility_status: 'visible' | 'hidden';
-  images?: unknown[];
+  images?: any[];
   created_at: string;
   users?: {
     id: string;
@@ -56,15 +56,15 @@ export const companionService = {
     return api.get(`/companion-posts/${id}`);
   },
 
-  getMyPosts: async (params: Record<string, unknown>) => {
+  getMyPosts: async (params: any) => {
     return api.get('/companion-posts/my-posts', { params });
   },
 
-  createPost: async (data: Record<string, unknown>) => {
+  createPost: async (data: any) => {
     return api.post('/companion-posts', data);
   },
 
-  updatePost: async (id: string, data: Record<string, unknown>) => {
+  updatePost: async (id: string, data: any) => {
     return api.patch(`/companion-posts/${id}`, data);
   },
 
@@ -77,11 +77,11 @@ export const companionService = {
     return api.post('/companion-posts/requests', data);
   },
 
-  getMySentRequests: async (params: Record<string, unknown>) => {
+  getMySentRequests: async (params: any) => {
     return api.get('/companion-posts/requests/me', { params });
   },
 
-  getPostRequests: async (postId: string, params: Record<string, unknown>) => {
+  getPostRequests: async (postId: string, params: any) => {
     return api.get(`/companion-posts/${postId}/requests`, { params });
   },
 
@@ -106,7 +106,7 @@ export const companionService = {
     return api.post('/companion-reviews', data);
   },
 
-  getHostReviews: async (hostId: string, params?: unknown) => {
+  getHostReviews: async (hostId: string, params?: any) => {
     return api.get(`/companion-reviews/host/${hostId}`, { params });
   },
 

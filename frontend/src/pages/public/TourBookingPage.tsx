@@ -25,8 +25,8 @@ const TourBookingPage: React.FC = () => {
   const scheduleId = searchParams.get('scheduleId');
   const initialParticipants = parseInt(searchParams.get('participants') || '1', 10);
 
-  const [tour, setTour] = useState<unknown>(null);
-  const [schedule, setSchedule] = useState<unknown>(null);
+  const [tour, setTour] = useState<any>(null);
+  const [schedule, setSchedule] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState<number>(1); // Changed from union to number to avoid OXC issues
@@ -61,7 +61,7 @@ const TourBookingPage: React.FC = () => {
         if (res.success && res.data) {
           setTour(res.data);
           if (scheduleId && res.data.schedules) {
-            const selected = res.data.schedules.find((s: unknown) => s.id === scheduleId);
+            const selected = res.data.schedules.find((s: any) => s.id === scheduleId);
             setSchedule(selected);
           }
         }
@@ -106,7 +106,7 @@ const TourBookingPage: React.FC = () => {
     setPassengers(updated);
   };
 
-  function formatDate(date: unknown) {
+  function formatDate(date: any) {
     if (!date) return 'Linh hoạt';
     return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
@@ -224,7 +224,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
         throw new Error("Không thể tạo liên kết thanh toán");
       }
 
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Booking submission error:", error);
       const msg = error.response?.data?.message || error.message || "Có lỗi xảy ra trong quá trình xử lý.";
       toast.error(msg);
@@ -315,7 +315,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
                             <label>Giới tính</label>
                             <select 
                               value={passenger.gender} 
-                              onChange={(e) => handlePassengerChange(index, 'gender', e.target.value as unknown)}
+                              onChange={(e) => handlePassengerChange(index, 'gender', e.target.value as any)}
                             >
                               <option value="male">Nam</option>
                               <option value="female">Nữ</option>

@@ -152,7 +152,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
         displayTitle: p.title || p.name || 'Điểm đến',
         displayNumber: p.sequenceNo || p.day || 0
       };
-    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as unknown[];
+    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as any[];
   }, []);
 
   // Process points and extract coordinates

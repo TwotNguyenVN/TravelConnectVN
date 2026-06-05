@@ -43,7 +43,7 @@ export const ContentDashboardPage: React.FC = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [tourStats, setTourStats] = useState<unknown>(null);
+  const [tourStats, setTourStats] = useState<any>(null);
   const [pendingRequests, setPendingRequests] = useState<VerificationRequest[]>([]);
 
   async function fetchData() {
@@ -64,11 +64,11 @@ export const ContentDashboardPage: React.FC = () => {
       if (verificationRequestsRes?.data) {
         // Filter only pending requests and take the top 3
         const pending = verificationRequestsRes.data
-          .filter((req: unknown) => req.status === 'pending')
+          .filter((req: any) => req.status === 'pending')
           .slice(0, 3);
         setPendingRequests(pending);
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error loading dashboard stats:', err);
       toast.error('Không thể tải thông tin thống kê kiểm duyệt');
     } finally {
@@ -326,7 +326,7 @@ export const ContentDashboardPage: React.FC = () => {
                     paddingAngle={3}
                     dataKey="value"
                   >
-                    {tourStats.categories.map((_entry: unknown, index: number) => (
+                    {tourStats.categories.map((_entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>

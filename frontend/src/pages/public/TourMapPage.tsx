@@ -36,10 +36,10 @@ const MapController: React.FC<{ center: [number, number]; zoom: number }> = ({ c
 export const TourMapPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [tour, setTour] = useState<unknown>(null);
+  const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState<unknown>(null);
+  const [selectedLocation, setSelectedLocation] = useState<any>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>([21.0285, 105.8542]); // Default Hanoi
   const [mapZoom, setMapZoom] = useState(13);
 
@@ -48,12 +48,12 @@ export const TourMapPage: React.FC = () => {
       if (!id) return;
       try {
         setLoading(true);
-        const response: unknown = await tourService.getTourDetail(id);
+        const response: any = await tourService.getTourDetail(id);
         if (response.success && response.data) {
           setTour(response.data);
           
           // Filter locations with coordinates
-          const validLocations = response.data.itinerary?.filter((loc: unknown) => loc.lat && loc.lng) || [];
+          const validLocations = response.data.itinerary?.filter((loc: any) => loc.lat && loc.lng) || [];
           if (validLocations.length > 0) {
             setMapCenter([validLocations[0].lat, validLocations[0].lng]);
             setMapZoom(14);
@@ -73,7 +73,7 @@ export const TourMapPage: React.FC = () => {
     fetchTourMapData();
   }, [id]);
 
-  function handleLocationClick(loc: unknown) {
+  function handleLocationClick(loc: any) {
     if (loc.lat && loc.lng) {
       setMapCenter([loc.lat, loc.lng]);
       setSelectedLocation(loc);
@@ -101,8 +101,8 @@ export const TourMapPage: React.FC = () => {
     );
   }
 
-  const validLocations = tour.itinerary?.filter((loc: unknown) => loc.lat && loc.lng) || [];
-  const polylinePositions = validLocations.map((loc: unknown) => [loc.lat, loc.lng]);
+  const validLocations = tour.itinerary?.filter((loc: any) => loc.lat && loc.lng) || [];
+  const polylinePositions = validLocations.map((loc: any) => [loc.lat, loc.lng]);
 
   return (
     <div className="tour-map-container">
@@ -132,7 +132,7 @@ export const TourMapPage: React.FC = () => {
             <p>{validLocations.length} địa điểm trên bản đồ</p>
           </div>
           <div className="location-list">
-            {tour.itinerary?.map((loc: unknown, index: number) => (
+            {tour.itinerary?.map((loc: any, index: number) => (
               <div 
                 key={index} 
                 className={`location-item ${selectedLocation?.day === loc.day ? 'active' : ''} ${!(loc.lat && loc.lng) ? 'no-coords' : ''}`}
@@ -165,7 +165,7 @@ export const TourMapPage: React.FC = () => {
               />
               <MapController center={mapCenter} zoom={mapZoom} />
               
-              {validLocations.map((loc: unknown, index: number) => (
+              {validLocations.map((loc: any, index: number) => (
                 <Marker 
                   key={index} 
                   position={[loc.lat, loc.lng]}

@@ -141,7 +141,7 @@ export function ContentReportHeatmapPage() {
                     cx="50%"
                     cy="50%"
                     outerRadius={90}
-                    label={(props: unknown) => `${translateStatus(props.status || props.name || 'Unknown')}: ${((props.percent || 0) * 100).toFixed(0)}%`}
+                    label={(props: any) => `${translateStatus(props.status || props.name || 'Unknown')}: ${((props.percent || 0) * 100).toFixed(0)}%`}
                   >
                     {data.byStatus.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[(index + 2) % COLORS.length]} />

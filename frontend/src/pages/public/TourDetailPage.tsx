@@ -21,8 +21,8 @@ export const TourDetailPage: React.FC = () => {
   const { toast } = useToast();
   
   const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'map' | 'reviews'>('overview');
-  const [tour, setTour] = useState<unknown>(null);
-  const [accommodations, setAccommodations] = useState<unknown[]>([]);
+  const [tour, setTour] = useState<any>(null);
+  const [accommodations, setAccommodations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const participantCount = 1;
   const [isFavorited, setIsFavorited] = useState(false);
@@ -31,7 +31,7 @@ export const TourDetailPage: React.FC = () => {
   
   // Gallery Carousel State
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedSchedule, setSelectedSchedule] = useState<unknown>(null);
+  const [selectedSchedule, setSelectedSchedule] = useState<any>(null);
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
   const [showReportModal, setShowReportModal] = useState(false);
 
@@ -49,7 +49,7 @@ export const TourDetailPage: React.FC = () => {
         setLoading(true);
         
         // Parallelize all primary requests to avoid waterfall loading
-        const [detailRes, reviewsRes, accRes, favRes]: [unknown, unknown, unknown, unknown] = await Promise.all([
+        const [detailRes, reviewsRes, accRes, favRes]: [any, any, any, any] = await Promise.all([
           tourService.getTourDetail(id),
           tourService.getTourReviews(id),
           getTourAccommodations(id),
@@ -160,7 +160,7 @@ export const TourDetailPage: React.FC = () => {
         setIsFavorited(true);
         toast.success("Đã thêm vào danh sách yêu thích");
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error("Favorite error:", error);
       toast.error("Có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
@@ -193,7 +193,7 @@ export const TourDetailPage: React.FC = () => {
     );
   }
 
-  function formatDate(date: unknown) {
+  function formatDate(date: any) {
     if (!date) return 'Linh hoạt';
     return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
@@ -350,7 +350,7 @@ export const TourDetailPage: React.FC = () => {
                 </h2>
                 <div className="tc-itinerary-accordion" style={{ marginTop: '20px' }}>
                   {tour.itinerary?.length > 0 ? (
-                    tour.itinerary.map((item: unknown) => (
+                    tour.itinerary.map((item: any) => (
                       <div key={item.day} className="tc-accordion-item" style={{ marginBottom: '12px' }}>
                         <div 
                           className="tc-accordion-header" 
@@ -454,7 +454,7 @@ export const TourDetailPage: React.FC = () => {
                     <span>🏨</span> Nơi lưu trú dự kiến
                   </h2>
                   <div className="tc-accommodation-list">
-                    {accommodations.map((acc: unknown, index: number) => (
+                    {accommodations.map((acc: any, index: number) => (
                       <div key={acc.id || index} className="tc-accommodation-card">
                         {acc.image_url && (
                           <div className="tc-acc-image-wrapper">
@@ -563,7 +563,7 @@ export const TourDetailPage: React.FC = () => {
                 </h3>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                   {tour.destinations?.length > 0 ? (
-                    tour.destinations.map((item: unknown) => (
+                    tour.destinations.map((item: any) => (
                       <div key={item.id} className="tc-itinerary-card" style={{ 
                         background: 'white', 
                         padding: '20px', 
@@ -620,7 +620,7 @@ export const TourDetailPage: React.FC = () => {
               </h2>
               <div className="tc-review-list">
                 {tour.reviews?.length > 0 ? (
-                  tour.reviews.map((review: unknown) => (
+                  tour.reviews.map((review: any) => (
                     <div key={review.id} className="tc-review-item" style={{ marginBottom: '16px', paddingBottom: '16px', borderBottom: '1px solid #eee' }}>
                       <div className="tc-review-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '12px' }}>
                         <img 

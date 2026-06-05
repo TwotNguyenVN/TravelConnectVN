@@ -20,7 +20,7 @@ export const AdminReviewManagementPage: React.FC = () => {
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [scanningReviewId, setScanningReviewId] = useState<string | null>(null);
-  const [aiScanResults, setAiScanResults] = useState<Record<string, unknown>>({});
+  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   async function fetchReviews() {
@@ -70,11 +70,11 @@ export const AdminReviewManagementPage: React.FC = () => {
   async function handleToggleVisibility(review: ReviewItem) {
     try {
       const newStatus = review.visibilityStatus === 'visible' ? 'hidden' : 'visible';
-      await reviewService.updateReviewVisibility(review.type as unknown, review.id, newStatus);
+      await reviewService.updateReviewVisibility(review.type as any, review.id, newStatus);
       
       setReviews(prev => prev.map(r => 
         (r.id === review.id && r.type === review.type) 
-        ? { ...r, visibilityStatus: newStatus as unknown } 
+        ? { ...r, visibilityStatus: newStatus as any } 
         : r
       ));
       
@@ -119,7 +119,7 @@ export const AdminReviewManagementPage: React.FC = () => {
         ].map(tab => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as unknown)}
+            onClick={() => setActiveTab(tab.id as any)}
             style={{
               padding: '8px 16px',
               borderRadius: '8px',

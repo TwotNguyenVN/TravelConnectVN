@@ -160,7 +160,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
     return (price / 1000).toLocaleString() + 'K';
   };
 
-  function handleDayClick(dayData: unknown) {
+  function handleDayClick(dayData: any) {
     if (!dayData.dateObj) return;
 
     if (dayData.isOtherMonth) {
@@ -326,7 +326,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                     {hasSchedules && primarySchedule && renderDayStatusIcon(primarySchedule)}
                     {hasSchedules && (
                       <div className="tc-day-schedules-list">
-                        {dayData.schedules.map((sch: unknown) => {
+                        {dayData.schedules.map((sch: any) => {
                           const computedStatus = getScheduleStatus(sch);
                           return (
                             <div 

@@ -70,7 +70,7 @@ export const GuideIncomePage: React.FC = () => {
 
   const [monthlySchedules, setMonthlySchedules] = useState<CombinedSchedule[]>([]);
   const [allSchedules, setAllSchedules] = useState<CombinedSchedule[]>([]);
-  const [allRequests, setAllRequests] = useState<unknown[]>([]);
+  const [allRequests, setAllRequests] = useState<any[]>([]);
 
   // Month-Year Selection options (recent 12 months)
   const filterOptions = React.useMemo(() => {
@@ -198,10 +198,10 @@ export const GuideIncomePage: React.FC = () => {
     const [year, month] = selectedFilter.split('-');
     const timeLabel = `${month}_${year}`;
 
-    let sheetData: unknown[] = [];
+    let sheetData: any[] = [];
     let fileName = '';
 
-    function getStatusLabelText(item: unknown) {
+    function getStatusLabelText(item: any) {
       if (item.status === 'cancelled') return 'Đã hủy';
       if (item.status === 'completed') return 'Hoàn thành';
       if (item.status === 'ongoing' || item.status === 'in_progress') return 'Đang đi';
@@ -298,7 +298,7 @@ async function fetchAllData() {
       
       // 1. Fetch toàn bộ các requests của HDV
       const reqRes = await tourRequestService.getGuideRequests({ limit: 1000 });
-      let requestsList: unknown[] = [];
+      let requestsList: any[] = [];
       if (reqRes.data && reqRes.data.data) {
         requestsList = reqRes.data.data;
         setAllRequests(requestsList);
@@ -312,12 +312,12 @@ async function fetchAllData() {
         const toursList = toursRes.data.data;
 
         await Promise.all(
-          toursList.map(async (t: unknown) => {
+          toursList.map(async (t: any) => {
             try {
               const res = await tourService.getTourDetailForGuide(t.id);
               const tourDetail = res.data || res;
-              (tourDetail.tour_schedules || []).forEach((s: unknown) => {
-                const bookedCount = s.tour_requests?.reduce((sum: number, req: unknown) => sum + req.participant_count, 0) || 0;
+              (tourDetail.tour_schedules || []).forEach((s: any) => {
+                const bookedCount = s.tour_requests?.reduce((sum: number, req: any) => sum + req.participant_count, 0) || 0;
                 schedulesList.push({
                   id: s.id,
                   start_date: s.start_date,
@@ -715,7 +715,7 @@ function calculateStats(filterVal: string, schedules: CombinedSchedule[]) {
                           <td><strong className={item.grossRevenue > 0 ? 'text-success' : ''}>{formatPrice(item.grossRevenue)}</strong></td>
                           <td><strong className={item.systemFee > 0 ? 'text-muted' : ''}>{formatPrice(item.systemFee)}</strong></td>
                           <td><strong className={item.netRevenue > 0 ? 'text-success' : ''}>{formatPrice(item.netRevenue)}</strong></td>
-                          <td>{getScheduleStatusLabel(item as unknown)}</td>
+                          <td>{getScheduleStatusLabel(item as any)}</td>
                         </tr>
                       ))}
                       <tr className="table-total-row">

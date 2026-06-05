@@ -140,7 +140,7 @@ export function AdminUserManagementPage() {
       setStaffRole('CONTENT_MODERATOR');
       fetchUsers();
       fetchRoleStats();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       toast.error((err as ApiError)?.response?.data?.message || 'Tạo nhân viên thất bại');
     } finally {
@@ -170,7 +170,7 @@ export function AdminUserManagementPage() {
       }
       fetchUsers();
       fetchRoleStats();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       toast.error((err as ApiError)?.response?.data?.message || 'Cập nhật vai trò thất bại');
     } finally {

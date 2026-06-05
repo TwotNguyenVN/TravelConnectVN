@@ -13,7 +13,7 @@ import './GuideVerificationPage.css';
 
 interface VerificationStatus {
   profileStatus: string;
-  latestRequest: unknown;
+  latestRequest: any;
 }
 
 interface GuideVerificationPageProps {
@@ -29,20 +29,20 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
   
   // Form state
   const [submissionNote, setSubmissionNote] = useState('');
-  const [files, setFiles] = useState<{ [key: string]: unknown }>({
+  const [files, setFiles] = useState<{ [key: string]: any }>({
     national_id_front: null,
     national_id_back: null,
     tour_guide_card: null,
     certificate: [],
   });
-  const [previews, setPreviews] = useState<{ [key: string]: unknown }>({
+  const [previews, setPreviews] = useState<{ [key: string]: any }>({
     certificate: [],
   });
 
   async function fetchStatus() {
     try {
       setLoading(true);
-      const response: unknown = await verificationService.getStatus();
+      const response: any = await verificationService.getStatus();
       if (response.success) {
         setStatus(response.data);
       }
@@ -135,7 +135,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
         }
       }
 
-      const response: unknown = await verificationService.submitRequest({
+      const response: any = await verificationService.submitRequest({
         submissionNote,
         documents: uploadedDocs,
       });
@@ -146,7 +146,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
       } else {
         toast.error(response.message || 'Có lỗi xảy ra khi gửi yêu cầu');
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Error submitting verification:', error);
       toast.error(error.message || 'Có lỗi xảy ra. Vui lòng thử lại sau.');
     } finally {
@@ -312,13 +312,13 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
                               setFiles((prev) => ({
                                 ...prev,
                                 certificate: prev.certificate.filter(
-                                  (_: unknown, i: number) => i !== index,
+                                  (_: any, i: number) => i !== index,
                                 ),
                               }));
                               setPreviews((prev) => ({
                                 ...prev,
                                 certificate: prev.certificate.filter(
-                                  (_: unknown, i: number) => i !== index,
+                                  (_: any, i: number) => i !== index,
                                 ),
                               }));
                             }}
@@ -396,7 +396,7 @@ export const GuideVerificationPage: React.FC<GuideVerificationPageProps> = ({ is
                       <h4>Tài liệu đã gửi:</h4>
                       <div className="docs-grid">
                         {status.latestRequest.guide_verification_documents?.map(
-                          (doc: unknown) => (
+                          (doc: any) => (
                             <div key={doc.id} className="doc-item">
                               <img src={doc.file_url} alt={doc.document_type} />
                               <span>

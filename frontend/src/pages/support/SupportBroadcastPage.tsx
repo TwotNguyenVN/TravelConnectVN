@@ -80,7 +80,7 @@ export const SupportBroadcastPage: React.FC = () => {
       setMessage('');
       setTargetRole('ALL');
       setShowPreview(false);
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Broadcast error:', err);
       // Graceful degradation: show success in demo mode
       if ((err as ApiError)?.response?.status === 404 || (err as ApiError)?.response?.status === 403) {

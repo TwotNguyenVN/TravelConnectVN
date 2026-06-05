@@ -29,7 +29,7 @@ export const AdminActivityLogPage: React.FC = () => {
       setLoading(true);
       const response = await adminApi.getActivityLogs({ module, take: 50 });
       setLogs(response.data?.items || []);
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error('Không thể tải nhật ký hoạt động');
     } finally {
       setLoading(false);

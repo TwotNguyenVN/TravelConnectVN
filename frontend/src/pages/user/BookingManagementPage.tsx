@@ -25,7 +25,7 @@ interface NormalizedActivity {
   amountPaid?: number;
   status: string;
   requestedAt: string;
-  transactions: unknown[];
+  transactions: any[];
   responseNote?: string;
   cancellationNote?: string;
   entityId: string; // tourId or postId
@@ -60,11 +60,11 @@ export const BookingManagementPage: React.FC = () => {
       const transactions = transRes.success ? transRes.data : [];
       
       // Normalize Tour Requests
-      const normalizedTours: NormalizedActivity[] = (tourRes.data?.data || []).map((req: unknown) => {
-        const tourTransactions = transactions.filter((t: unknown) => t.tour_request_id === req.id);
+      const normalizedTours: NormalizedActivity[] = (tourRes.data?.data || []).map((req: any) => {
+        const tourTransactions = transactions.filter((t: any) => t.tour_request_id === req.id);
         const paidAmount = tourTransactions
-          .filter((t: unknown) => t.status === 'paid')
-          .reduce((sum: number, t: unknown) => sum + Number(t.amount), 0);
+          .filter((t: any) => t.status === 'paid')
+          .reduce((sum: number, t: any) => sum + Number(t.amount), 0);
 
         return {
           id: `tour-${req.id}`,
@@ -82,7 +82,7 @@ export const BookingManagementPage: React.FC = () => {
           amountPaid: paidAmount,
           status: req.status,
           requestedAt: req.requestedAt,
-          transactions: tourTransactions.map((t: unknown) => ({
+          transactions: tourTransactions.map((t: any) => ({
             id: t.id,
             code: t.transaction_code,
             amount: Number(t.amount),
@@ -99,9 +99,9 @@ export const BookingManagementPage: React.FC = () => {
       });
 
       // Normalize Companion Requests
-      const normalizedCompanions: NormalizedActivity[] = (companionRes.data?.items || []).map((req: unknown) => {
-        const companionImages = req.companion_posts?.images as unknown[] | undefined;
-        const coverImage = companionImages?.find((img: unknown) => img.isCover)?.imageUrl || companionImages?.[0]?.imageUrl;
+      const normalizedCompanions: NormalizedActivity[] = (companionRes.data?.items || []).map((req: any) => {
+        const companionImages = req.companion_posts?.images as any[] | undefined;
+        const coverImage = companionImages?.find((img: any) => img.isCover)?.imageUrl || companionImages?.[0]?.imageUrl;
 
         // Tự động chuyển trạng thái thành completed trên giao diện nếu ngày kết thúc đã qua và yêu cầu đã được duyệt
         let status = req.status;
@@ -200,7 +200,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
       } else {
         toast.error('Không thể mở nhóm chat.');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error opening group chat:', err);
       toast.error('Có lỗi xảy ra khi tạo nhóm chat. Vui lòng thử lại sau.');
     }
@@ -214,7 +214,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
       } else {
         toast.error('Không thể mở cuộc trò chuyện.');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error opening direct chat:', err);
       toast.error('Có lỗi xảy ra khi bắt đầu cuộc trò chuyện.');
     }
@@ -334,7 +334,7 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
               <button 
                 key={tab.id}
                 className={`tc-mockup-tab ${activeTab === tab.id ? 'active' : ''}`}
-                onClick={() => setActiveTab(tab.id as unknown)}
+                onClick={() => setActiveTab(tab.id as any)}
               >
                 {tab.label}
               </button>

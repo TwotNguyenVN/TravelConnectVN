@@ -90,7 +90,7 @@ const TourFormPage: React.FC = () => {
 
   // System States
   const [categories, setCategories] = useState<Category[]>([]);
-  const [allAccommodations, setAllAccommodations] = useState<unknown[]>([]);
+  const [allAccommodations, setAllAccommodations] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -110,7 +110,7 @@ const TourFormPage: React.FC = () => {
     title: "",
     categoryId: "",
     price: 0,
-    maxParticipants: "" as unknown,
+    maxParticipants: "" as any,
     description: "",
     participantRequirements: "",
     province: "",
@@ -123,8 +123,8 @@ const TourFormPage: React.FC = () => {
     meetLatitude: undefined as number | undefined,
     meetLongitude: undefined as number | undefined,
     duration: "",
-    numDays: "" as unknown,
-    numNights: "" as unknown,
+    numDays: "" as any,
+    numNights: "" as any,
     startDate: "",
     endDate: "",
     businessStatus: "draft",
@@ -211,7 +211,7 @@ async function fetchTourDetail() {
         meetTime: tour.meet_time || tour.meetTime || "",
         googleMapsLink: tour.google_maps_link || tour.googleMapsLink || "",
         duration: tour.duration || "",
-        itinerary: tour.tour_locations ? tour.tour_locations.map((loc: unknown) => ({
+        itinerary: tour.tour_locations ? tour.tour_locations.map((loc: any) => ({
           locationName: loc.location_name || '',
           address: loc.address || '',
           visitTime: loc.visit_time ? new Date(loc.visit_time).toISOString().slice(0, 16) : '',
@@ -224,7 +224,7 @@ async function fetchTourDetail() {
           latitude: loc.latitude,
           longitude: loc.longitude
         })) : [],
-        destinations: tour.tour_destinations ? tour.tour_destinations.map((d: unknown) => ({
+        destinations: tour.tour_destinations ? tour.tour_destinations.map((d: any) => ({
           name: d.name || '',
           address: d.address || '',
           googleMapsLink: d.google_maps_link || ''
@@ -234,12 +234,12 @@ async function fetchTourDetail() {
         numNights: tour.num_nights ?? tour.numNights ?? "",
         meetLatitude: tour.meet_latitude ?? tour.meetLatitude ?? "",
         meetLongitude: tour.meet_longitude ?? tour.meetLongitude ?? "",
-        images: tour.tour_images ? tour.tour_images.map((img: unknown) => ({
+        images: tour.tour_images ? tour.tour_images.map((img: any) => ({
           imageUrl: img.image_url,
           caption: img.caption || "",
           isCover: img.is_cover
         })) : [],
-        accommodations: tour.tour_accommodations ? tour.tour_accommodations.map((acc: unknown) => ({
+        accommodations: tour.tour_accommodations ? tour.tour_accommodations.map((acc: any) => ({
           accommodationId: acc.accommodation_id,
           name: acc.accommodations?.name || "",
           checkInDate: acc.check_in_date ? new Date(acc.check_in_date).toISOString().split("T")[0] : "",
@@ -279,7 +279,7 @@ async function fetchTourDetail() {
           navigate('/guide/tours');
         }
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Update status error:', error);
       toast.error('Không thể cập nhật trạng thái tour');
     } finally {
@@ -573,7 +573,7 @@ async function fetchTourDetail() {
   const handleItineraryChange = (
     index: number,
     field: keyof ItineraryItem,
-    value: unknown,
+    value: any,
   ) => {
     setFormData((prev) => {
       const newItinerary = [...prev.itinerary];

@@ -12,14 +12,14 @@ interface TourSchedulesTabProps {
 }
 
 export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) => {
-  const [tour, setTour] = useState<unknown>(null);
+  const [tour, setTour] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [editingSchedule, setEditingSchedule] = useState<unknown>(null);
+  const [editingSchedule, setEditingSchedule] = useState<any>(null);
   const [price, setPrice] = useState<number>(0);
   const [maxParticipants, setMaxParticipants] = useState<number>(0);
   const [saving, setSaving] = useState(false);
@@ -45,7 +45,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     }
   };
 
-  function handleDateClick(date: Date, schedule: unknown) {
+  function handleDateClick(date: Date, schedule: any) {
     if (schedule) {
       navigate(`/guide/tours/${tourId}/schedules/${schedule.id}`);
       return;
@@ -85,7 +85,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
       }
       setIsModalOpen(false);
       fetchTourDetail(); // refresh
-    } catch (error: unknown) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra');
     } finally {
       setSaving(false);
@@ -102,7 +102,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
       toast.success('Xóa lịch thành công');
       setIsModalOpen(false);
       fetchTourDetail();
-    } catch (error: unknown) {
+    } catch (error: any) {
       toast.error(error.response?.data?.message || 'Không thể xóa lịch đã có người đặt');
     } finally {
       setSaving(false);

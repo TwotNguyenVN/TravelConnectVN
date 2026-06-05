@@ -65,8 +65,8 @@ const GuideSchedulesPage: React.FC = () => {
         // Build tour options list for the create flow
         // Only include tours that are published AND visible (not draft / hidden)
         const options: TourOption[] = toursList
-          .filter((t: unknown) => t.businessStatus === 'published' && t.visibilityStatus === 'visible')
-          .map((t: unknown) => ({
+          .filter((t: any) => t.businessStatus === 'published' && t.visibilityStatus === 'visible')
+          .map((t: any) => ({
             id: t.id,
             title: t.title,
             cover: t.cover,
@@ -76,7 +76,7 @@ const GuideSchedulesPage: React.FC = () => {
         setTourOptions(options);
 
         const details = await Promise.all(
-          toursList.map(async (t: unknown) => {
+          toursList.map(async (t: any) => {
             try {
               const res = await tourService.getTourDetailForGuide(t.id);
               const tourDetail = res.data || res;
@@ -125,7 +125,7 @@ function formatDateLocal(date: Date) {
 };
 
   // --- View schedule detail handler (existing) ---
-  function handleDateClick(date: Date, _schedule?: unknown) {
+  function handleDateClick(date: Date, _schedule?: any) {
     const dateString = formatDateLocal(date);
     const daySchedules = schedules.filter(s => {
       const sDate = new Date(s.start_date);
@@ -179,7 +179,7 @@ function formatDateLocal(date: Date) {
       toast.success(`Đã tạo lịch khởi hành ngày ${createDate.toLocaleDateString('vi-VN')} cho tour "${selectedTour.title}"!`);
       setIsCreateModalOpen(false);
       await fetchAllSchedules();
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error creating schedule:', err);
       toast.error(err?.response?.data?.message || 'Không thể tạo lịch trình. Vui lòng thử lại.');
     } finally {

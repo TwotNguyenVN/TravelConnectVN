@@ -17,7 +17,7 @@ const FavoritesPage: React.FC = () => {
   async function fetchFavorites() {
     try {
       setLoading(true);
-      const [toursRes, guidesRes]: [unknown, unknown] = await Promise.all([
+      const [toursRes, guidesRes]: [any, any] = await Promise.all([
         favoriteService.getMyFavoriteTours(),
         favoriteService.getMyFavoriteGuides(),
       ]);
@@ -40,7 +40,7 @@ const FavoritesPage: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      const res: unknown = await favoriteService.removeTourFavorite(tourId);
+      const res: any = await favoriteService.removeTourFavorite(tourId);
       if (res.success) {
         setTours(prev => prev.filter(t => t.id !== tourId));
         toast.success('Đã xóa khỏi danh sách yêu thích');
@@ -54,7 +54,7 @@ const FavoritesPage: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      const res: unknown = await favoriteService.removeGuideFavorite(guideId);
+      const res: any = await favoriteService.removeGuideFavorite(guideId);
       if (res.success) {
         setGuides(prev => prev.filter(g => g.id !== guideId));
         toast.success('Đã xóa khỏi danh sách yêu thích');

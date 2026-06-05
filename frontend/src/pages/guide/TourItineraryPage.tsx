@@ -29,7 +29,7 @@ async function fetchItinerary() {
       
       // Map backend naming to frontend naming
       if (Array.isArray(data)) {
-        const mappedData = data.map((loc: unknown) => ({
+        const mappedData = data.map((loc: any) => ({
           id: loc.id,
           locationName: loc.location_name,
           address: loc.address || '',

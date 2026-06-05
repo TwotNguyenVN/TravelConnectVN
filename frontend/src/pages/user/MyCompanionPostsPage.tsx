@@ -148,7 +148,7 @@ const MyCompanionPostsPage: React.FC = () => {
             >
               <div className="tc-companion-manage-card__image">
                 {post.images && post.images.length > 0 ? (
-                  <img src={post.images.find((img: unknown) => img.isCover)?.imageUrl || post.images[0].imageUrl} alt={post.title} />
+                  <img src={post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl} alt={post.title} />
                 ) : (
                   <div className="tc-companion-manage-card__no-image">
                     <img src="https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/logo_gr.png" alt="Default" />

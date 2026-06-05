@@ -68,11 +68,11 @@ export const tourService = {
     return api.get('/tours/guide/me', { params });
   },
 
-  createTour: async (data: Record<string, unknown>) => {
+  createTour: async (data: any) => {
     return api.post('/tours/guide/create', data);
   },
 
-  updateTour: async (id: string, data: Record<string, unknown>) => {
+  updateTour: async (id: string, data: any) => {
     return api.patch(`/tours/guide/${id}`, data);
   },
 
@@ -80,7 +80,7 @@ export const tourService = {
     return api.get(`/tours/${id}/itinerary`);
   },
 
-  updateTourItinerary: async (id: string, locations: unknown[]) => {
+  updateTourItinerary: async (id: string, locations: any[]) => {
     return api.post(`/tours/${id}/itinerary`, locations);
   },
 
@@ -88,7 +88,7 @@ export const tourService = {
     return api.get(`/tours/${id}/images`);
   },
 
-  updateTourImages: async (id: string, images: unknown[]) => {
+  updateTourImages: async (id: string, images: any[]) => {
     return api.post(`/tours/${id}/images`, images);
   },
 

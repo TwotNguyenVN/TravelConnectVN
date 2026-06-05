@@ -46,7 +46,7 @@ export const guideService = {
     return api.get('/guides/provinces');
   },
 
-  createProfile: async (data: Record<string, unknown>) => {
+  createProfile: async (data: any) => {
     return api.post('/guides/me/profile', data);
   },
 
@@ -62,7 +62,7 @@ export const guideService = {
     return api.put('/guides/me/skills', { skillIds });
   },
 
-  getPublicGuides: async (params: Record<string, unknown>) => {
+  getPublicGuides: async (params: any) => {
     return api.get('/guides', { params });
   },
 

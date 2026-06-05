@@ -60,7 +60,7 @@ export const ResetPasswordPage: React.FC = () => {
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setErrorMsg(err.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);

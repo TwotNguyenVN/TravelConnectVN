@@ -38,7 +38,7 @@ export function AdminMaintenancePage() {
       if (res?.success) {
         setMaintenance(res.data);
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       setError(err?.response?.data?.message || 'Không thể thay đổi trạng thái bảo trì.');
     } finally {
@@ -63,7 +63,7 @@ export function AdminMaintenancePage() {
         setMaintenance(res.data);
         setNewIp('');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       setError(err?.response?.data?.message || 'Không thể thêm IP.');
     } finally {
@@ -81,7 +81,7 @@ export function AdminMaintenancePage() {
       if (res?.success) {
         setMaintenance(res.data);
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error(err);
       setError(err?.response?.data?.message || 'Không thể xoá IP.');
     } finally {

@@ -12,9 +12,9 @@ export const HomePage: React.FC = () => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [featuredTours, setFeaturedTours] = useState<Tour[]>([]);
-  const [featuredGuides, setFeaturedGuides] = useState<unknown[]>([]);
-  const [latestPosts, setLatestPosts] = useState<unknown[]>([]);
-  const [recommendedTours, setRecommendedTours] = useState<unknown[]>([]);
+  const [featuredGuides, setFeaturedGuides] = useState<any[]>([]);
+  const [latestPosts, setLatestPosts] = useState<any[]>([]);
+  const [recommendedTours, setRecommendedTours] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
 
@@ -368,7 +368,7 @@ export const HomePage: React.FC = () => {
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
             gap: 'var(--tc-spacing-5)'
           }}>
-            {recommendedTours.map((tour: unknown) => (
+            {recommendedTours.map((tour: any) => (
               <TourCard 
                 key={tour.id} 
                 tour={tour} 

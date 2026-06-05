@@ -9,7 +9,7 @@ export interface ActivityLog {
   entity_type: string | null;
   entity_id: string | null;
   description: string;
-  metadata: Record<string, unknown>;
+  metadata: any;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;
@@ -17,7 +17,7 @@ export interface ActivityLog {
 
 const userActivityLogsService = {
   getMyLogs: async (page = 1, limit = 20, activityType?: string): Promise<ApiResponse<PaginatedData<ActivityLog>>> => {
-    const params: Record<string, unknown> = { page, limit };
+    const params: any = { page, limit };
     if (activityType && activityType !== 'all') params.activityType = activityType;
     return api.get('/me/activity-logs', { params });
   },

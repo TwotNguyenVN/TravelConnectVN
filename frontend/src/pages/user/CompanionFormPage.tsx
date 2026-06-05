@@ -118,7 +118,7 @@ async function fetchDetail() {
 
       setFormData(prev => ({ ...prev, images: newImages }));
       toast.success('Tải ảnh lên thành công');
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Error uploading images:', error);
       toast.error('Có lỗi xảy ra khi tải ảnh lên');
     } finally {
@@ -159,7 +159,7 @@ async function fetchDetail() {
     setSubmitting(true);
     try {
       // Prepare data for backend DTO
-      const payload: unknown = {
+      const payload: any = {
         title: formData.title,
         destination: formData.destination,
         startDate: new Date(formData.start_date).toISOString(),
@@ -183,7 +183,7 @@ async function fetchDetail() {
         toast.success('Tạo bài đăng thành công!');
       }
       navigate('/user/companion-posts');
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('DEBUG - Post submission error:', error.response?.data);
       const errorMsg = error.response?.data?.message;
       if (Array.isArray(errorMsg)) {

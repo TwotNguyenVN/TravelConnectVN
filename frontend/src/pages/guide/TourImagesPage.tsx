@@ -31,7 +31,7 @@ async function fetchImages() {
       const data = response.data || response;
       
       if (Array.isArray(data)) {
-        const mappedData = data.map((img: unknown) => ({
+        const mappedData = data.map((img: any) => ({
           id: img.id,
           imageUrl: img.image_url,
           caption: img.caption || '',

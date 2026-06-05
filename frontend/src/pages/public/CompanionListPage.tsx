@@ -126,7 +126,7 @@ const CompanionListPage: React.FC = () => {
                 <div className="post-image-container">
                   {post.images && post.images.length > 0 ? (
                     <img 
-                      src={post.images.find((img: unknown) => img.isCover)?.imageUrl || post.images[0].imageUrl} 
+                      src={post.images.find((img: any) => img.isCover)?.imageUrl || post.images[0].imageUrl} 
                       alt={post.title} 
                       className="post-cover"
                     />

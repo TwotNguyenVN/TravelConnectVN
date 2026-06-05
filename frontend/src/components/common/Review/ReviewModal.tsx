@@ -58,7 +58,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
         comment: comment.trim()
       };
 
-      let res: unknown;
+      let res: any;
       if (type === 'tour') {
         res = await reviewService.createTourReview(data);
       } else if (type === 'guide') {
@@ -84,7 +84,7 @@ export const ReviewModal: React.FC<ReviewModalProps> = ({
       } else {
         toast.error(res.message || 'Có lỗi xảy ra');
       }
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('Error submitting review:', error);
       toast.error(error.response?.data?.message || 'Có lỗi xảy ra khi gửi đánh giá');
     } finally {

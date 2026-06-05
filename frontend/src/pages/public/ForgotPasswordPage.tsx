@@ -35,7 +35,7 @@ export const ForgotPasswordPage: React.FC = () => {
       setTimeout(() => {
         navigate('/verify-otp');
       }, 1500);
-    } catch (err: unknown) {
+    } catch (err: any) {
       setErrorMsg(err.message || 'Gửi mã xác thực thất bại. Vui lòng kiểm tra lại email.');
     } finally {
       setIsLoading(false);

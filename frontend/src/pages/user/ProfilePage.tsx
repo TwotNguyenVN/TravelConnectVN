@@ -38,8 +38,8 @@ export const ProfilePage: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [isUploadingCover, setIsUploadingCover] = useState(false);
   
-  const [provinces, setProvinces] = useState<unknown[]>([]);
-  const [languages, setLanguages] = useState<unknown[]>([]);
+  const [provinces, setProvinces] = useState<any[]>([]);
+  const [languages, setLanguages] = useState<any[]>([]);
   const [provinceSearch, setProvinceSearch] = useState('');
   const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
 
@@ -88,11 +88,11 @@ async function fetchData() {
         });
 
         if (data.home_province_id && provincesRes.data) {
-          const prov = provincesRes.data.find((p: unknown) => p.id.toString() === data.home_province_id.toString());
+          const prov = provincesRes.data.find((p: any) => p.id.toString() === data.home_province_id.toString());
           if (prov) setProvinceSearch(prov.name);
         }
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error('Error fetching profile data:', err);
     } finally {
       setIsFetching(false);
@@ -115,10 +115,10 @@ async function fetchData() {
   async function fetchDefaultCovers() {
     try {
       setIsLoadingCovers(true);
-      const res: unknown = await guideService.getDefaultCovers();
+      const res: any = await guideService.getDefaultCovers();
       
       if (res && res.success && res.data) {
-        const urls = res.data.map((item: unknown) => item.url);
+        const urls = res.data.map((item: any) => item.url);
         setDefaultCovers(urls);
       } else {
         const baseUrl = 'https://zkeymmxuncvlrlezrbye.supabase.co/storage/v1/object/public/banner/profile_cover/';
@@ -180,7 +180,7 @@ async function fetchData() {
         await refreshProfile();
         toast.success('Cập nhật ảnh đại diện thành công!');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error('Lỗi khi tải ảnh lên.');
     } finally {
       setIsUploading(false);
@@ -214,7 +214,7 @@ async function fetchData() {
 
       setFormData(prev => ({ ...prev, coverUrl: data.publicUrl }));
       toast.success('Cập nhật ảnh bìa thành công!');
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error('Lỗi khi tải ảnh bìa.');
     } finally {
       setIsUploadingCover(false);
@@ -248,7 +248,7 @@ async function fetchData() {
       if (error) throw error;
       toast.success('Đổi mật khẩu thành công!');
       setPasswordData({ newPassword: '', confirmPassword: '' });
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err.message || 'Lỗi khi cập nhật mật khẩu.');
     } finally {
       setPasswordLoading(false);
@@ -323,7 +323,7 @@ async function fetchData() {
       await refreshProfile();
       toast.success('Cập nhật hồ sơ cá nhân thành công!');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err.message || 'Lỗi khi cập nhật hồ sơ.');
     } finally {
       setIsLoading(false);

@@ -6,7 +6,7 @@ import favoriteService from '../../../services/favoriteService';
 import './TourCard.css';
 
 export interface TourCardProps {
-  tour: unknown;
+  tour: any;
   onClick?: () => void;
 }
 

@@ -11,7 +11,7 @@ interface Tour {
   province: string;
   category_id: string;
   description?: string;
-  tour_images?: unknown;
+  tour_images?: any;
   created_at: string;
   guide_profiles: {
     users: {
@@ -23,11 +23,11 @@ interface Tour {
 export const AdminTourManagementPage: React.FC = () => {
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<unknown>(null);
+  const [stats, setStats] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [visibility, setVisibility] = useState('');
   const [scanningTourId, setScanningTourId] = useState<string | null>(null);
-  const [aiScanResults, setAiScanResults] = useState<Record<string, unknown>>({});
+  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
   async function handleAiScan(tour: Tour) {
@@ -44,7 +44,7 @@ export const AdminTourManagementPage: React.FC = () => {
       } else {
         toast.success('AI quét hoàn tất: Nội dung an toàn.');
       }
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error('AI quét thất bại');
     } finally {
       setScanningTourId(null);
@@ -60,7 +60,7 @@ export const AdminTourManagementPage: React.FC = () => {
       ]);
       setTours(toursRes.data?.items || []);
       setStats(statsRes.data);
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error('Không thể tải dữ liệu tour');
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export const AdminTourManagementPage: React.FC = () => {
       });
       toast.success('Cập nhật trạng thái thành công');
       fetchData();
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err.response?.data?.message || 'Thao tác thất bại');
     }
   };
@@ -94,7 +94,7 @@ export const AdminTourManagementPage: React.FC = () => {
     flagged: { label: 'Cảnh báo', color: '#d97706', bg: '#fffbeb' },
   };
 
-  function getTourImage(images: unknown) {
+  function getTourImage(images: any) {
     if (!images) return '/default-tour.jpg';
     try {
       const imgs = typeof images === 'string' ? JSON.parse(images) : images;
@@ -108,10 +108,10 @@ export const AdminTourManagementPage: React.FC = () => {
   };
 
   const statCards = [
-    { title: 'Tổng Tour', count: stats?.statuses?.reduce((a: unknown, b: unknown) => a + b.value, 0) || 0, color: '#3b82f6', bg: '#eff6ff', icon: '🗺️' },
-    { title: 'Đang hiển thị', count: stats?.statuses?.find((s: unknown) => s.name === 'visible')?.value || 0, color: '#10b981', bg: '#ecfdf5', icon: '✅' },
-    { title: 'Đã ẩn', count: stats?.statuses?.find((s: unknown) => s.name === 'hidden')?.value || 0, color: '#ef4444', bg: '#fef2f2', icon: '🚫' },
-    { title: 'Bị cảnh báo', count: stats?.statuses?.find((s: unknown) => s.name === 'flagged')?.value || 0, color: '#f59e0b', bg: '#fffbeb', icon: '🚩' },
+    { title: 'Tổng Tour', count: stats?.statuses?.reduce((a: any, b: any) => a + b.value, 0) || 0, color: '#3b82f6', bg: '#eff6ff', icon: '🗺️' },
+    { title: 'Đang hiển thị', count: stats?.statuses?.find((s: any) => s.name === 'visible')?.value || 0, color: '#10b981', bg: '#ecfdf5', icon: '✅' },
+    { title: 'Đã ẩn', count: stats?.statuses?.find((s: any) => s.name === 'hidden')?.value || 0, color: '#ef4444', bg: '#fef2f2', icon: '🚫' },
+    { title: 'Bị cảnh báo', count: stats?.statuses?.find((s: any) => s.name === 'flagged')?.value || 0, color: '#f59e0b', bg: '#fffbeb', icon: '🚩' },
   ];
 
   return (
