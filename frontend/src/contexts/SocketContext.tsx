@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
+import { toast as sonnerToast } from 'sonner';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -67,6 +68,32 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     socketInstance.on('new_companion_request', (data) => {
       toast.info(`🤝 ${data.message}`);
+    });
+
+    // Lắng nghe tiến trình công việc chạy ngầm (BullMQ)
+    socketInstance.on('job_progress', (data: { jobId: string; progress: number; message: string }) => {
+      sonnerToast.loading(`${data.message} (${data.progress}%)`, {
+        id: data.jobId,
+        duration: Infinity,
+      });
+    });
+
+    socketInstance.on('job_completed', (data: { jobId: string; message: string; downloadUrl?: string }) => {
+      sonnerToast.success(data.message, {
+        id: data.jobId,
+        duration: 5000,
+        action: data.downloadUrl ? {
+          label: 'Tải xuống',
+          onClick: () => window.open(data.downloadUrl, '_blank')
+        } : undefined
+      });
+    });
+
+    socketInstance.on('job_failed', (data: { jobId: string; message: string }) => {
+      sonnerToast.error(`Tác vụ thất bại: ${data.message}`, {
+        id: data.jobId,
+        duration: 5000,
+      });
     });
 
     setSocket(socketInstance);

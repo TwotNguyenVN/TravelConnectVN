@@ -5,20 +5,40 @@ import { ToastProvider } from './contexts/ToastContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { MiniChatProvider } from './contexts/MiniChatContext';
 import { MiniChatContainer } from './components/chat/MiniChatContainer';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { HelmetProvider } from 'react-helmet-async';
+import { Toaster } from 'sonner';
 import './App.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 function App() {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <SocketProvider>
-          <MiniChatProvider>
-            <RouterProvider router={router} />
-            <MiniChatContainer />
-          </MiniChatProvider>
-        </SocketProvider>
-      </ToastProvider>
-    </AuthProvider>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ToastProvider>
+            <SocketProvider>
+              <MiniChatProvider>
+                <RouterProvider router={router} />
+                <MiniChatContainer />
+                <Toaster richColors position="top-right" />
+              </MiniChatProvider>
+            </SocketProvider>
+          </ToastProvider>
+        </AuthProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
+    </HelmetProvider>
   );
 }
 
