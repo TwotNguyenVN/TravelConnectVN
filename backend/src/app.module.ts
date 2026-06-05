@@ -35,6 +35,7 @@ import {
   MaintenanceService,
   MaintenanceGuard,
 } from './common/guards/maintenance.guard';
+import { MaintenanceModule } from './common/maintenance.module';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
@@ -117,12 +118,12 @@ import { MetricsModule } from './metrics/metrics.module';
     TicketsModule,
     DisputesModule,
     MailModule,
+    MaintenanceModule,
     MetricsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
-    MaintenanceService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
