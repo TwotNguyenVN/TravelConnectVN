@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { useChatStore } from '../../store/useChatStore';
 import ChatInput from './ChatInput';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import { format } from 'date-fns';
 
 interface ChatWindowProps {

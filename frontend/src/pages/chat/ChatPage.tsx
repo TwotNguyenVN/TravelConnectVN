@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useChatStore } from '../../store/useChatStore';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../contexts/AuthContext';
 import ChatWindow from '../../components/chat/ChatWindow';
-import { api } from '../../lib/api';
+import api from '../../services/api';
 
 const ChatPage = () => {
-  const { token, user } = useAuth();
+  const { session, user } = useAuth();
+  const token = session?.access_token;
   const { connect, disconnect, isConnected, conversations, setMessages } = useChatStore();
   const [inbox, setInbox] = useState<any[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);

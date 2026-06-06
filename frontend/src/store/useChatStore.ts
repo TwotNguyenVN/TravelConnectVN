@@ -13,6 +13,7 @@ interface Message {
     full_name: string;
     avatar_url: string;
   };
+  conversation_id?: string;
 }
 
 interface ChatState {

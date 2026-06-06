@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useChatStore } from '../../store/useChatStore';
 import { Send, Image as ImageIcon, Mic } from 'lucide-react';
-import { api } from '../../lib/api';
+import api from '../../services/api';
 
 interface ChatInputProps {
   conversationId: string;
