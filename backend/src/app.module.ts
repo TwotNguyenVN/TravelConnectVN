@@ -44,6 +44,9 @@ import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { MetricsModule } from './metrics/metrics.module';
+import { AiModerationModule } from './ai-moderation/ai-moderation.module';
+import { TrustSafetyModule } from './trust-safety/trust-safety.module';
+import { ContentModeratorModule } from './content-moderator/content-moderator.module';
 
 @Module({
   imports: [
@@ -117,6 +120,9 @@ import { MetricsModule } from './metrics/metrics.module';
     MailModule,
     MaintenanceModule,
     MetricsModule,
+    AiModerationModule,
+    TrustSafetyModule,
+    ContentModeratorModule,
   ],
   controllers: [AppController],
   providers: [

@@ -16,6 +16,7 @@ import {
   Tooltip,
   Legend
 } from 'recharts';
+import { GuideVerificationTab } from './components/GuideVerificationTab';
 
 interface DashboardStats {
   userCount: number;
@@ -245,67 +246,13 @@ export const ContentDashboardPage: React.FC = () => {
         <Card style={{ padding: 'var(--tc-spacing-6)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--tc-spacing-5)' }}>
             <h3 style={{ margin: 0, fontSize: 'var(--tc-font-size-md)', fontWeight: 700, color: '#1e293b' }}>
-              Yêu cầu xác minh HDV chờ xử lý ({pendingRequests.length})
+              Yêu cầu xác minh HDV chờ xử lý
             </h3>
             <Button variant="outline" size="small" onClick={() => navigate('/content/guides')}>
               Xem tất cả
             </Button>
           </div>
-
-          {pendingRequests.length === 0 ? (
-            <div style={{ padding: 'var(--tc-spacing-10) 0', textAlign: 'center' }}>
-              <div style={{ fontSize: '32px', marginBottom: '12px' }}>🎉</div>
-              <h4 style={{ color: '#1e293b', margin: '0 0 4px 0' }}>Đã hoàn thành kiểm duyệt</h4>
-              <p style={{ color: '#64748b', fontSize: 'var(--tc-font-size-xs)', margin: 0 }}>Không có hồ sơ Hướng dẫn viên nào đang đợi bạn.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-4)' }}>
-              {pendingRequests.map((req) => (
-                <div
-                  key={req.id}
-                  style={{
-                    padding: 'var(--tc-spacing-4)',
-                    borderRadius: 'var(--tc-radius-lg)',
-                    border: '1px solid var(--tc-border)',
-                    backgroundColor: '#f8fafc',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    transition: 'border-color 0.2s ease',
-                  }}
-                >
-                  <div style={{ flex: 1, marginRight: 'var(--tc-spacing-4)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ fontWeight: 700, fontSize: 'var(--tc-font-size-sm)', color: '#1e293b' }}>
-                        {req.guide_profiles?.users?.full_name}
-                      </span>
-                      <span style={{ fontSize: '11px', color: '#64748b' }}>
-                        📍 {req.guide_profiles?.working_area || 'Chưa cập nhật'}
-                      </span>
-                    </div>
-                    <p style={{
-                      margin: '6px 0 0 0',
-                      fontSize: 'var(--tc-font-size-xs)',
-                      color: '#64748b',
-                      lineHeight: '1.4',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
-                    }}>
-                      <strong>Ghi chú:</strong> {req.submission_note || 'Không có ghi chú.'}
-                    </p>
-                    <div style={{ fontSize: '10px', color: '#94a3b8', marginTop: '6px' }}>
-                      Gửi lúc: {new Date(req.submitted_at).toLocaleString('vi-VN')}
-                    </div>
-                  </div>
-                  <Button variant="outline" size="small" onClick={() => navigate('/content/guides')}>
-                    Xét duyệt
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
+          <GuideVerificationTab />
         </Card>
 
         {/* Right Column: Tour Categories Analysis */}
