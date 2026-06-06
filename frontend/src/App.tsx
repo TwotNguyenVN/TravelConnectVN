@@ -5,6 +5,7 @@ import { ToastProvider } from './contexts/ToastContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { MiniChatProvider } from './contexts/MiniChatContext';
 import { MiniChatContainer } from './components/chat/MiniChatContainer';
+import { MaintenanceWrapper } from './routes/MaintenanceWrapper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HelmetProvider } from 'react-helmet-async';
@@ -29,9 +30,11 @@ function App() {
           <ToastProvider>
             <SocketProvider>
               <MiniChatProvider>
-                <RouterProvider router={router} />
-                <MiniChatContainer />
-                <Toaster richColors position="top-right" />
+                <MaintenanceWrapper>
+                  <RouterProvider router={router} />
+                  <MiniChatContainer />
+                  <Toaster richColors position="top-right" />
+                </MaintenanceWrapper>
               </MiniChatProvider>
             </SocketProvider>
           </ToastProvider>

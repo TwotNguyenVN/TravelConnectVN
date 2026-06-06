@@ -61,8 +61,14 @@ export const adminApi = {
   getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
 
   // Support Staff — Notifications Broadcast
-  sendBroadcastNotification: (data: { title: string; content: string; targetGroup?: string }) =>
+  sendSupportBroadcastNotification: (data: { title: string; content: string; targetGroup?: string }) =>
     api.post('/support/notifications/broadcast', data),
+  sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
+    api.post('/admin/notifications/broadcast', data),
+  // System Settings / Maintenance
+  getPublicSettings: () => api.get('/system-settings/public'),
+  getSettings: () => api.get('/system-settings'),
+  updateSetting: (key: string, value: string) => api.patch(`/system-settings/${key}`, { value }),
 
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
@@ -104,8 +110,7 @@ export const adminApi = {
   // Phase 1.1 Core: Global Settings & System Health
   getSystemHealth: () => api.get('/admin/system/health'),
   getSetting: (key: string) => api.get(`/admin/settings/${key}`),
-  updateSetting: (key: string, value: string) => api.patch(`/admin/settings/${key}`, { value }),
-  
+
   getCategories: (type: string) => api.get(`/admin/categories/${type}`),
   createCategory: (type: string, data: { name: string; description?: string }) => api.post(`/admin/categories/${type}`, data),
   updateCategory: (type: string, id: string, data: { name: string; description?: string }) => api.patch(`/admin/categories/${type}/${id}`, data),
