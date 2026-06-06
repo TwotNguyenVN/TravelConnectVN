@@ -44,13 +44,13 @@ export const adminApi = {
   resolveSosAlert: (id: string, note: string) => api.patch(`/admin/sos/${id}/resolve`, { note }),
 
   // Support Tickets
-  getTickets: (params?: Record<string, unknown>) => api.get('/admin/tickets', { params }),
-  updateTicket: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tickets/${id}`, data),
+  getTickets: (params?: Record<string, unknown>) => api.get('/support/tickets', { params }),
+  updateTicket: (id: string, data: Record<string, unknown>) => api.patch(`/support/tickets/${id}`, data),
 
   // Tour Disputes
-  getDisputes: () => api.get('/admin/disputes'),
-  getDisputeChatHistory: (disputeId: string) => api.get(`/admin/disputes/${disputeId}/chat-history`),
-  resolveDispute: (id: string, data: Record<string, unknown>) => api.patch(`/admin/disputes/${id}/resolve`, data),
+  getDisputes: () => api.get('/support/disputes'),
+  getDisputeChatHistory: (disputeId: string) => api.get(`/support/disputes/${disputeId}/chat-history`),
+  resolveDispute: (id: string, data: Record<string, unknown>) => api.post(`/support/disputes/${id}/resolve`, data),
 
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
@@ -61,8 +61,8 @@ export const adminApi = {
   getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
 
   // Support Staff — Notifications Broadcast
-  sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
-    api.post('/admin/notifications/broadcast', data),
+  sendBroadcastNotification: (data: { title: string; content: string; targetGroup?: string }) =>
+    api.post('/support/notifications/broadcast', data),
 
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
@@ -82,10 +82,10 @@ export const adminApi = {
   getReportHeatmapData: () => api.get('/reports/heatmap'),
 
   // Phase 8: FAQ & Quick Responses
-  getFaqItems: () => api.get('/admin/faq'),
-  createFaqItem: (data: { question: string; answer: string; category?: string }) => api.post('/admin/faq', data),
-  updateFaqItem: (id: string, data: { question?: string; answer?: string; category?: string }) => api.patch(`/admin/faq/${id}`, data),
-  deleteFaqItem: (id: string) => api.delete(`/admin/faq/${id}`),
+  getFaqItems: () => api.get('/support/faq'),
+  createFaqItem: (data: { question: string; answer: string; category?: string }) => api.post('/support/faq', data),
+  updateFaqItem: (id: string, data: { question?: string; answer?: string; category?: string }) => api.patch(`/support/faq/${id}`, data),
+  deleteFaqItem: (id: string) => api.delete(`/support/faq/${id}`),
 
   // Phase 9: CSAT & SLA Analytics
   getCsatAnalytics: () => api.get('/admin/analytics/csat'),

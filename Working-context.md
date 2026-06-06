@@ -32,7 +32,7 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 - [x] Triển khai **SYSTEM_ADMIN**: Dashboard, cấu hình hệ thống, kiểm toán bảo mật, Anomaly Detection, DevOps Monitoring.
 - [x] Triển khai **CONTENT_MODERATOR**: Hệ thống phê duyệt hướng dẫn viên, kiểm duyệt báo cáo vi phạm, AI Moderation.
 - [x] Triển khai **ACCOUNTANT**: Lịch sử giao dịch, xử lý hoàn tiền, quyết toán, Smart Auto-Reconciliation, Automated E-Invoicing, Cashflow Forecasting.
-- [ ] Triển khai **SUPPORT_STAFF**: Quản lý ticket hỗ trợ, giải quyết tranh chấp tour, điều phối SOS khẩn cấp.
+- [x] Triển khai **SUPPORT_STAFF**: Quản lý ticket hỗ trợ, giải quyết tranh chấp tour, điều phối SOS khẩn cấp.
 - [ ] Hoàn thiện CI/CD, tối ưu hiệu năng và Audit bảo mật tổng thể.
 
 ---
@@ -40,6 +40,12 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 ## Latest Execution Notes
 
 ### 2026-06-07
+- **Hoàn thành Role SUPPORT_STAFF (Nhân viên Hỗ trợ):**
+  - Tạo mới hoàn toàn backend module `support` thay vì dùng chung `admin`.
+  - Xây dựng hệ thống API cho Quản lý Tickets, Giải quyết tranh chấp (kèm logic thông báo tự động và hoàn tiền), Gửi thông báo diện rộng Broadcast, và Quản lý câu hỏi thường gặp FAQ.
+  - Cập nhật Frontend API để map với các endpoint `/support/...` mới.
+  - Đã vá lỗi bảo mật (AuthGuard) cho module Kế toán (`FinanceController`).
+
 - **Hoàn thành Role ACCOUNTANT (Kế toán & Tài chính):**
   - **Smart Auto-Reconciliation (Đối soát tự động):** Xây dựng trang `FinanceReconciliationPage` trên frontend dùng `papaparse` parse CSV mượt mà; Backend triển khai `ReconciliationService` tự động khớp mã giao dịch, phát hiện lệch tiền, thiếu/thừa giao dịch.
   - **Automated E-Invoicing (Hóa đơn điện tử):** Thêm model `invoices` vào Prisma schema. Cập nhật `InvoiceService` và giao diện `FinanceTransactionsPage` để cho phép kế toán bấm nút "Xuất Hóa đơn điện tử" ngay trên lưới giao dịch.

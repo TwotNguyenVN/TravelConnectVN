@@ -46,6 +46,7 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { MetricsModule } from './metrics/metrics.module';
 import { FinanceModule } from './finance/finance.module';
 import { AiModerationModule } from './ai-moderation/ai-moderation.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -121,6 +122,7 @@ import { AiModerationModule } from './ai-moderation/ai-moderation.module';
     MetricsModule,
     AiModerationModule,
     FinanceModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [
