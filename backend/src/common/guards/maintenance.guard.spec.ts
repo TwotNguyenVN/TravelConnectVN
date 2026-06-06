@@ -7,9 +7,6 @@ import { ExecutionContext, ServiceUnavailableException } from '@nestjs/common';
 
 describe('MaintenanceGuard', () => {
   let guard: MaintenanceGuard;
-  let settingsService: SystemSettingsService;
-  let supabaseService: SupabaseService;
-  let prismaService: PrismaService;
 
   const mockSettingsService = {
     getPublicSettings: jest.fn(),
@@ -36,9 +33,6 @@ describe('MaintenanceGuard', () => {
     }).compile();
 
     guard = module.get<MaintenanceGuard>(MaintenanceGuard);
-    settingsService = module.get<SystemSettingsService>(SystemSettingsService);
-    supabaseService = module.get<SupabaseService>(SupabaseService);
-    prismaService = module.get<PrismaService>(PrismaService);
 
     jest.clearAllMocks();
   });

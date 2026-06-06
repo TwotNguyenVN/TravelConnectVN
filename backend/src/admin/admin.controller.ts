@@ -26,7 +26,6 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
-import { MaintenanceService } from '../common/guards/maintenance.guard';
 import {
   UpdateUserStatusDto,
   AssignRoleDto,
@@ -41,10 +40,7 @@ import {
 @Controller('admin')
 @UseGuards(AuthGuard, RoleGuard)
 export class AdminController {
-  constructor(
-    private readonly adminService: AdminService,
-    private readonly maintenanceService: MaintenanceService,
-  ) {}
+  constructor(private readonly adminService: AdminService) {}
 
   @Get('dashboard')
   @Roles(Role.SYSTEM_ADMIN, Role.CONTENT_MODERATOR, Role.SUPPORT_STAFF)
@@ -344,22 +340,6 @@ export class AdminController {
     @Req() req: AuthenticatedRequest,
   ) {
     return this.adminService.restoreDeletedItem(type, id, req.user.id);
-  }
-
-  // Phase 5: Maintenance Mode
-  @Get('settings/maintenance')
-  @Roles(Role.SYSTEM_ADMIN)
-  getMaintenanceStatus() {
-    return this.maintenanceService.getStatus();
-  }
-
-  @Post('settings/maintenance')
-  @Roles(Role.SYSTEM_ADMIN)
-  toggleMaintenance(
-    @Body() dto: { enabled: boolean },
-    @Req() req: AuthenticatedRequest,
-  ) {
-    return this.maintenanceService.toggle(dto.enabled, req.user.id);
   }
 
   // Phase 6: Anomaly Detection

@@ -72,7 +72,6 @@ export class MaintenanceGuard implements CanActivate {
     // Nếu hệ thống đang bảo trì và không phải Admin, chặn lại và trả về 503
     throw new ServiceUnavailableException(
       maintenanceMessage || 'Hệ thống đang bảo trì. Vui lòng quay lại sau.',
-
     );
   }
 }
