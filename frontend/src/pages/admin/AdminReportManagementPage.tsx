@@ -41,7 +41,8 @@ export const AdminReportManagementPage: React.FC = () => {
     if (note === null) return;
 
     try {
-      await adminApi.processReport(reportId, { status: action, resolution_note: note });
+      const apiAction = action === 'resolved' ? 'hide' : 'dismiss';
+      await adminApi.processReport(reportId, { action: apiAction, resolutionNote: note });
       toast.success(`Đã ${actionLabel.toLowerCase()} báo cáo`);
       fetchReports();
     } catch (error) {

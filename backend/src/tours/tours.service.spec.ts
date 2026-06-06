@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 import { ToursService } from './tours.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -57,6 +58,7 @@ describe('ToursService', () => {
         ToursService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
+        { provide: AiModerationService, useValue: { analyzeContent: jest.fn().mockResolvedValue({ isFlagged: false, reason: '', confidenceScore: 0.9 }) } },
       ],
     }).compile();
 

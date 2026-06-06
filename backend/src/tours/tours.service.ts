@@ -16,6 +16,7 @@ import {
 } from './dto/tours.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 
 export type TourWithIncludes = Prisma.toursGetPayload<{
   include: {
@@ -154,6 +155,7 @@ export class ToursService implements OnApplicationBootstrap {
   constructor(
     private readonly prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly aiModeration: AiModerationService,
   ) {}
 
   onApplicationBootstrap() {
@@ -954,6 +956,15 @@ export class ToursService implements OnApplicationBootstrap {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
+    // AI Auto-Moderation check
+    const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
+    const aiResult = await this.aiModeration.analyzeContent(
+      contentToAnalyze,
+      'TOUR_DESCRIPTION',
+    );
+    const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
+    const businessStatus = aiResult.isFlagged ? 'draft' : 'published';
+
     // Validate max days/nights
     if (
       data.numDays !== undefined &&
@@ -1032,12 +1043,25 @@ export class ToursService implements OnApplicationBootstrap {
           route_map_link: data.routeMapLink,
           description: data.description,
           participant_requirements: data.participantRequirements,
-          business_status: data.businessStatus || 'draft',
-          visibility_status: data.visibilityStatus || 'visible',
-          published_at: data.businessStatus === 'published' ? new Date() : null,
-          other_provinces: data.otherProvinces || [],
+          business_status: businessStatus,
+          visibility_status: visibilityStatus,
         },
       });
+
+      // Nếu AI Flagged, tự động tạo Report
+      if (aiResult.isFlagged) {
+        await tx.reports.create({
+          data: {
+            reporter_user_id: userId, // Tạm dùng userId của chính người tạo vì AI báo cáo
+            target_type: 'TOUR',
+            tour_id: tour.id,
+            guide_profile_id: guideProfile.id,
+            reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
+            description: aiResult.reason,
+            status: 'open',
+          },
+        });
+      }
 
       // 2.2 Tạo lịch trình (Itinerary)
       if (data.itinerary && Array.isArray(data.itinerary)) {
