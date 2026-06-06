@@ -44,7 +44,10 @@ describe('ReviewsService', () => {
         ReviewsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: UserActivityLogsService, useValue: mockActivityLogsService },
-        { provide: AiModerationService, useValue: { analyzeContent: jest.fn().mockResolvedValue({}) } },
+        {
+          provide: AiModerationService,
+          useValue: { analyzeContent: jest.fn().mockResolvedValue({}) },
+        },
       ],
     }).compile();
 

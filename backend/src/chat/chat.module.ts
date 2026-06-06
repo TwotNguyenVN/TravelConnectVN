@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConversationController } from './conversation.controller';
-import { ConversationService } from './conversation.service';
-import { MessageController } from './message.controller';
-import { MessageService } from './message.service';
+import { ChatGateway } from './chat.gateway';
+import { ChatService } from './chat.service';
+import { ChatController } from './chat.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { SupabaseModule } from '../supabase/supabase.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [PrismaModule, SupabaseModule],
-  controllers: [ConversationController, MessageController],
-  providers: [ConversationService, MessageService],
-  exports: [ConversationService, MessageService],
+  imports: [PrismaModule, JwtModule.register({})],
+  controllers: [ChatController],
+  providers: [ChatGateway, ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}

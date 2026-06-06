@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
     fetchCategories(activeTab);
   }, [activeTab]);
 
-  const fetchGlobalSettings = async () => {
+  async function fetchGlobalSettings() {
     try {
       setLoadingConfig(true);
       const res = await adminApi.getSetting('commission_rate');
@@ -39,7 +39,7 @@ export default function AdminSettingsPage() {
     } finally {
       setLoadingConfig(false);
     }
-  };
+  }
 
   const saveCommissionRate = async () => {
     try {
@@ -53,7 +53,7 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const fetchCategories = async (type: string) => {
+  async function fetchCategories(type: string) {
     try {
       setLoadingCats(true);
       const res = await adminApi.getCategories(type);
@@ -63,7 +63,7 @@ export default function AdminSettingsPage() {
     } finally {
       setLoadingCats(false);
     }
-  };
+  }
 
   const handleSaveCategory = async () => {
     if (!formData.name) return;

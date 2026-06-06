@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:20.12.0-alpine AS builder
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:alpine-slim
 
 # Copy built assets
 COPY --from=builder /app/dist /usr/share/nginx/html
@@ -22,6 +22,7 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Add custom Nginx config for SPA routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
+# Nginx-unprivileged listens on 8080 by default
+EXPOSE 8080
 
 CMD ["nginx", "-g", "daemon off;"]

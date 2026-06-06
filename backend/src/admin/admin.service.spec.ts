@@ -258,12 +258,19 @@ describe('AdminService - createCategory', () => {
   });
 
   it('should create category and return mapped bigInt id', async () => {
-    mockPrisma.tour_categories.create.mockResolvedValue({ id: BigInt(1), name: 'Adventure' });
-    
-    const result = await service.createCategory('tour_categories', { name: 'Adventure' }, 'admin-1');
-    
+    mockPrisma.tour_categories.create.mockResolvedValue({
+      id: BigInt(1),
+      name: 'Adventure',
+    });
+
+    const result = await service.createCategory(
+      'tour_categories',
+      { name: 'Adventure' },
+      'admin-1',
+    );
+
     expect(result.id).toBe('1');
-    expect(result.name).toBe('Adventure');
+    expect((result as any).name).toBe('Adventure');
     expect(mockPrisma.admin_activity_logs.create).toHaveBeenCalled();
   });
 });

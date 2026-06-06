@@ -33,7 +33,7 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 - [x] Triển khai **CONTENT_MODERATOR**: Hệ thống phê duyệt hướng dẫn viên, kiểm duyệt báo cáo vi phạm, AI Moderation.
 - [x] Triển khai **ACCOUNTANT**: Lịch sử giao dịch, xử lý hoàn tiền, quyết toán, Smart Auto-Reconciliation, Automated E-Invoicing, Cashflow Forecasting.
 - [x] Triển khai **SUPPORT_STAFF**: Quản lý ticket hỗ trợ, giải quyết tranh chấp tour, điều phối SOS khẩn cấp.
-- [ ] Hoàn thiện CI/CD, tối ưu hiệu năng và Audit bảo mật tổng thể.
+- [x] Hoàn thiện CI/CD, tối ưu hiệu năng và Audit bảo mật tổng thể.
 
 ---
 
@@ -79,9 +79,13 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - **Refunds & Settlements:** Hoàn thiện giao diện duyệt yêu cầu Hoàn tiền (`FinanceRefundsPage`) và tạo lệnh Quyết toán thủ công cho HDV (`FinanceSettlementsPage`).
   - Đã chạy qua toàn bộ Backend Unit Tests (`finance` module) đạt 100% Pass và bổ sung E2E test bằng Playwright (`finance.spec.ts`). Đã tạo Pull Request `#74` trên nhánh `feat/accountant-role`.
 
-### 2026-06-06
-- **Hoàn thành Role CONTENT_MODERATOR (Kiểm duyệt viên):**
-  - **Quy trình Phê duyệt HDV:** Cải thiện `GuideVerificationTab`, cho phép xem chi tiết hồ sơ và xét duyệt. 
-  - **Quản lý Vi phạm (Report Management):** Tích hợp xử lý cắm cờ (flag), cảnh cáo và ẩn nội dung vi phạm.
-  - **AI Moderation & Trust Safety:** Bổ sung module AI Moderation dùng Gemini API tự động phát hiện ngôn từ độc hại, spam. Triển khai `TrustSafetyService` quản lý điểm uy tín của User/Guide.
-  - Thiết kế layout và sidebar riêng biệt (`ContentLayout`, `ContentSidebar`). Tạo PR và gộp mã thành công.
+### 2026-06-07 (Security & Deployment CI/CD)
+- **Tổng kiểm tra Bảo mật (Security Audit):**
+  - Chạy `npm audit fix` trên Backend và Frontend để vá các lỗ hổng (như RCE, Prototype Pollution) của `axios` và `ws`.
+  - Cài đặt `helmet` cho Backend để bổ sung 11 HTTP Security Headers (CSP, HSTS, XSS Filter).
+  - Khóa chặt cấu hình CORS tại `main.ts`, loại bỏ `Access-Control-Allow-Origin: *` và chỉ cho phép `FRONTEND_URL` truy cập.
+- **Tối ưu Docker & Thiết lập CI/CD:**
+  - Chuyển đổi `Dockerfile` của Backend sang sử dụng `USER node` (non-root) và ghim phiên bản `node:20.12.0-alpine`.
+  - Chuyển Frontend sang dùng `nginxinc/nginx-unprivileged:alpine-slim` chạy ở port 8080 (non-root).
+  - Tạo `docker-compose.yml` để dễ dàng khởi chạy toàn bộ stack cục bộ (Frontend, Backend, Redis).
+  - Viết luồng GitHub Actions CI tại `.github/workflows/ci.yml` tự động cài đặt, chạy Linting, Unit Testing và build Docker. Toàn bộ `Active Queues` của dự án đã chính thức được hoàn tất!

@@ -32,10 +32,10 @@ export class MaintenanceGuard implements CanActivate {
 
     // Check system_settings for maintenance mode
     const maintenanceSetting = await this.prisma.system_settings.findUnique({
-      where: { key: 'is_maintenance' },
+      where: { setting_key: 'is_maintenance' },
     });
 
-    if (maintenanceSetting && maintenanceSetting.value === 'true') {
+    if (maintenanceSetting && maintenanceSetting.setting_value === 'true') {
       throw new ServiceUnavailableException(
         'Hệ thống đang trong chế độ bảo trì. Vui lòng thử lại sau.',
       );
