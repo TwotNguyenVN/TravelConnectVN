@@ -12,30 +12,31 @@ export class CashflowForecastingService {
     // Lấy các tour đã đặt và chưa hoàn thành trong khoảng thời gian tới
     const upcomingTours = await this.prisma.tour_requests.findMany({
       where: {
-        start_date: {
-          lte: targetDate,
-          gte: new Date(),
+        tours: {
+          start_date: {
+            lte: targetDate,
+            gte: new Date(),
+          }
         },
-        status: { in: ['approved', 'payment_pending'] } // Các tour sắp đi
+        status: { in: ['approved', 'payment_pending', 'paid'] } // Các tour sắp đi
       },
-      select: {
-        start_date: true,
-        agreed_price: true,
+      include: {
+        tours: { select: { start_date: true } }
       }
     });
 
     // Gộp dữ liệu theo ngày
     const dailyForecast: Record<string, { expectedRevenue: number, platformFee: number, guidePayout: number }> = {};
 
-    for (const tour of upcomingTours) {
-      if (!tour.start_date || !tour.agreed_price) continue;
+    for (const req of upcomingTours) {
+      if (!req.tours?.start_date || !req.price_at_booking) continue;
       
-      const dateKey = tour.start_date.toISOString().split('T')[0];
+      const dateKey = req.tours.start_date.toISOString().split('T')[0];
       if (!dailyForecast[dateKey]) {
         dailyForecast[dateKey] = { expectedRevenue: 0, platformFee: 0, guidePayout: 0 };
       }
 
-      const price = Number(tour.agreed_price);
+      const price = Number(req.price_at_booking) * req.participant_count;
       // Giả sử phí nền tảng là 10%
       const fee = price * 0.1;
       const payout = price - fee;

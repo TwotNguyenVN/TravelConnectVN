@@ -6,18 +6,16 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  CreateTourReviewDto,
-  CreateGuideReviewDto,
-} from './dto/create-review.dto';
-
+import { CreateTourReviewDto, CreateGuideReviewDto } from './dto/create-review.dto';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
+import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 
 @Injectable()
 export class ReviewsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly activityLogsService: UserActivityLogsService,
+    private readonly aiModeration: AiModerationService,
   ) {}
 
   // ==========================================
@@ -57,7 +55,11 @@ export class ReviewsService {
       throw new ConflictException('Bạn đã đánh giá tour này rồi');
     }
 
-    // 5. Create review
+    // 5. AI Auto-Moderation
+    const aiResult = await this.aiModeration.analyzeContent(dto.comment, 'REVIEW');
+    const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
+
+    // 6. Create review
     const review = await this.prisma.tour_reviews.create({
       data: {
         tour_id: tourRequest.tour_id,
@@ -65,7 +67,7 @@ export class ReviewsService {
         tour_request_id: dto.tourRequestId,
         rating: dto.rating,
         comment: dto.comment,
-        visibility_status: 'visible',
+        visibility_status: visibilityStatus,
       },
     });
 
@@ -80,6 +82,20 @@ export class ReviewsService {
 
     if (dto.rating <= 2) {
       await this.deductReputation(tourRequest.tours.guide_profile_id, 10);
+    }
+
+    // 7. Report if AI Flagged
+    if (aiResult.isFlagged) {
+      await this.prisma.reports.create({
+        data: {
+          reporter_user_id: userId,
+          target_type: 'TOUR_REVIEW',
+          tour_review_id: review.id,
+          reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
+          description: aiResult.reason,
+          status: 'open',
+        },
+      });
     }
 
     return review;
@@ -173,7 +189,11 @@ export class ReviewsService {
       );
     }
 
-    // 5. Create review
+    // 5. AI Auto-Moderation
+    const aiResult = await this.aiModeration.analyzeContent(dto.comment, 'REVIEW');
+    const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
+
+    // 6. Create review
     const review = await this.prisma.guide_reviews.create({
       data: {
         guide_profile_id: tourRequest.tours.guide_profile_id,
@@ -182,7 +202,7 @@ export class ReviewsService {
         tour_request_id: dto.tourRequestId,
         rating: dto.rating,
         comment: dto.comment,
-        visibility_status: 'visible',
+        visibility_status: visibilityStatus,
       },
     });
 
@@ -197,6 +217,20 @@ export class ReviewsService {
 
     if (dto.rating <= 2) {
       await this.deductReputation(tourRequest.tours.guide_profile_id, 10);
+    }
+
+    // 7. Report if AI Flagged
+    if (aiResult.isFlagged) {
+      await this.prisma.reports.create({
+        data: {
+          reporter_user_id: userId,
+          target_type: 'GUIDE_REVIEW',
+          guide_review_id: review.id,
+          reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
+          description: aiResult.reason,
+          status: 'open',
+        },
+      });
     }
 
     return review;

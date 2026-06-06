@@ -16,8 +16,8 @@ export const adminApi = {
   createStaff: (data: Record<string, unknown>) => api.post('/admin/staff', data),
 
   // Reports
-  getReports: (params: Record<string, unknown>) => api.get('/admin/reports', { params }),
-  processReport: (id: string, data: Record<string, unknown>) => api.patch(`/admin/reports/${id}`, data),
+  getReports: (params: Record<string, unknown>) => api.get('/reports', { params }),
+  processReport: (id: string, data: { action: 'dismiss' | 'hide' | 'warn'; resolutionNote: string }) => api.post(`/reports/${id}/resolve`, data),
 
   // Moderation
   moderateTour: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tours/${id}/moderation`, data),
@@ -79,7 +79,7 @@ export const adminApi = {
   getAnomalyAlerts: () => api.get('/admin/anomaly/alerts'),
 
   // Phase 7: Report Heatmap
-  getReportHeatmapData: () => api.get('/admin/reports/heatmap'),
+  getReportHeatmapData: () => api.get('/reports/heatmap'),
 
   // Phase 8: FAQ & Quick Responses
   getFaqItems: () => api.get('/admin/faq'),

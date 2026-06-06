@@ -23,9 +23,9 @@ export class ReconciliationService {
 
     const dbTxMap = new Map(dbTx.map(tx => [tx.provider_transaction_code, tx]));
 
-    const matched = [];
-    const mismatched = [];
-    const notFound = [];
+    const matched: { row: StatementRow; tx: any }[] = [];
+    const mismatched: { row: StatementRow; tx: any; diff: number }[] = [];
+    const notFound: StatementRow[] = [];
 
     // Map các row
     for (const row of statementRows) {
