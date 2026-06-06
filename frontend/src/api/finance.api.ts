@@ -1,7 +1,7 @@
-import axiosClient from './axiosClient';
+import api from '../services/api';
 
 export const financeApi = {
-  reconcileTransactions: (data: any[]) => axiosClient.post('/finance/reconcile', { statementRows: data }),
-  generateInvoice: (id: string) => axiosClient.post(`/finance/invoices/generate/${id}`),
-  getForecasting: (days: number) => axiosClient.get('/finance/forecasting', { params: { days } }),
+  reconcileTransactions: (data: any[]) => api.post('/finance/reconcile', { statementRows: data }),
+  generateInvoice: (id: string) => api.post(`/finance/invoices/generate/${id}`),
+  getForecasting: (days: number) => api.get('/finance/forecasting', { params: { days } }),
 };

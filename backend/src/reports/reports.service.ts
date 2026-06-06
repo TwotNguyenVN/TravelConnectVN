@@ -49,7 +49,9 @@ export class ReportsService {
     return this.prisma.reports.findMany({
       where: status ? { status } : undefined,
       include: {
-        users_reports_reporter_user_idTousers: { select: { full_name: true, email: true } },
+        users_reports_reporter_user_idTousers: {
+          select: { full_name: true, email: true },
+        },
         users_reports_reported_user_idTousers: { select: { full_name: true } },
         tours: { select: { title: true } },
         companion_posts: { select: { title: true } },

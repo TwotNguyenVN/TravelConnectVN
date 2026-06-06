@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, UseGuards, Req, Param, Query } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Req,
+  Param,
+  Query,
+} from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { CreateReportDto } from './dto/create-report.dto';
@@ -37,9 +46,15 @@ export class ReportsController {
   @Post(':id/resolve')
   resolveReport(
     @Param('id') id: string,
-    @Body() body: { action: 'dismiss' | 'hide' | 'warn'; resolutionNote: string },
+    @Body()
+    body: { action: 'dismiss' | 'hide' | 'warn'; resolutionNote: string },
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.reportsService.resolveReport(id, req.user.id, body.action, body.resolutionNote);
+    return this.reportsService.resolveReport(
+      id,
+      req.user.id,
+      body.action,
+      body.resolutionNote,
+    );
   }
 }

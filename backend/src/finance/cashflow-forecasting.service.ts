@@ -16,24 +16,31 @@ export class CashflowForecastingService {
           start_date: {
             lte: targetDate,
             gte: new Date(),
-          }
+          },
         },
-        status: { in: ['approved', 'payment_pending', 'paid'] } // Các tour sắp đi
+        status: { in: ['approved', 'payment_pending', 'paid'] }, // Các tour sắp đi
       },
       include: {
-        tours: { select: { start_date: true } }
-      }
+        tours: { select: { start_date: true } },
+      },
     });
 
     // Gộp dữ liệu theo ngày
-    const dailyForecast: Record<string, { expectedRevenue: number, platformFee: number, guidePayout: number }> = {};
+    const dailyForecast: Record<
+      string,
+      { expectedRevenue: number; platformFee: number; guidePayout: number }
+    > = {};
 
     for (const req of upcomingTours) {
       if (!req.tours?.start_date || !req.price_at_booking) continue;
-      
+
       const dateKey = req.tours.start_date.toISOString().split('T')[0];
       if (!dailyForecast[dateKey]) {
-        dailyForecast[dateKey] = { expectedRevenue: 0, platformFee: 0, guidePayout: 0 };
+        dailyForecast[dateKey] = {
+          expectedRevenue: 0,
+          platformFee: 0,
+          guidePayout: 0,
+        };
       }
 
       const price = Number(req.price_at_booking) * req.participant_count;
@@ -46,17 +53,22 @@ export class CashflowForecastingService {
       dailyForecast[dateKey].guidePayout += payout;
     }
 
-    const series = Object.keys(dailyForecast).sort().map(date => ({
-      date,
-      ...dailyForecast[date]
-    }));
+    const series = Object.keys(dailyForecast)
+      .sort()
+      .map((date) => ({
+        date,
+        ...dailyForecast[date],
+      }));
 
     return {
       days,
-      totalExpectedRevenue: series.reduce((sum, item) => sum + item.expectedRevenue, 0),
+      totalExpectedRevenue: series.reduce(
+        (sum, item) => sum + item.expectedRevenue,
+        0,
+      ),
       totalPlatformFee: series.reduce((sum, item) => sum + item.platformFee, 0),
       totalGuidePayout: series.reduce((sum, item) => sum + item.guidePayout, 0),
-      series
+      series,
     };
   }
 }

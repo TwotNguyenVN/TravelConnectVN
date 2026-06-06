@@ -14,14 +14,18 @@ export class ReconciliationService {
 
   async reconcileTransactions(statementRows: StatementRow[]) {
     // Lấy tất cả các giao dịch trong hệ thống có mã nằm trong danh sách sao kê
-    const txCodes = statementRows.map(row => row.transactionCode).filter(Boolean);
+    const txCodes = statementRows
+      .map((row) => row.transactionCode)
+      .filter(Boolean);
     const dbTx = await this.prisma.payment_transactions.findMany({
       where: {
-        provider_transaction_code: { in: txCodes }
-      }
+        provider_transaction_code: { in: txCodes },
+      },
     });
 
-    const dbTxMap = new Map(dbTx.map(tx => [tx.provider_transaction_code, tx]));
+    const dbTxMap = new Map(
+      dbTx.map((tx) => [tx.provider_transaction_code, tx]),
+    );
 
     const matched: { row: StatementRow; tx: any }[] = [];
     const mismatched: { row: StatementRow; tx: any; diff: number }[] = [];
@@ -42,7 +46,7 @@ export class ReconciliationService {
           mismatched.push({
             row,
             tx,
-            diff: Number(row.amount) - Number(tx.amount)
+            diff: Number(row.amount) - Number(tx.amount),
           });
         }
         dbTxMap.delete(row.transactionCode);
@@ -63,7 +67,7 @@ export class ReconciliationService {
       matched,
       mismatched,
       notFound,
-      extra
+      extra,
     };
   }
 }

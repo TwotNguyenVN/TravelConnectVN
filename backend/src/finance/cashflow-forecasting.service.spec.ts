@@ -13,7 +13,9 @@ describe('CashflowForecastingService', () => {
       ],
     }).compile();
 
-    service = module.get<CashflowForecastingService>(CashflowForecastingService);
+    service = module.get<CashflowForecastingService>(
+      CashflowForecastingService,
+    );
   });
 
   it('should be defined', () => {
