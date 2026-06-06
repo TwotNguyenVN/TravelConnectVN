@@ -9,6 +9,10 @@ import { MailModule } from '../mail/mail.module';
 @Module({
   imports: [PrismaModule, MailModule],
   controllers: [FinanceController],
-  providers: [ReconciliationService, InvoiceService, CashflowForecastingService]
+  providers: [
+    ReconciliationService,
+    InvoiceService,
+    CashflowForecastingService,
+  ],
 })
 export class FinanceModule {}

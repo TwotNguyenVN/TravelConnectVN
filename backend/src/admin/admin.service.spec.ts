@@ -183,3 +183,87 @@ describe('AdminService - updateTransactionStatus', () => {
     expect(mockPrisma.admin_activity_logs.create).toHaveBeenCalled();
   });
 });
+
+describe('AdminService - getSystemHealth', () => {
+  let service: AdminService;
+  let mockPrisma: any;
+  let mockSupabase: any;
+  let mockConfig: any;
+
+  beforeEach(async () => {
+    mockPrisma = {
+      $queryRaw: jest.fn(),
+      admin_activity_logs: { count: jest.fn() },
+      tour_requests: { count: jest.fn() },
+      payment_transactions: { count: jest.fn(), aggregate: jest.fn() },
+    };
+    mockSupabase = {};
+    mockConfig = {
+      get: jest.fn().mockReturnValue('mock-api-key'),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: SupabaseService, useValue: mockSupabase },
+        { provide: ConfigService, useValue: mockConfig },
+      ],
+    }).compile();
+
+    service = module.get<AdminService>(AdminService);
+  });
+
+  it('should return healthy status when DB is up', async () => {
+    mockPrisma.$queryRaw.mockResolvedValue([1]);
+
+    const result = await service.getSystemHealth();
+    expect(result.services.database.status).toBe('healthy');
+  });
+
+  it('should return down status when DB is down', async () => {
+    mockPrisma.$queryRaw.mockRejectedValue(new Error('Connection error'));
+
+    const result = await service.getSystemHealth();
+    expect(result.services.database.status).toBe('down');
+  });
+});
+
+describe('AdminService - createCategory', () => {
+  let service: AdminService;
+  let mockPrisma: any;
+  let mockSupabase: any;
+  let mockConfig: any;
+
+  beforeEach(async () => {
+    mockPrisma = {
+      tour_categories: { create: jest.fn() },
+      admin_activity_logs: { create: jest.fn() },
+    };
+    mockSupabase = {};
+    mockConfig = {
+      get: jest.fn().mockReturnValue('mock-api-key'),
+    };
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AdminService,
+        { provide: PrismaService, useValue: mockPrisma },
+        { provide: SupabaseService, useValue: mockSupabase },
+        { provide: ConfigService, useValue: mockConfig },
+      ],
+    }).compile();
+
+    service = module.get<AdminService>(AdminService);
+  });
+
+  it('should create category and return mapped bigInt id', async () => {
+    mockPrisma.tour_categories.create.mockResolvedValue({ id: BigInt(1), name: 'Adventure' });
+    
+    const result = await service.createCategory('tour_categories', { name: 'Adventure' }, 'admin-1');
+    
+    expect(result.id).toBe('1');
+    expect(result.name).toBe('Adventure');
+    expect(mockPrisma.admin_activity_logs.create).toHaveBeenCalled();
+  });
+});

@@ -23,7 +23,10 @@ export class AiModerationService {
    * @param content Nội dung cần kiểm tra
    * @param contentType Loại nội dung (e.g., 'TOUR_DESCRIPTION', 'REVIEW', 'COMPANION_POST')
    */
-  async analyzeContent(content: string, contentType: string): Promise<ModerationResult> {
+  async analyzeContent(
+    content: string,
+    contentType: string,
+  ): Promise<ModerationResult> {
     try {
       const prompt = `Bạn là một hệ thống kiểm duyệt nội dung tự động (Auto-Moderation) cho nền tảng du lịch TravelConnectVN.
 Hãy phân tích nội dung sau đây (loại nội dung: ${contentType}) và xác định xem nó có vi phạm chính sách không.
@@ -50,14 +53,22 @@ TRẢ VỜI DƯỚI ĐỊNH DẠNG JSON CHÍNH XÁC NHƯ SAU (Không có markdow
       });
 
       const responseText = response.text || '{}';
-      const cleanJsonStr = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
-      
-      const parsedResult = JSON.parse(cleanJsonStr);
-      
+      const cleanJsonStr = responseText
+        .replace(/```json/g, '')
+        .replace(/```/g, '')
+        .trim();
+
+      const parsedResult = JSON.parse(
+        cleanJsonStr,
+      ) as Partial<ModerationResult>;
+
       return {
         isFlagged: parsedResult.isFlagged === true,
         reason: parsedResult.reason || '',
-        confidenceScore: typeof parsedResult.confidenceScore === 'number' ? parsedResult.confidenceScore : 1.0,
+        confidenceScore:
+          typeof parsedResult.confidenceScore === 'number'
+            ? parsedResult.confidenceScore
+            : 1.0,
       };
     } catch (error) {
       this.logger.error('Error during AI Content Moderation', error);

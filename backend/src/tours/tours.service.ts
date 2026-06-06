@@ -958,7 +958,10 @@ export class ToursService implements OnApplicationBootstrap {
 
     // AI Auto-Moderation check
     const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
-    const aiResult = await this.aiModeration.analyzeContent(contentToAnalyze, 'TOUR_DESCRIPTION');
+    const aiResult = await this.aiModeration.analyzeContent(
+      contentToAnalyze,
+      'TOUR_DESCRIPTION',
+    );
     const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
     const businessStatus = aiResult.isFlagged ? 'draft' : 'published';
 

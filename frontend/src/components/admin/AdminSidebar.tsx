@@ -49,6 +49,7 @@ export const AdminSidebar: React.FC = () => {
         <NavLink to="/admin/recovery" style={navLinkStyle}>🗑️ Khôi phục dữ liệu</NavLink>
         <NavLink to="/admin/maintenance" style={navLinkStyle}>🔧 Chế độ bảo trì</NavLink>
         <NavLink to="/admin/anomaly" style={navLinkStyle}>🚨 Cảnh báo bất thường</NavLink>
+        <NavLink to="/admin/settings" style={navLinkStyle}>⚙️ Cấu hình hệ thống</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

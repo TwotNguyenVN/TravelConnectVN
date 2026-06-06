@@ -39,10 +39,36 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 
 ## Latest Execution Notes
 
+### 2026-06-06
+* **Date**: 2026-06-06
+* **Component**: Backend Backoffice & Unit Tests
+* **Action**: Sửa lỗi Dependency Injection trong `ai-moderation` và `reviews` module, đạt 100% Pass Rate cho toàn bộ Unit Tests. Tái cấu trúc `MaintenanceGuard` để sử dụng cấu hình từ bảng `system_settings` trong DB thay vì In-Memory. Xác minh logic trừ điểm uy tín (Reputation) đã được triển khai đầy đủ.
+* **Status**: Completed
+
+### 2026-06-07 (SYSTEM_ADMIN Phase 1.x Debug & Refactor)
+- **Rà soát & Sửa lỗi (Refactoring) cho module `admin` và `support`:**
+  - Chạy `npm run lint` và khắc phục triệt để ~60 lỗi TypeScript (chủ yếu là `any` type usage) trong `admin.service.ts`, `ai-moderation.service.ts` và loại bỏ các biến `params` không sử dụng ở `support.service.ts`.
+  - Giảm số lượng lint errors của module admin từ 58 xuống 0, nâng cao độ an toàn (Type Safety).
+  - Cập nhật Unit Tests trong `admin.service.spec.ts` cho các hàm mới như `getSystemHealth()` và `createCategory()`, đảm bảo pass 100% khi chạy `npm run test -- admin`.
+
+### 2026-06-07 (SYSTEM_ADMIN Phase 1.1)
+- **Hoàn thành Role SYSTEM_ADMIN (Cấu hình hệ thống & Sức khỏe hệ thống):**
+  - Tạo model `system_settings` trong `schema.prisma` để lưu trữ biến cấu hình toàn cục (như Commission Rate).
+  - Viết logic và API endpoint trong `AdminController` và `AdminService` cho:
+    - Quản lý Global Settings (`GET /admin/settings/:key`, `PATCH /admin/settings/:key`).
+    - Quản lý Dictionaries động (ngôn ngữ, kỹ năng, tỉnh/thành, thể loại tour) qua `PrismaService`.
+    - Lấy thông tin sức khỏe hệ thống (System Health) báo cáo trạng thái DB và External APIs (`GET /admin/system/health`).
+  - Xây dựng giao diện `AdminSettingsPage.tsx` tích hợp đầy đủ UI cấu hình chiết khấu và danh mục (CRUD table với Tabs).
+  - Cập nhật `AdminDashboardPage.tsx` hiển thị Dashboard Sức khỏe hệ thống với ping latency và Storage Usage.
+  - Cập nhật `routes/index.tsx` và `AdminSidebar.tsx` để truy cập trang Settings. Đã verify frontend build không lỗi kiểu.
+
 ### 2026-06-07
-- **Hoàn thành Role SUPPORT_STAFF (Nhân viên Hỗ trợ):**
   - Tạo mới hoàn toàn backend module `support` thay vì dùng chung `admin`.
   - Xây dựng hệ thống API cho Quản lý Tickets, Giải quyết tranh chấp (kèm logic thông báo tự động và hoàn tiền), Gửi thông báo diện rộng Broadcast, và Quản lý câu hỏi thường gặp FAQ.
+  - Triển khai thành công các tính năng nâng cao (Phase 3.2):
+    - **SOS Dashboard**: Di dời hệ thống quản lý tín hiệu cầu cứu SOS từ `/admin/sos` sang `/support/sos`, tích hợp đầy đủ với Frontend `SupportDashboardPage`.
+    - **CSAT Analytics**: Xây dựng API thống kê hiệu suất giải quyết ticket/tranh chấp của nhân viên, thời gian xử lý trung bình và Leaderboard.
+    - **Agent Co-Pilot**: Tích hợp Google Gemini sinh tự động câu trả lời và phán quyết gợi ý dựa trên ngữ cảnh tranh chấp, bổ sung nút "🤖 AI Gợi ý" trên màn hình xử lý khiếu nại.
   - Cập nhật Frontend API để map với các endpoint `/support/...` mới.
   - Đã vá lỗi bảo mật (AuthGuard) cho module Kế toán (`FinanceController`).
 

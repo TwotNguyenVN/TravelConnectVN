@@ -13,7 +13,7 @@ export class InvoiceService {
   async generateInvoice(paymentTransactionId: string) {
     const tx = await this.prisma.payment_transactions.findUnique({
       where: { id: paymentTransactionId },
-      include: { users: true }
+      include: { users: true },
     });
 
     if (!tx) {
@@ -22,7 +22,7 @@ export class InvoiceService {
 
     // Kiểm tra xem đã có hóa đơn chưa
     const existingInvoice = await this.prisma.invoices.findUnique({
-      where: { payment_transaction_id: paymentTransactionId }
+      where: { payment_transaction_id: paymentTransactionId },
     });
 
     if (existingInvoice) {
@@ -30,7 +30,8 @@ export class InvoiceService {
     }
 
     // Mock gọi API VNPT / MISA sinh hóa đơn
-    const mockInvoiceNumber = 'INV-' + randomBytes(4).toString('hex').toUpperCase();
+    const mockInvoiceNumber =
+      'INV-' + randomBytes(4).toString('hex').toUpperCase();
     const mockPdfUrl = `https://travelconnect.vn/invoices/${mockInvoiceNumber}.pdf`;
 
     const newInvoice = await this.prisma.invoices.create({
@@ -40,13 +41,15 @@ export class InvoiceService {
         total_amount: tx.amount,
         pdf_url: mockPdfUrl,
         status: 'issued',
-      }
+      },
     });
 
     // Gửi email
     if (tx.users?.email) {
       // Mock gửi email (MailService giả định có sendInvoiceEmail hoặc dùng log)
-      console.log(`[InvoiceService] Đã gửi hóa đơn điện tử ${mockInvoiceNumber} đến ${tx.users.email}`);
+      console.log(
+        `[InvoiceService] Đã gửi hóa đơn điện tử ${mockInvoiceNumber} đến ${tx.users.email}`,
+      );
     }
 
     return newInvoice;

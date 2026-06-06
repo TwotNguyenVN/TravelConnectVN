@@ -6,7 +6,10 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTourReviewDto, CreateGuideReviewDto } from './dto/create-review.dto';
+import {
+  CreateTourReviewDto,
+  CreateGuideReviewDto,
+} from './dto/create-review.dto';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
 import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 
@@ -56,7 +59,10 @@ export class ReviewsService {
     }
 
     // 5. AI Auto-Moderation
-    const aiResult = await this.aiModeration.analyzeContent(dto.comment, 'REVIEW');
+    const aiResult = await this.aiModeration.analyzeContent(
+      dto.comment,
+      'REVIEW',
+    );
     const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
 
     // 6. Create review
@@ -190,7 +196,10 @@ export class ReviewsService {
     }
 
     // 5. AI Auto-Moderation
-    const aiResult = await this.aiModeration.analyzeContent(dto.comment, 'REVIEW');
+    const aiResult = await this.aiModeration.analyzeContent(
+      dto.comment,
+      'REVIEW',
+    );
     const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
 
     // 6. Create review

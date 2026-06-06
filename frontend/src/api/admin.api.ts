@@ -40,8 +40,8 @@ export const adminApi = {
 
 
   // SOS Alerts
-  getSosAlerts: () => api.get('/admin/sos'),
-  resolveSosAlert: (id: string, note: string) => api.patch(`/admin/sos/${id}/resolve`, { note }),
+  getSosAlerts: () => api.get('/support/sos'),
+  resolveSosAlert: (id: string, note: string) => api.patch(`/support/sos/${id}/resolve`, { note }),
 
   // Support Tickets
   getTickets: (params?: Record<string, unknown>) => api.get('/support/tickets', { params }),
@@ -67,6 +67,9 @@ export const adminApi = {
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
 
+  // Agent Co-Pilot (Support)
+  getCopilotSuggestion: (text: string) => api.post('/support/copilot/suggest', { text }),
+
   // Soft Delete Recovery Console
   getDeletedItems: () => api.get('/admin/recovery/deleted'),
   restoreDeletedItem: (type: string, id: string) => api.post(`/admin/recovery/${type}/${id}/restore`),
@@ -88,7 +91,7 @@ export const adminApi = {
   deleteFaqItem: (id: string) => api.delete(`/support/faq/${id}`),
 
   // Phase 9: CSAT & SLA Analytics
-  getCsatAnalytics: () => api.get('/admin/analytics/csat'),
+  getCsatAnalytics: () => api.get('/support/analytics/csat'),
 
   // Phase 10: Smart Reconciliation
   reconcileTransactions: (formData: FormData) => api.post('/admin/finance/reconcile', formData, {
@@ -97,4 +100,15 @@ export const adminApi = {
 
   // Phase 11: Financial Export
   exportFinancialReport: (params?: { startDate?: string; endDate?: string }) => api.get('/admin/finance/export', { params }),
+
+  // Phase 1.1 Core: Global Settings & System Health
+  getSystemHealth: () => api.get('/admin/system/health'),
+  getSetting: (key: string) => api.get(`/admin/settings/${key}`),
+  updateSetting: (key: string, value: string) => api.patch(`/admin/settings/${key}`, { value }),
+  
+  getCategories: (type: string) => api.get(`/admin/categories/${type}`),
+  createCategory: (type: string, data: { name: string; description?: string }) => api.post(`/admin/categories/${type}`, data),
+  updateCategory: (type: string, id: string, data: { name: string; description?: string }) => api.patch(`/admin/categories/${type}/${id}`, data),
+  deleteCategory: (type: string, id: string) => api.delete(`/admin/categories/${type}/${id}`),
 };
+

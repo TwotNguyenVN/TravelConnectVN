@@ -5,50 +5,17 @@ import {
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Request } from 'express';
-
-/**
- * Singleton service to hold maintenance mode state in-memory.
- * In production, this could be backed by Redis or a database setting.
- */
-@Injectable()
-export class MaintenanceService {
-  private enabled = false;
-  private enabledAt: Date | null = null;
-  private enabledBy: string | null = null;
-
-  isEnabled(): boolean {
-    return this.enabled;
-  }
-
-  getStatus() {
-    return {
-      enabled: this.enabled,
-      enabledAt: this.enabledAt,
-      enabledBy: this.enabledBy,
-    };
-  }
-
-  toggle(enabled: boolean, adminId: string) {
-    this.enabled = enabled;
-    this.enabledAt = enabled ? new Date() : null;
-    this.enabledBy = enabled ? adminId : null;
-    return this.getStatus();
-  }
-}
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Global guard that blocks write operations (POST/PATCH/DELETE)
- * when maintenance mode is enabled, except for admin endpoints.
+ * when maintenance mode is enabled via system_settings, except for admin endpoints.
  */
 @Injectable()
 export class MaintenanceGuard implements CanActivate {
-  constructor(private readonly maintenanceService: MaintenanceService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    if (!this.maintenanceService.isEnabled()) {
-      return true;
-    }
-
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const method = request.method?.toUpperCase();
     const url: string = request.originalUrl || request.url || '';
@@ -63,9 +30,17 @@ export class MaintenanceGuard implements CanActivate {
       return true;
     }
 
-    // Block all other write operations
-    throw new ServiceUnavailableException(
-      'Hệ thống đang trong chế độ bảo trì. Vui lòng thử lại sau.',
-    );
+    // Check system_settings for maintenance mode
+    const maintenanceSetting = await this.prisma.system_settings.findUnique({
+      where: { key: 'is_maintenance' },
+    });
+
+    if (maintenanceSetting && maintenanceSetting.value === 'true') {
+      throw new ServiceUnavailableException(
+        'Hệ thống đang trong chế độ bảo trì. Vui lòng thử lại sau.',
+      );
+    }
+
+    return true;
   }
 }

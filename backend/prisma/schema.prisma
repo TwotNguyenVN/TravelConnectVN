@@ -1618,3 +1618,11 @@ model invoices {
   @@schema("public")
 }
 
+model system_settings {
+  setting_key   String   @id @db.VarChar(100)
+  setting_value String   @db.Text
+  description   String?
+  updated_at    DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}

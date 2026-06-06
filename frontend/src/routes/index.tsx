@@ -62,6 +62,7 @@ import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManag
 import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
 import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
 import { AdminRecoveryConsolePage } from '../pages/admin/AdminRecoveryConsolePage';
+import AdminSettingsPage from '../pages/admin/AdminSettingsPage';
 import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
 import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
 import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
@@ -176,6 +177,7 @@ export const router = createBrowserRouter([
       { path: 'recovery', element: <AdminRecoveryConsolePage /> },
       { path: 'maintenance', element: <AdminMaintenancePage /> },
       { path: 'anomaly', element: <AdminAnomalyPage /> },
+      { path: 'settings', element: <AdminSettingsPage /> },
     ],
   },
   {

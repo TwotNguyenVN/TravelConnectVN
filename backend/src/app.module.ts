@@ -32,7 +32,6 @@ import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MaintenanceGuard } from './common/guards/maintenance.guard';
-import { MaintenanceModule } from './common/maintenance.module';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
@@ -118,7 +117,6 @@ import { SupportModule } from './support/support.module';
     TicketsModule,
     DisputesModule,
     MailModule,
-    MaintenanceModule,
     MetricsModule,
     AiModerationModule,
     FinanceModule,

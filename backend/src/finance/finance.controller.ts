@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Query, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Query,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ReconciliationService, StatementRow } from './reconciliation.service';
 import { InvoiceService } from './invoice.service';
@@ -15,11 +23,15 @@ export class FinanceController {
 
   @Post('reconcile')
   async reconcile(@Body('statementRows') statementRows: StatementRow[]) {
-    return this.reconciliationService.reconcileTransactions(statementRows || []);
+    return this.reconciliationService.reconcileTransactions(
+      statementRows || [],
+    );
   }
 
   @Post('invoices/generate/:paymentTransactionId')
-  async generateInvoice(@Param('paymentTransactionId') paymentTransactionId: string) {
+  async generateInvoice(
+    @Param('paymentTransactionId') paymentTransactionId: string,
+  ) {
     return this.invoiceService.generateInvoice(paymentTransactionId);
   }
 

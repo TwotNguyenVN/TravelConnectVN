@@ -23,6 +23,7 @@ export function AdminDashboardPage() {
   const [tourStats, setTourStats] = useState<any>(null);
   const [reportStats, setReportStats] = useState<any>(null);
   const [revenueStats, setRevenueStats] = useState<any>(null);
+  const [healthStats, setHealthStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +43,8 @@ export function AdminDashboardPage() {
         adminApi.getStatisticsUsers(),
         adminApi.getStatisticsTours(),
         adminApi.getStatisticsReports(),
-        adminApi.getStatisticsRevenue()
+        adminApi.getStatisticsRevenue(),
+        adminApi.getSystemHealth()
       ]);
 
       if (dashboardRes?.success) setStats(dashboardRes.data);
@@ -50,6 +52,7 @@ export function AdminDashboardPage() {
       if (tourRes?.success) setTourStats(tourRes.data);
       if (reportRes?.success) setReportStats(reportRes.data);
       if (revenueRes?.success) setRevenueStats(revenueRes.data);
+      if (healthRes) setHealthStats(healthRes); // Depending on axios interceptor, it might just be the direct response.
 
     } catch (err) {
       console.error('Failed to fetch admin statistics', err);
@@ -116,6 +119,31 @@ export function AdminDashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* System Health Section */}
+      {healthStats && (
+        <div style={{ backgroundColor: 'white', padding: 'var(--tc-spacing-6)', borderRadius: 'var(--tc-radius-lg)', border: '1px solid var(--tc-border)', marginBottom: 'var(--tc-spacing-8)' }}>
+          <h3 style={{ marginBottom: 'var(--tc-spacing-6)', fontSize: 'var(--tc-font-size-md)', display: 'flex', justifyContent: 'space-between' }}>
+            <span>Bảng giám sát sức khỏe hệ thống</span>
+            <span className="text-sm font-normal text-gray-500">Cập nhật lúc: {new Date(healthStats.lastChecked).toLocaleTimeString('vi-VN')}</span>
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Object.entries(healthStats.services || {}).map(([key, service]: [string, any]) => (
+              <div key={key} className="p-4 border rounded-md bg-gray-50 flex flex-col items-center">
+                <span className="text-sm font-medium text-gray-600 uppercase mb-2">{key}</span>
+                <span className={`px-2 py-1 text-xs font-bold rounded-full mb-2 ${service.status === 'healthy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                  {service.status === 'healthy' ? 'ONLINE' : 'OFFLINE'}
+                </span>
+                <span className="text-xs text-gray-500">{service.latency} ms</span>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 pt-4 border-t flex items-center justify-between">
+            <span className="text-sm font-medium text-gray-700">Storage Usage (Supabase S3)</span>
+            <span className="text-sm font-bold text-blue-600">{healthStats.storageUsageMB} MB / 50 GB</span>
+          </div>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 'var(--tc-spacing-6)', marginBottom: 'var(--tc-spacing-6)' }}>
         {/* Revenue Chart */}
