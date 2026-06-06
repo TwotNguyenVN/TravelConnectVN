@@ -18,7 +18,7 @@ const CompanionListPage: React.FC = () => {
     status: 'open',
   });
 
-  const fetchPosts = async () => {
+  async function fetchPosts() {
     setLoading(true);
     setError(null);
     try {
@@ -40,12 +40,12 @@ const CompanionListPage: React.FC = () => {
     fetchPosts();
   }, [filters]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  function handleFilterChange(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       day: '2-digit',
       month: '2-digit',
@@ -53,11 +53,11 @@ const CompanionListPage: React.FC = () => {
     });
   };
 
-  const formatCurrency = (amount: number) => {
+  function formatCurrency(amount: number) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
 
-  const isPostExpired = (startDateStr: string) => {
+  function isPostExpired(startDateStr: string) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const startDate = new Date(startDateStr);

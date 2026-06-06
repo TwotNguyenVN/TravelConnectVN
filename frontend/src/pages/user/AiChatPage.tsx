@@ -11,7 +11,7 @@ import axios from 'axios';
 import './AiChatPage.css';
 
 // Helper to replace <br> tags with actual JSX <br /> elements in rendered Markdown nodes
-const replaceBr = (node: any): any => {
+function replaceBr(node: any): any {
   if (typeof node === 'string') {
     if (/<br\s*\/?>/gi.test(node)) {
       const parts = node.split(/<br\s*\/?>/gi);
@@ -65,14 +65,14 @@ const AiChatPage: React.FC = () => {
   const streamingIntervalRef = useRef<any>(null);
   const isCreatingSessionRef = useRef(false);
 
-  const scrollToBottom = () => {
+  function scrollToBottom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
     fetchSessions();
     
-    const fetchUpcomingTour = async () => {
+    async function fetchUpcomingTour() {
       try {
         const res = await tourRequestService.getMyRequests({ limit: 20 });
         if (res.success && res.data?.data) {
@@ -132,7 +132,7 @@ const AiChatPage: React.FC = () => {
 
   const isNewChat = currentSessionId === null || (messages.length === 0 && !loadingMessages);
 
-  const fetchSessions = async () => {
+  async function fetchSessions() {
     if (!user) return;
     try {
       setLoadingSessions(true);
@@ -147,7 +147,7 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const fetchMessages = async (sessionId: string) => {
+  async function fetchMessages(sessionId: string) {
     try {
       setLoadingMessages(true);
       const res = await aiChatService.getMessages(sessionId);
@@ -163,7 +163,7 @@ const AiChatPage: React.FC = () => {
 
 
 
-  const handleDeleteSession = async (e: React.MouseEvent, sessionId: string) => {
+  async function handleDeleteSession(e: React.MouseEvent, sessionId: string) {
     e.stopPropagation();
     if (!window.confirm('Bạn có chắc chắn muốn xóa hội thoại này không?')) return;
     
@@ -181,13 +181,13 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const handleStartEditSession = (e: React.MouseEvent, session: AiSession) => {
+  function handleStartEditSession(e: React.MouseEvent, session: AiSession) {
     e.stopPropagation();
     setEditingSessionId(session.id);
     setEditTitleText(session.context?.title || `Hội thoại ${session.id.substring(0, 4)}`);
   };
 
-  const handleSaveSessionTitle = async (sessionId: string) => {
+  async function handleSaveSessionTitle(sessionId: string) {
     if (!editTitleText.trim()) {
       setEditingSessionId(null);
       return;
@@ -208,7 +208,7 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = async (e?: React.FormEvent, directText?: string, isRegenerate = false) => {
+  async function handleSendMessage(e?: React.FormEvent, directText?: string, isRegenerate = false) {
     if (e) e.preventDefault();
     const textToSend = directText || inputText;
     if (!textToSend.trim() || (sending && !isRegenerate)) return;
@@ -291,7 +291,7 @@ const AiChatPage: React.FC = () => {
     }
   };
 
-  const handleStopGeneration = () => {
+  function handleStopGeneration() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
@@ -304,12 +304,12 @@ const AiChatPage: React.FC = () => {
     toast.info('Đã dừng phản hồi từ AI');
   };
 
-  const handleStartEditMessage = (messageId: string, content: string) => {
+  function handleStartEditMessage(messageId: string, content: string) {
     setEditingMessageId(messageId);
     setEditingText(content);
   };
 
-  const handleSaveAndResendMessage = async (messageId: string) => {
+  async function handleSaveAndResendMessage(messageId: string) {
     if (!editingText.trim() || sending) return;
     const msgIndex = messages.findIndex(m => m.id === messageId);
     if (msgIndex === -1) return;
@@ -323,7 +323,7 @@ const AiChatPage: React.FC = () => {
     handleSendMessage(undefined, editingText);
   };
 
-  const handleCopyToClipboard = (e: React.MouseEvent, messageId: string, content: string) => {
+  function handleCopyToClipboard(e: React.MouseEvent, messageId: string, content: string) {
     e.stopPropagation();
     navigator.clipboard.writeText(content).then(() => {
       setCopiedMessageId(messageId);
@@ -334,7 +334,7 @@ const AiChatPage: React.FC = () => {
     });
   };
 
-  const handleRegenerate = async (e: React.MouseEvent) => {
+  async function handleRegenerate(e: React.MouseEvent) {
     e.stopPropagation();
     if (sending || messages.length < 2) return;
     
@@ -355,14 +355,14 @@ const AiChatPage: React.FC = () => {
     handleSendMessage(undefined, lastUserMsg.content, true);
   };
 
-  const formatDate = (dateStr?: string) => {
+  function formatDate(dateStr?: string) {
     if (!dateStr) return 'Gần đây';
     const date = new Date(dateStr);
     if (isNaN(date.getTime())) return 'Gần đây';
     return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
   };
 
-  const getSessionDisplayTitle = (s: AiSession) => {
+  function getSessionDisplayTitle(s: AiSession) {
     if (s.context?.title) return s.context.title;
     
     if (s.ai_chat_messages && s.ai_chat_messages.length > 0) {

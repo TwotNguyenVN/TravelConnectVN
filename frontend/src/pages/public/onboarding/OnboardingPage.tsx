@@ -60,13 +60,7 @@ export const OnboardingPage: React.FC = () => {
     certificate: [],
   });
 
-  useEffect(() => {
-    if (currentStep === OnboardingStep.GUIDE_INFO) {
-      fetchGuideMasterData();
-    }
-  }, [currentStep]);
-
-  const fetchGuideMasterData = async () => {
+  async function fetchGuideMasterData() {
     try {
       const [langsRes, skillsRes] = await Promise.all([
         guideService.getLanguages(),
@@ -96,12 +90,18 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  const handleSkip = () => {
+  useEffect(() => {
+    if (currentStep === OnboardingStep.GUIDE_INFO) {
+      fetchGuideMasterData();
+    }
+  }, [currentStep]);
+
+  function handleSkip() {
     toast.info('Bạn đã bỏ qua thiết lập hồ sơ. Bạn có thể cập nhật sau trong phần Cài đặt.');
     navigate('/');
   };
 
-  const handleNext = async () => {
+  async function handleNext() {
     // Validation on basicInfo step
     if (currentStep === OnboardingStep.BASIC_INFO) {
       if (basicInfo.phone) {
@@ -344,7 +344,7 @@ export const OnboardingPage: React.FC = () => {
     </div>
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: string) {
     if (e.target.files?.[0]) {
       const file = e.target.files[0];
       setVerificationFiles(prev => ({ ...prev, [type]: file }));
@@ -354,7 +354,7 @@ export const OnboardingPage: React.FC = () => {
     }
   };
 
-  const handleMultipleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: string) => {
+  function handleMultipleFileChange(e: React.ChangeEvent<HTMLInputElement>, type: string) {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setVerificationFiles(prev => ({ ...prev, [type]: [...(prev[type] || []), ...newFiles] }));

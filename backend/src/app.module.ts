@@ -1,4 +1,5 @@
 import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -32,8 +33,18 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { SystemSettingsModule } from './system-settings/system-settings.module';
 import { MaintenanceGuard } from './common/guards/maintenance.guard';
+import { MaintenanceModule } from './common/maintenance.module';
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
+import { SosModule } from './sos/sos.module';
+import { TicketsModule } from './tickets/tickets.module';
+import { DisputesModule } from './disputes/disputes.module';
+import { MailModule } from './mail/mail.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigService } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { redisStore } from 'cache-manager-redis-yet';
+import { MetricsModule } from './metrics/metrics.module';
 
 @Module({
   imports: [
@@ -41,10 +52,37 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
       isGlobal: true,
       envFilePath: '.env',
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    CacheModule.registerAsync({
+      isGlobal: true,
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => {
+        const store = await redisStore({
+          socket: {
+            host: configService.get('REDIS_HOST', 'localhost'),
+            port: configService.get<number>('REDIS_PORT', 6379),
+          },
+          ttl: 60 * 1000, // 1 minute default TTL
+        });
+        return {
+          store: store as unknown as any,
+        };
+      },
+      inject: [ConfigService],
+    }),
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
-        limit: 60, // max 60 requests per minute
+        limit: 100, // max 100 requests per minute
       },
     ]),
     ScheduleModule.forRoot(),
@@ -75,6 +113,12 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
     AiChatModule,
     TripExpensesModule,
     SystemSettingsModule,
+    SosModule,
+    TicketsModule,
+    DisputesModule,
+    MailModule,
+    MaintenanceModule,
+    MetricsModule,
   ],
   controllers: [AppController],
   providers: [
@@ -92,7 +136,7 @@ import { CompanionReviewsModule } from './companion-reviews/companion-reviews.mo
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
-      .apply((req, res, next) => {
+      .apply((req: Request, res: Response, next: NextFunction) => {
         const { method, originalUrl } = req;
         const start = Date.now();
         res.on('finish', () => {

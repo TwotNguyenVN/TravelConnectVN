@@ -12,13 +12,13 @@ export class NotificationsScheduler implements OnModuleInit {
   onModuleInit() {
     // Run the check immediately on startup in background
     setTimeout(() => {
-      this.checkAndSendReminders();
+      this.checkAndSendReminders().catch(console.error);
     }, 5000);
 
     // Check every 5 minutes
     setInterval(
       () => {
-        this.checkAndSendReminders();
+        this.checkAndSendReminders().catch(console.error);
       },
       5 * 60 * 1000,
     );

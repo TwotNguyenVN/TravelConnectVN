@@ -22,7 +22,7 @@ export const GuideRequestsPage: React.FC = () => {
   const [responseNote, setResponseNote] = useState('');
   const [processType, setProcessType] = useState<'approve' | 'reject' | null>(null);
 
-  const fetchRequests = async () => {
+  async function fetchRequests() {
     try {
       setLoading(true);
       const response = await tourRequestService.getGuideRequests();
@@ -41,13 +41,13 @@ export const GuideRequestsPage: React.FC = () => {
     fetchRequests();
   }, []);
 
-  const handleOpenProcess = (request: TourRequest, type: 'approve' | 'reject') => {
+  function handleOpenProcess(request: TourRequest, type: 'approve' | 'reject') {
     setSelectedRequest(request);
     setProcessType(type);
     setResponseNote('');
   };
 
-  const handleProcessSubmit = async () => {
+  async function handleProcessSubmit() {
     if (!selectedRequest || !processType) return;
 
     try {
@@ -69,7 +69,7 @@ export const GuideRequestsPage: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  function getStatusBadge(status: string) {
     switch (status) {
       case 'pending':
         return <Badge variant="warning">Đang chờ</Badge>;

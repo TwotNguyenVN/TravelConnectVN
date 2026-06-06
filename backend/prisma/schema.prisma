@@ -725,7 +725,9 @@ model guide_profiles {
   avatar_url                  String?
   verification_status         String                        @default("not_submitted")
   visibility_status           String                        @default("visible")
+  reputation_score            Int                           @default(100)
   is_accepting_tours          Boolean                       @default(true)
+
   created_at                  DateTime                      @default(now()) @db.Timestamptz(6)
   updated_at                  DateTime                      @default(now()) @db.Timestamptz(6)
   deleted_at                  DateTime?                     @db.Timestamptz(6)
@@ -1103,6 +1105,7 @@ model tour_requests {
   cancellation_note                               String?
   price_at_booking                                Decimal?               @db.Decimal(12, 2)
   guide_reviews                                   guide_reviews?
+  tour_disputes                                   tour_disputes?
   payment_transactions                            payment_transactions[]
   users_tour_requests_processed_by_user_idTousers public_users?          @relation("tour_requests_processed_by_user_idTousers", fields: [processed_by_user_id], references: [id], onUpdate: NoAction)
   tours                                           tours                  @relation(fields: [tour_id], references: [id], onUpdate: NoAction)
@@ -1181,6 +1184,7 @@ model tours {
   tour_requests            tour_requests[]
   tour_reviews             tour_reviews[]
   tour_schedules           tour_schedules[]
+  sos_alerts               sos_alerts[]
   tour_categories          tour_categories?      @relation(fields: [category_id], references: [id], onUpdate: NoAction)
   guide_profiles           guide_profiles        @relation(fields: [guide_profile_id], references: [id], onUpdate: NoAction)
   tour_route               tour_routes?
@@ -1346,6 +1350,12 @@ model public_users {
   user_role_change_logs_user_role_change_logs_target_user_idTousers     user_role_change_logs[]       @relation("user_role_change_logs_target_user_idTousers")
   user_roles_user_roles_assigned_byTousers                              user_roles[]                  @relation("user_roles_assigned_byTousers")
   user_roles_user_roles_user_idTousers                                  user_roles[]                  @relation("user_roles_user_idTousers")
+  sos_alerts_sent                                                       sos_alerts[]                  @relation("sos_user")
+  sos_alerts_resolved                                                   sos_alerts[]                  @relation("sos_resolver")
+  tickets_reported                                                      support_tickets[]             @relation("ticket_reporter")
+  tickets_assigned                                                      support_tickets[]             @relation("ticket_assignee")
+  disputes_created                                                      tour_disputes[]               @relation("dispute_creator")
+  disputes_resolved                                                     tour_disputes[]               @relation("dispute_resolver")
   provinces                                                             provinces?                    @relation(fields: [home_province_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_users_home_province")
   users                                                                 auth_users                    @relation(fields: [id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   paid_expenses                                                         trip_expenses[]               @relation("paid_expenses")
@@ -1353,6 +1363,7 @@ model public_users {
   trip_expense_splits                                                   trip_expense_splits[]
   companion_reviews_written                                             companion_reviews[]           @relation("companion_reviewer")
   companion_reviews_received                                            companion_reviews[]           @relation("companion_host")
+  faq_created                                                           faq_items[]                   @relation("faq_creator")
 
   @@map("users")
   @@schema("public")
@@ -1528,6 +1539,75 @@ model system_settings {
   value       String   @db.VarChar(500)
   description String?
   updated_at  DateTime @default(now()) @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model sos_alerts {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id             String        @db.Uuid
+  tour_id             String?       @db.Uuid
+  latitude            Decimal       @db.Decimal(9, 6)
+  longitude           Decimal       @db.Decimal(9, 6)
+  status              String        @default("active")
+  note                String?
+  resolved_by_user_id String?       @db.Uuid
+  resolved_at         DateTime?     @db.Timestamptz(6)
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+
+  users               public_users  @relation("sos_user", fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  tours               tours?        @relation(fields: [tour_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  resolved_by         public_users? @relation("sos_resolver", fields: [resolved_by_user_id], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model support_tickets {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  reporter_user_id    String        @db.Uuid
+  title               String        @db.VarChar(255)
+  description         String
+  category            String        @db.VarChar(50)
+  status              String        @default("pending")
+  assigned_to_user_id String?       @db.Uuid
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime      @default(now()) @db.Timestamptz(6)
+
+  reporter            public_users  @relation("ticket_reporter", fields: [reporter_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  assignee            public_users? @relation("ticket_assignee", fields: [assigned_to_user_id], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model tour_disputes {
+  id                  String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  tour_request_id     String        @unique @db.Uuid
+  raised_by_user_id   String        @db.Uuid
+  reason              String
+  status              String        @default("open")
+  resolved_by_user_id String?       @db.Uuid
+  resolution_note     String?
+  refund_amount       Decimal       @default(0.00) @db.Decimal(12, 2)
+  created_at          DateTime      @default(now()) @db.Timestamptz(6)
+  resolved_at         DateTime?     @db.Timestamptz(6)
+
+  tour_requests       tour_requests @relation(fields: [tour_request_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  raised_by           public_users  @relation("dispute_creator", fields: [raised_by_user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  resolved_by         public_users? @relation("dispute_resolver", fields: [resolved_by_user_id], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model faq_items {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  question   String
+  answer     String
+  category   String?
+  created_by String?  @db.Uuid
+  created_at DateTime @default(now()) @db.Timestamptz(6)
+  updated_at DateTime @default(now()) @db.Timestamptz(6)
+
+  creator    public_users? @relation("faq_creator", fields: [created_by], references: [id], onUpdate: NoAction)
 
   @@schema("public")
 }

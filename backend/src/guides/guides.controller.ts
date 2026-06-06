@@ -15,6 +15,15 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+import { Request as ExpressRequest } from 'express';
+import { CreateGuideProfileDto, UpdateGuideProfileDto } from './dto/guides.dto';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    role: string;
+  };
+}
 
 @Controller('guides')
 export class GuidesController {
@@ -71,7 +80,7 @@ export class GuidesController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Get('me/profile')
-  async getMyProfile(@Request() req) {
+  async getMyProfile(@Request() req: AuthenticatedRequest) {
     // req.user.id được gắn từ AuthGuard thực tế (Supabase JWT)
     const userId = req.user.id;
     return this.guidesService.getMyProfile(userId);
@@ -80,7 +89,10 @@ export class GuidesController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Post('me/profile')
-  async createProfile(@Request() req, @Body() data: any) {
+  async createProfile(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: CreateGuideProfileDto,
+  ) {
     const userId = req.user.id;
     return this.guidesService.createProfile(userId, data);
   }
@@ -88,7 +100,10 @@ export class GuidesController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Patch('me/profile')
-  async updateProfile(@Request() req, @Body() data: any) {
+  async updateProfile(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: UpdateGuideProfileDto,
+  ) {
     const userId = req.user.id;
     return this.guidesService.updateProfile(userId, data);
   }
@@ -97,7 +112,7 @@ export class GuidesController {
   @Roles(Role.GUIDE)
   @Put('me/languages')
   async updateLanguages(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Body('languageIds') languageIds: number[],
   ) {
     const userId = req.user.id;
@@ -107,7 +122,10 @@ export class GuidesController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Put('me/skills')
-  async updateSkills(@Request() req, @Body('skillIds') skillIds: number[]) {
+  async updateSkills(
+    @Request() req: AuthenticatedRequest,
+    @Body('skillIds') skillIds: number[],
+  ) {
     const userId = req.user.id;
     return this.guidesService.updateSkills(userId, skillIds);
   }

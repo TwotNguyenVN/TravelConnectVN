@@ -32,7 +32,7 @@ export const LoginPage: React.FC = () => {
     }
   }, [user, roles, navigate]);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setErrorMsg(null);
     setIsLoading(true);
@@ -75,7 +75,7 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleLogin = async () => {
+  async function handleGoogleLogin() {
     setErrorMsg(null);
     try {
       const { error } = await supabase.auth.signInWithOAuth({

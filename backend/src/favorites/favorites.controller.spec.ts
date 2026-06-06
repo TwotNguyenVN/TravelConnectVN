@@ -1,11 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext } from '@nestjs/common';
 import { FavoritesController } from './favorites.controller';
 import { FavoritesService } from './favorites.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 
 const mockAuthGuard = {
-  canActivate: (context: ExecutionContext) => true,
+  canActivate: jest.fn(() => true),
 };
 
 describe('FavoritesController', () => {

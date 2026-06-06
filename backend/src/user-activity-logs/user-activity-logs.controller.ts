@@ -2,6 +2,11 @@ import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { UserActivityLogsService } from './user-activity-logs.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ApiResponse } from '../common/interfaces/response.interface';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('me')
 @UseGuards(AuthGuard)
@@ -10,11 +15,11 @@ export class UserActivityLogsController {
 
   @Get('activity-logs')
   async findAll(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 20,
     @Query('activityType') activityType?: string,
-  ): Promise<ApiResponse<any>> {
+  ): Promise<ApiResponse<unknown>> {
     const result = await this.activityLogsService.findAll(
       req.user.id,
       page,

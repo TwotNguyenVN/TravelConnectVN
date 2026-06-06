@@ -1,10 +1,42 @@
 import {
   Injectable,
   NotFoundException,
-  ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+  GetGuidesQueryDto,
+  CreateGuideProfileDto,
+  UpdateGuideProfileDto,
+} from './dto/guides.dto';
+
+type PublicGuideType = Prisma.guide_profilesGetPayload<{
+  include: {
+    users: { select: { full_name: true; avatar_url: true; phone: true } };
+    guide_languages: { include: { languages: true } };
+    guide_skills: { include: { skills: true } };
+  };
+}>;
+
+type DetailGuideType = Prisma.guide_profilesGetPayload<{
+  include: {
+    users: { select: { full_name: true; avatar_url: true; phone: true } };
+    guide_languages: { include: { languages: true } };
+    guide_skills: { include: { skills: true } };
+    guide_reviews: { include: { users: true } };
+    home_province: true;
+    tours: {
+      include: {
+        tour_images: { select: { image_url: true } };
+        tour_categories: { select: { name: true } };
+        tour_schedules: {
+          include: { tour_requests: { select: { participant_count: true } } };
+        };
+      };
+    };
+  };
+}>;
 
 @Injectable()
 export class GuidesService {
@@ -13,12 +45,12 @@ export class GuidesService {
   /**
    * Lấy danh sách hướng dẫn viên công khai
    */
-  async getPublicGuides(query: any) {
+  async getPublicGuides(query: GetGuidesQueryDto) {
     const page = Number(query.page) || 1;
     const limit = Number(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const where: any = {
+    const where: Prisma.guide_profilesWhereInput = {
       visibility_status: 'visible',
       deleted_at: null,
       // 1. Phải được phê duyệt/xác minh
@@ -79,7 +111,11 @@ export class GuidesService {
     ]);
 
     return {
-      data: await Promise.all(guides.map((g) => this.formatGuidePublic(g))),
+      data: await Promise.all(
+        guides.map((g) =>
+          this.formatGuidePublic(g as unknown as PublicGuideType),
+        ),
+      ),
       total,
       page,
       limit,
@@ -159,7 +195,7 @@ export class GuidesService {
       throw new NotFoundException('Không tìm thấy hướng dẫn viên');
     }
 
-    return this.formatGuideDetail(guide);
+    return this.formatGuideDetail(guide as unknown as DetailGuideType);
   }
 
   /**
@@ -231,7 +267,7 @@ export class GuidesService {
   /**
    * Tạo hồ sơ hướng dẫn viên
    */
-  async createProfile(userId: string, data: any) {
+  async createProfile(userId: string, data: CreateGuideProfileDto) {
     const existing = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
     });
@@ -264,7 +300,7 @@ export class GuidesService {
   /**
    * Cập nhật hồ sơ
    */
-  async updateProfile(userId: string, data: any) {
+  async updateProfile(userId: string, data: UpdateGuideProfileDto) {
     const guide = await this.prisma.guide_profiles.findUnique({
       where: { user_id: userId },
     });
@@ -394,7 +430,7 @@ export class GuidesService {
     return aggregate._avg.rating || 0.0;
   }
 
-  private async formatGuidePublic(g: any) {
+  private async formatGuidePublic(g: PublicGuideType | DetailGuideType) {
     const rating = await this.getGuideAverageRating(g.id);
     return {
       id: g.id,
@@ -410,13 +446,13 @@ export class GuidesService {
       rating: rating,
       verificationStatus: g.verification_status,
       languages: [
-        ...g.guide_languages.map((gl: any) => gl.languages.name),
+        ...g.guide_languages.map((gl) => gl.languages?.name).filter(Boolean),
         ...(g.other_languages
           ? g.other_languages.split(',').map((s: string) => s.trim())
           : []),
       ],
       skills: [
-        ...g.guide_skills.map((gs: any) => gs.skills.name),
+        ...g.guide_skills.map((gs) => gs.skills?.name).filter(Boolean),
         ...(g.other_skills
           ? g.other_skills.split(',').map((s: string) => s.trim())
           : []),
@@ -424,7 +460,9 @@ export class GuidesService {
     };
   }
 
-  private isGuideProfileComplete(g: any): boolean {
+  private isGuideProfileComplete(
+    g: PublicGuideType | DetailGuideType,
+  ): boolean {
     if (!g) return false;
 
     // 1. Họ và tên
@@ -460,14 +498,14 @@ export class GuidesService {
     return true;
   }
 
-  private async formatGuideDetail(g: any) {
+  private async formatGuideDetail(g: DetailGuideType) {
     const publicInfo = await this.formatGuidePublic(g);
     const isComplete = this.isGuideProfileComplete(g);
     return {
       ...publicInfo,
       bio: g.bio || '',
       isAcceptingTours: g.is_accepting_tours,
-      reviews: g.guide_reviews.map((r: any) => ({
+      reviews: g.guide_reviews.map((r) => ({
         id: r.id,
         user: r.users?.full_name || 'Người dùng',
         avatar: r.users?.avatar_url || '',
@@ -484,20 +522,18 @@ export class GuidesService {
       familiarProvinces: g.familiar_provinces || '',
       region: g.region || '',
       tours: isComplete
-        ? (g.tours || []).map((t: any) => {
-            const nextAvailableSchedule = (t.tour_schedules || []).find(
-              (s: any) => {
-                const bookedCount = (s.tour_requests || []).reduce(
-                  (sum: number, req: any) => sum + req.participant_count,
-                  0,
-                );
-                return bookedCount < s.max_participants;
-              },
-            );
+        ? (g.tours || []).map((t) => {
+            const nextAvailableSchedule = (t.tour_schedules || []).find((s) => {
+              const bookedCount = (s.tour_requests || []).reduce(
+                (sum: number, req) => sum + req.participant_count,
+                0,
+              );
+              return bookedCount < s.max_participants;
+            });
 
             const bookedCount = nextAvailableSchedule
               ? (nextAvailableSchedule.tour_requests || []).reduce(
-                  (sum: number, req: any) => sum + req.participant_count,
+                  (sum: number, req) => sum + req.participant_count,
                   0,
                 )
               : 0;

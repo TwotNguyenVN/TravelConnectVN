@@ -10,6 +10,7 @@ interface Tour {
   price: number;
   province: string;
   category_id: string;
+  description?: string;
   tour_images?: any;
   created_at: string;
   guide_profiles: {
@@ -25,9 +26,32 @@ export const AdminTourManagementPage: React.FC = () => {
   const [stats, setStats] = useState<any>(null);
   const [search, setSearch] = useState('');
   const [visibility, setVisibility] = useState('');
+  const [scanningTourId, setScanningTourId] = useState<string | null>(null);
+  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
-  const fetchData = async () => {
+  async function handleAiScan(tour: Tour) {
+    try {
+      setScanningTourId(tour.id);
+      const textToAnalyze = `${tour.title}. Địa điểm: ${tour.province}. Mô tả: ${tour.description || ''}`;
+      const response = await adminApi.analyzeContent(textToAnalyze);
+      setAiScanResults(prev => ({
+        ...prev,
+        [tour.id]: response.data
+      }));
+      if (response.data.flagged) {
+        toast.warning('AI phát hiện nghi vấn vi phạm chính sách!');
+      } else {
+        toast.success('AI quét hoàn tất: Nội dung an toàn.');
+      }
+    } catch (err: any) {
+      toast.error('AI quét thất bại');
+    } finally {
+      setScanningTourId(null);
+    }
+  };
+
+  async function fetchData() {
     try {
       setLoading(true);
       const [toursRes, statsRes] = await Promise.all([
@@ -47,7 +71,7 @@ export const AdminTourManagementPage: React.FC = () => {
     fetchData();
   }, [visibility]);
 
-  const handleModerate = async (id: string, status: string) => {
+  async function handleModerate(id: string, status: string) {
     const actionLabel = status === 'visible' ? 'HIỂN THỊ' : status === 'hidden' ? 'ẨN' : 'CẢNH BÁO';
     const reason = window.prompt(`Nhập lý do thực hiện thao tác ${actionLabel}:`);
     if (reason === null) return;
@@ -70,7 +94,7 @@ export const AdminTourManagementPage: React.FC = () => {
     flagged: { label: 'Cảnh báo', color: '#d97706', bg: '#fffbeb' },
   };
 
-  const getTourImage = (images: any) => {
+  function getTourImage(images: any) {
     if (!images) return '/default-tour.jpg';
     try {
       const imgs = typeof images === 'string' ? JSON.parse(images) : images;
@@ -200,9 +224,10 @@ export const AdminTourManagementPage: React.FC = () => {
             ) : tours.map(tour => {
               const status = statusConfig[tour.visibility_status] || statusConfig.visible;
               return (
-                <tr key={tour.id} style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
-                  <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
+                <React.Fragment key={tour.id}>
+                  <tr style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
+                    <td style={{ padding: 'var(--tc-spacing-5)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
                       <img 
                         src={getTourImage(tour.tour_images)} 
                         alt="" 
@@ -258,6 +283,14 @@ export const AdminTourManagementPage: React.FC = () => {
                         >🚩</button>
                       )}
                       <button 
+                        onClick={() => handleAiScan(tour)}
+                        disabled={scanningTourId === tour.id}
+                        title="Quét AI"
+                        style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: '#f8fafc', cursor: 'pointer', opacity: scanningTourId === tour.id ? 0.6 : 1 }}
+                      >
+                        {scanningTourId === tour.id ? '⏳' : '🤖'}
+                      </button>
+                      <button 
                         onClick={() => window.open(`/tours/${tour.id}`, '_blank')}
                         title="Xem chi tiết"
                         style={{ width: '32px', height: '32px', border: '1px solid #e2e8f0', borderRadius: '8px', backgroundColor: 'white', cursor: 'pointer' }}
@@ -265,11 +298,78 @@ export const AdminTourManagementPage: React.FC = () => {
                     </div>
                   </td>
                 </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                {aiScanResults[tour.id] && (
+                  <tr key={`${tour.id}-ai`}>
+                    <td colSpan={5} style={{ padding: '12px 24px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '8px',
+                        backgroundColor: 'white',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: `1px solid ${aiScanResults[tour.id].flagged ? '#fca5a5' : '#cbd5e1'}`,
+                        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '18px' }}>🤖</span>
+                            <span style={{ fontWeight: 700, fontSize: '14px', color: '#1e293b' }}>Kết quả Quét AI</span>
+                            <span style={{
+                              padding: '2px 8px',
+                              borderRadius: '12px',
+                              fontSize: '10px',
+                              fontWeight: 700,
+                              backgroundColor: aiScanResults[tour.id].flagged ? '#fef2f2' : '#f0fdf4',
+                              color: aiScanResults[tour.id].flagged ? '#ef4444' : '#16a34a'
+                            }}>
+                              {aiScanResults[tour.id].flagged ? 'Nghi vấn vi phạm' : 'An toàn'}
+                            </span>
+                          </div>
+                          <button 
+                            onClick={() => setAiScanResults(prev => {
+                              const copy = { ...prev };
+                              delete copy[tour.id];
+                              return copy;
+                            })}
+                            style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer', color: '#64748b', fontSize: '14px' }}
+                          >✕</button>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '13px', color: '#475569' }}>
+                          <strong>Lý do:</strong> {aiScanResults[tour.id].reason}
+                        </p>
+                        {aiScanResults[tour.id].highlights && aiScanResults[tour.id].highlights.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                            <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>Chi tiết nghi vấn:</div>
+                            {aiScanResults[tour.id].highlights.map((h: { text: string; type: string; explanation: string }, idx: number) => (
+                              <div key={idx} style={{ 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                gap: '8px',
+                                padding: '6px 12px',
+                                backgroundColor: '#fffbeb',
+                                borderLeft: '4px solid #f59e0b',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                color: '#78350f'
+                              }}>
+                                <span style={{ fontWeight: 700, textDecoration: 'underline' }}>"{h.text}"</span>
+                                <span>({h.type === 'contact_info' ? 'Thông tin liên hệ' : h.type === 'offensive' ? 'Ngôn từ nhạy cảm' : 'Spam/Khác'}):</span>
+                                <span>{h.explanation}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
-  );
+  </div>
+);
 };

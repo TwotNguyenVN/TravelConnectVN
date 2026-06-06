@@ -54,7 +54,7 @@ const TourBookingPage: React.FC = () => {
   );
 
   useEffect(() => {
-    const fetchTour = async () => {
+    async function fetchTour() {
       try {
         if (!id) return;
         const res = await tourService.getTourDetail(id);
@@ -95,28 +95,28 @@ const TourBookingPage: React.FC = () => {
     });
   }, [participantCount]);
 
-  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  function handleContactChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setContactInfo(prev => ({ ...prev, [name]: value }));
   };
 
-  const handlePassengerChange = (index: number, field: keyof Passenger, value: string) => {
+  function handlePassengerChange(index: number, field: keyof Passenger, value: string) {
     const updated = [...passengers];
     updated[index] = { ...updated[index], [field]: value };
     setPassengers(updated);
   };
 
-  const formatDate = (date: any) => {
+  function formatDate(date: any) {
     if (!date) return 'Linh hoạt';
     return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const calculateTotal = () => {
+  function calculateTotal() {
     const price = schedule ? schedule.price : (tour?.price || 0);
     return price * participantCount;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!contactInfo.fullName || !contactInfo.email || !contactInfo.phone) {
       toast.warning("Vui lòng nhập đầy đủ thông tin liên hệ (Họ tên, Email, Số điện thoại)");
@@ -134,7 +134,7 @@ const TourBookingPage: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  const proceedToPayment = async () => {
+  async function proceedToPayment() {
     setShowConfirmModal(false);
     let popup: Window | null = null;
     try {
@@ -190,7 +190,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
           return;
         }
 
-        const handleMessage = (event: MessageEvent) => {
+        function handleMessage(event: MessageEvent) {
           if (event.origin !== window.location.origin) return;
           
           if (event.data?.type === 'VNPAY_RETURN') {

@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsEnum, IsOptional } from 'class-validator';
 
 export enum UserStatus {
   ACTIVE = 'active',
@@ -63,4 +63,14 @@ export class CreateStaffDto {
 
   @IsEnum(['CONTENT_MODERATOR', 'SUPPORT_STAFF', 'ACCOUNTANT'])
   roleCode: string;
+}
+
+export class AnalyzeContentDto {
+  @IsString()
+  text: string;
+}
+
+export class UpdateTransactionStatusDto {
+  @IsEnum(['pending', 'paid', 'failed', 'cancelled'])
+  status: string;
 }

@@ -34,7 +34,7 @@ export function AdminDashboardPage() {
   const [savingSettings, setSavingSettings] = useState(false);
   const { toast } = useToast();
 
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       setLoading(true);
       setError(null);

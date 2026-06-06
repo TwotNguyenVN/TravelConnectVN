@@ -13,8 +13,9 @@ export const FinanceDashboardPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [revenueStats, setRevenueStats] = useState<any>(null);
   const [pendingRefundsCount, setPendingRefundsCount] = useState(0);
+  const [exporting, setExporting] = useState(false);
 
-  const fetchFinanceData = async () => {
+  async function fetchFinanceData() {
     try {
       setLoading(true);
       setError(null);
@@ -30,10 +31,31 @@ export const FinanceDashboardPage: React.FC = () => {
         setPendingRefundsCount(refundsRes.data?.length || 0);
       }
     } catch (err) {
-      console.error('Failed to fetch finance statistics', err);
+      console.error('Failed to fetch finance data', err);
       setError('Đã xảy ra lỗi khi tải dữ liệu thống kê tài chính.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  async function handleExport() {
+    try {
+      setExporting(true);
+      const res = await adminApi.exportFinancialReport();
+      // Handle file download
+      const blob = new Blob([res.data?.data || res.data], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `financial_export_${new Date().getTime()}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Lỗi khi xuất báo cáo', err);
+      alert('Không thể xuất báo cáo. Vui lòng thử lại.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -93,19 +115,37 @@ export const FinanceDashboardPage: React.FC = () => {
             Theo dõi doanh thu, dòng tiền thanh toán và phê duyệt yêu cầu hoàn tiền.
           </p>
         </div>
-        <button 
-          onClick={fetchFinanceData} 
-          style={{ 
-            padding: '8px 16px', 
-            background: 'white', 
-            border: '1px solid var(--tc-border)', 
-            borderRadius: 'var(--tc-radius-md)', 
-            cursor: 'pointer', 
-            fontSize: 'var(--tc-font-size-sm)' 
-          }}
-        >
-          🔄 Tải lại dữ liệu
-        </button>
+        <div style={{ display: 'flex', gap: 'var(--tc-spacing-4)' }}>
+          <button 
+            onClick={handleExport} 
+            disabled={exporting}
+            style={{ 
+              padding: '8px 16px', 
+              background: 'var(--tc-primary)', 
+              color: 'white',
+              border: 'none', 
+              borderRadius: 'var(--tc-radius-md)', 
+              cursor: exporting ? 'not-allowed' : 'pointer', 
+              fontSize: 'var(--tc-font-size-sm)',
+              opacity: exporting ? 0.7 : 1
+            }}
+          >
+            {exporting ? '⏳ Đang xuất...' : '⬇️ Xuất Báo Cáo'}
+          </button>
+          <button 
+            onClick={fetchFinanceData} 
+            style={{ 
+              padding: '8px 16px', 
+              background: 'white', 
+              border: '1px solid var(--tc-border)', 
+              borderRadius: 'var(--tc-radius-md)', 
+              cursor: 'pointer', 
+              fontSize: 'var(--tc-font-size-sm)' 
+            }}
+          >
+            🔄 Tải lại dữ liệu
+          </button>
+        </div>
       </div>
 
       {/* Grid Quick Stats */}

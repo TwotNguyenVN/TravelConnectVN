@@ -41,18 +41,18 @@ export const TourListPage: React.FC = () => {
     p.toLowerCase().includes(locationSearch.toLowerCase())
   );
 
-  const selectProvince = (p: string) => {
+  function selectProvince(p: string) {
     setLocationSearch(p);
     setShowProvinceSuggestions(false);
   };
 
-  const handleCategoryToggle = (id: string) => {
+  function handleCategoryToggle(id: string) {
     setSelectedCategories(prev => 
       prev.includes(id) ? prev.filter(c => c !== id) : [...prev, id]
     );
   };
 
-  const handleApplyFilters = () => {
+  function handleApplyFilters() {
     setFilters({
       ...filters,
       province: locationSearch,
@@ -64,7 +64,7 @@ export const TourListPage: React.FC = () => {
     });
   };
 
-  const handleClearFilters = () => {
+  function handleClearFilters() {
     setLocationSearch('');
     setStartDateSearch('');
     setSelectedCategories([]);
@@ -84,7 +84,7 @@ export const TourListPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    async function fetchCategories() {
       try {
         const res: any = await tourService.getCategories();
         if (res && res.data) {
@@ -100,21 +100,21 @@ export const TourListPage: React.FC = () => {
 
   // Price range state is already initialized above
 
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleMinChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = parseInt(e.target.value, 10);
     if (maxPrice - value >= minGap) {
       setMinPrice(value);
     }
   };
 
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  function handleMaxChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = parseInt(e.target.value, 10);
     if (value - minPrice >= minGap) {
       setMaxPrice(value);
     }
   };
 
-  const fetchTours = async () => {
+  async function fetchTours() {
     try {
       setLoading(true);
       setError(null);

@@ -9,18 +9,36 @@ import {
   UseGuards,
   Request,
   Delete,
+  UseInterceptors,
 } from '@nestjs/common';
+import { Request as ExpressRequest } from 'express';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: {
+    id: string;
+    role: string;
+  };
+}
 import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
 import { ToursService } from './tours.service';
+import {
+  CreateTourDto,
+  UpdateTourDto,
+  TourItineraryItemDto,
+  TourImageItemDto,
+} from './dto/tours.dto';
 
 @Controller('tours')
 export class ToursController {
   constructor(private readonly toursService: ToursService) {}
 
   @Get()
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60000) // Cache 1 minute
   async getTours(
     @Query('keyword') keyword?: string,
     @Query('province') province?: string,
@@ -73,7 +91,7 @@ export class ToursController {
   @Roles(Role.GUIDE)
   @Get('guide/me')
   async getMyGuidedTours(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Query('status') status?: string,
     @Query('keyword') keyword?: string,
     @Query('page') page: string = '1',
@@ -91,7 +109,10 @@ export class ToursController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Post('guide/create')
-  async createTour(@Request() req, @Body() data: any) {
+  async createTour(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: CreateTourDto,
+  ) {
     const userId = req.user.id;
     return this.toursService.createTour(userId, data);
   }
@@ -99,7 +120,10 @@ export class ToursController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Get('guide/:id')
-  async getTourDetailForGuide(@Request() req, @Param('id') id: string) {
+  async getTourDetailForGuide(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const userId = req.user.id;
     return this.toursService.getTourDetailForGuide(userId, id);
   }
@@ -107,12 +131,18 @@ export class ToursController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Patch('guide/:id')
-  async updateTour(@Request() req, @Param('id') id: string, @Body() data: any) {
+  async updateTour(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body() data: UpdateTourDto,
+  ) {
     const userId = req.user.id;
     return this.toursService.updateTour(userId, id, data);
   }
 
   @Get(':id')
+  @UseInterceptors(CacheInterceptor)
+  @CacheTTL(60000) // Cache 1 minute
   async getTourDetail(@Param('id') id: string) {
     return this.toursService.getPublicTourDetail(id);
   }
@@ -135,9 +165,9 @@ export class ToursController {
   @Roles(Role.GUIDE)
   @Post(':id/itinerary')
   async updateTourItinerary(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Body() locations: any[],
+    @Body() locations: TourItineraryItemDto[],
   ) {
     const userId = req.user.id;
     return this.toursService.updateTourItinerary(userId, id, locations);
@@ -152,9 +182,9 @@ export class ToursController {
   @Roles(Role.GUIDE)
   @Post(':id/images')
   async updateTourImages(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Body() images: any[],
+    @Body() images: TourImageItemDto[],
   ) {
     const userId = req.user.id;
     return this.toursService.updateTourImages(userId, id, images);
@@ -163,7 +193,10 @@ export class ToursController {
   @UseGuards(AuthGuard, RoleGuard)
   @Roles(Role.GUIDE)
   @Patch('guide/:id/delete')
-  async deleteTour(@Request() req, @Param('id') id: string) {
+  async deleteTour(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const userId = req.user.id;
     return this.toursService.deleteTour(userId, id);
   }
@@ -173,7 +206,7 @@ export class ToursController {
   @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
   @Post(':id/schedules')
   async createSchedule(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') tourId: string,
     @Body()
     createScheduleDto: {
@@ -193,7 +226,7 @@ export class ToursController {
   @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
   @Patch(':id/schedules/:scheduleId')
   async updateSchedule(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') tourId: string,
     @Param('scheduleId') scheduleId: string,
     @Body()
@@ -215,7 +248,7 @@ export class ToursController {
   @Roles(Role.GUIDE, Role.SYSTEM_ADMIN)
   @Delete(':id/schedules/:scheduleId')
   async deleteSchedule(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') tourId: string,
     @Param('scheduleId') scheduleId: string,
   ) {

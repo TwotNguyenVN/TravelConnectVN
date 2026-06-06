@@ -48,7 +48,7 @@ export function AdminVerificationPage() {
   
   const { toast } = useToast();
 
-  const fetchRequests = async () => {
+  async function fetchRequests() {
     try {
       setLoading(true);
       const response = await adminApi.getVerificationRequests();
@@ -64,19 +64,19 @@ export function AdminVerificationPage() {
     fetchRequests();
   }, []);
 
-  const handleOpenDetail = (request: VerificationRequest) => {
+  function handleOpenDetail(request: VerificationRequest) {
     setSelectedRequest(request);
     setIsDetailModalOpen(true);
     setShowRejectionForm(false);
     setRejectionNote('');
   };
 
-  const handleCloseDetail = () => {
+  function handleCloseDetail() {
     setIsDetailModalOpen(false);
     setSelectedRequest(null);
   };
 
-  const handleProcess = async (status: 'approved' | 'rejected') => {
+  async function handleProcess(status: 'approved' | 'rejected') {
     if (!selectedRequest) return;
     
     if (status === 'rejected' && !rejectionNote.trim()) {

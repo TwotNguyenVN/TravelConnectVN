@@ -35,7 +35,7 @@ export const TourDetailPage: React.FC = () => {
   const [expandedDays, setExpandedDays] = useState<Record<number, boolean>>({});
   const [showReportModal, setShowReportModal] = useState(false);
 
-  const toggleDay = (day: number) => {
+  function toggleDay(day: number) {
     setExpandedDays(prev => ({
       ...prev,
       [day]: !prev[day]
@@ -43,7 +43,7 @@ export const TourDetailPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const fetchTourData = async () => {
+    async function fetchTourData() {
       if (!id) return;
       try {
         setLoading(true);
@@ -100,7 +100,7 @@ export const TourDetailPage: React.FC = () => {
     }
   }, [tour]);
 
-  const handleBooking = () => {
+  function handleBooking() {
     if (!user) {
       toast.info("Vui lòng đăng nhập để đặt tour");
       navigate('/login');
@@ -121,7 +121,7 @@ export const TourDetailPage: React.FC = () => {
     navigate(url);
   };
   
-  const handleChat = async () => {
+  async function handleChat() {
     if (!user) {
       toast.info("Vui lòng đăng nhập để trò chuyện");
       navigate('/login');
@@ -142,7 +142,7 @@ export const TourDetailPage: React.FC = () => {
     }
   };
 
-  const handleToggleFavorite = async () => {
+  async function handleToggleFavorite() {
     if (!user) {
       toast.info("Vui lòng đăng nhập để lưu vào yêu thích");
       navigate('/login');
@@ -193,7 +193,7 @@ export const TourDetailPage: React.FC = () => {
     );
   }
 
-  const formatDate = (date: any) => {
+  function formatDate(date: any) {
     if (!date) return 'Linh hoạt';
     return new Date(date).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };

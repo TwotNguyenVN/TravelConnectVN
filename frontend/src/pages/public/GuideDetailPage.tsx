@@ -55,7 +55,7 @@ const GuideDetailPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  const fetchGuideDetail = async () => {
+  async function fetchGuideDetail() {
     try {
       setLoading(true);
       const res: any = await guideService.getPublicGuideDetail(id!);
@@ -86,7 +86,7 @@ const GuideDetailPage: React.FC = () => {
     }
   }, [id, user]);
 
-  const handleToggleFavorite = async () => {
+  async function handleToggleFavorite() {
     if (!user) {
       navigate('/login', { state: { from: `/guides/${id}` } });
       return;
@@ -116,7 +116,7 @@ const GuideDetailPage: React.FC = () => {
     }
   };
 
-  const handleMessageGuide = async () => {
+  async function handleMessageGuide() {
     if (!user) {
       navigate('/login', { state: { from: `/guides/${id}` } });
       return;

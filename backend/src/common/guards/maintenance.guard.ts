@@ -5,6 +5,7 @@ import {
   ExecutionContext,
   ServiceUnavailableException,
 } from '@nestjs/common';
+
 import { SystemSettingsService } from '../../system-settings/system-settings.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -71,6 +72,7 @@ export class MaintenanceGuard implements CanActivate {
     // Nếu hệ thống đang bảo trì và không phải Admin, chặn lại và trả về 503
     throw new ServiceUnavailableException(
       maintenanceMessage || 'Hệ thống đang bảo trì. Vui lòng quay lại sau.',
+
     );
   }
 }

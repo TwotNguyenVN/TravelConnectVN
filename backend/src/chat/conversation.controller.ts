@@ -11,6 +11,12 @@ import {
 import { ConversationService } from './conversation.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { ApiResponse } from '../common/interfaces/response.interface';
+import { CreateDirectDto, CreateGroupCompanionDto } from './dto/chat.dto';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @Controller('conversations')
 @UseGuards(AuthGuard)
@@ -22,7 +28,9 @@ export class ConversationController {
    * Lấy danh sách conversation của current user (sắp theo mới nhất).
    */
   @Get()
-  async findAll(@Request() req): Promise<ApiResponse<any>> {
+  async findAll(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<any>> {
     const result = await this.conversationService.findAll(req.user.id);
     return {
       success: true,
@@ -36,7 +44,9 @@ export class ConversationController {
    * Lấy tổng số tin nhắn chưa đọc của người dùng trong tất cả các cuộc trò chuyện.
    */
   @Get('unread-message-count')
-  async getUnreadMessageCount(@Request() req): Promise<ApiResponse<any>> {
+  async getUnreadMessageCount(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<ApiResponse<any>> {
     const result = await this.conversationService.getUnreadMessageCount(
       req.user.id,
     );
@@ -54,13 +64,8 @@ export class ConversationController {
    */
   @Post('direct')
   async createDirect(
-    @Request() req,
-    @Body()
-    body: {
-      guideUserId: string;
-      relatedTourId?: string;
-      initialMessage?: string;
-    },
+    @Request() req: AuthenticatedRequest,
+    @Body() body: CreateDirectDto,
   ): Promise<ApiResponse<any>> {
     const result = await this.conversationService.createOrGetDirect(
       req.user.id,
@@ -80,8 +85,8 @@ export class ConversationController {
    */
   @Post('group-companion')
   async createGroupCompanion(
-    @Request() req,
-    @Body() body: { companionPostId: string },
+    @Request() req: AuthenticatedRequest,
+    @Body() body: CreateGroupCompanionDto,
   ): Promise<ApiResponse<any>> {
     const result = await this.conversationService.createGroupCompanion(
       req.user.id,
@@ -100,7 +105,7 @@ export class ConversationController {
    */
   @Get(':id/participants')
   async getParticipants(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<ApiResponse<any>> {
     const result = await this.conversationService.getParticipants(
@@ -120,7 +125,7 @@ export class ConversationController {
    */
   @Patch(':id/read')
   async markAsRead(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
   ): Promise<ApiResponse<any>> {
     await this.conversationService.markAsRead(id, req.user.id);

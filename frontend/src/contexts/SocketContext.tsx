@@ -2,15 +2,18 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
+import { toast as sonnerToast } from 'sonner';
 
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
+  onlineUsers: Set<string>;
 }
 
 const SocketContext = createContext<SocketContextType>({
   socket: null,
   isConnected: false,
+  onlineUsers: new Set(),
 });
 
 export const useSocket = () => useContext(SocketContext);
@@ -20,6 +23,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { toast } = useToast();
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!user) {
@@ -69,6 +73,44 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       toast.info(`🤝 ${data.message}`);
     });
 
+    // Lắng nghe tiến trình công việc chạy ngầm (BullMQ)
+    socketInstance.on('job_progress', (data: { jobId: string; progress: number; message: string }) => {
+      sonnerToast.loading(`${data.message} (${data.progress}%)`, {
+        id: data.jobId,
+        duration: Infinity,
+      });
+    });
+
+    socketInstance.on('job_completed', (data: { jobId: string; message: string; downloadUrl?: string }) => {
+      sonnerToast.success(data.message, {
+        id: data.jobId,
+        duration: 5000,
+        action: data.downloadUrl ? {
+          label: 'Tải xuống',
+          onClick: () => window.open(data.downloadUrl, '_blank')
+        } : undefined
+      });
+    });
+
+    socketInstance.on('job_failed', (data: { jobId: string; message: string }) => {
+      sonnerToast.error(`Tác vụ thất bại: ${data.message}`, {
+        id: data.jobId,
+        duration: 5000,
+      });
+    });
+
+    socketInstance.on('user_status_change', (data: { userId: string; status: 'online' | 'offline' }) => {
+      setOnlineUsers(prev => {
+        const next = new Set(prev);
+        if (data.status === 'online') {
+          next.add(data.userId);
+        } else {
+          next.delete(data.userId);
+        }
+        return next;
+      });
+    });
+
     setSocket(socketInstance);
 
     return () => {
@@ -77,7 +119,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   }, [user]);
 
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected, onlineUsers }}>
       {children}
     </SocketContext.Provider>
   );

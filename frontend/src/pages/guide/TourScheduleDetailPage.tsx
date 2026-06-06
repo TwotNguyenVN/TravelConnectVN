@@ -35,7 +35,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     fetchData();
   }, [tourId, scheduleId]);
 
-  const fetchData = async () => {
+  async function fetchData() {
     if (!tourId || !scheduleId) return;
     try {
       setLoading(true);
@@ -73,7 +73,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const handleUpdateSchedule = async () => {
+  async function handleUpdateSchedule() {
     if (!scheduleId || !tourId) return;
     if (price > Number(schedule.price)) {
       toast.error('Giá chỉnh sửa chỉ được phép giảm xuống, không được phép tăng lên');
@@ -94,7 +94,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const handleDeleteSchedule = async () => {
+  async function handleDeleteSchedule() {
     if (!scheduleId || !tourId) return;
     if (totalRegistered > 0) {
       toast.error('Không thể xóa lịch trình đã có khách đăng ký');
@@ -115,11 +115,11 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const handleCompleteSchedule = () => {
+  function handleCompleteSchedule() {
     setIsCompleteModalOpen(true);
   };
 
-  const confirmCompleteSchedule = async () => {
+  async function confirmCompleteSchedule() {
     if (!scheduleId || !tourId) return;
     
     try {
@@ -137,7 +137,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const handleStartSchedule = async () => {
+  async function handleStartSchedule() {
     if (!scheduleId || !tourId) return;
     if (totalRegistered === 0) {
       toast.error('Chưa có khách đăng ký, không thể bắt đầu tour');
@@ -156,7 +156,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const handleToggleAccepting = async () => {
+  async function handleToggleAccepting() {
     if (!scheduleId || !tourId) return;
     
     const isCurrentlyAvailable = schedule.status === 'available';
@@ -179,7 +179,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     }
   };
 
-  const parsePassengersFromNote = (note: string): Passenger[] => {
+  function parsePassengersFromNote(note: string) {
     if (!note) return [];
     const lines = note.split('\n');
     const passengers: Passenger[] = [];
@@ -219,7 +219,7 @@ export const TourScheduleDetailPage: React.FC = () => {
     return passengers;
   };
 
-  const formatDate = (dateString: string) => {
+  function formatDate(dateString: string) {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       weekday: 'long',

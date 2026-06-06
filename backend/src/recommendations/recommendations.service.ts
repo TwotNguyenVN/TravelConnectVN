@@ -1,5 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+
+type GuideProfileWithDetails = Prisma.guide_profilesGetPayload<{
+  include: {
+    users: { select: { full_name: true; avatar_url: true; phone: true } };
+    guide_languages: true;
+  };
+}>;
 
 @Injectable()
 export class RecommendationsService {
@@ -131,14 +139,19 @@ export class RecommendationsService {
           // Tiêu chí 3: Extra Preferences (VD: khu vực, phong cách)
           if (userPrefs?.extra_preferences) {
             try {
-              const extra = userPrefs.extra_preferences as any;
-              if (extra.provinces && Array.isArray(extra.provinces)) {
+              const extra = userPrefs.extra_preferences as Record<
+                string,
+                unknown
+              >;
+              if (Array.isArray(extra.provinces)) {
                 if (extra.provinces.includes(tour.province)) {
                   score += 3;
                   reasons.push('Khu vực bạn quan tâm');
                 }
               }
-            } catch (e) {}
+            } catch {
+              // ignore
+            }
           }
 
           // Tiêu chí 4: Rating cao
@@ -152,7 +165,7 @@ export class RecommendationsService {
                 (sum, req) => sum + req.participant_count,
                 0,
               )
-            : (tour as any).tour_requests.reduce(
+            : tour.tour_requests.reduce(
                 (sum, req) => sum + req.participant_count,
                 0,
               );
@@ -194,7 +207,7 @@ export class RecommendationsService {
               reasons.length > 0 ? reasons : ['Có thể bạn sẽ thích'],
           };
         })
-        .filter((t) => t !== null) as any[];
+        .filter((t): t is Exclude<typeof t, null> => t !== null);
 
       // Nếu user chưa cài đặt sở thích, trả về top tour bất kỳ đã lọc
       if (!userPrefs && categoryIds.length === 0) {
@@ -212,7 +225,9 @@ export class RecommendationsService {
     }
   }
 
-  private isGuideProfileComplete(g: any): boolean {
+  private isGuideProfileComplete(
+    g: GuideProfileWithDetails | null | undefined,
+  ): boolean {
     if (!g) return false;
 
     // 1. Họ và tên

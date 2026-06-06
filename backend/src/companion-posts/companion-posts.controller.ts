@@ -18,12 +18,12 @@ import { CompanionPostQueryDto } from './dto/companion-post-query.dto';
 import { CreateCompanionRequestDto } from './dto/create-companion-request.dto';
 import { ProcessCompanionRequestDto } from './dto/process-companion-request.dto';
 
-import {
-  ApiTags,
-  ApiOperation,
-  ApiBearerAuth,
-  ApiProperty,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
+
+interface AuthenticatedRequest extends ExpressRequest {
+  user: { id: string; role: string };
+}
 
 @ApiTags('companion-posts')
 @Controller('companion-posts')
@@ -40,7 +40,11 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user companion posts' })
-  async getMyPosts(@Request() req, @Query() query: any) {
+  async getMyPosts(
+    @Request() req: AuthenticatedRequest,
+    @Query()
+    query: { page?: string; limit?: string; status?: string; keyword?: string },
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.getMyCompanionPosts(userId, query);
   }
@@ -55,7 +59,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a new companion post' })
-  async createPost(@Request() req, @Body() data: CreateCompanionPostDto) {
+  async createPost(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: CreateCompanionPostDto,
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.createCompanionPost(userId, data);
   }
@@ -65,7 +72,7 @@ export class CompanionPostsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a companion post' })
   async updatePost(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() data: UpdateCompanionPostDto,
   ) {
@@ -77,7 +84,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Soft delete a companion post' })
-  async deletePost(@Request() req, @Param('id') id: string) {
+  async deletePost(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.softDeleteCompanionPost(userId, id);
   }
@@ -90,7 +100,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Send a join request to a post' })
-  async sendRequest(@Request() req, @Body() data: CreateCompanionRequestDto) {
+  async sendRequest(
+    @Request() req: AuthenticatedRequest,
+    @Body() data: CreateCompanionRequestDto,
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.sendJoinRequest(userId, data);
   }
@@ -99,7 +112,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user sent join requests' })
-  async getMySentRequests(@Request() req, @Query() query: any) {
+  async getMySentRequests(
+    @Request() req: AuthenticatedRequest,
+    @Query() query: { page?: string; limit?: string; status?: string },
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.getMySentRequests(userId, query);
   }
@@ -109,9 +125,9 @@ export class CompanionPostsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get requests for a specific post (Owner only)' })
   async getPostRequests(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
-    @Query() query: any,
+    @Query() query: { page?: string; limit?: string; status?: string },
   ) {
     const userId = req.user.id;
     return this.companionPostsService.getPostRequests(userId, id, query);
@@ -121,7 +137,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Cancel a pending join request' })
-  async cancelRequest(@Request() req, @Param('id') id: string) {
+  async cancelRequest(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.cancelJoinRequest(userId, id);
   }
@@ -131,7 +150,7 @@ export class CompanionPostsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Approve a join request (Owner only)' })
   async approveRequest(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() data: ProcessCompanionRequestDto,
   ) {
@@ -144,7 +163,7 @@ export class CompanionPostsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Reject a join request (Owner only)' })
   async rejectRequest(
-    @Request() req,
+    @Request() req: AuthenticatedRequest,
     @Param('id') id: string,
     @Body() data: ProcessCompanionRequestDto,
   ) {
@@ -156,7 +175,10 @@ export class CompanionPostsController {
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user request for a specific post' })
-  async getMyRequestForPost(@Request() req, @Param('id') id: string) {
+  async getMyRequestForPost(
+    @Request() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const userId = req.user.id;
     return this.companionPostsService.getMyRequestForPost(userId, id);
   }

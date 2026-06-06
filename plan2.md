@@ -1,0 +1,7 @@
+1. Nâng cấp Frontend (Client / Admin) lên chuẩn Enterprise: Backend đã có cache và queue, nhưng Frontend thì sao? Chúng ta có cần tối ưu hóa hiệu năng (Core Web Vitals), triển khai Server-Side Rendering (Next.js nếu chưa có), setup React Query/Redux bài bản, và xử lý real-time UI cho các tác vụ chạy ngầm (ví dụ: hiển thị progress bar khi xuất file Excel báo cáo) không?
+
+2. Hoàn thiện Hệ thống Chat & Real-time (WebSockets): Tôi thấy file chat/conversation.service.ts vừa được đụng vào. Tính năng chat giữa Khách hàng và Hướng dẫn viên (hoặc với Support Staff) đã thực sự mượt mà chưa? Đã có offline messages, read receipts (đã xem), và push notification qua socket chưa?
+
+3. Triển khai DevOps, Monitoring & CI/CD (Production Readiness): Code đã ngon, nhưng hệ thống giám sát thì sao? Chúng ta có nên tích hợp Prometheus/Grafana để theo dõi Health Check của BullMQ/Redis/Postgres? Đã có workflow tự động chạy test và build Docker image mỗi khi push code lên develop chưa?
+
+4. Bao phủ Kiểm thử (E2E Testing & Unit Tests): Với các nghiệp vụ tài chính và thanh toán quan trọng, việc code bằng tay không còn an toàn nữa. Bạn có muốn chúng ta dành một phase để viết Unit Tests (Jest) và E2E Tests (Playwright/Cypress) cho các luồng cốt lõi (Đặt tour -> Thanh toán -> Hoàn tiền -> Đối soát kế toán) không?

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import reviewService from '../../services/reviewService';
 import { useToast } from '../../contexts/ToastContext';
+import { adminApi } from '../../api/admin.api';
 
 interface ReviewItem {
   id: string;
@@ -18,13 +19,11 @@ export const AdminReviewManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'post' | 'guide' | 'tour'>('all');
   const [reviews, setReviews] = useState<ReviewItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [scanningReviewId, setScanningReviewId] = useState<string | null>(null);
+  const [aiScanResults, setAiScanResults] = useState<Record<string, any>>({});
   const { toast } = useToast();
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
-
-  const fetchReviews = async () => {
+  async function fetchReviews() {
     try {
       setLoading(true);
       const response = await reviewService.getAllReviewsAdmin();
@@ -43,7 +42,32 @@ export const AdminReviewManagementPage: React.FC = () => {
     }
   };
 
-  const handleToggleVisibility = async (review: ReviewItem) => {
+  async function handleAiScan(review: ReviewItem) {
+    try {
+      setScanningReviewId(review.id);
+      const textToAnalyze = `Đánh giá của ${review.userName} cho ${review.targetName} (${review.rating} sao): ${review.comment}`;
+      const response = await adminApi.analyzeContent(textToAnalyze);
+      setAiScanResults(prev => ({
+        ...prev,
+        [review.id]: response.data
+      }));
+      if (response.data.flagged) {
+        toast.warning('AI phát hiện nghi vấn vi phạm chính sách!');
+      } else {
+        toast.success('AI quét hoàn tất: Nội dung an toàn.');
+      }
+    } catch {
+      toast.error('AI quét thất bại');
+    } finally {
+      setScanningReviewId(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  async function handleToggleVisibility(review: ReviewItem) {
     try {
       const newStatus = review.visibilityStatus === 'visible' ? 'hidden' : 'visible';
       await reviewService.updateReviewVisibility(review.type as any, review.id, newStatus);
@@ -186,6 +210,23 @@ export const AdminReviewManagementPage: React.FC = () => {
                 </div>
                 <div style={{ marginTop: '12px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
                   <button 
+                    onClick={() => handleAiScan(review)}
+                    disabled={scanningReviewId === review.id}
+                    style={{
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid var(--tc-border)',
+                      backgroundColor: '#f8fafc',
+                      color: 'var(--tc-text-primary)',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      opacity: scanningReviewId === review.id ? 0.6 : 1
+                    }}
+                  >
+                    {scanningReviewId === review.id ? '⏳ Đang quét...' : '🤖 Quét AI'}
+                  </button>
+                  <button 
                     onClick={() => handleToggleVisibility(review)}
                     style={{
                       padding: '6px 12px',
@@ -201,6 +242,69 @@ export const AdminReviewManagementPage: React.FC = () => {
                     {review.visibilityStatus === 'hidden' ? 'Hiện đánh giá' : 'Ẩn đánh giá'}
                   </button>
                 </div>
+                
+                {aiScanResults[review.id] && (
+                  <div style={{
+                    marginTop: '12px',
+                    backgroundColor: '#f8fafc',
+                    padding: '16px',
+                    borderRadius: '12px',
+                    border: `1px solid ${aiScanResults[review.id].flagged ? '#fca5a5' : '#cbd5e1'}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '16px' }}>🤖</span>
+                        <span style={{ fontWeight: 700, fontSize: '13px', color: '#1e293b' }}>Kết quả Quét AI</span>
+                        <span style={{
+                          padding: '2px 8px',
+                          borderRadius: '12px',
+                          fontSize: '10px',
+                          fontWeight: 700,
+                          backgroundColor: aiScanResults[review.id].flagged ? '#fef2f2' : '#f0fdf4',
+                          color: aiScanResults[review.id].flagged ? '#ef4444' : '#16a34a'
+                        }}>
+                          {aiScanResults[review.id].flagged ? 'Nghi vấn vi phạm' : 'An toàn'}
+                        </span>
+                      </div>
+                      <button 
+                        onClick={() => setAiScanResults(prev => {
+                          const copy = { ...prev };
+                          delete copy[review.id];
+                          return copy;
+                        })}
+                        style={{ border: 'none', backgroundColor: 'transparent', cursor: 'pointer', color: '#64748b', fontSize: '14px' }}
+                      >✕</button>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#475569' }}>
+                      <strong>Lý do:</strong> {aiScanResults[review.id].reason}
+                    </p>
+                    {aiScanResults[review.id].highlights && aiScanResults[review.id].highlights.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '4px' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#64748b' }}>Chi tiết nghi vấn:</div>
+                        {aiScanResults[review.id].highlights.map((h: { text: string; type: string; explanation: string }, idx: number) => (
+                          <div key={idx} style={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: '8px',
+                            padding: '6px 12px',
+                            backgroundColor: '#fffbeb',
+                            borderLeft: '4px solid #f59e0b',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            color: '#78350f'
+                          }}>
+                            <span style={{ fontWeight: 700, textDecoration: 'underline' }}>"{h.text}"</span>
+                            <span>({h.type === 'contact_info' ? 'Thông tin liên hệ' : h.type === 'offensive' ? 'Ngôn từ nhạy cảm' : 'Spam/Khác'}):</span>
+                            <span>{h.explanation}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -25,7 +25,7 @@ export const TourCard: React.FC<TourCardProps> = ({ tour, onClick }) => {
   
   useEffect(() => {
     const calculateTimeLeft = () => {
-      let targetDate = tour.startDate ? new Date(tour.startDate) : (tour.start_date ? new Date(tour.start_date) : null);
+      const targetDate = tour.startDate ? new Date(tour.startDate) : (tour.start_date ? new Date(tour.start_date) : null);
       if (!targetDate) return { d: 0, h: 0, m: 0, s: 0 };
       
       // Set to 00:00:00 of the target date
