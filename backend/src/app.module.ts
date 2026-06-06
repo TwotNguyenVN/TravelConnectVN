@@ -31,8 +31,9 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { SystemSettingsModule } from './system-settings/system-settings.module';
 import { MaintenanceGuard } from './common/guards/maintenance.guard';
-import { MaintenanceModule } from './common/maintenance.module';
+
 
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
@@ -111,11 +112,12 @@ import { MetricsModule } from './metrics/metrics.module';
     PaymentsModule,
     AiChatModule,
     TripExpensesModule,
+    SystemSettingsModule,
     SosModule,
     TicketsModule,
     DisputesModule,
     MailModule,
-    MaintenanceModule,
+
     MetricsModule,
   ],
   controllers: [AppController],

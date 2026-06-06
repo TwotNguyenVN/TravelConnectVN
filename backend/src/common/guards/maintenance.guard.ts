@@ -1,71 +1,77 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-argument */
 import {
   Injectable,
   CanActivate,
   ExecutionContext,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { Request } from 'express';
 
-/**
- * Singleton service to hold maintenance mode state in-memory.
- * In production, this could be backed by Redis or a database setting.
- */
-@Injectable()
-export class MaintenanceService {
-  private enabled = false;
-  private enabledAt: Date | null = null;
-  private enabledBy: string | null = null;
+import { SystemSettingsService } from '../../system-settings/system-settings.service';
+import { SupabaseService } from '../../supabase/supabase.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
-  isEnabled(): boolean {
-    return this.enabled;
-  }
-
-  getStatus() {
-    return {
-      enabled: this.enabled,
-      enabledAt: this.enabledAt,
-      enabledBy: this.enabledBy,
-    };
-  }
-
-  toggle(enabled: boolean, adminId: string) {
-    this.enabled = enabled;
-    this.enabledAt = enabled ? new Date() : null;
-    this.enabledBy = enabled ? adminId : null;
-    return this.getStatus();
-  }
-}
-
-/**
- * Global guard that blocks write operations (POST/PATCH/DELETE)
- * when maintenance mode is enabled, except for admin endpoints.
- */
 @Injectable()
 export class MaintenanceGuard implements CanActivate {
-  constructor(private readonly maintenanceService: MaintenanceService) {}
+  constructor(
+    private readonly systemSettingsService: SystemSettingsService,
+    private readonly supabaseService: SupabaseService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    if (!this.maintenanceService.isEnabled()) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const method = request.method;
+
+    // Chỉ chặn các request ghi (POST, PUT, PATCH, DELETE)
+    const isWriteRequest = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+    if (!isWriteRequest) {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest<Request>();
-    const method = request.method?.toUpperCase();
-    const url: string = request.originalUrl || request.url || '';
-
-    // Always allow GET/HEAD/OPTIONS
-    if (['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    // Ngoại lệ: Không bao giờ chặn việc cập nhật cấu hình hệ thống
+    const url = request.url;
+    if (url.includes('/system-settings')) {
       return true;
     }
 
-    // Always allow admin endpoints (so admin can toggle maintenance off)
-    if (url.startsWith('/admin')) {
+    // Lấy trạng thái bảo trì
+    const { maintenanceMode, maintenanceMessage } =
+      await this.systemSettingsService.getPublicSettings();
+
+    if (!maintenanceMode) {
       return true;
     }
 
-    // Block all other write operations
+    // Nếu đang bảo trì, kiểm tra xem người dùng có phải là SYSTEM_ADMIN không
+    const authHeader = request.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.split(' ')[1];
+      try {
+        const user = await this.supabaseService.verifyUser(token);
+        const userRoles = await this.prisma.user_roles.findMany({
+          where: { user_id: user.id },
+          select: { role_code: true },
+        });
+
+        const roles = userRoles.map((r) => r.role_code);
+
+        // Nếu là Admin, cho phép đi qua
+        if (roles.includes('SYSTEM_ADMIN')) {
+          // Gắn user vào request để các guard tiếp theo không cần giải mã lại
+          request.user = {
+            ...user,
+            roles,
+          };
+          return true;
+        }
+      } catch {
+        // Lỗi giải mã token hoặc truy vấn DB sẽ do AuthGuard xử lý sau
+      }
+    }
+
+    // Nếu hệ thống đang bảo trì và không phải Admin, chặn lại và trả về 503
     throw new ServiceUnavailableException(
-      'Hệ thống đang trong chế độ bảo trì. Vui lòng thử lại sau.',
+      maintenanceMessage || 'Hệ thống đang bảo trì. Vui lòng quay lại sau.',
     );
   }
 }

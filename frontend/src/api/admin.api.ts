@@ -63,6 +63,10 @@ export const adminApi = {
   // Support Staff — Notifications Broadcast
   sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
     api.post('/admin/notifications/broadcast', data),
+  // System Settings / Maintenance
+  getPublicSettings: () => api.get('/system-settings/public'),
+  getSettings: () => api.get('/system-settings'),
+  updateSetting: (key: string, value: string) => api.patch(`/system-settings/${key}`, { value }),
 
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),

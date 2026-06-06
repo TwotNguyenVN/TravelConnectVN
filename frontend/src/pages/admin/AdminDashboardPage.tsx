@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi } from '../../api/admin.api';
 import { LoadingBlock } from '../../components/common';
+import { useToast } from '../../contexts/ToastContext';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   PieChart, Pie, Cell
@@ -26,6 +27,13 @@ export function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Settings State
+  const [maintenanceMode, setMaintenanceMode] = useState(false);
+  const [maintenanceMessage, setMaintenanceMessage] = useState('');
+  const [commissionRate, setCommissionRate] = useState('0.10');
+  const [savingSettings, setSavingSettings] = useState(false);
+  const { toast } = useToast();
+
   async function fetchData() {
     try {
       setLoading(true);
@@ -36,13 +44,15 @@ export function AdminDashboardPage() {
         userRes, 
         tourRes, 
         reportRes, 
-        revenueRes
+        revenueRes,
+        settingsRes
       ] = await Promise.all([
         adminApi.getDashboardStats(),
         adminApi.getStatisticsUsers(),
         adminApi.getStatisticsTours(),
         adminApi.getStatisticsReports(),
-        adminApi.getStatisticsRevenue()
+        adminApi.getStatisticsRevenue(),
+        adminApi.getSettings()
       ]);
 
       if (dashboardRes?.success) setStats(dashboardRes.data);
@@ -51,11 +61,45 @@ export function AdminDashboardPage() {
       if (reportRes?.success) setReportStats(reportRes.data);
       if (revenueRes?.success) setRevenueStats(revenueRes.data);
 
+      if (settingsRes?.data) {
+        const list = settingsRes.data as Array<{ key: string; value: string }>;
+        const mode = list.find((s) => s.key === 'maintenance_mode')?.value === 'true';
+        const msg = list.find((s) => s.key === 'maintenance_message')?.value || '';
+        const rate = list.find((s) => s.key === 'commission_rate')?.value || '0.10';
+        setMaintenanceMode(mode);
+        setMaintenanceMessage(msg);
+        setCommissionRate(rate);
+      }
+
     } catch (err) {
       console.error('Failed to fetch admin statistics', err);
       setError('Đã xảy ra lỗi khi tải dữ liệu thống kê hệ thống.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      setSavingSettings(true);
+      await Promise.all([
+        adminApi.updateSetting('maintenance_mode', maintenanceMode ? 'true' : 'false'),
+        adminApi.updateSetting('maintenance_message', maintenanceMessage.trim()),
+        adminApi.updateSetting('commission_rate', commissionRate.trim())
+      ]);
+
+      toast.success('Cập nhật cấu hình hệ thống thành công');
+
+      // Dispatch custom event to update warning banner in AdminLayout
+      const event = new CustomEvent('maintenance-changed', {
+        detail: { enabled: maintenanceMode }
+      });
+      window.dispatchEvent(event);
+    } catch (err) {
+      console.error(err);
+      toast.error('Cập nhật cấu hình hệ thống thất bại');
+    } finally {
+      setSavingSettings(false);
     }
   };
 
@@ -210,6 +254,135 @@ export function AdminDashboardPage() {
                 <Bar dataKey="value" fill="#ef4444" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Config & Maintenance Card */}
+      <div style={{
+        backgroundColor: 'white',
+        padding: 'var(--tc-spacing-6)',
+        borderRadius: 'var(--tc-radius-lg)',
+        border: '1px solid var(--tc-border)',
+        marginTop: 'var(--tc-spacing-6)',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+      }}>
+        <h3 style={{ margin: '0 0 var(--tc-spacing-2) 0', fontSize: 'var(--tc-font-size-md)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          ⚙️ Cấu hình Hệ thống & Bảo trì
+        </h3>
+        <p style={{ color: '#64748b', fontSize: 'var(--tc-font-size-xs)', margin: '0 0 var(--tc-spacing-5) 0' }}>
+          Quản lý trạng thái vận hành, thông báo bảo trì toàn cục và mức phí hoa hồng dịch vụ.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--tc-spacing-6)' }}>
+          {/* Maintenance Mode */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-4)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', backgroundColor: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <div>
+                <span style={{ fontWeight: 700, display: 'block', fontSize: 'var(--tc-font-size-sm)' }}>Chế độ Bảo trì (Maintenance Mode)</span>
+                <span style={{ color: '#64748b', fontSize: '11px' }}>Khi bật, chặn toàn bộ thao tác thay đổi dữ liệu của khách hàng.</span>
+              </div>
+              <label style={{ position: 'relative', display: 'inline-block', width: '48px', height: '24px' }}>
+                <input
+                  type="checkbox"
+                  checked={maintenanceMode}
+                  onChange={(e) => setMaintenanceMode(e.target.checked)}
+                  style={{ opacity: 0, width: 0, height: 0 }}
+                />
+                <span style={{
+                  position: 'absolute',
+                  cursor: 'pointer',
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundColor: maintenanceMode ? '#6366f1' : '#cbd5e1',
+                  transition: '0.3s',
+                  borderRadius: '24px'
+                }}>
+                  <span style={{
+                    position: 'absolute',
+                    content: '""',
+                    height: '18px', width: '18px',
+                    left: maintenanceMode ? '26px' : '4px',
+                    bottom: '3px',
+                    backgroundColor: 'white',
+                    transition: '0.3s',
+                    borderRadius: '50%'
+                  }} />
+                </span>
+              </label>
+            </div>
+
+            <div>
+              <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: 'var(--tc-font-size-sm)' }}>Nội dung thông báo bảo trì</label>
+              <textarea
+                value={maintenanceMessage}
+                onChange={(e) => setMaintenanceMessage(e.target.value)}
+                placeholder="Nhập thông báo hiển thị cho người dùng..."
+                style={{
+                  width: '100%',
+                  height: '80px',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid var(--tc-border)',
+                  fontSize: 'var(--tc-font-size-sm)',
+                  resize: 'none',
+                  outline: 'none',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Finance Settings */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--tc-spacing-4)' }}>
+            <div>
+              <label style={{ fontWeight: 600, display: 'block', marginBottom: '8px', fontSize: 'var(--tc-font-size-sm)' }}>Tỷ lệ phí dịch vụ / hoa hồng đặt tour</label>
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  value={commissionRate}
+                  onChange={(e) => setCommissionRate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '10px 40px 10px 12px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--tc-border)',
+                    fontSize: 'var(--tc-font-size-sm)',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <span style={{ position: 'absolute', right: '14px', color: '#94a3b8', fontSize: 'var(--tc-font-size-sm)' }}>%</span>
+              </div>
+              <span style={{ color: '#64748b', fontSize: '11px', display: 'block', marginTop: '6px' }}>
+                Mức phí hoa hồng áp dụng khi quyết toán thu nhập cho Hướng dẫn viên (ví dụ: 0.10 tương đương với 10% doanh thu).
+              </span>
+            </div>
+
+            <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                onClick={handleSaveSettings}
+                disabled={savingSettings}
+                style={{
+                  padding: '10px 24px',
+                  backgroundColor: '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: 'var(--tc-font-size-sm)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                  boxShadow: '0 2px 4px rgba(99, 102, 241, 0.2)'
+                }}
+                onMouseOver={(e) => (e.currentTarget.style.backgroundColor = '#4f46e5')}
+                onMouseOut={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
+              >
+                {savingSettings ? '⌛ Đang lưu...' : '💾 Lưu cài đặt'}
+              </button>
+            </div>
           </div>
         </div>
       </div>
