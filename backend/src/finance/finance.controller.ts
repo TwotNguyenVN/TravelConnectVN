@@ -1,9 +1,11 @@
-import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Param, UseGuards } from '@nestjs/common';
+import { AuthGuard } from '../common/guards/auth.guard';
 import { ReconciliationService, StatementRow } from './reconciliation.service';
 import { InvoiceService } from './invoice.service';
 import { CashflowForecastingService } from './cashflow-forecasting.service';
 
 @Controller('finance')
+@UseGuards(AuthGuard)
 export class FinanceController {
   constructor(
     private readonly reconciliationService: ReconciliationService,
