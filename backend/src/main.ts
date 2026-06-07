@@ -6,6 +6,7 @@ import * as path from 'path';
 import { RedisIoAdapter } from './socket/redis.adapter';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
+import { I18nInterceptor } from './common/interceptors/i18n.interceptor';
 import helmet from 'helmet';
 import { Request, Response, NextFunction } from 'express';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -42,8 +43,11 @@ async function bootstrap() {
   // Standardization: Global Exception Filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Standardization: Global Transform Interceptor
-  app.useGlobalInterceptors(new TransformInterceptor());
+  // Standardization: Global Transform Interceptor & I18n
+  app.useGlobalInterceptors(
+    new TransformInterceptor(),
+    new I18nInterceptor()
+  );
 
   // Standardization: Global Validation Pipe
   app.useGlobalPipes(
