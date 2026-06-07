@@ -932,6 +932,7 @@ model payment_transactions {
 
   @@index([tour_request_id, status, created_at(sort: Desc)], map: "idx_payment_transactions_request_status")
   @@index([user_id, status, created_at(sort: Desc)], map: "idx_payment_transactions_user_status")
+  @@index([status, created_at(sort: Desc)], map: "idx_payment_transactions_status_created")
   @@schema("public")
 }
 
@@ -1118,6 +1119,7 @@ model tour_requests {
 
   @@index([tour_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_tour_status")
   @@index([user_id, status, requested_at(sort: Desc)], map: "idx_tour_requests_user_status")
+  @@index([status, requested_at(sort: Desc)], map: "idx_tour_requests_status_requested")
   @@schema("public")
 }
 
@@ -1372,6 +1374,7 @@ model public_users {
   faq_created                                                           faq_items[]                   @relation("faq_creator")
   user_activities                                                       user_activities[]
 
+  @@index([status, created_at(sort: Desc)], map: "idx_public_users_status_created")
   @@map("users")
   @@schema("public")
 }
