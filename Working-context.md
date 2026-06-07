@@ -50,6 +50,8 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - Hiển thị danh sách "Gợi Ý Dành Riêng Cho Bạn" trên `HomePage.tsx`.
   - Bổ sung `trackActivity` gọi API Tracking mỗi khi người dùng xem `TourDetailPage.tsx`.
   - Frontend build thành công. Hoàn thiện xong tính năng Cốt lõi (AI & Trải nghiệm).
+  - Viết thêm E2E test `home-i18n-recommendations.spec.ts` kiểm thử Playwright cho i18n pass 100% (9/9 suites pass).
+  - Tạo PR #82 trên Github cho toàn bộ nhánh `feat/ai-recommendation-i18n`.
 
 ### 2026-06-06
 * **Date**: 2026-06-06
