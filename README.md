@@ -9,6 +9,8 @@
   [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
   [![Prisma](https://img.shields.io/badge/Prisma-3982CE?style=for-the-badge&logo=Prisma&logoColor=white)](https://www.prisma.io/)
   [![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 </div>
 
 ---
@@ -17,7 +19,11 @@
 
 **TravelConnect VN** là giải pháp toàn diện giúp số hóa và minh bạch hóa ngành du lịch tại Việt Nam. Nền tảng hoạt động như một Marketplace hai chiều, nơi khách du lịch có thể dễ dàng tìm kiếm, đánh giá và đặt lịch các hướng dẫn viên bản địa chuyên nghiệp. 
 
-Hệ thống được thiết kế nguyên khối (Monolith) nhưng áp dụng nguyên tắc Domain-Driven Design (DDD) để sẵn sàng mở rộng (Scale).
+Hệ thống được thiết kế nguyên khối (Monolith) nhưng áp dụng nguyên tắc Domain-Driven Design (DDD) để dễ dàng mở rộng. Điểm đặc biệt của kiến trúc này là sự chia tách **4 Vai Trò Quản Trị Hệ Thống (Backoffice Roles)** độc lập để tăng tính bảo mật:
+1. 👑 **System Admin (Quản trị viên):** Quản lý toàn bộ cấu hình hệ thống, phân quyền, và theo dõi các chỉ số sức khỏe của máy chủ.
+2. 🛡️ **Content Moderator (Kiểm duyệt viên):** Duyệt hồ sơ hướng dẫn viên, kiểm duyệt các bài viết đồng hành và xử lý các nội dung vi phạm được AI (Gemini) phát hiện.
+3. 💰 **Accountant (Kế toán):** Kiểm soát dòng tiền, xét duyệt các yêu cầu rút tiền của hướng dẫn viên và tính toán hoa hồng nền tảng.
+4. 🎧 **Support Staff (Nhân viên CSKH):** Chuyên trách xử lý các khiếu nại (Disputes) giữa Khách du lịch và Hướng dẫn viên, đưa ra quyết định bồi thường.
 
 > [!NOTE] 📸 Xem Screenshots thực tế
 > *(Vui lòng chèn link ảnh thực tế của bạn tại đây)*

@@ -38,6 +38,18 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 - [x] Đa ngôn ngữ (i18n)
   - [x] Thiết lập `i18next` ở React
   - [x] Header Language Switcher
+
+- [x] Tài liệu & Bàn giao (Docs Phase)
+  - [x] Hoàn thiện Swagger API (đã được setup sẵn tại `/api/docs`)
+  - [x] Làm mới `README.md` chuyên nghiệp với Role details và Badges
+  - [x] Soạn thảo `ADR-0002` về việc chia tách 4 Role Backoffice
+
+---
+
+## Latest Execution Notes
+- **2026-06-07**: 
+  - Hoàn thành Phase 3 (Frontend i18n & Tour Recommendations) và các E2E tests liên quan. Đã fix triệt để lỗi TypeScript `any` type ở backend gây fail CI GitHub Actions.
+  - Hoàn thành Phase 4 (Tài liệu): Xác nhận Swagger Docs chạy mượt mà tại `localhost:3000/api/docs`. Viết lại README.md với đầy đủ Badges chuẩn quốc tế và chi tiết 4 vai trò quản trị. Đã viết `ADR-0002` phân tích quyết định tách biệt các role Backoffice để làm sáng tỏ thiết kế hệ thống.
   - [x] Dịch tiếng Việt / Anh trên HomePage
 
 ---
