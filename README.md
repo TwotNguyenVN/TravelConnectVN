@@ -25,10 +25,14 @@ Hệ thống được thiết kế nguyên khối (Monolith) nhưng áp dụng n
 3. 💰 **Accountant (Kế toán):** Kiểm soát dòng tiền, xét duyệt các yêu cầu rút tiền của hướng dẫn viên và tính toán hoa hồng nền tảng.
 4. 🎧 **Support Staff (Nhân viên CSKH):** Chuyên trách xử lý các khiếu nại (Disputes) giữa Khách du lịch và Hướng dẫn viên, đưa ra quyết định bồi thường.
 
-> [!NOTE] 📸 Xem Screenshots thực tế
-> *(Vui lòng chèn link ảnh thực tế của bạn tại đây)*
-> ![Trang chủ](https://placehold.co/800x450/e6f0fa/006ce4?text=Trang+Chu)
-> ![Admin Dashboard](https://placehold.co/800x450/e6f0fa/006ce4?text=Admin+Dashboard)
+---
+
+## ✨ Các Tính Năng Nổi Bật (Key Features)
+- **Gợi Ý Tour Thông Minh:** Thuật toán AI-based tự động đề xuất tour dựa trên lịch sử tương tác của người dùng.
+- **Hệ Thống Chat Thời Gian Thực:** Giao tiếp trực tiếp giữa Khách và HDV qua WebSockets, hỗ trợ gửi ảnh/file.
+- **Đa Ngôn Ngữ (i18n):** Hỗ trợ toàn diện Tiếng Việt và Tiếng Anh để mở rộng tệp khách hàng quốc tế.
+- **Xử Lý Khiếu Nại Công Bằng:** Chức năng Report/Dispute với sự tham gia của Support Staff làm trọng tài.
+- **Thanh Toán Điện Tử:** Tích hợp Payment Gateway (VNPAY/Momo) tự động hóa dòng tiền.
 
 ---
 
@@ -59,11 +63,16 @@ Yêu cầu hệ thống:
 - [Node.js v20.x](https://nodejs.org/)
 
 ### 1. Cấu hình Biến môi trường
-Copy file mẫu và điền thông tin (Database URL, Supabase Keys, Gemini API Key):
+Cần chuẩn bị các tài khoản dịch vụ sau:
+- **Supabase:** Để lấy cấu hình Database URL và Storage Keys.
+- **Google Gemini:** Để lấy API Key phân tích nội dung.
+
+Copy file mẫu và điền thông tin tương ứng:
 ```bash
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 ```
+*(Trong file `.env` của backend, chú ý điền đầy đủ `DATABASE_URL`, `REDIS_HOST`, `SUPABASE_URL`, `SUPABASE_KEY`)*
 
 ### 2. Khởi chạy bằng Docker Compose (Đề xuất)
 Chạy toàn bộ Database (Postgres), Redis, Backend và Frontend chỉ với 1 lệnh:
