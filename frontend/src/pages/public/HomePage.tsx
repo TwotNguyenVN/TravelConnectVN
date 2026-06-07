@@ -7,8 +7,10 @@ import { getRecommendedTours } from '../../services/recommendationService';
 import { tourService, type Tour } from '../../services/tourService';
 import { useAuth } from '../../contexts/AuthContext';
 import { DEFAULT_AVATAR } from '../../constants/images';
+import { useTranslation } from 'react-i18next';
 
 export const HomePage: React.FC = () => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const [featuredTours, setFeaturedTours] = useState<Tour[]>([]);
@@ -159,10 +161,10 @@ export const HomePage: React.FC = () => {
         position: 'relative'
       }}>
         <h1 style={{ color: '#ffffff', fontSize: '48px', fontWeight: 800, marginBottom: 'var(--tc-spacing-4)', textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)' }}>
-          Trải nghiệm du lịch theo cách của bạn
+          {t('home.hero_title')}
         </h1>
         <p style={{ fontSize: '20px', color: 'rgba(255, 255, 255, 0.9)', marginBottom: 'var(--tc-spacing-8)', maxWidth: '650px', lineHeight: 1.6, textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
-          Khám phá những vùng đất mới cùng hướng dẫn viên địa phương nhiệt tình và những người bạn đồng hành chung đam mê.
+          {t('home.hero_subtitle')}
         </p>
         <div style={{ 
           display: 'flex', 
@@ -357,7 +359,7 @@ export const HomePage: React.FC = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
             <div>
               <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✨ Gợi Ý Dành Riêng Cho Bạn
+                ✨ {t('home.recommendations_title')}
               </h2>
               <p style={{ color: 'var(--tc-text-secondary)' }}>Dựa trên sở thích và ngân sách của {profile?.full_name}</p>
             </div>
@@ -384,7 +386,7 @@ export const HomePage: React.FC = () => {
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 var(--tc-spacing-5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
             <div>
-              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Tour Nổi Bật</h2>
+              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>{t('home.featured_tours')}</h2>
               <p style={{ color: 'var(--tc-text-secondary)' }}>Những hành trình được yêu thích nhất trong tuần</p>
             </div>
             <Link to="/tours" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
@@ -411,7 +413,7 @@ export const HomePage: React.FC = () => {
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 var(--tc-spacing-5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
             <div>
-              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Hướng dẫn viên địa phương</h2>
+              <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>{t('home.featured_guides')}</h2>
               <p style={{ color: 'var(--tc-text-secondary)' }}>Kết nối với người bản địa am hiểu khu vực</p>
             </div>
             <Link to="/guides" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>
@@ -526,7 +528,7 @@ export const HomePage: React.FC = () => {
       <section style={{ padding: 'var(--tc-spacing-8) var(--tc-spacing-5)', maxWidth: '1280px', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 'var(--tc-spacing-5)' }}>
           <div>
-            <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>Bài đồng hành mới nhất</h2>
+            <h2 style={{ fontSize: 'var(--tc-font-size-xl)', color: 'var(--tc-text-primary)' }}>{t('home.featured_companions')}</h2>
             <p style={{ color: 'var(--tc-text-secondary)' }}>Cùng chia sẻ chi phí và niềm vui</p>
           </div>
           <Link to="/companions" style={{ color: 'var(--tc-primary)', fontWeight: 500, textDecoration: 'none' }}>Xem tất cả &rarr;</Link>

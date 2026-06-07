@@ -1,0 +1,29 @@
+{
+  "header": {
+    "explore_tours": "Discover Tours",
+    "guides": "Tour Guides",
+    "companions": "Companions",
+    "login": "Login",
+    "signup": "Sign Up",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero_title": "Experience travel your way",
+    "hero_subtitle": "Discover new lands with enthusiastic local guides and companions who share your passion.",
+    "recommendations_title": "Just For You",
+    "featured_tours": "Featured Tours",
+    "featured_guides": "Local Tour Guides",
+    "featured_companions": "Latest Companions"
+  },
+  "tour_detail": {
+    "book_now": "Book Now",
+    "price": "Price",
+    "duration": "Duration",
+    "days": "days",
+    "nights": "nights",
+    "guide": "Tour Guide",
+    "itinerary": "Itinerary",
+    "reviews": "Reviews",
+    "recommendations_similar": "Similar Tours"
+  }
+}
