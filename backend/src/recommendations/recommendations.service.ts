@@ -1,6 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
 
 type GuideProfileWithDetails = Prisma.guide_profilesGetPayload<{
   include: {
@@ -11,10 +13,36 @@ type GuideProfileWithDetails = Prisma.guide_profilesGetPayload<{
 
 @Injectable()
 export class RecommendationsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
+
+  async trackActivity(userId: string, tourId: string, action: string) {
+    try {
+      await this.prisma.user_activities.create({
+        data: {
+          user_id: userId,
+          tour_id: tourId,
+          action: action,
+        },
+      });
+      // Xóa cache khi có activity mới
+      await this.cacheManager.del(`recs_${userId}`);
+      return { success: true };
+    } catch (error) {
+      console.error('Error tracking activity:', error);
+      throw new InternalServerErrorException('Failed to track activity');
+    }
+  }
 
   async getRecommendations(userId: string) {
     try {
+      const cacheKey = `recs_${userId}`;
+      const cachedData = await this.cacheManager.get(cacheKey);
+      if (cachedData) {
+        return cachedData;
+      }
       // 1. Lấy thông tin sở thích của user
       const userPrefs = await this.prisma.user_preferences.findUnique({
         where: { user_id: userId },
@@ -27,6 +55,15 @@ export class RecommendationsService {
         });
 
       const categoryIds = userCategories.map((c) => Number(c.category_id));
+
+      // 1.5 Lấy lịch sử activity của user
+      const recentActivities = await this.prisma.user_activities.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: 'desc' },
+        take: 50,
+      });
+      const interactedTourIds = new Set(recentActivities.map(a => a.tour_id));
+      const favoriteTourIds = new Set(recentActivities.filter(a => a.action === 'FAVORITE').map(a => a.tour_id));
 
       // 2. Lấy danh sách tour public (visible & published)
       const tours = await this.prisma.tours.findMany({
@@ -160,6 +197,15 @@ export class RecommendationsService {
             reasons.push('Tour có đánh giá tốt');
           }
 
+          // Tiêu chí 5: Lịch sử tương tác
+          if (favoriteTourIds.has(tour.id)) {
+            score += 4;
+            reasons.push('Tour bạn đã yêu thích');
+          } else if (interactedTourIds.has(tour.id)) {
+            score += 1;
+            reasons.push('Tour bạn đã xem gần đây');
+          }
+
           const currentParticipants = nextAvailableSchedule
             ? nextAvailableSchedule.tour_requests.reduce(
                 (sum, req) => sum + req.participant_count,
@@ -218,7 +264,11 @@ export class RecommendationsService {
       scoredTours.sort((a, b) => b.match_score - a.match_score);
 
       // Trả về top 10 gợi ý tốt nhất
-      return scoredTours.slice(0, 10);
+      const result = scoredTours.slice(0, 10);
+      
+      // Lưu cache 1 giờ (3600000 ms)
+      await this.cacheManager.set(cacheKey, result, 3600000);
+      return result;
     } catch (error) {
       console.error('Error getting recommendations:', error);
       throw new InternalServerErrorException('Failed to get recommendations');

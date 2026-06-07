@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { tourService } from '../../services/tourService';
 import { getTourAccommodations } from '../../services/accommodationService';
+import { trackActivity } from '../../services/recommendationService';
 import favoriteService from '../../services/favoriteService';
 import chatService from '../../services/chatService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -99,6 +100,13 @@ export const TourDetailPage: React.FC = () => {
       return () => clearInterval(interval);
     }
   }, [tour]);
+
+  // Track VIEW activity
+  useEffect(() => {
+    if (user && id) {
+      trackActivity(id, 'VIEW').catch(err => console.error('Failed to track view activity:', err));
+    }
+  }, [user, id]);
 
   function handleBooking() {
     if (!user) {

@@ -27,18 +27,31 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 
 ---
 
-## Active Queues (Development Roadmap)
-- [x] Xây dựng cốt lõi (User, Guide, Tour, Payment, Booking).
-- [x] Triển khai **SYSTEM_ADMIN**: Dashboard, cấu hình hệ thống, kiểm toán bảo mật, Anomaly Detection, DevOps Monitoring.
-- [x] Triển khai **CONTENT_MODERATOR**: Hệ thống phê duyệt hướng dẫn viên, kiểm duyệt báo cáo vi phạm, AI Moderation.
-- [x] Triển khai **ACCOUNTANT**: Lịch sử giao dịch, xử lý hoàn tiền, quyết toán, Smart Auto-Reconciliation, Automated E-Invoicing, Cashflow Forecasting.
-- [x] Triển khai **SUPPORT_STAFF**: Quản lý ticket hỗ trợ, giải quyết tranh chấp tour, điều phối SOS khẩn cấp.
-- [x] Hoàn thiện CI/CD, tối ưu hiệu năng và Audit bảo mật tổng thể.
-- [x] Triển khai hệ thống **Chat Real-time** (Redis Pub/Sub, WebSockets, Supabase Storage) cho trải nghiệm nhắn tin thời gian thực giữa Khách và Hướng dẫn viên.
+## 🚀 Active Queues (Tác vụ đang chờ/Đang xử lý)
+
+- [x] Tính năng Recommendation Engine (Gợi ý Tour)
+  - [x] Tạo `RecommendationModule` (NestJS) lấy tour qua Redis/Collaborative Filtering giả lập
+  - [x] Bổ sung caching bằng `cache-manager`
+  - [x] Tích hợp với Frontend (React) trên `HomePage.tsx`
+  - [x] Thêm API track hành vi người dùng "VIEW", "BOOK", "FAVORITE"
+
+- [x] Đa ngôn ngữ (i18n)
+  - [x] Thiết lập `i18next` ở React
+  - [x] Header Language Switcher
+  - [x] Dịch tiếng Việt / Anh trên HomePage
 
 ---
 
-## Latest Execution Notes
+## 📝 Latest Execution Notes
+
+- **07/06/2026:** Hoàn thành triển khai Phase 3 (Frontend):
+  - Thiết lập `i18next`, cấu hình ngôn ngữ VI/EN.
+  - Tích hợp `LanguageSwitcher` vào `PublicHeader.tsx`.
+  - Hiển thị danh sách "Gợi Ý Dành Riêng Cho Bạn" trên `HomePage.tsx`.
+  - Bổ sung `trackActivity` gọi API Tracking mỗi khi người dùng xem `TourDetailPage.tsx`.
+  - Frontend build thành công. Hoàn thiện xong tính năng Cốt lõi (AI & Trải nghiệm).
+  - Viết thêm E2E test `home-i18n-recommendations.spec.ts` kiểm thử Playwright cho i18n pass 100% (9/9 suites pass).
+  - Tạo PR #82 trên Github cho toàn bộ nhánh `feat/ai-recommendation-i18n`.
 
 ### 2026-06-06
 * **Date**: 2026-06-06
