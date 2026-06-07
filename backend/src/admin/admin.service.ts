@@ -1836,7 +1836,11 @@ If no issues are found, flagged should be false, reason should be "No issues det
     return setting;
   }
 
-  async updateSetting(settingKey: string, settingValue: string, adminId: string) {
+  async updateSetting(
+    settingKey: string,
+    settingValue: string,
+    adminId: string,
+  ) {
     const setting = await this.prisma.system_settings.upsert({
       where: { key: settingKey },
       update: { value: settingValue, updated_at: new Date() },
