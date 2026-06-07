@@ -69,14 +69,12 @@ jobs:
       working-directory: ./frontend
       run: npx playwright install --with-deps
       
-    - name: Start Frontend server
-      working-directory: ./frontend
-      run: npm run dev &
-      
     - name: Run Playwright tests
       working-directory: ./frontend
       env:
         CI: true
+        VITE_SUPABASE_URL: "https://mock-supabase.co"
+        VITE_SUPABASE_ANON_KEY: "mock-anon-key"
       run: npx playwright test
       
     - uses: actions/upload-artifact@v4
