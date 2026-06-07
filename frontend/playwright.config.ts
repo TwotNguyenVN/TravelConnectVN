@@ -10,7 +10,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     port: 5173,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
   use: {
     baseURL: 'http://localhost:5173',

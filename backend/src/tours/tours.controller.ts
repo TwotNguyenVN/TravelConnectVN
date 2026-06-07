@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -32,6 +33,7 @@ import {
   TourImageItemDto,
 } from './dto/tours.dto';
 
+@ApiTags('Tours')
 @Controller('tours')
 export class ToursController {
   constructor(private readonly toursService: ToursService) {}

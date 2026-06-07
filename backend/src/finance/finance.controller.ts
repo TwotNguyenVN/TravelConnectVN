@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Post,
@@ -12,6 +13,7 @@ import { ReconciliationService, StatementRow } from './reconciliation.service';
 import { InvoiceService } from './invoice.service';
 import { CashflowForecastingService } from './cashflow-forecasting.service';
 
+@ApiTags('Finance')
 @Controller('finance')
 @UseGuards(AuthGuard)
 export class FinanceController {

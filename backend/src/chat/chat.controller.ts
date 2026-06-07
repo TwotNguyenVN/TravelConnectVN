@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -21,6 +22,7 @@ import { ChatService } from './chat.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { SupabaseService } from '../supabase/supabase.service';
 
+@ApiTags('Chat')
 @Controller('chat')
 @UseGuards(AuthGuard)
 export class ChatController {

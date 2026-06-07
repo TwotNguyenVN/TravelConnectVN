@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Query, UseGuards, Request } from '@nestjs/common';
 import { UserActivityLogsService } from './user-activity-logs.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -8,6 +9,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: { id: string; role: string };
 }
 
+@ApiTags('User Activity Logs')
 @Controller('me')
 @UseGuards(AuthGuard)
 export class UserActivityLogsController {
