@@ -1,0 +1,29 @@
+{
+  "header": {
+    "explore_tours": "Khám phá Tour",
+    "guides": "Hướng dẫn viên",
+    "companions": "Bạn đồng hành",
+    "login": "Đăng nhập",
+    "signup": "Đăng ký",
+    "logout": "Đăng xuất"
+  },
+  "home": {
+    "hero_title": "Trải nghiệm du lịch theo cách của bạn",
+    "hero_subtitle": "Khám phá những vùng đất mới cùng hướng dẫn viên địa phương nhiệt tình và những người bạn đồng hành chung đam mê.",
+    "recommendations_title": "Gợi Ý Dành Riêng Cho Bạn",
+    "featured_tours": "Tour Nổi Bật",
+    "featured_guides": "Hướng dẫn viên địa phương",
+    "featured_companions": "Bài đồng hành mới nhất"
+  },
+  "tour_detail": {
+    "book_now": "Đặt Tour",
+    "price": "Giá",
+    "duration": "Thời gian",
+    "days": "ngày",
+    "nights": "đêm",
+    "guide": "Hướng dẫn viên",
+    "itinerary": "Lịch trình",
+    "reviews": "Đánh giá",
+    "recommendations_similar": "Các Tour Tương Tự"
+  }
+}

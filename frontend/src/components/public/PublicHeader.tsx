@@ -12,6 +12,7 @@ import { useToast } from '../../contexts/ToastContext';
 
 import { useSocket } from '../../contexts/SocketContext';
 import { DEFAULT_AVATAR } from '../../constants/images';
+import { useTranslation } from 'react-i18next';
 
 
 export const PublicHeader: React.FC = () => {
@@ -23,6 +24,11 @@ export const PublicHeader: React.FC = () => {
   const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [showChatPopover, setShowChatPopover] = useState(false);
   const [showNotifPopover, setShowNotifPopover] = useState(false);
+  const { t, i18n } = useTranslation();
+
+  const toggleLanguage = () => {
+    i18n.changeLanguage(i18n.language.startsWith('en') ? 'vi' : 'en');
+  };
 
   useEffect(() => {
     if (user) {
@@ -116,12 +122,29 @@ export const PublicHeader: React.FC = () => {
         </Link>
 
         <nav style={{ display: 'flex', gap: 'var(--tc-spacing-5)', fontWeight: 500 }}>
-          <Link to="/tours" style={{ color: 'var(--tc-text-primary)' }}>Khám phá Tour</Link>
-          <Link to="/guides" style={{ color: 'var(--tc-text-primary)' }}>Hướng dẫn viên</Link>
-          <Link to="/companions" style={{ color: 'var(--tc-text-primary)' }}>Bạn đồng hành</Link>
+          <Link to="/tours" style={{ color: 'var(--tc-text-primary)' }}>{t('header.explore_tours')}</Link>
+          <Link to="/guides" style={{ color: 'var(--tc-text-primary)' }}>{t('header.guides')}</Link>
+          <Link to="/companions" style={{ color: 'var(--tc-text-primary)' }}>{t('header.companions')}</Link>
         </nav>
 
         <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)', alignItems: 'center' }}>
+          <button
+            onClick={toggleLanguage}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.2rem',
+              display: 'flex',
+              alignItems: 'center',
+              padding: '4px',
+              borderRadius: '4px',
+            }}
+            title={i18n.language.startsWith('en') ? 'Switch to Vietnamese' : 'Switch to English'}
+          >
+            {i18n.language.startsWith('en') ? '🇬🇧' : '🇻🇳'}
+          </button>
+
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-3)' }}>
               <Link to={profileLink} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-2)', color: 'inherit' }}>
@@ -250,16 +273,16 @@ export const PublicHeader: React.FC = () => {
                 )}
               </div>
 
-              <Button variant="outline" size="small" onClick={handleLogout}>Đăng xuất</Button>
+              <Button variant="outline" size="small" onClick={handleLogout}>{t('header.logout')}</Button>
             </div>
 
           ) : (
             <>
               <Link to="/login">
-                <Button variant="outline" size="small">Đăng nhập</Button>
+                <Button variant="outline" size="small">{t('header.login')}</Button>
               </Link>
               <Link to="/select-role">
-                <Button variant="primary" size="small">Đăng ký</Button>
+                <Button variant="primary" size="small">{t('header.signup')}</Button>
               </Link>
             </>
           )}

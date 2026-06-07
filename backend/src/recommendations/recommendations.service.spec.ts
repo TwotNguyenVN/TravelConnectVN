@@ -15,6 +15,10 @@ describe('RecommendationsService', () => {
     tours: {
       findMany: jest.fn(),
     },
+    user_activities: {
+      findMany: jest.fn(),
+      create: jest.fn(),
+    },
   };
 
   beforeEach(async () => {
@@ -23,6 +27,14 @@ describe('RecommendationsService', () => {
       providers: [
         RecommendationsService,
         { provide: PrismaService, useValue: mockPrismaService },
+        {
+          provide: 'CACHE_MANAGER',
+          useValue: {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -44,6 +56,8 @@ describe('RecommendationsService', () => {
       mockPrismaService.user_preferred_categories.findMany.mockResolvedValue(
         [],
       );
+      
+      mockPrismaService.user_activities.findMany.mockResolvedValue([]);
 
       const mockTours = [
         {
