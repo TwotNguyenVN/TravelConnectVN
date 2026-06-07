@@ -827,7 +827,7 @@ export class AdminService {
           module_name: 'transaction_management',
           entity_type: 'payment_transactions',
           entity_pk: id,
-          action_type: 'update_status',
+          action_type: 'change_status',
           reason: 'Manual reconciliation / admin override',
           old_data: { status: oldStatus },
           new_data: { status },
@@ -1013,11 +1013,11 @@ export class AdminService {
 
       await tx.admin_activity_logs.create({
         data: {
-          actor_user_id: adminId,
+          actor_user_id: adminId === 'system-cron' ? null : adminId,
           module_name: 'finance_settlement',
           entity_type: 'guide_profiles',
           entity_pk: guideProfileId,
-          action_type: 'settle_guide_income',
+          action_type: 'other',
           reason: `Quyết toán thu nhập HDV ${guide.users.full_name}. Tổng doanh thu: ${totalSettledAmount}đ. Thực nhận (90%): ${netPaid}đ.`,
           new_data: {
             settledTransactionIds: transactionsToSettle.map((t) => t.id),
@@ -1124,7 +1124,7 @@ export class AdminService {
           module_name: 'user_management',
           entity_type: 'users',
           entity_pk: userId,
-          action_type: 'create_staff',
+          action_type: 'create',
           reason: `Tạo tài khoản nhân viên mới. Email: ${dto.email}, Quyền: ${dto.roleCode}`,
           new_data: {
             email: dto.email,
@@ -1199,7 +1199,7 @@ export class AdminService {
           actor_user_id: adminId,
           module_name: 'broadcast_notifications',
           entity_type: 'notifications',
-          action_type: 'broadcast',
+          action_type: 'other',
           reason: `Phát thông báo rộng rãi: "${title}". Đối tượng: ${targetRole || targetUserId || 'Tất cả'}`,
           new_data: {
             title,
@@ -1980,7 +1980,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
           module_name: 'categories_management',
           entity_type: type,
           entity_pk: idStr,
-          action_type: 'delete',
+          action_type: 'other',
           reason: 'Delete category',
         },
       });

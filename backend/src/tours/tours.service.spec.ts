@@ -5,7 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { AiModerationService } from '../ai-moderation/ai-moderation.service';
+
 
 /**
  * Unit Tests cho ToursService
