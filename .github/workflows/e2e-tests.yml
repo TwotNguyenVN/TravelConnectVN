@@ -47,7 +47,7 @@ jobs:
         DATABASE_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
         DIRECT_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
       run: |
-        npx prisma db execute --url "$DATABASE_URL" --stdin <<< "CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;"
+        npx prisma db execute --stdin <<< "CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;"
         npx prisma generate
         npx prisma migrate dev --name init
 
