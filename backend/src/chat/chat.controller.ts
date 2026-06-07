@@ -10,7 +10,11 @@ import {
   UploadedFile,
   BadRequestException,
   Body,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 import { ChatService } from './chat.service';
@@ -48,6 +52,7 @@ export class ChatController {
   }
 
   @Post('media')
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @UseInterceptors(
     FileInterceptor('file', {
       storage: memoryStorage(),
@@ -57,7 +62,14 @@ export class ChatController {
     }),
   )
   async uploadMedia(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp|mp3|wav|webm|m4a)' }),
+        ],
+      }),
+    ) file: Express.Multer.File,
     @Body('conversationId') conversationId: string,
   ) {
     if (!file) {

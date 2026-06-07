@@ -9,6 +9,7 @@ import {
   Param,
   Res,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { PaymentsService } from './payments.service';
 import type { Response } from 'express';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -23,6 +24,7 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @UseGuards(AuthGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('create-vnpay-url')
   async createPaymentUrl(
     @Req() req: AuthenticatedRequest,
@@ -48,6 +50,7 @@ export class PaymentsController {
   }
 
   // IPN Endpoint (Không dùng Auth Guard vì VNPAY gọi server-to-server)
+  @Throttle({ default: { limit: 50, ttl: 60000 } })
   @Get('vnpay-ipn')
   async vnpayIpn(@Query() query: Record<string, string>) {
     const result = await this.paymentsService.vnpayIpn(query);
