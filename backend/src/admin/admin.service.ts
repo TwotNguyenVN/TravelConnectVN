@@ -1816,16 +1816,16 @@ If no issues are found, flagged should be false, reason should be "No issues det
   }
 
   // Phase 1.1 Core: Global Settings
-  async getSetting(key: string) {
+  async getSetting(settingKey: string) {
     let setting = await this.prisma.system_settings.findUnique({
-      where: { setting_key: key },
+      where: { key: settingKey },
     });
     if (!setting) {
       // Return default values if not found yet
-      if (key === 'commission_rate') {
+      if (settingKey === 'commission_rate') {
         setting = {
-          setting_key: key,
-          setting_value: '10',
+          key: settingKey,
+          value: '10',
           description: 'Commission rate (%)',
           updated_at: new Date(),
         };
@@ -1836,11 +1836,11 @@ If no issues are found, flagged should be false, reason should be "No issues det
     return setting;
   }
 
-  async updateSetting(key: string, value: string, adminId: string) {
+  async updateSetting(settingKey: string, settingValue: string, adminId: string) {
     const setting = await this.prisma.system_settings.upsert({
-      where: { setting_key: key },
-      update: { setting_value: value, updated_at: new Date() },
-      create: { setting_key: key, setting_value: value },
+      where: { key: settingKey },
+      update: { value: settingValue, updated_at: new Date() },
+      create: { key: settingKey, value: settingValue },
     });
 
     await this.prisma.admin_activity_logs.create({
@@ -1848,10 +1848,10 @@ If no issues are found, flagged should be false, reason should be "No issues det
         actor_user_id: adminId,
         module_name: 'global_settings',
         entity_type: 'system_settings',
-        entity_pk: key,
+        entity_pk: settingKey,
         action_type: 'update',
         reason: 'Update global setting',
-        new_data: { setting_value: value },
+        new_data: { value: settingValue },
       },
     });
 
