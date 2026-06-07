@@ -37,7 +37,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ conversationId }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      // We will implement this backend endpoint soon
+      formData.append('conversationId', conversationId);
       const response = await api.post('/chat/media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
@@ -63,6 +63,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ conversationId }) => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         const formData = new FormData();
         formData.append('file', audioBlob, 'voice.webm');
+        formData.append('conversationId', conversationId);
         try {
           const response = await api.post('/chat/media', formData, {
             headers: { 'Content-Type': 'multipart/form-data' }

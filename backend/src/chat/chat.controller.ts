@@ -9,24 +9,21 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { ChatService } from './chat.service';
 import { AuthGuard } from '../common/guards/auth.guard';
-import * as fs from 'fs';
-
-// Ensure upload directory exists
-const uploadDir = './uploads/chat-media';
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+import { SupabaseService } from '../supabase/supabase.service';
 
 @Controller('chat')
 @UseGuards(AuthGuard)
 export class ChatController {
-  constructor(private readonly chatService: ChatService) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private readonly supabaseService: SupabaseService,
+  ) {}
 
   @Get('conversations')
   async getConversations(@Request() req: { user: { sub: string } }) {
@@ -53,24 +50,31 @@ export class ChatController {
   @Post('media')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: uploadDir,
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname) || '.webm';
-          cb(null, `${uniqueSuffix}${ext}`);
-        },
-      }),
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+      },
     }),
   )
-  uploadMedia(@UploadedFile() file: Express.Multer.File) {
+  async uploadMedia(
+    @UploadedFile() file: Express.Multer.File,
+    @Body('conversationId') conversationId: string,
+  ) {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
-    // Return relative URL that can be served by a static file server later
-    // In production, this should return a Supabase/S3 public URL.
-    const fileUrl = `${process.env.API_URL || 'http://localhost:3000'}/uploads/chat-media/${file.filename}`;
-    return { url: fileUrl };
+    if (!conversationId) {
+      throw new BadRequestException('conversationId is required');
+    }
+
+    try {
+      const publicUrl = await this.supabaseService.uploadChatMedia(
+        conversationId,
+        file,
+      );
+      return { url: publicUrl };
+    } catch (error) {
+      throw new BadRequestException('Failed to upload media file');
+    }
   }
 }
