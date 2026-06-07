@@ -74,3 +74,17 @@ export class UpdateTransactionStatusDto {
   @IsEnum(['pending', 'paid', 'failed', 'cancelled'])
   status: string;
 }
+
+export class UpdateSettingDto {
+  @IsString()
+  value: string;
+}
+
+export class CategoryDto {
+  @IsString()
+  name: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+}

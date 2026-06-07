@@ -34,6 +34,11 @@ export class RoleGuard implements CanActivate {
       throw new ForbiddenException('Access denied. No roles found for user.');
     }
 
+    // SYSTEM_ADMIN bypasses all role restrictions
+    if (user.roles.includes(Role.SYSTEM_ADMIN)) {
+      return true;
+    }
+
     const hasRole = requiredRoles.some((role) => user.roles?.includes(role));
 
     if (!hasRole) {

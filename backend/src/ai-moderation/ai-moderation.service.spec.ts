@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AiModerationService } from './ai-moderation.service';
-
 import { ConfigService } from '@nestjs/config';
 
 describe('AiModerationService', () => {
@@ -10,7 +9,10 @@ describe('AiModerationService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AiModerationService,
-        { provide: ConfigService, useValue: { get: jest.fn() } },
+        {
+          provide: ConfigService,
+          useValue: { get: jest.fn().mockReturnValue('mock-api-key') },
+        },
       ],
     }).compile();
 

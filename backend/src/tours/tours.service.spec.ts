@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 
 /**
  * Unit Tests cho ToursService
@@ -58,7 +59,16 @@ describe('ToursService', () => {
         ToursService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: CACHE_MANAGER, useValue: mockCacheManager },
-        { provide: AiModerationService, useValue: { analyzeContent: jest.fn().mockResolvedValue({ isFlagged: false, reason: '', confidenceScore: 0.9 }) } },
+        {
+          provide: AiModerationService,
+          useValue: {
+            analyzeContent: jest.fn().mockResolvedValue({
+              isFlagged: false,
+              reason: '',
+              confidenceScore: 0.9,
+            }),
+          },
+        },
       ],
     }).compile();
 

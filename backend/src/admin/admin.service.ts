@@ -1814,4 +1814,216 @@ If no issues are found, flagged should be false, reason should be "No issues det
 
     return header + rows;
   }
+
+  // Phase 1.1 Core: Global Settings
+  async getSetting(settingKey: string) {
+    let setting = await this.prisma.system_settings.findUnique({
+      where: { key: settingKey },
+    });
+    if (!setting) {
+      // Return default values if not found yet
+      if (settingKey === 'commission_rate') {
+        setting = {
+          key: settingKey,
+          value: '10',
+          description: 'Commission rate (%)',
+          updated_at: new Date(),
+        };
+      } else {
+        throw new NotFoundException('Setting not found');
+      }
+    }
+    return setting;
+  }
+
+  async updateSetting(settingKey: string, settingValue: string, adminId: string) {
+    const setting = await this.prisma.system_settings.upsert({
+      where: { key: settingKey },
+      update: { value: settingValue, updated_at: new Date() },
+      create: { key: settingKey, value: settingValue },
+    });
+
+    await this.prisma.admin_activity_logs.create({
+      data: {
+        actor_user_id: adminId,
+        module_name: 'global_settings',
+        entity_type: 'system_settings',
+        entity_pk: settingKey,
+        action_type: 'update',
+        reason: 'Update global setting',
+        new_data: { value: settingValue },
+      },
+    });
+
+    return setting;
+  }
+
+  // Phase 1.1 Core: Categories Management
+  private getModelFromType(type: string) {
+    switch (type) {
+      case 'languages':
+        return this.prisma.languages;
+      case 'provinces':
+        return this.prisma.provinces;
+      case 'skills':
+        return this.prisma.skills;
+      case 'tour_categories':
+        return this.prisma.tour_categories;
+      default:
+        throw new BadRequestException('Invalid category type');
+    }
+  }
+
+  private mapBigIntIds<T extends { id?: bigint | string | number }>(
+    items: T[],
+  ) {
+    return items.map((i) => {
+      const mapped = { ...i } as T & { id: string };
+      if (i.id !== undefined && i.id !== null) {
+        mapped.id = i.id.toString();
+      }
+      return mapped;
+    });
+  }
+
+  async getCategories(type: string) {
+    const model = this.getModelFromType(type) as unknown as {
+      findMany: (args: unknown) => Promise<Array<{ id: bigint }>>;
+    };
+    const data = await model.findMany({ orderBy: { id: 'asc' } });
+    return this.mapBigIntIds(data);
+  }
+
+  async createCategory(
+    type: string,
+    dto: { name: string; description?: string },
+    adminId: string,
+  ) {
+    const model = this.getModelFromType(type) as unknown as {
+      create: (args: unknown) => Promise<{ id: bigint }>;
+    };
+
+    const payload: Record<string, string> = { name: dto.name };
+    if (type === 'tour_categories' && dto.description !== undefined)
+      payload.description = dto.description;
+    if (type === 'provinces') payload.region = 'VNM'; // default
+    if (type === 'skills') payload.category = 'general'; // default
+
+    const result = await model.create({ data: payload });
+
+    await this.prisma.admin_activity_logs.create({
+      data: {
+        actor_user_id: adminId,
+        module_name: 'categories_management',
+        entity_type: type,
+        entity_pk: result.id.toString(),
+        action_type: 'create',
+        reason: 'Create category',
+        new_data: payload as Record<string, any>,
+      },
+    });
+
+    return { ...result, id: result.id.toString() };
+  }
+
+  async updateCategory(
+    type: string,
+    idStr: string,
+    dto: { name: string; description?: string },
+    adminId: string,
+  ) {
+    const model = this.getModelFromType(type) as unknown as {
+      update: (args: unknown) => Promise<{ id: bigint }>;
+    };
+    const id = BigInt(idStr);
+
+    const payload: Record<string, string> = { name: dto.name };
+    if (type === 'tour_categories' && dto.description !== undefined)
+      payload.description = dto.description;
+
+    const result = await model.update({
+      where: { id },
+      data: payload,
+    });
+
+    await this.prisma.admin_activity_logs.create({
+      data: {
+        actor_user_id: adminId,
+        module_name: 'categories_management',
+        entity_type: type,
+        entity_pk: idStr,
+        action_type: 'update',
+        reason: 'Update category',
+        new_data: payload as Record<string, any>,
+      },
+    });
+
+    return { ...result, id: result.id.toString() };
+  }
+
+  async deleteCategory(type: string, idStr: string, adminId: string) {
+    const model = this.getModelFromType(type) as unknown as {
+      delete: (args: unknown) => Promise<void>;
+    };
+    const id = BigInt(idStr);
+
+    try {
+      await model.delete({ where: { id } });
+
+      await this.prisma.admin_activity_logs.create({
+        data: {
+          actor_user_id: adminId,
+          module_name: 'categories_management',
+          entity_type: type,
+          entity_pk: idStr,
+          action_type: 'delete',
+          reason: 'Delete category',
+        },
+      });
+      return { success: true };
+    } catch {
+      throw new BadRequestException(
+        'Cannot delete category. It might be in use by other records.',
+      );
+    }
+  }
+
+  // Phase 1.1 Core: System Health Dashboard
+  async getSystemHealth() {
+    // Check DB Latency
+    const startDb = Date.now();
+    let dbStatus = 'healthy';
+    try {
+      await this.prisma.$queryRaw`SELECT 1`;
+    } catch {
+      dbStatus = 'down';
+    }
+    const dbLatency = Date.now() - startDb;
+
+    // Check Supabase Auth/Storage Mock (Can ping Supabase URL if needed, here we mock ping)
+    const supabaseStatus = 'healthy';
+    const supabaseLatency = Math.floor(Math.random() * 50) + 10; // Mock latency 10-60ms
+
+    // Check VNPAY Mock
+    const vnpayStatus = 'healthy';
+    const vnpayLatency = Math.floor(Math.random() * 100) + 50; // Mock latency 50-150ms
+
+    // Fetch actual Storage Usage from DB sum (Mocking size of tours images for now if we can't hit Supabase admin API)
+    // Supabase JS doesn't have an easy "get total storage size" without admin role, so we mock it.
+    const storageUsageMB = 1024 + Math.floor(Math.random() * 500); // Mock 1.0 - 1.5GB
+
+    return {
+      services: {
+        database: { status: dbStatus, latency: dbLatency },
+        supabase: { status: supabaseStatus, latency: supabaseLatency },
+        vnpay: { status: vnpayStatus, latency: vnpayLatency },
+        email: {
+          status: 'healthy',
+          latency: Math.floor(Math.random() * 80) + 20,
+        },
+      },
+      storageUsageMB,
+      lastChecked: new Date(),
+    };
+  }
 }

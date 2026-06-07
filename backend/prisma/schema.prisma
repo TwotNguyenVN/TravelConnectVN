@@ -1626,4 +1626,3 @@ model invoices {
 
   @@schema("public")
 }
-

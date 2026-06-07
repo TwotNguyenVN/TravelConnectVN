@@ -26,6 +26,7 @@ import { AuthGuard } from '../common/guards/auth.guard';
 import { RoleGuard } from '../common/guards/role.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../common/enums/role.enum';
+
 import {
   UpdateUserStatusDto,
   AssignRoleDto,
@@ -418,5 +419,67 @@ export class AdminController {
       endDate,
     );
     return { data: csv };
+  }
+
+  // Phase 1.1 Core: Global Settings
+  @Get('settings/:key')
+  @Roles(Role.SYSTEM_ADMIN)
+  getSetting(@Param('key') key: string) {
+    return this.adminService.getSetting(key);
+  }
+
+  @Patch('settings/:key')
+  @Roles(Role.SYSTEM_ADMIN)
+  updateSetting(
+    @Param('key') key: string,
+    @Body() dto: { value: string },
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.adminService.updateSetting(key, dto.value, req.user.id);
+  }
+
+  // Phase 1.1 Core: Categories Management
+  @Get('categories/:type')
+  @Roles(Role.SYSTEM_ADMIN)
+  getCategories(@Param('type') type: string) {
+    return this.adminService.getCategories(type);
+  }
+
+  @Post('categories/:type')
+  @Roles(Role.SYSTEM_ADMIN)
+  createCategory(
+    @Param('type') type: string,
+    @Body() dto: { name: string; description?: string },
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.adminService.createCategory(type, dto, req.user.id);
+  }
+
+  @Patch('categories/:type/:id')
+  @Roles(Role.SYSTEM_ADMIN)
+  updateCategory(
+    @Param('type') type: string,
+    @Param('id') id: string,
+    @Body() dto: { name: string; description?: string },
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.adminService.updateCategory(type, id, dto, req.user.id);
+  }
+
+  @Delete('categories/:type/:id')
+  @Roles(Role.SYSTEM_ADMIN)
+  deleteCategory(
+    @Param('type') type: string,
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.adminService.deleteCategory(type, id, req.user.id);
+  }
+
+  // Phase 1.1 Core: System Health Dashboard
+  @Get('system/health')
+  @Roles(Role.SYSTEM_ADMIN)
+  getSystemHealth() {
+    return this.adminService.getSystemHealth();
   }
 }

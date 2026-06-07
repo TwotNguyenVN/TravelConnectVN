@@ -69,6 +69,7 @@ export const SupportDisputePage: React.FC = () => {
   const [resolution, setResolution] = useState('');
   const [refundAmount, setRefundAmount] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
+  const [copilotLoading, setCopilotLoading] = useState(false);
   
   // Chat History state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -145,6 +146,24 @@ export const SupportDisputePage: React.FC = () => {
       setSubmitting(false);
     }
   };
+
+  async function handleCopilotSuggest() {
+    if (!selectedDispute) return;
+    try {
+      setCopilotLoading(true);
+      const textToAnalyze = `Khách hàng: ${selectedDispute.tour_requests.users_tour_requests_user_idTousers.full_name}. HDV: ${selectedDispute.tour_requests.tours.guide_profiles.users.full_name}. Lý do khiếu nại: ${selectedDispute.reason}`;
+      const res = await adminApi.getCopilotSuggestion(textToAnalyze);
+      if (res?.success && res.data?.suggestion) {
+        setResolution(res.data.suggestion);
+        toast.success('AI đã tạo gợi ý thành công!');
+      }
+    } catch (err) {
+      console.error('Copilot error:', err);
+      toast.error('Lỗi khi gọi AI Co-Pilot');
+    } finally {
+      setCopilotLoading(false);
+    }
+  }
 
   const filteredDisputes = disputes.filter(d => {
     const textStr = `${d.tour_requests?.tours?.title} ${d.tour_requests?.users_tour_requests_user_idTousers?.full_name} ${d.tour_requests?.tours?.guide_profiles?.users?.full_name} ${d.reason}`.toLowerCase();
@@ -410,9 +429,23 @@ export const SupportDisputePage: React.FC = () => {
                     </div>
                   ) : (
                     <div style={{ borderTop: '2px solid var(--tc-border)', paddingTop: '16px' }}>
-                      <h4 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>
-                        👨‍⚖️ Soạn phán quyết phân xử
-                      </h4>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>
+                          👨‍⚖️ Soạn phán quyết phân xử
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={handleCopilotSuggest}
+                          disabled={copilotLoading}
+                          style={{
+                            background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0',
+                            padding: '4px 10px', borderRadius: '4px', fontSize: '12px', fontWeight: 600,
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          {copilotLoading ? '⏳ Đang phân tích...' : '🤖 AI Gợi ý'}
+                        </button>
+                      </div>
                       
                       <div style={{ marginBottom: '12px' }}>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>

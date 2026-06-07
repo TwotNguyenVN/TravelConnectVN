@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument */
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenAI } from '@google/genai';
@@ -59,7 +58,9 @@ TRẢ VỜI DƯỚI ĐỊNH DẠNG JSON CHÍNH XÁC NHƯ SAU (Không có markdow
         .replace(/```/g, '')
         .trim();
 
-      const parsedResult = JSON.parse(cleanJsonStr);
+      const parsedResult = JSON.parse(
+        cleanJsonStr,
+      ) as Partial<ModerationResult>;
 
       return {
         isFlagged: parsedResult.isFlagged === true,

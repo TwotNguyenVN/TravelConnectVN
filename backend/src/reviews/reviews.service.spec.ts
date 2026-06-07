@@ -3,6 +3,7 @@ import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 import { ReviewsService } from './reviews.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserActivityLogsService } from '../user-activity-logs/user-activity-logs.service';
+import { AiModerationService } from '../ai-moderation/ai-moderation.service';
 import {
   NotFoundException,
   ForbiddenException,
@@ -44,7 +45,16 @@ describe('ReviewsService', () => {
         ReviewsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: UserActivityLogsService, useValue: mockActivityLogsService },
-        { provide: AiModerationService, useValue: { analyzeContent: jest.fn().mockResolvedValue({ isFlagged: false, reason: '', confidenceScore: 0.9 }) } },
+        {
+          provide: AiModerationService,
+          useValue: {
+            analyzeContent: jest.fn().mockResolvedValue({
+              isFlagged: false,
+              reason: '',
+              confidenceScore: 0.9,
+            }),
+          },
+        },
       ],
     }).compile();
 
