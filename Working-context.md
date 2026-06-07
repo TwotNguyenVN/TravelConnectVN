@@ -34,6 +34,7 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 - [x] Triển khai **ACCOUNTANT**: Lịch sử giao dịch, xử lý hoàn tiền, quyết toán, Smart Auto-Reconciliation, Automated E-Invoicing, Cashflow Forecasting.
 - [x] Triển khai **SUPPORT_STAFF**: Quản lý ticket hỗ trợ, giải quyết tranh chấp tour, điều phối SOS khẩn cấp.
 - [x] Hoàn thiện CI/CD, tối ưu hiệu năng và Audit bảo mật tổng thể.
+- [x] Triển khai hệ thống **Chat Real-time** (Redis Pub/Sub, WebSockets, Supabase Storage) cho trải nghiệm nhắn tin thời gian thực giữa Khách và Hướng dẫn viên.
 
 ---
 
@@ -89,3 +90,12 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - Chuyển Frontend sang dùng `nginxinc/nginx-unprivileged:alpine-slim` chạy ở port 8080 (non-root).
   - Tạo `docker-compose.yml` để dễ dàng khởi chạy toàn bộ stack cục bộ (Frontend, Backend, Redis).
   - Viết luồng GitHub Actions CI tại `.github/workflows/ci.yml` tự động cài đặt, chạy Linting, Unit Testing và build Docker. Toàn bộ `Active Queues` của dự án đã chính thức được hoàn tất!
+
+### 2026-06-07 (Chat Real-time)
+- **Hoàn thành hệ thống Chat Real-time (User-Guide Messaging):**
+  - Cấu hình Backend tích hợp `Redis Adapter` cho NestJS WebSocket (Sẵn sàng cho việc scale nhiều instance).
+  - Viết API `POST /chat/media` kết nối tới bucket `chat-media` của Supabase Storage để nhận ảnh và voice record thay vì lưu ổ đĩa local.
+  - Cập nhật `chat.service.ts` để lưu type của message (text/image/audio) và URL đính kèm.
+  - Nâng cấp Frontend `ChatInput.tsx` để hỗ trợ upload ảnh và thu âm Mic trực tiếp bằng `MediaRecorder`.
+  - Hoàn thiện UI `ChatWindow.tsx` hiển thị bong bóng chat với thẻ `<img>` và `<audio controls>`.
+  - Tạo PR `#77` trên nhánh `feat/realtime-chat`. Khẳng định dự án đã có đầy đủ tính năng cốt lõi cho môi trường Marketplace du lịch.

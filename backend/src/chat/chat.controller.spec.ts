@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatController } from './chat.controller';
 import { ChatService } from './chat.service';
@@ -7,7 +8,6 @@ import { AuthGuard } from '../common/guards/auth.guard';
 
 describe('ChatController', () => {
   let controller: ChatController;
-  let chatService: ChatService;
   let supabaseService: SupabaseService;
 
   const mockChatService = {
@@ -27,12 +27,11 @@ describe('ChatController', () => {
         { provide: SupabaseService, useValue: mockSupabaseService },
       ],
     })
-    .overrideGuard(AuthGuard)
-    .useValue({ canActivate: jest.fn(() => true) })
-    .compile();
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
+      .compile();
 
     controller = module.get<ChatController>(ChatController);
-    chatService = module.get<ChatService>(ChatService);
     supabaseService = module.get<SupabaseService>(SupabaseService);
   });
 
@@ -47,7 +46,10 @@ describe('ChatController', () => {
   describe('uploadMedia', () => {
     it('should throw BadRequestException if no file is provided', async () => {
       await expect(
-        controller.uploadMedia(undefined as any, 'conv-1'),
+        controller.uploadMedia(
+          undefined as unknown as Express.Multer.File,
+          'conv-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -59,7 +61,7 @@ describe('ChatController', () => {
       } as Express.Multer.File;
 
       await expect(
-        controller.uploadMedia(mockFile, undefined as any),
+        controller.uploadMedia(mockFile, undefined as unknown as string),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -93,9 +95,9 @@ describe('ChatController', () => {
         new Error('Upload failed'),
       );
 
-      await expect(
-        controller.uploadMedia(mockFile, 'conv-1'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(controller.uploadMedia(mockFile, 'conv-1')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

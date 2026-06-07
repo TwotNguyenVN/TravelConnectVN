@@ -73,7 +73,7 @@ export class ChatController {
         file,
       );
       return { url: publicUrl };
-    } catch (error) {
+    } catch {
       throw new BadRequestException('Failed to upload media file');
     }
   }

@@ -145,7 +145,9 @@ export class SupabaseService {
       throw error;
     }
 
-    const { data } = this.client.storage.from('chat-media').getPublicUrl(filePath);
+    const { data } = this.client.storage
+      .from('chat-media')
+      .getPublicUrl(filePath);
     return data.publicUrl;
   }
 }
