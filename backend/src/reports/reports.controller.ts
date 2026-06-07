@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Post,
@@ -18,6 +19,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: { id: string; role: string };
 }
 
+@ApiTags('Reports')
 @Controller('reports')
 @UseGuards(AuthGuard)
 export class ReportsController {

@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -25,6 +26,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   };
 }
 
+@ApiTags('Guides')
 @Controller('guides')
 export class GuidesController {
   constructor(private readonly guidesService: GuidesService) {}

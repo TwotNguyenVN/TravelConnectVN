@@ -99,3 +99,31 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - Nâng cấp Frontend `ChatInput.tsx` để hỗ trợ upload ảnh và thu âm Mic trực tiếp bằng `MediaRecorder`.
   - Hoàn thiện UI `ChatWindow.tsx` hiển thị bong bóng chat với thẻ `<img>` và `<audio controls>`.
   - Tạo PR `#77` trên nhánh `feat/realtime-chat`. Khẳng định dự án đã có đầy đủ tính năng cốt lõi cho môi trường Marketplace du lịch.
+
+### 2026-06-07 (Security Audit - Rate Limiting & File Validation)
+- **Vá lỗ hổng bảo mật nghiêm trọng trên API Upload & Webhook:**
+  - Bổ sung `@Throttle` cho `uploadMedia` (10 reqs/min) và VNPAY Webhook `vnpay-ipn` (50 reqs/min) để chống Spam/DDoS.
+  - Tích hợp `ParseFilePipe`, `MaxFileSizeValidator` (10MB) và `FileTypeValidator` cho endpoint `POST /chat/media`.
+  - Từ nay API chỉ chấp nhận file ảnh (`.png`, `.jpg`, `.webp`) và âm thanh (`.mp3`, `.wav`, `.webm`, `.m4a`), ngăn chặn triệt để nguy cơ user upload file thực thi độc hại (`.exe`, `.sh`) lên Supabase Storage.
+  - Chạy `npm audit fix` trên backend để vá các lỗ hổng dependency từ `@hono/node-server`.
+  - Backend đã build và pass 100% tests thành công. Đã commit và push các bản vá bảo mật.
+
+### 2026-06-07 (Performance Optimization)
+- **Tối ưu hóa hiệu năng tải trang (Frontend Code Splitting):**
+  - Viết script tự động thay thế 69 import tĩnh thành `React.lazy()` cho các trang (Pages) nằm trong các Layouts (Admin, Content, Support, Finance, Guide, User) tại `routes/index.tsx`.
+  - Áp dụng `<Suspense fallback={<LoadingSpinner/>}>` bọc các Layouts chính.
+  - Chạy `npm run build` thành công, chia nhỏ file main bundle (index.js) từ vài MB xuống còn 120KB (gzipped) và tạo ra >80 chunk files nhỏ, giúp ứng dụng load tức thì.
+- **Tối ưu hóa Backend (Redis Caching):**
+  - Áp dụng `@UseInterceptors(CacheInterceptor)` vào endpoint `GET /system-settings/public` để cache cấu hình hệ thống toàn cục, giảm tải truy vấn lặp đi lặp lại vào CSDL.
+  - Cập nhật `README.md` chuyên nghiệp với Tech Stack, badges và hướng dẫn khởi chạy nhanh bằng Docker Compose.
+  - Tự động hóa Swagger API Docs: Viết script Node.js quét và gán tự động `@ApiTags` vào toàn bộ 24 Controllers của Backend. Swagger UI giờ đã có phân nhóm rõ ràng (Tours, Admin, Chat, Payments...).
+  - Biên soạn `docs/USER_MANUAL.md` (Sổ tay vận hành) hướng dẫn các tác vụ cho Accountant, Support Staff và Content Moderator.
+  - Viết 3 tệp tin `Architecture Decision Records (ADRs)` giải thích các quyết định kiến trúc cốt lõi: Sử dụng Prisma, Supabase Storage và phân tách 4 role Backoffice.
+
+### 2026-06-07 (End-to-End Testing & CI/CD)
+- **Tích hợp Kiểm thử Tự động Playwright:**
+  - Cập nhật kịch bản `booking.spec.ts` kiểm thử toàn diện luồng người dùng từ đăng nhập, truy cập danh sách Tour, đến hoàn tất thanh toán.
+  - Xây dựng kịch bản mới `chat-support.spec.ts` kiểm tra luồng Nhắn tin giữa User và Guide, cũng như tính năng Report vi phạm gửi tới Support Staff.
+  - Chạy `npx playwright test --project=chromium` tại máy ảo, 8/8 kịch bản test (bao gồm Finance và Content Moderator) đều PASS với tốc độ 2.0s.
+- **Tích hợp CI/CD (GitHub Actions):**
+  - Viết file workflow `.github/workflows/e2e-tests.yml` giúp tự động khởi tạo môi trường (PostgreSQL, Redis, Backend, Frontend) và chạy Playwright ở chế độ Headless mỗi khi có Pull Request hoặc Push code lên nhánh chính. Hệ thống đảm bảo ứng dụng không bao giờ bị dính lỗi "White Screen" trên Production.

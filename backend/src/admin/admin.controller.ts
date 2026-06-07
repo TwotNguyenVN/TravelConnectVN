@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -38,6 +39,7 @@ import {
   UpdateTransactionStatusDto,
 } from './dto/admin.dto';
 
+@ApiTags('Admin')
 @Controller('admin')
 @UseGuards(AuthGuard, RoleGuard)
 export class AdminController {

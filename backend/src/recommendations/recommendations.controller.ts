@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { RecommendationsService } from './recommendations.service';
 import { AuthGuard } from '../common/guards/auth.guard';
@@ -7,6 +8,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: { id: string; role: string };
 }
 
+@ApiTags('Recommendations')
 @Controller('recommendations')
 @UseGuards(AuthGuard)
 export class RecommendationsController {

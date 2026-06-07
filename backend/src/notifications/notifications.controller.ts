@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Get,
@@ -17,6 +18,7 @@ interface AuthenticatedRequest extends ExpressRequest {
   user: { id: string; role: string };
 }
 
+@ApiTags('Notifications')
 @Controller('notifications')
 @UseGuards(AuthGuard)
 export class NotificationsController {

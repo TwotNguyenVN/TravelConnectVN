@@ -1,87 +1,88 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import { PublicLayout } from '../layouts/PublicLayout';
-import { UserLayout } from '../layouts/UserLayout';
-import { GuideLayout } from '../layouts/GuideLayout';
-import { AdminLayout } from '../layouts/AdminLayout';
-import { ContentLayout } from '../layouts/ContentLayout';
-import { SupportLayout } from '../layouts/SupportLayout';
-import { FinanceLayout } from '../layouts/FinanceLayout';
-import { FinanceDashboardPage } from '../pages/finance/FinanceDashboardPage';
-import { FinanceRefundsPage } from '../pages/finance/FinanceRefundsPage';
-import { FinanceTransactionsPage } from '../pages/finance/FinanceTransactionsPage';
-import { FinanceSettlementsPage } from '../pages/finance/FinanceSettlementsPage';
-import { FinanceForecastingPage } from '../pages/finance/FinanceForecastingPage';
-import { FinanceReconciliationPage } from '../pages/finance/FinanceReconciliationPage';
+const UserLayout = lazy(() => import('../layouts/UserLayout').then(m => ({ default: m.UserLayout })));
+const GuideLayout = lazy(() => import('../layouts/GuideLayout').then(m => ({ default: m.GuideLayout })));
+const AdminLayout = lazy(() => import('../layouts/AdminLayout').then(m => ({ default: m.AdminLayout })));
+const ContentLayout = lazy(() => import('../layouts/ContentLayout').then(m => ({ default: m.ContentLayout })));
+const SupportLayout = lazy(() => import('../layouts/SupportLayout').then(m => ({ default: m.SupportLayout })));
+const FinanceLayout = lazy(() => import('../layouts/FinanceLayout').then(m => ({ default: m.FinanceLayout })));
+const FinanceDashboardPage = lazy(() => import('../pages/finance/FinanceDashboardPage').then(m => ({ default: m.FinanceDashboardPage })));
+const FinanceRefundsPage = lazy(() => import('../pages/finance/FinanceRefundsPage').then(m => ({ default: m.FinanceRefundsPage })));
+const FinanceTransactionsPage = lazy(() => import('../pages/finance/FinanceTransactionsPage').then(m => ({ default: m.FinanceTransactionsPage })));
+const FinanceSettlementsPage = lazy(() => import('../pages/finance/FinanceSettlementsPage').then(m => ({ default: m.FinanceSettlementsPage })));
+const FinanceForecastingPage = lazy(() => import('../pages/finance/FinanceForecastingPage').then(m => ({ default: m.FinanceForecastingPage })));
+const FinanceReconciliationPage = lazy(() => import('../pages/finance/FinanceReconciliationPage').then(m => ({ default: m.FinanceReconciliationPage })));
 
 import { HomePage } from '../pages/public/HomePage';
 import { TourListPage } from '../pages/public/TourListPage';
 import { TourDetailPage } from '../pages/public/TourDetailPage';
 import { LoginPage } from '../pages/public/LoginPage';
 import { RegisterPage } from '../pages/public/RegisterPage';
-import { OnboardingPage } from '../pages/public/onboarding/OnboardingPage';
+const OnboardingPage = lazy(() => import('../pages/public/onboarding/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
 import { RoleSelectionPage } from '../pages/public/RoleSelectionPage';
-import { ForgotPasswordPage } from '../pages/public/ForgotPasswordPage';
-import { VerifyOtpPage } from '../pages/public/VerifyOtpPage';
-import { ResetPasswordPage } from '../pages/public/ResetPasswordPage';
-import { ProfilePage } from '../pages/user/ProfilePage';
-import { NotificationsPage } from '../pages/user/NotificationsPage';
-import { ActivityLogsPage } from '../pages/user/ActivityLogsPage';
-import { TourMapPage } from '../pages/public/TourMapPage';
-import { CalendarDemoPage } from '../pages/public/CalendarDemoPage';
-import { PublicProfilePage } from '../pages/public/PublicProfilePage';
+const ForgotPasswordPage = lazy(() => import('../pages/public/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const VerifyOtpPage = lazy(() => import('../pages/public/VerifyOtpPage').then(m => ({ default: m.VerifyOtpPage })));
+const ResetPasswordPage = lazy(() => import('../pages/public/ResetPasswordPage').then(m => ({ default: m.ResetPasswordPage })));
+const ProfilePage = lazy(() => import('../pages/user/ProfilePage').then(m => ({ default: m.ProfilePage })));
+const NotificationsPage = lazy(() => import('../pages/user/NotificationsPage').then(m => ({ default: m.NotificationsPage })));
+const ActivityLogsPage = lazy(() => import('../pages/user/ActivityLogsPage').then(m => ({ default: m.ActivityLogsPage })));
+const TourMapPage = lazy(() => import('../pages/public/TourMapPage').then(m => ({ default: m.TourMapPage })));
+const CalendarDemoPage = lazy(() => import('../pages/public/CalendarDemoPage').then(m => ({ default: m.CalendarDemoPage })));
+const PublicProfilePage = lazy(() => import('../pages/public/PublicProfilePage').then(m => ({ default: m.PublicProfilePage })));
 
-import FavoritesPage from '../pages/user/FavoritesPage';
+const FavoritesPage = lazy(() => import('../pages/user/FavoritesPage'));
 
 
-import GuideDashboardPage from '../pages/guide/GuideDashboardPage';
-import GuideSchedulesPage from '../pages/guide/GuideSchedulesPage';
-import GuideProfilePage from '../pages/guide/GuideProfilePage';
-import GuideListPage from '../pages/public/GuideListPage';
-import GuideDetailPage from '../pages/public/GuideDetailPage';
-import MyToursPage from '../pages/guide/MyToursPage';
-import TourFormPage from '../pages/guide/TourFormPage';
-import TourManagementPage from '../pages/guide/TourManagementPage';
-import TourItineraryPage from '../pages/guide/TourItineraryPage';
-import TourImagesPage from '../pages/guide/TourImagesPage';
-import TourScheduleDetailPage from '../pages/guide/TourScheduleDetailPage';
-import { GuideRequestsPage } from '../pages/guide/GuideRequestsPage';
-import { ActiveTourPage } from '../pages/guide/ActiveTourPage';
-import GuideIncomePage from '../pages/guide/GuideIncomePage';
-import CompanionListPage from '../pages/public/CompanionListPage';
-import CompanionDetailPage from '../pages/public/CompanionDetailPage';
-import MyCompanionPostsPage from '../pages/user/MyCompanionPostsPage';
-import CompanionFormPage from '../pages/user/CompanionFormPage';
-import CompanionManagementPage from '../pages/user/CompanionManagementPage';
-import { AdminDashboardPage } from '../pages/admin/AdminDashboardPage';
-import { AdminStatisticsPage } from '../pages/admin/AdminStatisticsPage';
-import { AdminUserManagementPage } from '../pages/admin/AdminUserManagementPage';
-import { AdminReportManagementPage } from '../pages/admin/AdminReportManagementPage';
-import { AdminVerificationPage } from '../pages/admin/AdminVerificationPage';
-import { AdminTourManagementPage } from '../pages/admin/AdminTourManagementPage';
-import { AdminCompanionManagementPage } from '../pages/admin/AdminCompanionManagementPage';
-import { AdminActivityLogPage } from '../pages/admin/AdminActivityLogPage';
-import { AdminReviewManagementPage } from '../pages/admin/AdminReviewManagementPage';
-import { AdminRecoveryConsolePage } from '../pages/admin/AdminRecoveryConsolePage';
-import AdminSettingsPage from '../pages/admin/AdminSettingsPage';
-import { GuideVerificationPage } from '../pages/guide/GuideVerificationPage';
-import { ContentDashboardPage } from '../pages/content/ContentDashboardPage';
-import { SupportDashboardPage } from '../pages/support/SupportDashboardPage';
-import { SupportDisputePage } from '../pages/support/SupportDisputePage';
-import { SupportBroadcastPage } from '../pages/support/SupportBroadcastPage';
-import { SupportTicketsPage } from '../pages/support/SupportTicketsPage';
+const GuideDashboardPage = lazy(() => import('../pages/guide/GuideDashboardPage'));
+const GuideSchedulesPage = lazy(() => import('../pages/guide/GuideSchedulesPage'));
+const GuideProfilePage = lazy(() => import('../pages/guide/GuideProfilePage'));
+const GuideListPage = lazy(() => import('../pages/public/GuideListPage'));
+const GuideDetailPage = lazy(() => import('../pages/public/GuideDetailPage'));
+const MyToursPage = lazy(() => import('../pages/guide/MyToursPage'));
+const TourFormPage = lazy(() => import('../pages/guide/TourFormPage'));
+const TourManagementPage = lazy(() => import('../pages/guide/TourManagementPage'));
+const TourItineraryPage = lazy(() => import('../pages/guide/TourItineraryPage'));
+const TourImagesPage = lazy(() => import('../pages/guide/TourImagesPage'));
+const TourScheduleDetailPage = lazy(() => import('../pages/guide/TourScheduleDetailPage'));
+const GuideRequestsPage = lazy(() => import('../pages/guide/GuideRequestsPage').then(m => ({ default: m.GuideRequestsPage })));
+const ActiveTourPage = lazy(() => import('../pages/guide/ActiveTourPage').then(m => ({ default: m.ActiveTourPage })));
+const GuideIncomePage = lazy(() => import('../pages/guide/GuideIncomePage'));
+const CompanionListPage = lazy(() => import('../pages/public/CompanionListPage'));
+const CompanionDetailPage = lazy(() => import('../pages/public/CompanionDetailPage'));
+const MyCompanionPostsPage = lazy(() => import('../pages/user/MyCompanionPostsPage'));
+const CompanionFormPage = lazy(() => import('../pages/user/CompanionFormPage'));
+const CompanionManagementPage = lazy(() => import('../pages/user/CompanionManagementPage'));
+const AdminDashboardPage = lazy(() => import('../pages/admin/AdminDashboardPage').then(m => ({ default: m.AdminDashboardPage })));
+const AdminStatisticsPage = lazy(() => import('../pages/admin/AdminStatisticsPage').then(m => ({ default: m.AdminStatisticsPage })));
+const AdminUserManagementPage = lazy(() => import('../pages/admin/AdminUserManagementPage').then(m => ({ default: m.AdminUserManagementPage })));
+const AdminReportManagementPage = lazy(() => import('../pages/admin/AdminReportManagementPage').then(m => ({ default: m.AdminReportManagementPage })));
+const AdminVerificationPage = lazy(() => import('../pages/admin/AdminVerificationPage').then(m => ({ default: m.AdminVerificationPage })));
+const AdminTourManagementPage = lazy(() => import('../pages/admin/AdminTourManagementPage').then(m => ({ default: m.AdminTourManagementPage })));
+const AdminCompanionManagementPage = lazy(() => import('../pages/admin/AdminCompanionManagementPage').then(m => ({ default: m.AdminCompanionManagementPage })));
+const AdminActivityLogPage = lazy(() => import('../pages/admin/AdminActivityLogPage').then(m => ({ default: m.AdminActivityLogPage })));
+const AdminReviewManagementPage = lazy(() => import('../pages/admin/AdminReviewManagementPage').then(m => ({ default: m.AdminReviewManagementPage })));
+const AdminRecoveryConsolePage = lazy(() => import('../pages/admin/AdminRecoveryConsolePage').then(m => ({ default: m.AdminRecoveryConsolePage })));
+const AdminSettingsPage = lazy(() => import('../pages/admin/AdminSettingsPage'));
+const GuideVerificationPage = lazy(() => import('../pages/guide/GuideVerificationPage').then(m => ({ default: m.GuideVerificationPage })));
+const ContentDashboardPage = lazy(() => import('../pages/content/ContentDashboardPage').then(m => ({ default: m.ContentDashboardPage })));
+const SupportDashboardPage = lazy(() => import('../pages/support/SupportDashboardPage').then(m => ({ default: m.SupportDashboardPage })));
+const SupportDisputePage = lazy(() => import('../pages/support/SupportDisputePage').then(m => ({ default: m.SupportDisputePage })));
+const SupportBroadcastPage = lazy(() => import('../pages/support/SupportBroadcastPage').then(m => ({ default: m.SupportBroadcastPage })));
+const SupportTicketsPage = lazy(() => import('../pages/support/SupportTicketsPage').then(m => ({ default: m.SupportTicketsPage })));
 
 // Phase 5-9 new imports
-import { AdminMaintenancePage } from '../pages/admin/AdminMaintenancePage';
-import { AdminAnomalyPage } from '../pages/admin/AdminAnomalyPage';
-import { ContentReportHeatmapPage } from '../pages/admin/ContentReportHeatmapPage';
-import { SupportFaqPage } from '../pages/admin/SupportFaqPage';
-import { SupportAnalyticsPage } from '../pages/admin/SupportAnalyticsPage';
+const AdminMaintenancePage = lazy(() => import('../pages/admin/AdminMaintenancePage').then(m => ({ default: m.AdminMaintenancePage })));
+const AdminAnomalyPage = lazy(() => import('../pages/admin/AdminAnomalyPage').then(m => ({ default: m.AdminAnomalyPage })));
+const ContentReportHeatmapPage = lazy(() => import('../pages/admin/ContentReportHeatmapPage').then(m => ({ default: m.ContentReportHeatmapPage })));
+const SupportFaqPage = lazy(() => import('../pages/admin/SupportFaqPage').then(m => ({ default: m.SupportFaqPage })));
+const SupportAnalyticsPage = lazy(() => import('../pages/admin/SupportAnalyticsPage').then(m => ({ default: m.SupportAnalyticsPage })));
 
-import ChatPage from '../pages/chat/ChatPage';
-import AiChatPage from '../pages/user/AiChatPage';
-import { VnpayReturnPage } from '../pages/user/VnpayReturnPage';
-import TourBookingPage from '../pages/public/TourBookingPage';
-import { BookingManagementPage } from '../pages/user/BookingManagementPage';
+const ChatPage = lazy(() => import('../pages/chat/ChatPage'));
+const AiChatPage = lazy(() => import('../pages/user/AiChatPage'));
+const VnpayReturnPage = lazy(() => import('../pages/user/VnpayReturnPage').then(m => ({ default: m.VnpayReturnPage })));
+const TourBookingPage = lazy(() => import('../pages/public/TourBookingPage'));
+const BookingManagementPage = lazy(() => import('../pages/user/BookingManagementPage').then(m => ({ default: m.BookingManagementPage })));
 import { AuthGuard } from './AuthGuard';
 import { RoleGuard } from './RoleGuard';
 import { MaintenancePage } from '../pages/public/MaintenancePage';
@@ -117,7 +118,7 @@ export const router = createBrowserRouter([
     path: '/user',
     element: (
       <AuthGuard>
-        <UserLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><UserLayout /></Suspense>
       </AuthGuard>
     ),
     children: [
@@ -145,7 +146,7 @@ export const router = createBrowserRouter([
     path: '/guide',
     element: (
       <RoleGuard allowedRoles={['GUIDE', 'SYSTEM_ADMIN']}>
-        <GuideLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><GuideLayout /></Suspense>
       </RoleGuard>
     ),
     children: [
@@ -168,7 +169,7 @@ export const router = createBrowserRouter([
     path: '/admin',
     element: (
       <RoleGuard allowedRoles={['SYSTEM_ADMIN']}>
-        <AdminLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><AdminLayout /></Suspense>
       </RoleGuard>
     ),
     children: [
@@ -186,7 +187,7 @@ export const router = createBrowserRouter([
     path: '/content',
     element: (
       <RoleGuard allowedRoles={['CONTENT_MODERATOR', 'SYSTEM_ADMIN']}>
-        <ContentLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><ContentLayout /></Suspense>
       </RoleGuard>
     ),
     children: [
@@ -203,7 +204,7 @@ export const router = createBrowserRouter([
     path: '/support',
     element: (
       <RoleGuard allowedRoles={['SUPPORT_STAFF', 'SYSTEM_ADMIN']}>
-        <SupportLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><SupportLayout /></Suspense>
       </RoleGuard>
     ),
     children: [
@@ -220,7 +221,7 @@ export const router = createBrowserRouter([
     path: '/accountant',
     element: (
       <RoleGuard allowedRoles={['ACCOUNTANT', 'SYSTEM_ADMIN']}>
-        <FinanceLayout />
+        <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><div className="text-xl font-semibold text-gray-500">Loading...</div></div>}><FinanceLayout /></Suspense>
       </RoleGuard>
     ),
     children: [
