@@ -1,4 +1,8 @@
-import { Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -62,8 +66,12 @@ export class RecommendationsService {
         orderBy: { created_at: 'desc' },
         take: 50,
       });
-      const interactedTourIds = new Set(recentActivities.map(a => a.tour_id));
-      const favoriteTourIds = new Set(recentActivities.filter(a => a.action === 'FAVORITE').map(a => a.tour_id));
+      const interactedTourIds = new Set(recentActivities.map((a) => a.tour_id));
+      const favoriteTourIds = new Set(
+        recentActivities
+          .filter((a) => a.action === 'FAVORITE')
+          .map((a) => a.tour_id),
+      );
 
       // 2. Lấy danh sách tour public (visible & published)
       const tours = await this.prisma.tours.findMany({
@@ -265,7 +273,7 @@ export class RecommendationsService {
 
       // Trả về top 10 gợi ý tốt nhất
       const result = scoredTours.slice(0, 10);
-      
+
       // Lưu cache 1 giờ (3600000 ms)
       await this.cacheManager.set(cacheKey, result, 3600000);
       return result;
