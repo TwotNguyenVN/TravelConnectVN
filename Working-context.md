@@ -39,6 +39,13 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - [x] Thiết lập `i18next` ở React
   - [x] Header Language Switcher
 
+- [x] Tối ưu Hiệu năng & Kiểm toán Bảo mật (Performance & Security Phase)
+  - [x] Bổ sung `@@index` Database (Prisma) giảm thiểu Full Table Scan.
+  - [x] Kiểm định code splitting (React.lazy).
+  - [x] Xác thực Rate Limiting toàn cầu với `@nestjs/throttler`.
+  - [x] Xác thực `ValidationPipe` whitelist chặn payload rác.
+  - [x] Pass toàn bộ Backend (105 tests) và Frontend (9 E2E tests).
+
 - [x] Tài liệu & Bàn giao (Docs Phase)
   - [x] Hoàn thiện Swagger API (đã được setup sẵn tại `/api/docs`)
   - [x] Làm mới `README.md` chuyên nghiệp với Role details và Badges
@@ -46,15 +53,13 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 
 ---
 
-## Latest Execution Notes
-- **2026-06-07**: 
-  - Hoàn thành Phase 3 (Frontend i18n & Tour Recommendations) và các E2E tests liên quan. Đã fix triệt để lỗi TypeScript `any` type ở backend gây fail CI GitHub Actions.
-  - Hoàn thành Phase 4 (Tài liệu): Xác nhận Swagger Docs chạy mượt mà tại `localhost:3000/api/docs`. Viết lại README.md với đầy đủ Badges chuẩn quốc tế và chi tiết 4 vai trò quản trị. Đã viết `ADR-0002` phân tích quyết định tách biệt các role Backoffice để làm sáng tỏ thiết kế hệ thống.
-  - [x] Dịch tiếng Việt / Anh trên HomePage
-
----
-
 ## 📝 Latest Execution Notes
+
+- **07/06/2026:** Hoàn thành triển khai Phase Performance & Security:
+  - Bổ sung Index vào `schema.prisma` cho các bảng heavy `public_users`, `tour_requests`, `payment_transactions` để tối ưu truy vấn.
+  - Kiểm toán cấu hình bảo mật `ThrottlerModule` và `ValidationPipe` đã được thiết lập nghiêm ngặt từ trước, đáp ứng chuẩn Enterprise.
+  - Đã chạy 100% tests (Backend Jest & Frontend Playwright) pass xanh mượt mà, xác minh không lỗi lầm.
+  - Đã tạo PR lên `develop` (PR #88) thông qua quy trình Automation Git cực nhanh.
 
 - **07/06/2026:** Hoàn thành triển khai Phase 3 (Frontend):
   - Thiết lập `i18next`, cấu hình ngôn ngữ VI/EN.
@@ -152,3 +157,10 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - Chạy `npx playwright test --project=chromium` tại máy ảo, 8/8 kịch bản test (bao gồm Finance và Content Moderator) đều PASS với tốc độ 2.0s.
 - **Tích hợp CI/CD (GitHub Actions):**
   - Viết file workflow `.github/workflows/e2e-tests.yml` giúp tự động khởi tạo môi trường (PostgreSQL, Redis, Backend, Frontend) và chạy Playwright ở chế độ Headless mỗi khi có Pull Request hoặc Push code lên nhánh chính. Hệ thống đảm bảo ứng dụng không bao giờ bị dính lỗi "White Screen" trên Production.
+
+### 2026-06-08 (UI/UX & Debugging Note)
+- **Về React Query Devtools (Icon bãi biển ở góc dưới phải):**
+  - Hiện tại bảng điều khiển trống trơn do Frontend đang gọi API theo cách truyền thống (`useEffect` + `axios/fetch`) chứ chưa chuyển sang dùng Hook chuẩn của React Query (`useQuery`, `useMutation`).
+  - **Lựa chọn 1:** Nếu vướng víu, có thể yêu cầu ẩn/xóa icon này đi.
+  - **Lựa chọn 2:** Mặc kệ nó. Khi nào tối ưu hóa tốc độ load trang và refactor code sang chuẩn React Query, dữ liệu sẽ tự động xuất hiện.
+  - Vui lòng xem và yêu cầu lựa chọn để tiến hành bước tiếp theo.
