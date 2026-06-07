@@ -7,14 +7,16 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { Request } from 'express';
+
 @Injectable()
 export class I18nInterceptor implements NestInterceptor {
-  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-    const request = context.switchToHttp().getRequest();
-    const language = request.headers['accept-language'] || 'vi';
+  intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const language = (request.headers['accept-language'] as string) || 'vi';
 
     return next.handle().pipe(
-      map((data) => {
+      map((data: unknown) => {
         if (language.startsWith('en')) {
           return this.translateData(data);
         }
@@ -23,7 +25,7 @@ export class I18nInterceptor implements NestInterceptor {
     );
   }
 
-  private translateData(data: any): any {
+  private translateData(data: unknown): unknown {
     if (data === null || data === undefined) {
       return data;
     }
@@ -33,11 +35,15 @@ export class I18nInterceptor implements NestInterceptor {
     }
 
     if (typeof data === 'object') {
-      const translated = { ...data };
+      const translated = { ...data } as Record<string, unknown>;
       for (const key of Object.keys(translated)) {
         // Nếu có trường _en (ví dụ title_en) và không rỗng
         const enKey = `${key}_en`;
-        if (translated[enKey] !== undefined && translated[enKey] !== null && translated[enKey] !== '') {
+        if (
+          translated[enKey] !== undefined &&
+          translated[enKey] !== null &&
+          translated[enKey] !== ''
+        ) {
           translated[key] = translated[enKey];
         }
 
