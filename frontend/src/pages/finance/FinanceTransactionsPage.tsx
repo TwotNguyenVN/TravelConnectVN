@@ -1089,9 +1089,35 @@ export const FinanceTransactionsPage: React.FC = () => {
               borderTop: '1px solid var(--tc-border)',
               display: 'flex',
               justifyContent: 'flex-end',
+              gap: '12px',
               backgroundColor: 'var(--tc-bg-subtle)',
               borderRadius: '0 0 12px 12px'
             }}>
+              {(selectedTransaction.status === 'paid' || selectedTransaction.status === 'success') && (
+                <button
+                  onClick={async () => {
+                    try {
+                      const { financeApi } = await import('../../api/finance.api');
+                      const res = await financeApi.generateInvoice(selectedTransaction.id);
+                      toast.success('Đã xuất Hóa đơn điện tử thành công! ' + (res.data?.invoice_number || ''));
+                    } catch (error) {
+                      toast.error('Lỗi khi xuất hóa đơn');
+                    }
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  Xuất Hóa đơn điện tử
+                </button>
+              )}
               <button
                 onClick={() => setSelectedTransaction(null)}
                 style={{

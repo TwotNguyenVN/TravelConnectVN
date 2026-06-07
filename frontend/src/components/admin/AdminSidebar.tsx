@@ -42,6 +42,9 @@ export const AdminSidebar: React.FC = () => {
       </div>
 
       <nav style={{ flex: 1, padding: 'var(--tc-spacing-4)', overflowY: 'auto' }}>
+        <div style={{ marginTop: 'var(--tc-spacing-4)', marginBottom: 'var(--tc-spacing-2)' }}>
+          <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--tc-text-tertiary)', letterSpacing: '0.05em', fontWeight: 600 }}>Quản trị viên</span>
+        </div>
         <NavLink to="/admin" end style={navLinkStyle}>Dashboard</NavLink>
         <NavLink to="/admin/users" style={navLinkStyle}>Quản lý người dùng</NavLink>
         <NavLink to="/admin/activity-logs" style={navLinkStyle}>Nhật ký hoạt động</NavLink>
@@ -49,6 +52,14 @@ export const AdminSidebar: React.FC = () => {
         <NavLink to="/admin/recovery" style={navLinkStyle}>🗑️ Khôi phục dữ liệu</NavLink>
         <NavLink to="/admin/maintenance" style={navLinkStyle}>🔧 Chế độ bảo trì</NavLink>
         <NavLink to="/admin/anomaly" style={navLinkStyle}>🚨 Cảnh báo bất thường</NavLink>
+        <NavLink to="/admin/settings" style={navLinkStyle}>⚙️ Cấu hình hệ thống</NavLink>
+
+        <div style={{ marginTop: 'var(--tc-spacing-6)', marginBottom: 'var(--tc-spacing-2)' }}>
+          <span style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--tc-text-tertiary)', letterSpacing: '0.05em', fontWeight: 600 }}>Phân Hệ Khác (Cross-Modules)</span>
+        </div>
+        <NavLink to="/content" style={navLinkStyle}>📝 Quản lý Kiểm duyệt</NavLink>
+        <NavLink to="/support" style={navLinkStyle}>🎧 Quản lý Hỗ trợ</NavLink>
+        <NavLink to="/accountant" style={navLinkStyle}>💰 Quản lý Tài chính</NavLink>
       </nav>
 
       <div style={{ padding: 'var(--tc-spacing-4)', borderTop: '1px solid var(--tc-border)' }}>

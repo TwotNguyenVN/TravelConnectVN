@@ -28,8 +28,8 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ children, allowedRoles }) 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Kiểm tra xem user có ít nhất 1 role khớp với allowedRoles không
-  const hasPermission = roles.some(role => allowedRoles.includes(role));
+  // Kiểm tra xem user có quyền không (SYSTEM_ADMIN luôn có quyền)
+  const hasPermission = roles.includes('SYSTEM_ADMIN') || roles.some(role => allowedRoles.includes(role));
 
   if (!hasPermission) {
     // Nếu không có quyền, hiện trang 403

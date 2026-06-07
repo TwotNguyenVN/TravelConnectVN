@@ -34,7 +34,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { SystemSettingsModule } from './system-settings/system-settings.module';
 import { MaintenanceGuard } from './common/guards/maintenance.guard';
 
-
 import { CompanionReviewsModule } from './companion-reviews/companion-reviews.module';
 import { SosModule } from './sos/sos.module';
 import { TicketsModule } from './tickets/tickets.module';
@@ -45,6 +44,9 @@ import { ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { MetricsModule } from './metrics/metrics.module';
+import { FinanceModule } from './finance/finance.module';
+import { AiModerationModule } from './ai-moderation/ai-moderation.module';
+import { SupportModule } from './support/support.module';
 
 @Module({
   imports: [
@@ -119,6 +121,9 @@ import { MetricsModule } from './metrics/metrics.module';
     MailModule,
 
     MetricsModule,
+    AiModerationModule,
+    FinanceModule,
+    SupportModule,
   ],
   controllers: [AppController],
   providers: [

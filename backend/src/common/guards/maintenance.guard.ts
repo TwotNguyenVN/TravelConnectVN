@@ -5,7 +5,6 @@ import {
   ExecutionContext,
   ServiceUnavailableException,
 } from '@nestjs/common';
-
 import { SystemSettingsService } from '../../system-settings/system-settings.service';
 import { SupabaseService } from '../../supabase/supabase.service';
 import { PrismaService } from '../../prisma/prisma.service';

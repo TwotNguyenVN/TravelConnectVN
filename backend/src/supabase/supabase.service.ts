@@ -123,4 +123,31 @@ export class SupabaseService {
       console.error('Error in deleteAvatar:', err);
     }
   }
+
+  async uploadChatMedia(
+    conversationId: string,
+    file: Express.Multer.File,
+  ): Promise<string> {
+    const fileExt = file.originalname.split('.').pop() || 'bin';
+    const fileName = `${conversationId}-${Date.now()}.${fileExt}`;
+    // Lữu trữ vào bucket 'chat-media'
+    const filePath = `public/${fileName}`;
+
+    const { error } = await this.getAdminClient()
+      .storage.from('chat-media')
+      .upload(filePath, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true,
+      });
+
+    if (error) {
+      this.logger.error(`Error uploading chat media: ${error.message}`);
+      throw error;
+    }
+
+    const { data } = this.client.storage
+      .from('chat-media')
+      .getPublicUrl(filePath);
+    return data.publicUrl;
+  }
 }

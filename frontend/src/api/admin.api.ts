@@ -16,8 +16,8 @@ export const adminApi = {
   createStaff: (data: Record<string, unknown>) => api.post('/admin/staff', data),
 
   // Reports
-  getReports: (params: Record<string, unknown>) => api.get('/admin/reports', { params }),
-  processReport: (id: string, data: Record<string, unknown>) => api.patch(`/admin/reports/${id}`, data),
+  getReports: (params: Record<string, unknown>) => api.get('/reports', { params }),
+  processReport: (id: string, data: { action: 'dismiss' | 'hide' | 'warn'; resolutionNote: string }) => api.post(`/reports/${id}/resolve`, data),
 
   // Moderation
   moderateTour: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tours/${id}/moderation`, data),
@@ -40,17 +40,17 @@ export const adminApi = {
 
 
   // SOS Alerts
-  getSosAlerts: () => api.get('/admin/sos'),
-  resolveSosAlert: (id: string, note: string) => api.patch(`/admin/sos/${id}/resolve`, { note }),
+  getSosAlerts: () => api.get('/support/sos'),
+  resolveSosAlert: (id: string, note: string) => api.patch(`/support/sos/${id}/resolve`, { note }),
 
   // Support Tickets
-  getTickets: (params?: Record<string, unknown>) => api.get('/admin/tickets', { params }),
-  updateTicket: (id: string, data: Record<string, unknown>) => api.patch(`/admin/tickets/${id}`, data),
+  getTickets: (params?: Record<string, unknown>) => api.get('/support/tickets', { params }),
+  updateTicket: (id: string, data: Record<string, unknown>) => api.patch(`/support/tickets/${id}`, data),
 
   // Tour Disputes
-  getDisputes: () => api.get('/admin/disputes'),
-  getDisputeChatHistory: (disputeId: string) => api.get(`/admin/disputes/${disputeId}/chat-history`),
-  resolveDispute: (id: string, data: Record<string, unknown>) => api.patch(`/admin/disputes/${id}/resolve`, data),
+  getDisputes: () => api.get('/support/disputes'),
+  getDisputeChatHistory: (disputeId: string) => api.get(`/support/disputes/${disputeId}/chat-history`),
+  resolveDispute: (id: string, data: Record<string, unknown>) => api.post(`/support/disputes/${id}/resolve`, data),
 
   // Guide Settlements
   getGuideSettlements: () => api.get('/admin/guides/settlements'),
@@ -61,6 +61,8 @@ export const adminApi = {
   getTourRequestDetail: (id: string) => api.get(`/admin/tour-requests/${id}`),
 
   // Support Staff — Notifications Broadcast
+  sendSupportBroadcastNotification: (data: { title: string; content: string; targetGroup?: string }) =>
+    api.post('/support/notifications/broadcast', data),
   sendBroadcastNotification: (data: { title: string; message: string; targetRole?: string; targetUserId?: string }) =>
     api.post('/admin/notifications/broadcast', data),
   // System Settings / Maintenance
@@ -70,6 +72,9 @@ export const adminApi = {
 
   // Content Moderation AI Scanner
   analyzeContent: (text: string) => api.post('/admin/moderation/analyze', { text }),
+
+  // Agent Co-Pilot (Support)
+  getCopilotSuggestion: (text: string) => api.post('/support/copilot/suggest', { text }),
 
   // Soft Delete Recovery Console
   getDeletedItems: () => api.get('/admin/recovery/deleted'),
@@ -83,16 +88,16 @@ export const adminApi = {
   getAnomalyAlerts: () => api.get('/admin/anomaly/alerts'),
 
   // Phase 7: Report Heatmap
-  getReportHeatmapData: () => api.get('/admin/reports/heatmap'),
+  getReportHeatmapData: () => api.get('/reports/heatmap'),
 
   // Phase 8: FAQ & Quick Responses
-  getFaqItems: () => api.get('/admin/faq'),
-  createFaqItem: (data: { question: string; answer: string; category?: string }) => api.post('/admin/faq', data),
-  updateFaqItem: (id: string, data: { question?: string; answer?: string; category?: string }) => api.patch(`/admin/faq/${id}`, data),
-  deleteFaqItem: (id: string) => api.delete(`/admin/faq/${id}`),
+  getFaqItems: () => api.get('/support/faq'),
+  createFaqItem: (data: { question: string; answer: string; category?: string }) => api.post('/support/faq', data),
+  updateFaqItem: (id: string, data: { question?: string; answer?: string; category?: string }) => api.patch(`/support/faq/${id}`, data),
+  deleteFaqItem: (id: string) => api.delete(`/support/faq/${id}`),
 
   // Phase 9: CSAT & SLA Analytics
-  getCsatAnalytics: () => api.get('/admin/analytics/csat'),
+  getCsatAnalytics: () => api.get('/support/analytics/csat'),
 
   // Phase 10: Smart Reconciliation
   reconcileTransactions: (formData: FormData) => api.post('/admin/finance/reconcile', formData, {
@@ -101,4 +106,14 @@ export const adminApi = {
 
   // Phase 11: Financial Export
   exportFinancialReport: (params?: { startDate?: string; endDate?: string }) => api.get('/admin/finance/export', { params }),
+
+  // Phase 1.1 Core: Global Settings & System Health
+  getSystemHealth: () => api.get('/admin/system/health'),
+  getSetting: (key: string) => api.get(`/admin/settings/${key}`),
+
+  getCategories: (type: string) => api.get(`/admin/categories/${type}`),
+  createCategory: (type: string, data: { name: string; description?: string }) => api.post(`/admin/categories/${type}`, data),
+  updateCategory: (type: string, id: string, data: { name: string; description?: string }) => api.patch(`/admin/categories/${type}/${id}`, data),
+  deleteCategory: (type: string, id: string) => api.delete(`/admin/categories/${type}/${id}`),
 };
+

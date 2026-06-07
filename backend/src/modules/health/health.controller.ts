@@ -1,3 +1,4 @@
+import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheckService,
@@ -10,6 +11,7 @@ import { RedisHealthIndicator } from './redis.health';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
+@ApiTags('Health')
 @Controller('api/health')
 export class HealthController {
   constructor(

@@ -95,7 +95,7 @@ model identities {
   last_sign_in_at DateTime?  @db.Timestamptz(6)
   created_at      DateTime?  @db.Timestamptz(6)
   updated_at      DateTime?  @db.Timestamptz(6)
-  email           String?    @default(dbgenerated("lower((identity_data ->> 'email'::text))"))
+  email           String?
   id              String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   users           auth_users @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
@@ -435,7 +435,7 @@ model auth_users {
   phone_change                String?                @default("")
   phone_change_token          String?                @default("") @db.VarChar(255)
   phone_change_sent_at        DateTime?              @db.Timestamptz(6)
-  confirmed_at                DateTime?              @default(dbgenerated("LEAST(email_confirmed_at, phone_confirmed_at)")) @db.Timestamptz(6)
+  confirmed_at                DateTime?              @db.Timestamptz(6)
   email_change_token_current  String?                @unique(map: "email_change_token_current_idx", where: raw("((email_change_token_current)::text !~ '^[0-9 ]*$'::text)")) @default("") @db.VarChar(255)
   email_change_confirm_status Int?                   @default(0) @db.SmallInt
   banned_until                DateTime?              @db.Timestamptz(6)
@@ -928,6 +928,7 @@ model payment_transactions {
   guide_settled             Boolean       @default(false)
   tour_requests             tour_requests @relation(fields: [tour_request_id], references: [id], onUpdate: NoAction)
   users                     public_users  @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+  invoices                  invoices?
 
   @@index([tour_request_id, status, created_at(sort: Desc)], map: "idx_payment_transactions_request_status")
   @@index([user_id, status, created_at(sort: Desc)], map: "idx_payment_transactions_user_status")
@@ -1608,6 +1609,20 @@ model faq_items {
   updated_at DateTime @default(now()) @db.Timestamptz(6)
 
   creator    public_users? @relation("faq_creator", fields: [created_by], references: [id], onUpdate: NoAction)
+
+  @@schema("public")
+}
+
+model invoices {
+  id                    String                @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  payment_transaction_id String               @unique @db.Uuid
+  invoice_number        String                @unique
+  tax_code              String?
+  total_amount          Decimal               @db.Decimal(12, 2)
+  pdf_url               String?
+  status                String                @default("issued")
+  issued_at             DateTime              @default(now()) @db.Timestamptz(6)
+  payment_transactions  payment_transactions  @relation(fields: [payment_transaction_id], references: [id], onUpdate: NoAction)
 
   @@schema("public")
 }
