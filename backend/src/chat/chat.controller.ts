@@ -68,10 +68,13 @@ export class ChatController {
       new ParseFilePipe({
         validators: [
           new MaxFileSizeValidator({ maxSize: 10 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|webp|mp3|wav|webm|m4a)' }),
+          new FileTypeValidator({
+            fileType: '.(png|jpeg|jpg|webp|mp3|wav|webm|m4a)',
+          }),
         ],
       }),
-    ) file: Express.Multer.File,
+    )
+    file: Express.Multer.File,
     @Body('conversationId') conversationId: string,
   ) {
     if (!file) {

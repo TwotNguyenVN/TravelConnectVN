@@ -44,10 +44,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   // Standardization: Global Transform Interceptor & I18n
-  app.useGlobalInterceptors(
-    new TransformInterceptor(),
-    new I18nInterceptor()
-  );
+  app.useGlobalInterceptors(new TransformInterceptor(), new I18nInterceptor());
 
   // Standardization: Global Validation Pipe
   app.useGlobalPipes(
