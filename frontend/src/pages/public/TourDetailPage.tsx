@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { tourService } from '../../services/tourService';
 import { getTourAccommodations } from '../../services/accommodationService';
 import { trackActivity } from '../../services/recommendationService';
@@ -18,6 +18,7 @@ const TourCalendar = lazy(() => import('../../components/tour/TourCalendar/TourC
 export const TourDetailPage: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -110,8 +111,8 @@ export const TourDetailPage: React.FC = () => {
 
   function handleBooking() {
     if (!user) {
-      toast.info("Vui lòng đăng nhập để đặt tour");
-      navigate('/login');
+      toast.error("Vui lòng đăng nhập để gửi yêu cầu tham gia tour.");
+      navigate('/login', { state: { from: location.pathname } });
       return;
     }
 

@@ -566,7 +566,14 @@ const CompanionDetailPage: React.FC<CompanionDetailPageProps> = ({ isEmbedded = 
                 <div className="guest-actions">
                   <h3>Tham gia chuyến đi?</h3>
                   <p>Gửi yêu cầu để chủ bài đăng có thể duyệt bạn vào nhóm.</p>
-                  <Button variant="primary" fullWidth onClick={() => setShowRequestModal(true)} disabled={post.business_status !== 'open' || isPostExpired(post.start_date)}>
+                  <Button variant="primary" fullWidth onClick={() => {
+                    if (!user) {
+                      toast.error('Vui lòng đăng nhập để gửi yêu cầu tham gia.');
+                      navigate('/login', { state: { from: `/companions/${id}` } });
+                      return;
+                    }
+                    setShowRequestModal(true);
+                  }} disabled={post.business_status !== 'open' || isPostExpired(post.start_date)}>
                      {isPostExpired(post.start_date) ? 'Đã kết thúc' : post.business_status === 'open' ? 'Gửi yêu cầu tham gia' : 'Đã đủ người'}
                   </Button>
                 </div>

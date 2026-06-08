@@ -50,6 +50,11 @@ export const GuideRequestsPage: React.FC = () => {
   async function handleProcessSubmit() {
     if (!selectedRequest || !processType) return;
 
+    if (processType === 'reject') {
+      const isConfirmed = window.confirm('Bạn có chắc chắn muốn từ chối yêu cầu này? Thao tác này không thể hoàn tác.');
+      if (!isConfirmed) return;
+    }
+
     try {
       setIsProcessing(true);
       if (processType === 'approve') {

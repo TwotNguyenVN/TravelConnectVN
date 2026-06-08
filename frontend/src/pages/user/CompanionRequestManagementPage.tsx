@@ -48,6 +48,11 @@ const CompanionRequestManagementPage: React.FC = () => {
   async function handleProcess() {
     if (!selectedRequest) return;
     
+    if (processType === 'reject') {
+      const isConfirmed = window.confirm('Bạn có chắc chắn muốn từ chối yêu cầu này? Thao tác không thể hoàn tác.');
+      if (!isConfirmed) return;
+    }
+
     setSubmitting(true);
     try {
       const response = processType === 'approve' 
