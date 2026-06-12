@@ -11,12 +11,19 @@ export class RedisIoAdapter extends IoAdapter {
   async connectToRedis(): Promise<void> {
     const redisHost = process.env.REDIS_HOST || 'localhost';
     const redisPort = process.env.REDIS_PORT || 6379;
+    const redisPassword = process.env.REDIS_PASSWORD;
+    const isUpstash = redisHost.includes('upstash');
 
     try {
       this.logger.log(`Connecting to Redis at ${redisHost}:${redisPort}`);
 
       const pubClient = createClient({
-        url: `redis://${redisHost}:${redisPort}`,
+        socket: {
+          host: redisHost,
+          port: Number(redisPort),
+          tls: isUpstash ? true : undefined,
+        },
+        password: redisPassword,
       });
       const subClient = pubClient.duplicate();
 
