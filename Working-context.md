@@ -172,4 +172,11 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - `TourBookingPage`: Thiết lập Toast success `"Đã gửi yêu cầu tham gia tour"` ngay sau khi tạo request thành công trước khi forward sang VNPAY.
   - `GuideRequestsPage` / `CompanionManagementPage`: Thêm lớp bảo mật UX thông qua `window.confirm` cho các hành động mang tính phá hủy/không thể hoàn tác ("Từ chối" yêu cầu).
   - `ReportModal` / `AdminReportManagementPage`: Thêm loading overlay trên Report Form và dùng `window.prompt` bắt buộc nhập lý do cho Admin khi giải quyết khiếu nại.
-- **Regression Test Validation:** Toàn bộ các luồng chức năng MVP (Đăng ký, Đăng nhập, Duyệt hồ sơ, Đặt Tour, Thanh toán, Tìm bạn đồng hành, Khiếu nại) đều đã được kiểm tra (Verified) và hoạt động mượt mà E2E thông qua backend integration script (`test_regression.ts`). Không có lỗi phát sinh sau quá trình hardening.
+- **Regression Test Validation:** Toàn bộ các luồng chức năng MVP (Đăng ký, Đăng nhập, Duyệt hồ sơ, Đặt Tour, Thanh toán, Tìm bạn đồng hành, Khiếu nại) đều đã được kiểm tra (Verified) và hoạt động mượt mà E2E thông qua backend integration script (`test_regression.ts`). Không có lỗi phát sinh sau quá trình hardening. 
+ # # #   2 0 2 6 - 0 6 - 1 2   ( B a c k e n d   D e b u g   &   H o t f i x )  
+ -   * * S �a   l �i   B a c k e n d   b �  C r a s h   d o   R e d i s   ( E A D D R I N U S E   &   S o c k e t C l o s e d U n e x p e c t e d l y E r r o r ) : * *  
+     -   T � m   v �   k i l l   t i �n   t r � n h   Z o m b i e   a n g   c h i �m   g i �  c �n g   3 0 0 0 .  
+     -   C �u   h � n h   l �i   t o � n   b �  U p s t a s h   R e d i s   c o n n e c t i o n   t r o n g   \  p p . m o d u l e . t s \ ,   \  e d i s - i o . a d a p t e r . t s \ ,   \ s o c k e t / r e d i s . a d a p t e r . t s \   �  s �  d �n g   U R L   s c h e m e   \  e d i s s : / / \   c �   T L S   v �   p a s s w o r d .  
+     -   G i �i   q u y �t   m e r g e   c o n f l i c t s   v �i   n h � n h   \ d e v e l o p \   v �   t �o   P R   \ # 1 0 0 \   t h � n h   c � n g   q u a   G i t H u b   C L I .  
+     -   S �a   l �i   C I :   F i x   P r i s m a   S c h e m a   \ 	 o u r _ i m a g e s \   ( c h u y �n   t �  1 - t o - 1   t h � n h   1 - t o - m a n y )   v �   c �p   n h �t   T y p e S c r i p t   b i n d i n g s   t r o n g   a p p . m o d u l e ,   r e c o m m e n d a t i o n s . s e r v i c e ,   t o u r - r e q u e s t s . s e r v i c e .  
+ 

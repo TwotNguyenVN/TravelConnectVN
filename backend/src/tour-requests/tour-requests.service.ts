@@ -207,7 +207,7 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
-          tourImage: req.tours.tour_images?.image_url,
+          tourImage: req.tours.tour_images?.[0]?.image_url,
           startDate: req.tour_schedules?.start_date,
           guideId: req.tours.guide_profiles.id, // Using profile ID for navigation
           guideUserId: req.tours.guide_profiles.user_id,
@@ -319,7 +319,7 @@ export class TourRequestsService {
           id: req.id,
           tourId: req.tour_id,
           tourTitle: req.tours.title,
-          tourImage: req.tours.tour_images?.image_url,
+          tourImage: req.tours.tour_images?.[0]?.image_url,
           startDate: req.tour_schedules?.start_date,
           guideId: req.tours.guide_profiles.id,
           guideName: req.tours.guide_profiles.users.full_name,

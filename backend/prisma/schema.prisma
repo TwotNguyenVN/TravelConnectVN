@@ -1050,7 +1050,7 @@ model tour_categories {
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model tour_images {
   id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  tour_id    String   @unique(map: "uq_tour_cover_image", where: raw("(is_cover = true)")) @db.Uuid
+  tour_id    String   @db.Uuid
   image_url  String
   caption    String?
   sort_order Int      @default(0)
@@ -1184,7 +1184,7 @@ model tours {
   sos_alerts               sos_alerts[]
   tour_accommodations      tour_accommodations[]
   tour_destinations        tour_destinations[]
-  tour_images              tour_images?
+  tour_images              tour_images[]
   tour_locations           tour_locations[]
   tour_requests            tour_requests[]
   tour_reviews             tour_reviews[]

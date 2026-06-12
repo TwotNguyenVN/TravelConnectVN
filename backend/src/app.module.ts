@@ -57,8 +57,8 @@ import { SupportModule } from './support/support.module';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const host = configService.get('REDIS_HOST', 'localhost');
-        const password = configService.get('REDIS_PASSWORD');
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const password = configService.get<string>('REDIS_PASSWORD');
         return {
           connection: {
             host,
@@ -74,14 +74,14 @@ import { SupportModule } from './support/support.module';
       isGlobal: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const host = configService.get('REDIS_HOST', 'localhost');
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
         const port = configService.get<number>('REDIS_PORT', 6379);
-        const password = configService.get('REDIS_PASSWORD');
+        const password = configService.get<string>('REDIS_PASSWORD');
         const isUpstash = host.includes('upstash');
-        const url = isUpstash 
+        const url = isUpstash
           ? `rediss://default:${password}@${host}:${port}`
           : `redis://${host}:${port}`;
-          
+
         const store = await redisStore({
           url,
           ttl: 60 * 1000, // 1 minute default TTL

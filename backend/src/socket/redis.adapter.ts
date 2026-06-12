@@ -16,7 +16,7 @@ export class RedisIoAdapter extends IoAdapter {
     const redisPort = process.env.REDIS_PORT || 6379;
     const redisPassword = process.env.REDIS_PASSWORD;
     const isUpstash = redisHost.includes('upstash');
-    const url = isUpstash 
+    const url = isUpstash
       ? `rediss://default:${redisPassword}@${redisHost}:${redisPort}`
       : `redis://${redisHost}:${redisPort}`;
 
