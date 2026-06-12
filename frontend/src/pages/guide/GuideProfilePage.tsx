@@ -384,7 +384,10 @@ const GuideProfilePage: React.FC = () => {
     try {
       setSaving(true);
       
-      const personalResponse = await userService.updateProfile(personalData);
+      const personalResponse = await userService.updateProfile({
+        ...personalData,
+        avatarUrl: profile.avatarUrl || personalData.avatarUrl
+      });
       if (!personalResponse.success) {
          throw new Error(personalResponse.message || "Lỗi khi cập nhật thông tin cá nhân");
       }
