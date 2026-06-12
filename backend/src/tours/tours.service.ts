@@ -364,7 +364,8 @@ export class ToursService implements OnApplicationBootstrap {
         if (!nextAvailableSchedule) {
           if (
             t.tour_schedules.length === 0 &&
-            (t.start_date === null || t.start_date >= new Date())
+            t.start_date !== null &&
+            t.start_date >= new Date()
           ) {
             return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
@@ -630,6 +631,7 @@ export class ToursService implements OnApplicationBootstrap {
   }
 
   async getFeaturedTours() {
+    console.log("[DEBUG] getFeaturedTours is called!");
     // 1. Lấy tất cả tour đang hoạt động để lọc theo logic 'còn chỗ'
     const tours = await this.prisma.tours.findMany({
       where: {
@@ -697,7 +699,8 @@ export class ToursService implements OnApplicationBootstrap {
           // thì kiểm tra ngày start_date chính của tour (cho phép fallback)
           if (
             t.tour_schedules.length === 0 &&
-            (t.start_date === null || t.start_date >= new Date())
+            t.start_date !== null &&
+            t.start_date >= new Date()
           ) {
             return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
