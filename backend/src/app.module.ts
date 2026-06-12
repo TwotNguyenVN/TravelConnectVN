@@ -60,6 +60,8 @@ import { SupportModule } from './support/support.module';
         connection: {
           host: configService.get('REDIS_HOST', 'localhost'),
           port: configService.get('REDIS_PORT', 6379),
+          password: configService.get<string>('REDIS_PASSWORD'),
+          tls: configService.get<string>('REDIS_HOST', '').includes('upstash') ? {} : undefined,
         },
       }),
       inject: [ConfigService],
@@ -72,7 +74,9 @@ import { SupportModule } from './support/support.module';
           socket: {
             host: configService.get('REDIS_HOST', 'localhost'),
             port: configService.get<number>('REDIS_PORT', 6379),
+            tls: configService.get<string>('REDIS_HOST', '').includes('upstash') ? true : undefined,
           },
+          password: configService.get<string>('REDIS_PASSWORD'),
           ttl: 60 * 1000, // 1 minute default TTL
         });
         return {
