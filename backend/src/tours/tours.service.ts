@@ -956,14 +956,9 @@ export class ToursService implements OnApplicationBootstrap {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
-    // AI Auto-Moderation check
-    const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
-    const aiResult = await this.aiModeration.analyzeContent(
-      contentToAnalyze,
-      'TOUR_DESCRIPTION',
-    );
-    const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
-    const businessStatus = aiResult.isFlagged ? 'draft' : 'published';
+    // Xác định trạng thái dựa trên input
+    let visibilityStatus = data.visibilityStatus || 'visible';
+    let businessStatus = data.businessStatus || 'draft';
 
     // Validate max days/nights
     if (
@@ -1048,20 +1043,6 @@ export class ToursService implements OnApplicationBootstrap {
         },
       });
 
-      // Nếu AI Flagged, tự động tạo Report
-      if (aiResult.isFlagged) {
-        await tx.reports.create({
-          data: {
-            reporter_user_id: userId, // Tạm dùng userId của chính người tạo vì AI báo cáo
-            target_type: 'TOUR',
-            tour_id: tour.id,
-            guide_profile_id: guideProfile.id,
-            reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
-            description: aiResult.reason,
-            status: 'open',
-          },
-        });
-      }
 
       // 2.2 Tạo lịch trình (Itinerary)
       if (data.itinerary && Array.isArray(data.itinerary)) {
@@ -1176,6 +1157,39 @@ export class ToursService implements OnApplicationBootstrap {
       return tour;
     });
     await this.invalidateCache();
+
+    // Run AI Auto-Moderation check in the background to avoid blocking the HTTP response
+    const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
+    this.aiModeration.analyzeContent(contentToAnalyze, 'TOUR_DESCRIPTION')
+      .then(async (aiResult) => {
+        if (aiResult.isFlagged) {
+          // Update tour status and create report asynchronously
+          await this.prisma.$transaction(async (tx) => {
+            await tx.tours.update({
+              where: { id: result.id },
+              data: {
+                business_status: 'draft',
+                visibility_status: 'hidden',
+              },
+            });
+            await tx.reports.create({
+              data: {
+                reporter_user_id: userId,
+                target_type: 'TOUR',
+                tour_id: result.id,
+                guide_profile_id: guideProfile.id,
+                reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
+                description: aiResult.reason,
+                status: 'open',
+              },
+            });
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Background AI Moderation failed:', err);
+      });
+
     return result;
   }
 
