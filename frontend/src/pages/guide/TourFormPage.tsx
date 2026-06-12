@@ -87,6 +87,9 @@ const TourFormPage: React.FC = () => {
   const isEditMode = !!id;
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const provinceRef = useRef<HTMLDivElement>(null);
+  const endProvinceRef = useRef<HTMLDivElement>(null);
+  const otherProvinceRef = useRef<HTMLDivElement>(null);
 
   // System States
   const [categories, setCategories] = useState<Category[]>([]);
@@ -155,7 +158,155 @@ const TourFormPage: React.FC = () => {
   const isPublished = formData.businessStatus === 'published' || formData.businessStatus === 'closed' || formData.businessStatus === 'cancelled';
   const wasPublished = useRef(false);
 
+<<<<<<< Updated upstream
 async function fetchInitialData() {
+=======
+  useEffect(() => {
+    if (formData.businessStatus === 'published' && !wasPublished.current) {
+      wasPublished.current = true;
+    }
+  }, [formData.businessStatus]);
+
+  const handleStatusUpdatePage = async (newStatus: string, successMsg: string) => {
+    try {
+      setSubmitting(true);
+      const response = await tourService.updateTour(id!, { businessStatus: newStatus });
+      if (response.success || response.id) {
+        toast.success(successMsg);
+        setFormData({ ...formData, businessStatus: newStatus });
+        if (newStatus === 'cancelled') {
+          navigate('/guide/tours');
+        }
+      }
+    } catch (error: any) {
+      console.error('Update status error:', error);
+      toast.error('Không thể cập nhật trạng thái tour');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  const [participantCount, setParticipantCount] = useState(0);
+
+  const getStatusLabel = (business: string, visibility: string) => {
+    if (business === "draft") return { label: "Bản nháp", color: "var(--tc-text-secondary)", icon: "📝" };
+    if (business === "cancelled") return { label: "Đã xóa", color: "#ef4444", icon: "🗑️" };
+    
+    if (visibility === "hidden") return { label: "Đang ẩn", color: "#f59e0b", icon: "👁️‍🗨️" };
+    
+    if (business === "published") return { label: "Đang mở", color: "#22c55e", icon: "🚀" };
+    if (business === "closed") return { label: "Đã đóng ĐK", color: "#6366f1", icon: "🔒" };
+    if (business === "completed") return { label: "Hoàn tất", color: "#10b981", icon: "🏆" };
+    return { label: "Không rõ", color: "var(--tc-text-secondary)", icon: "❓" };
+  };
+
+  const statusInfo = getStatusLabel(formData.businessStatus, formData.visibilityStatus);
+
+  const [provinceSearch, setProvinceSearch] = useState("");
+  const [showProvinceSuggestions, setShowProvinceSuggestions] = useState(false);
+  const filteredProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(provinceSearch.toLowerCase()),
+  );
+
+  const selectProvince = (p: string) => {
+    setFormData((prev) => ({ ...prev, province: p }));
+    setProvinceSearch(p);
+    setShowProvinceSuggestions(false);
+  };
+
+  const [endProvinceSearch, setEndProvinceSearch] = useState("");
+  const [showEndProvinceSuggestions, setShowEndProvinceSuggestions] = useState(false);
+  const filteredEndProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(endProvinceSearch.toLowerCase()),
+  );
+
+  const selectEndProvince = (p: string) => {
+    setEndProvinceSearch(p);
+    setShowEndProvinceSuggestions(false);
+  };
+
+  const [otherProvinceSearch, setOtherProvinceSearch] = useState("");
+  const [showOtherSuggestions, setShowOtherSuggestions] = useState(false);
+  const filteredOtherProvinces = provinces.filter((p) =>
+    p.toLowerCase().includes(otherProvinceSearch.toLowerCase()) && 
+    p !== formData.province && 
+    p !== endProvinceSearch &&
+    !formData.otherProvinces?.includes(p)
+  );
+
+  const addOtherProvince = (p: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      otherProvinces: [...(prev.otherProvinces || []), p]
+    }));
+    setOtherProvinceSearch("");
+    setShowOtherSuggestions(false);
+  };
+
+  const removeOtherProvince = (p: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      otherProvinces: prev.otherProvinces?.filter(item => item !== p)
+    }));
+  };
+
+  // Helper to reconstruct otherProvinces list for API calls
+  const getReconstructedOtherProvinces = () => {
+    const start = formData.province;
+    const end = endProvinceSearch || start;
+    if (!start) return [];
+    if (start === end) {
+      return (formData.otherProvinces || []).filter(p => p !== start);
+    }
+    const filteredIntermediate = (formData.otherProvinces || []).filter(p => p !== start && p !== end);
+    return [...filteredIntermediate, end];
+  };
+
+  // Auto-select City Tour if start and end provinces are the same and no other provinces exist
+  useEffect(() => {
+    const start = formData.province;
+    const end = endProvinceSearch || start;
+    const hasOtherProvinces = formData.otherProvinces && formData.otherProvinces.length > 0;
+
+    if (start && start === end && !hasOtherProvinces && categories.length > 0) {
+      const cityTourCategory = categories.find(c => 
+        c.name.toLowerCase().includes('city tour') || 
+        c.name.toLowerCase().includes('thành phố')
+      );
+      if (cityTourCategory) {
+        setFormData(prev => ({ ...prev, categoryId: cityTourCategory.id.toString() }));
+      }
+    }
+  }, [formData.province, endProvinceSearch, formData.otherProvinces, categories]);
+
+  // Click outside to dismiss suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (provinceRef.current && !provinceRef.current.contains(event.target as Node)) {
+        setShowProvinceSuggestions(false);
+      }
+      if (endProvinceRef.current && !endProvinceRef.current.contains(event.target as Node)) {
+        setShowEndProvinceSuggestions(false);
+      }
+      if (otherProvinceRef.current && !otherProvinceRef.current.contains(event.target as Node)) {
+        setShowOtherSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    fetchInitialData();
+    if (isEditMode) {
+      fetchTourDetail();
+    }
+  }, [id]);
+
+  const fetchInitialData = async () => {
+>>>>>>> Stashed changes
     try {
       const [catRes, accRes, provRes] = await Promise.all([
         tourService.getCategories(),
@@ -186,8 +337,18 @@ async function fetchTourDetail() {
       const response = await tourService.getTourDetailForGuide(id!);
       const tour = response.data || response;
       const province = tour.province || "";
+      const otherProvincesList = tour.other_provinces || tour.otherProvinces || [];
+
+      let endProv = province;
+      let intermediateProvs = [...otherProvincesList];
+
+      if (otherProvincesList.length > 0) {
+        endProv = otherProvincesList[otherProvincesList.length - 1];
+        intermediateProvs = otherProvincesList.slice(0, -1);
+      }
 
       setProvinceSearch(province);
+      setEndProvinceSearch(endProv);
 
       setFormData((prev) => ({
         ...prev,
@@ -196,7 +357,7 @@ async function fetchTourDetail() {
         description: tour.description || "",
         participantRequirements: tour.participant_requirements || tour.participantRequirements || "",
         province: province,
-        otherProvinces: tour.other_provinces || tour.otherProvinces || [],
+        otherProvinces: intermediateProvs,
         district: tour.district || "",
         startDate: (tour.start_date || tour.startDate)
           ? new Date(tour.start_date || tour.startDate).toISOString().split("T")[0]
@@ -379,7 +540,7 @@ async function fetchTourDetail() {
 
   function isStepComplete(step: number) {
     if (step === 1) {
-      return !!(formData.title && formData.categoryId);
+      return !!(formData.title && formData.categoryId && formData.province && endProvinceSearch);
     }
     if (step === 2) {
       return !!(
@@ -404,8 +565,8 @@ async function fetchTourDetail() {
   };
   function validateStep(step: number) {
     if (step === 1) {
-      if (!formData.title || !formData.categoryId || !formData.province) {
-        toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Tỉnh thành)");
+      if (!formData.title || !formData.categoryId || !formData.province || !endProvinceSearch) {
+        toast.warning("Vui lòng điền đầy đủ các trường bắt buộc (Tiêu đề, Danh mục, Tỉnh xuất phát, Tỉnh đến)");
         return false;
       }
       if (formData.price === undefined || formData.price === null || formData.price <= 0) {
@@ -679,7 +840,11 @@ async function fetchTourDetail() {
 
 
       setSubmitting(true);
-      const draftData = { ...formData, businessStatus: 'draft' };
+      const draftData = { 
+        ...formData, 
+        otherProvinces: getReconstructedOtherProvinces(),
+        businessStatus: 'draft' 
+      };
       
       if (isEditMode) {
         await tourService.updateTour(id!, draftData);
@@ -700,7 +865,10 @@ async function fetchTourDetail() {
   async function executeSubmit(statusOverride?: string) {
     try {
       setSubmitting(true);
-      const finalData = { ...formData };
+      const finalData = { 
+        ...formData,
+        otherProvinces: getReconstructedOtherProvinces()
+      };
       if (statusOverride) {
         finalData.businessStatus = statusOverride;
         if (statusOverride === 'published') {
@@ -827,12 +995,14 @@ async function fetchTourDetail() {
                 </div>
 
                 <div className="tc-tour-form__grid">
+                  {/* Tỉnh xuất phát */}
                   <div
+                    ref={provinceRef}
                     className="tc-form-group"
                     style={{ position: "relative" }}
                   >
                     <label>
-                      Tỉnh / Thành phố chính <span>*</span>
+                      Tỉnh xuất phát <span>*</span>
                     </label>
                     <input
                       type="text"
@@ -843,7 +1013,7 @@ async function fetchTourDetail() {
                         setShowProvinceSuggestions(true);
                       }}
                       onFocus={() => setShowProvinceSuggestions(true)}
-                      placeholder="Chọn Tỉnh / Thành chính"
+                      placeholder="Chọn Tỉnh xuất phát"
                       required
                       disabled={isPublished}
                     />
@@ -885,24 +1055,29 @@ async function fetchTourDetail() {
                     )}
                   </div>
 
+                  {/* Tỉnh đến */}
                   <div
+                    ref={endProvinceRef}
                     className="tc-form-group"
                     style={{ position: "relative" }}
                   >
-                    <label>Các tỉnh khác</label>
+                    <label>
+                      Tỉnh đến <span>*</span>
+                    </label>
                     <input
                       type="text"
                       className="tc-form-input"
-                      value={otherProvinceSearch}
+                      value={endProvinceSearch}
                       onChange={(e) => {
-                        setOtherProvinceSearch(e.target.value);
-                        setShowOtherSuggestions(true);
+                        setEndProvinceSearch(e.target.value);
+                        setShowEndProvinceSuggestions(true);
                       }}
-                      onFocus={() => setShowOtherSuggestions(true)}
-                      placeholder="Tìm và thêm tỉnh khác..."
+                      onFocus={() => setShowEndProvinceSuggestions(true)}
+                      placeholder="Chọn Tỉnh đến"
+                      required
                       disabled={isPublished}
                     />
-                    {showOtherSuggestions && otherProvinceSearch && (
+                    {showEndProvinceSuggestions && endProvinceSearch && (
                       <div
                         className="tc-province-suggestions"
                         style={{
@@ -920,11 +1095,11 @@ async function fetchTourDetail() {
                           boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
                         }}
                       >
-                        {filteredOtherProvinces.map((p) => (
+                        {filteredEndProvinces.map((p) => (
                           <div
                             key={p}
                             style={{ padding: "10px 16px", cursor: "pointer" }}
-                            onClick={() => addOtherProvince(p)}
+                            onClick={() => selectEndProvince(p)}
                             onMouseOver={(e) =>
                               (e.currentTarget.style.backgroundColor =
                                 "#f1f5f9")
@@ -938,27 +1113,84 @@ async function fetchTourDetail() {
                         ))}
                       </div>
                     )}
-                    <div className="tc-selected-provinces" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
-                      {formData.otherProvinces?.map(p => (
-                        <span key={p} style={{ 
-                          background: '#f1f5f9', 
-                          padding: '4px 10px', 
-                          borderRadius: '20px', 
-                          fontSize: '0.85rem',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '6px'
-                        }}>
+                  </div>
+                </div>
+
+                {/* Các tỉnh đi qua */}
+                <div
+                  ref={otherProvinceRef}
+                  className="tc-form-group"
+                  style={{ position: "relative" }}
+                >
+                  <label>Các tỉnh đi qua khác (nếu có)</label>
+                  <input
+                    type="text"
+                    className="tc-form-input"
+                    value={otherProvinceSearch}
+                    onChange={(e) => {
+                      setOtherProvinceSearch(e.target.value);
+                      setShowOtherSuggestions(true);
+                    }}
+                    onFocus={() => setShowOtherSuggestions(true)}
+                    placeholder="Tìm và thêm tỉnh đi qua khác..."
+                    disabled={isPublished}
+                  />
+                  {showOtherSuggestions && otherProvinceSearch && (
+                    <div
+                      className="tc-province-suggestions"
+                      style={{
+                        position: "absolute",
+                        top: "100%",
+                        left: 0,
+                        right: 0,
+                        background: "white",
+                        border: "1px solid #e2e8f0",
+                        borderRadius: "12px",
+                        marginTop: "4px",
+                        maxHeight: "200px",
+                        overflowY: "auto",
+                        zIndex: 100,
+                        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                      }}
+                    >
+                      {filteredOtherProvinces.map((p) => (
+                        <div
+                          key={p}
+                          style={{ padding: "10px 16px", cursor: "pointer" }}
+                          onClick={() => addOtherProvince(p)}
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.backgroundColor =
+                              "#f1f5f9")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.backgroundColor = "white")
+                          }
+                        >
                           {p}
-                          {!isPublished && (
-                            <span 
-                              style={{ cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }} 
-                              onClick={() => removeOtherProvince(p)}
-                            >×</span>
-                          )}
-                        </span>
+                        </div>
                       ))}
                     </div>
+                  )}
+                  <div className="tc-selected-provinces" style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '12px' }}>
+                    {formData.otherProvinces?.map(p => (
+                      <span key={p} style={{ 
+                        background: '#f1f5f9', 
+                        padding: '4px 10px', 
+                        borderRadius: '20px', 
+                        fontSize: '0.85rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}>
+                        {p}
+                        {!isPublished && (
+                          <span 
+                            style={{ cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }} 
+                            onClick={() => removeOtherProvince(p)}
+                          >×</span>
+                        )}
+                      </span>
+                    ))}
                   </div>
                 </div>
 

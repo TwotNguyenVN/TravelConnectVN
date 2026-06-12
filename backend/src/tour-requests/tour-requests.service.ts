@@ -262,6 +262,10 @@ export class TourRequestsService {
       tours: {
         guide_profile_id: guideProfile.id,
       },
+<<<<<<< Updated upstream
+=======
+      status: { in: ['paid', 'completed'] }, // Hiển thị các yêu cầu đã thanh toán hoặc đã hoàn thành
+>>>>>>> Stashed changes
     };
     if (status) where.status = status;
     if (tourId) where.tour_id = tourId;
@@ -338,6 +342,8 @@ export class TourRequestsService {
             req.tours.guide_profiles.users.avatar_url,
           userName: req.users_tour_requests_user_idTousers.full_name,
           userAvatar: req.users_tour_requests_user_idTousers.avatar_url,
+          userPhone: req.users_tour_requests_user_idTousers.phone,
+          userEmail: req.users_tour_requests_user_idTousers.email,
           participantCount: req.participant_count,
           status: req.status,
           note: req.note,

@@ -219,7 +219,38 @@ export const TourScheduleDetailPage: React.FC = () => {
     return passengers;
   };
 
+<<<<<<< Updated upstream
   function formatDate(dateString: string) {
+=======
+  const parseContactInfo = (note: string) => {
+    if (!note) return null;
+    const lines = note.split('\n');
+    let contact = '';
+    let notes = '';
+    
+    for (const line of lines) {
+      if (line.includes('- Liên hệ:')) {
+        contact = line.replace('- Liên hệ:', '').trim();
+      }
+      if (line.includes('- Ghi chú:')) {
+        notes = line.replace('- Ghi chú:', '').trim();
+      }
+    }
+    
+    if (!contact && !notes) return null;
+    
+    // Split contact by "|"
+    const parts = contact.split('|').map(p => p.trim());
+    return {
+      name: parts[0] || '',
+      phone: parts[1] || '',
+      email: parts[2] || '',
+      notes: notes || 'Không có'
+    };
+  };
+
+  const formatDate = (dateString: string) => {
+>>>>>>> Stashed changes
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       weekday: 'long',
@@ -373,6 +404,7 @@ export const TourScheduleDetailPage: React.FC = () => {
             <div className="tc-requests-list">
               {requests.map((req) => {
                 const passengers = parsePassengersFromNote(req.note);
+                const contactInfo = parseContactInfo(req.note);
                 const paymentProgress = req.paymentStatus;
                 
                 return (
@@ -391,14 +423,61 @@ export const TourScheduleDetailPage: React.FC = () => {
                       </div>
                       <div className="tc-request-status">
                         <span className={`tc-badge tc-badge-${req.status}`}>
-                          {req.status === 'paid' ? 'Đã xác nhận' : 'Chờ xác nhận'}
+                          {req.status === 'paid' ? 'Đã xác nhận' : req.status === 'completed' ? 'Đã hoàn thành' : 'Chờ xác nhận'}
                         </span>
                         <span className="tc-payment-tag">{paymentProgress}</span>
+                      </div>
+                    </div>
+
+                    {/* Khung thông tin liên hệ */}
+                    <div className="tc-booking-contact-box" style={{
+                      background: '#f8fafc',
+                      padding: '16px',
+                      borderRadius: '12px',
+                      border: '1.5px solid #e2e8f0',
+                      marginBottom: '16px',
+                      fontSize: '0.9rem',
+                    }}>
+                      <h3 style={{ margin: '0 0 10px 0', fontSize: '0.95rem', color: 'var(--tc-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        📞 Thông tin liên hệ
+                      </h3>
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                        gap: '12px'
+                      }}>
+                        <div>
+                          <span style={{ color: '#64748b', fontWeight: '500' }}>Họ tên liên hệ:</span>
+                          <div style={{ fontWeight: '600', marginTop: '2px', color: '#1e293b' }}>
+                            {contactInfo ? contactInfo.name : (req.userName || 'Không rõ')}
+                          </div>
+                        </div>
+                        <div>
+                          <span style={{ color: '#64748b', fontWeight: '500' }}>Số điện thoại:</span>
+                          <div style={{ fontWeight: '600', marginTop: '2px', color: '#1e293b' }}>
+                            {contactInfo ? contactInfo.phone : (req.userPhone || 'Không có')}
+                          </div>
+                        </div>
+                        <div>
+                          <span style={{ color: '#64748b', fontWeight: '500' }}>Email:</span>
+                          <div style={{ fontWeight: '600', marginTop: '2px', color: '#1e293b', wordBreak: 'break-all' }}>
+                            {contactInfo ? contactInfo.email : (req.userEmail || 'Không có')}
+                          </div>
+                        </div>
+                        {contactInfo && (
+                          <div style={{ gridColumn: '1 / -1', borderTop: '1px dashed #e2e8f0', paddingTop: '8px', marginTop: '4px' }}>
+                            <span style={{ color: '#64748b', fontWeight: '500' }}>Yêu cầu / Ghi chú booking:</span>
+                            <div style={{ marginTop: '2px', fontStyle: contactInfo.notes === 'Không có' ? 'italic' : 'normal', color: contactInfo.notes === 'Không có' ? '#94a3b8' : '#1e293b' }}>
+                              {contactInfo.notes}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                     
                     {passengers.length > 0 ? (
                       <div className="tc-passengers-table-wrapper">
+                        <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: '#64748b' }}>👥 Danh sách hành khách đi tour:</h4>
                         <table className="tc-passengers-table">
                           <thead>
                             <tr>
@@ -424,8 +503,8 @@ export const TourScheduleDetailPage: React.FC = () => {
                       </div>
                     ) : (
                       <div className="tc-note-fallback">
-                        <strong>Ghi chú Booking:</strong>
-                        <pre>{req.note}</pre>
+                        <strong>Ghi chú / Tin nhắn từ khách:</strong>
+                        <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', fontSize: '0.9rem', color: '#1e293b' }}>{req.note}</pre>
                       </div>
                     )}
                   </div>
