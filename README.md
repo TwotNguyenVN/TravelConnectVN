@@ -75,13 +75,22 @@ cp frontend/.env.example frontend/.env
 *(Trong file `.env` của backend, chú ý điền đầy đủ `DATABASE_URL`, `REDIS_HOST`, `SUPABASE_URL`, `SUPABASE_KEY`)*
 
 ### 2. Khởi chạy bằng Docker Compose (Đề xuất)
-Chạy toàn bộ Database (Postgres), Redis, Backend và Frontend chỉ với 1 lệnh:
+Phương pháp này giúp bạn chạy toàn bộ dự án (Redis cục bộ, Backend, Frontend) trong các Container độc lập mà không cần cài đặt lẻ tẻ môi trường Node.js.
+
+Chỉ với 1 lệnh duy nhất tại thư mục gốc:
 ```bash
-docker-compose up -d
+docker-compose up -d --build
 ```
-- **Frontend:** http://localhost:8080 (hoặc cổng cấu hình)
+- **Frontend:** http://localhost:8080
 - **Backend API:** http://localhost:3000
 - **Swagger Docs:** http://localhost:3000/api/docs
+
+**Lưu ý khi dùng Docker:**
+- Khi bạn có thay đổi code mới, hãy chạy lại lệnh `docker-compose up -d --build` để Docker đóng gói lại bản mới nhất.
+- Để tắt hoàn toàn dự án và giải phóng tài nguyên, dùng lệnh:
+```bash
+docker-compose down
+```
 
 ### 3. Khởi chạy Thủ công (Môi trường Dev)
 ```bash

@@ -824,7 +824,7 @@ export class AdminService {
       await tx.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'transaction_management',
+          module_name: 'payment_management',
           entity_type: 'payment_transactions',
           entity_pk: id,
           action_type: 'change_status',
@@ -1014,7 +1014,7 @@ export class AdminService {
       await tx.admin_activity_logs.create({
         data: {
           actor_user_id: adminId === 'system-cron' ? null : adminId,
-          module_name: 'finance_settlement',
+          module_name: 'payment_management',
           entity_type: 'guide_profiles',
           entity_pk: guideProfileId,
           action_type: 'other',
@@ -1197,7 +1197,7 @@ export class AdminService {
       await tx.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'broadcast_notifications',
+          module_name: 'system_other',
           entity_type: 'notifications',
           action_type: 'other',
           reason: `Phát thông báo rộng rãi: "${title}". Đối tượng: ${targetRole || targetUserId || 'Tất cả'}`,
@@ -1389,7 +1389,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
       await this.prisma.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'recovery',
+          module_name: 'system_other',
           entity_type: 'tours',
           entity_pk: id,
           action_type: 'restore',
@@ -1412,7 +1412,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
       await this.prisma.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'recovery',
+          module_name: 'system_other',
           entity_type: 'companion_posts',
           entity_pk: id,
           action_type: 'restore',
@@ -1434,7 +1434,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
       await this.prisma.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'recovery',
+          module_name: 'system_other',
           entity_type: 'users',
           entity_pk: id,
           action_type: 'restore',
@@ -1850,7 +1850,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
     await this.prisma.admin_activity_logs.create({
       data: {
         actor_user_id: adminId,
-        module_name: 'global_settings',
+        module_name: 'system_other',
         entity_type: 'system_settings',
         entity_pk: settingKey,
         action_type: 'update',
@@ -1918,7 +1918,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
     await this.prisma.admin_activity_logs.create({
       data: {
         actor_user_id: adminId,
-        module_name: 'categories_management',
+        module_name: 'system_other',
         entity_type: type,
         entity_pk: result.id.toString(),
         action_type: 'create',
@@ -1953,7 +1953,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
     await this.prisma.admin_activity_logs.create({
       data: {
         actor_user_id: adminId,
-        module_name: 'categories_management',
+        module_name: 'system_other',
         entity_type: type,
         entity_pk: idStr,
         action_type: 'update',
@@ -1977,7 +1977,7 @@ If no issues are found, flagged should be false, reason should be "No issues det
       await this.prisma.admin_activity_logs.create({
         data: {
           actor_user_id: adminId,
-          module_name: 'categories_management',
+          module_name: 'system_other',
           entity_type: type,
           entity_pk: idStr,
           action_type: 'other',
