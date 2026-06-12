@@ -232,7 +232,6 @@ export class RecommendationsService {
             : Math.max(0, tour.max_participants - currentParticipants);
 
           const coverImg =
-            tour.tour_images?.find((img) => img.is_cover)?.image_url ||
             tour.tour_images?.[0]?.image_url ||
             'https://placehold.co/600x400/e6f0fa/006ce4?text=No+Image';
 

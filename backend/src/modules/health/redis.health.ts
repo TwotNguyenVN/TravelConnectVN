@@ -17,15 +17,16 @@ export class RedisHealthIndicator extends HealthIndicator {
     const host = this.configService.get<string>('REDIS_HOST', 'localhost');
     const port = this.configService.get<number>('REDIS_PORT', 6379);
     const password = this.configService.get<string>('REDIS_PASSWORD');
+    const tls = host.includes('upstash') ? {} : undefined;
 
     const client = new Redis({
       host,
       port,
       password,
-      tls: host.includes('upstash') ? {} : undefined,
+      tls,
       maxRetriesPerRequest: 1,
       connectTimeout: 2000,
-      lazyConnect: true, // we will manually connect/ping
+      lazyConnect: true,
     });
 
     try {

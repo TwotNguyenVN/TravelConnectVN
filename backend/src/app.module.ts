@@ -56,27 +56,34 @@ import { SupportModule } from './support/support.module';
     }),
     BullModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-          password: configService.get<string>('REDIS_PASSWORD'),
-          tls: configService.get<string>('REDIS_HOST', '').includes('upstash') ? {} : undefined,
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const password = configService.get<string>('REDIS_PASSWORD');
+        return {
+          connection: {
+            host,
+            port: configService.get('REDIS_PORT', 6379),
+            password,
+            tls: host.includes('upstash') ? { servername: host } : undefined,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
+        const host = configService.get<string>('REDIS_HOST', 'localhost');
+        const port = configService.get<number>('REDIS_PORT', 6379);
+        const password = configService.get<string>('REDIS_PASSWORD');
+        const isUpstash = host.includes('upstash');
+        const url = isUpstash
+          ? `rediss://default:${password}@${host}:${port}`
+          : `redis://${host}:${port}`;
+
         const store = await redisStore({
-          socket: {
-            host: configService.get('REDIS_HOST', 'localhost'),
-            port: configService.get<number>('REDIS_PORT', 6379),
-            tls: configService.get<string>('REDIS_HOST', '').includes('upstash') ? true : undefined,
-          },
-          password: configService.get<string>('REDIS_PASSWORD'),
+          url,
           ttl: 60 * 1000, // 1 minute default TTL
         });
         return {

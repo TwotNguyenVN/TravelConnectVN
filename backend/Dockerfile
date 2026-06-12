@@ -5,6 +5,8 @@ WORKDIR /app
 
 # Install dependencies
 COPY package*.json ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
 RUN npm ci
 
 # Copy source and generate Prisma client

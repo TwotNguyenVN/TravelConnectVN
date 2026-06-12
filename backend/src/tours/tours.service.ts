@@ -1447,7 +1447,7 @@ export class ToursService implements OnApplicationBootstrap {
       include: {
         tour_locations: { orderBy: { sequence_no: 'asc' } },
         tour_destinations: { orderBy: { sequence_no: 'asc' } },
-        tour_images: { orderBy: { sort_order: 'asc' } },
+        tour_images: true,
         tour_accommodations: { include: { partner_accommodations: true } },
         tour_categories: true,
         _count: {
