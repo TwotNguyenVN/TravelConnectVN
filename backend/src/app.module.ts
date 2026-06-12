@@ -86,6 +86,13 @@ import { SupportModule } from './support/support.module';
           url,
           ttl: 60 * 1000, // 1 minute default TTL
         });
+
+        if (store.client) {
+          store.client.on('error', (err: Error) => {
+            console.error('Redis Cache Error:', err.message);
+          });
+        }
+
         return {
           store: store as unknown as any,
         };
