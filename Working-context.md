@@ -179,4 +179,7 @@ D·ª± √°n **TravelConnect VN** l√† n·ªÅn t·∫£ng k·∫øt n·ªëi kh√°ch du l·ªãch v·ªõ
      -   C •u   h Ï n h   l °i   t o ‡ n   b Ÿ  U p s t a s h   R e d i s   c o n n e c t i o n   t r o n g   \  p p . m o d u l e . t s \ ,   \  e d i s - i o . a d a p t e r . t s \ ,   \ s o c k e t / r e d i s . a d a p t e r . t s \   √  s Ì  d Ân g   U R L   s c h e m e   \  e d i s s : / / \   c Û   T L S   v ‡   p a s s w o r d .  
      -   G i £i   q u y øt   m e r g e   c o n f l i c t s   v €i   n h · n h   \ d e v e l o p \   v ‡   t °o   P R   \ # 1 0 0 \   t h ‡ n h   c Ù n g   q u a   G i t H u b   C L I .  
      -   S Ìa   l ◊i   C I :   F i x   P r i s m a   S c h e m a   \ 	 o u r _ i m a g e s \   ( c h u y √n   t Î  1 - t o - 1   t h ‡ n h   1 - t o - m a n y )   v ‡   c ≠p   n h ≠t   T y p e S c r i p t   b i n d i n g s   t r o n g   a p p . m o d u l e ,   r e c o m m e n d a t i o n s . s e r v i c e ,   t o u r - r e q u e s t s . s e r v i c e .  
+     -   S Ìa   l ◊i   D o c k e r   B u i l d   C I :   C o p y   \ p r i s m a \   v ‡   \ p r i s m a . c o n f i g . t s \   t r ∞€c   k h i   c h °y   \ 
+ p m   c i \   t r o n g   D o c k e r f i l e .  
+     -   S Ìa   l ◊i   P l a y w r i g h t   C I :   L o °i   b œ  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b À  l ◊i   c Áa   c Ÿt   \ e m a i l \   t r o n g   b £n g   \  u t h . i d e n t i t i e s \   ﬂ  \ s c h e m a . p r i s m a \   √  c Û   t h √  c h °y   M i g r a t i o n .  
  
