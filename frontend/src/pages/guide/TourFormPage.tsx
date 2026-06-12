@@ -356,19 +356,25 @@ async function fetchTourDetail() {
     >,
   ) => {
     const { name, value } = e.target;
+    let parsedValue: string | number = value;
+
+    if (name === "price") {
+      // Loại bỏ mọi ký tự không phải số (như dấu phẩy)
+      const numericString = value.replace(/\D/g, "");
+      parsedValue = numericString === "" ? "" : Number(numericString);
+    } else if (
+      name === "maxParticipants" ||
+      name === "numDays" ||
+      name === "numNights" ||
+      name.includes("Latitude") ||
+      name.includes("Longitude")
+    ) {
+      parsedValue = value === "" ? "" : Number(value);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]:
-        name === "price" ||
-        name === "maxParticipants" ||
-        name === "numDays" ||
-        name === "numNights" ||
-        name.includes("Latitude") ||
-        name.includes("Longitude")
-          ? value === ""
-            ? ""
-            : Number(value)
-          : value,
+      [name]: parsedValue,
     }));
   };
 
@@ -754,12 +760,12 @@ async function fetchTourDetail() {
       }
       setShowPublishConfirm(true);
     } else {
-      // Lưu nháp chỉ cần kiểm tra bước 1 (cơ bản)
+      // Các trạng thái khác (như draft, cancelled)
       if (!validateStep(1)) {
         setCurrentStep(1);
         return;
       }
-      executeSubmit('draft');
+      executeSubmit(targetStatus);
     }
   };
 
@@ -1004,7 +1010,7 @@ async function fetchTourDetail() {
                     Giá tour cơ bản (VNĐ) <span>*</span>
                   </label>
                   <input
-                    type="number"
+                    type="text"
                     name="price"
                     className="tc-form-input"
                     value={formData.price || ""}
