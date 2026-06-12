@@ -263,7 +263,7 @@
   display: inline-block;
 }
 
-.tc-badge-paid {
+.tc-badge-paid, .tc-badge-completed {
   background: #dcfce7;
   color: #166534;
 }

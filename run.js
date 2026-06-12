@@ -48,20 +48,22 @@ const REQUIRED_NODE_VERSION = 24;
 
 // Tự động cấu hình môi trường shell (Aliases: tcvn, run, runf, runb)
 function setupShellEnvironment() {
-  const zshrcPath = path.join(os.homedir(), '.zshrc');
+  const { execSync } = require('child_process');
   const projectRoot = __dirname;
-  
-  const shellConfig = `
+  const projectRootEscaped = projectRoot.replace(/\\/g, '/');
+
+  // Cấu hình cho các Unix shells (Zsh, Bash)
+  const unixShellConfig = `
 # ==========================================
 # TravelConnectVN custom aliases & functions
 # ==========================================
-alias tcvn="node ${projectRoot}/run.js"
+alias tcvn="node ${projectRootEscaped}/run.js"
 alias TCVN="tcvn"
 alias Tcvn="tcvn"
 
 function run() {
   local current_dir=$(pwd)
-  local project_root="${projectRoot}"
+  local project_root="${projectRootEscaped}"
   
   if [[ "$current_dir" == "$project_root" ]]; then
     echo "Bạn đang ở thư mục gốc. Bạn muốn chạy Backend hay Frontend?"
@@ -87,27 +89,142 @@ function run() {
 }
 
 function runf() {
-  cd "${projectRoot}/frontend" && npm run dev
+  cd "${projectRootEscaped}/frontend" && npm run dev
 }
 
 function runb() {
-  cd "${projectRoot}/backend" && npm run start:dev
+  cd "${projectRootEscaped}/backend" && npm run start:dev
 }
 # ==========================================
 `;
 
-  try {
-    if (fs.existsSync(zshrcPath)) {
-      const zshrcContent = fs.readFileSync(zshrcPath, 'utf8');
-      if (!zshrcContent.includes('TravelConnectVN custom aliases & functions')) {
-        fs.appendFileSync(zshrcPath, '\n' + shellConfig);
-        console.log(`${COLORS.bgGreen}${COLORS.bright} ĐÃ CẤU HÌNH TỰ ĐỘNG TERMINAL ${COLORS.reset}`);
-        console.log(`${COLORS.green}Các lệnh rút gọn (tcvn, run, runf, runb) đã được cài đặt vào ~/.zshrc.${COLORS.reset}`);
-        console.log(`${COLORS.yellow}>>> Vui lòng khởi động lại Terminal hoặc chạy: source ~/.zshrc để có hiệu lực. <<<${COLORS.reset}\n`);
-      }
+  // Cấu hình cho Windows PowerShell
+  const psShellConfig = `
+# ==========================================
+# TravelConnectVN custom aliases & functions
+# ==========================================
+function tcvn { node "${projectRootEscaped}/run.js" $args }
+function TCVN { node "${projectRootEscaped}/run.js" $args }
+function Tcvn { node "${projectRootEscaped}/run.js" $args }
+
+function run {
+  $current_dir = (Get-Location).Path.Replace('\\', '/')
+  $project_root = "${projectRootEscaped}"
+  
+  if ($current_dir -eq $project_root) {
+    Write-Output "Bạn đang ở thư mục gốc. Bạn muốn chạy Backend hay Frontend?"
+    Write-Output "1. Backend"
+    Write-Output "2. Frontend"
+    $choice = Read-Host -Prompt "Chọn (1/2)"
+    Write-Output ""
+    if ($choice -eq "1") {
+      Set-Location "$project_root/backend"
+      npm run start:dev
+    } elseif ($choice -eq "2") {
+      Set-Location "$project_root/frontend"
+      npm run dev
+    } else {
+      Write-Output "Lựa chọn không hợp lệ."
     }
-  } catch (error) {
-    console.log(`${COLORS.red}Lỗi khi cấu hình tự động ~/.zshrc: ${error.message}${COLORS.reset}`);
+  } elseif ($current_dir -eq "$project_root/frontend") {
+    npm run dev
+  } elseif ($current_dir -eq "$project_root/backend") {
+    npm run start:dev
+  } else {
+    Write-Output "Lệnh 'run' không hỗ trợ trong thư mục này."
+  }
+}
+
+function runf {
+  Set-Location "${projectRootEscaped}/frontend"
+  npm run dev
+}
+
+function runb {
+  Set-Location "${projectRootEscaped}/backend"
+  npm run start:dev
+}
+# ==========================================
+`;
+
+  // 1. Cấu hình cho Unix shells (macOS, Linux, Git Bash)
+  const homeDir = os.homedir();
+  const unixProfiles = [
+    path.join(homeDir, '.zshrc'),
+    path.join(homeDir, '.bashrc'),
+    path.join(homeDir, '.bash_profile')
+  ];
+
+  let unixConfigured = [];
+  unixProfiles.forEach(profilePath => {
+    try {
+      if (fs.existsSync(profilePath)) {
+        const content = fs.readFileSync(profilePath, 'utf8');
+        if (!content.includes('TravelConnectVN custom aliases & functions')) {
+          fs.appendFileSync(profilePath, '\n' + unixShellConfig);
+          unixConfigured.push(path.basename(profilePath));
+        }
+      }
+    } catch (err) {
+      // Bỏ qua lỗi đọc/ghi của từng file riêng biệt
+    }
+  });
+
+  // 2. Cấu hình cho Windows PowerShell (nếu chạy trên Windows)
+  let windowsConfigured = [];
+  if (process.platform === 'win32') {
+    // Tự động kích hoạt policy chạy script cho CurrentUser để tránh lỗi bảo mật khi tải profile
+    try {
+      execSync('powershell -NoProfile -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"', { stdio: 'ignore' });
+    } catch (e) {}
+    try {
+      execSync('pwsh -NoProfile -Command "Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force"', { stdio: 'ignore' });
+    } catch (e) {}
+
+    const psCommands = [
+      { cmd: 'powershell -NoProfile -Command "Write-Output $PROFILE"', label: 'Windows PowerShell' },
+      { cmd: 'pwsh -NoProfile -Command "Write-Output $PROFILE"', label: 'PowerShell Core' }
+    ];
+
+    psCommands.forEach(({ cmd, label }) => {
+      try {
+        const profilePath = execSync(cmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+        if (profilePath) {
+          const dir = path.dirname(profilePath);
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          
+          let content = '';
+          if (fs.existsSync(profilePath)) {
+            content = fs.readFileSync(profilePath, 'utf8');
+          }
+
+          if (!content.includes('TravelConnectVN custom aliases & functions')) {
+            fs.appendFileSync(profilePath, '\n' + psShellConfig);
+            windowsConfigured.push(label);
+          }
+        }
+      } catch (err) {
+        // PowerShell hoặc pwsh không cài đặt hoặc không khả dụng
+      }
+    });
+  }
+
+  // In thông báo nếu có cấu hình mới
+  if (unixConfigured.length > 0 || windowsConfigured.length > 0) {
+    console.log(`\n${COLORS.bgGreen}${COLORS.bright} ĐÃ CẤU HÌNH TỰ ĐỘNG TERMINAL ${COLORS.reset}`);
+    
+    if (unixConfigured.length > 0) {
+      console.log(`${COLORS.green}Các lệnh rút gọn (tcvn, run, runf, runb) đã được thêm vào: ${unixConfigured.join(', ')}${COLORS.reset}`);
+      console.log(`${COLORS.yellow}>>> Vui lòng khởi động lại Terminal hoặc chạy: source ~/.zshrc (hoặc ~/.bashrc) để cập nhật. <<<${COLORS.reset}`);
+    }
+    
+    if (windowsConfigured.length > 0) {
+      console.log(`${COLORS.green}Các lệnh rút gọn (tcvn, run, runf, runb) đã được thêm vào profile: ${windowsConfigured.join(', ')}${COLORS.reset}`);
+      console.log(`${COLORS.yellow}>>> Vui lòng KHỞI ĐỘNG LẠI TERMINAL (hoặc chạy: . $PROFILE) để cập nhật. <<<${COLORS.reset}`);
+    }
+    console.log();
   }
 }
 
