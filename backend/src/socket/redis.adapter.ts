@@ -23,15 +23,22 @@ export class RedisIoAdapter extends IoAdapter {
     const pubClient = createClient({ url });
     const subClient = pubClient.duplicate();
 
-    pubClient.on('error', (err) => console.error('Redis PubClient Error:', err.message));
-    subClient.on('error', (err) => console.error('Redis SubClient Error:', err.message));
+    pubClient.on('error', (err: Error) =>
+      console.error('Redis PubClient Error:', err.message),
+    );
+    subClient.on('error', (err: Error) =>
+      console.error('Redis SubClient Error:', err.message),
+    );
 
     try {
       await Promise.all([pubClient.connect(), subClient.connect()]);
       this.adapterConstructor = createAdapter(pubClient, subClient);
       console.log('Connected to Redis for Socket.IO');
     } catch (error) {
-      console.error('Failed to connect to Redis. Falling back to in-memory adapter for Socket.IO', (error as Error).message);
+      console.error(
+        'Failed to connect to Redis. Falling back to in-memory adapter for Socket.IO',
+        (error as Error).message,
+      );
     }
   }
 

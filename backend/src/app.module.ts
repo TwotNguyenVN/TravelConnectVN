@@ -88,7 +88,7 @@ import { SupportModule } from './support/support.module';
         });
 
         if (store.client) {
-          store.client.on('error', (err: any) => {
+          store.client.on('error', (err: Error) => {
             console.error('Redis Cache Error:', err.message);
           });
         }
