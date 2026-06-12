@@ -182,4 +182,5 @@ D·ª± √°n **TravelConnect VN** l√† n·ªÅn t·∫£ng k·∫øt n·ªëi kh√°ch du l·ªãch v·ªõ
      -   S Ìa   l ◊i   D o c k e r   B u i l d   C I :   C o p y   \ p r i s m a \   v ‡   \ p r i s m a . c o n f i g . t s \   t r ∞€c   k h i   c h °y   \ 
  p m   c i \   t r o n g   D o c k e r f i l e .  
      -   S Ìa   l ◊i   P l a y w r i g h t   C I :   L o °i   b œ  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b À  l ◊i   c Áa   c Ÿt   \ e m a i l \   t r o n g   b £n g   \  u t h . i d e n t i t i e s \   ﬂ  \ s c h e m a . p r i s m a \   √  c Û   t h √  c h °y   M i g r a t i o n .  
+     -   S Ìa   l ◊i   P l a y w r i g h t   C I   ( t i øp ) :   L o °i   b œ  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b À  l ◊i   c Áa   c Ÿt   \ c o n f i r m e d _ a t \   t r o n g   b £n g   \  u t h . u s e r s \   ﬂ  \ s c h e m a . p r i s m a \   √  c Û   t h √  c h °y   M i g r a t i o n .  
  
