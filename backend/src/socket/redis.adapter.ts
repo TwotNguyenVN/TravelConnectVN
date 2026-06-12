@@ -2,10 +2,11 @@ import { IoAdapter } from '@nestjs/platform-socket.io';
 import { ServerOptions, Server } from 'socket.io';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { createClient } from 'redis';
-import { INestApplicationContext } from '@nestjs/common';
+import { INestApplicationContext, Logger } from '@nestjs/common';
 
 export class RedisIoAdapter extends IoAdapter {
   private adapterConstructor: ReturnType<typeof createAdapter>;
+  private readonly logger = new Logger(RedisIoAdapter.name);
 
   constructor(app: INestApplicationContext) {
     super(app);
@@ -20,25 +21,25 @@ export class RedisIoAdapter extends IoAdapter {
       ? `rediss://default:${redisPassword}@${redisHost}:${redisPort}`
       : `redis://${redisHost}:${redisPort}`;
 
-    const pubClient = createClient({ url });
-    const subClient = pubClient.duplicate();
-
-    pubClient.on('error', (err: Error) =>
-      console.error('Redis PubClient Error:', err.message),
-    );
-    subClient.on('error', (err: Error) =>
-      console.error('Redis SubClient Error:', err.message),
-    );
-
     try {
-      await Promise.all([pubClient.connect(), subClient.connect()]);
-      this.adapterConstructor = createAdapter(pubClient, subClient);
-      console.log('Connected to Redis for Socket.IO');
-    } catch (error) {
-      console.error(
-        'Failed to connect to Redis. Falling back to in-memory adapter for Socket.IO',
-        (error as Error).message,
+      this.logger.log(`Connecting to Redis at ${redisHost}:${redisPort}`);
+      const pubClient = createClient({ url });
+      const subClient = pubClient.duplicate();
+
+      // Register error handlers to prevent unhandled exception crashes
+      pubClient.on('error', (err: Error) =>
+        this.logger.error(`Redis PubClient Error: ${err.message}`),
       );
+      subClient.on('error', (err: Error) =>
+        this.logger.error(`Redis SubClient Error: ${err.message}`),
+      );
+
+      await Promise.all([pubClient.connect(), subClient.connect()]);
+
+      this.adapterConstructor = createAdapter(pubClient, subClient);
+      this.logger.log('Redis adapter connected successfully for socket.io');
+    } catch (err: any) {
+      this.logger.error(`Failed to initialize Redis Adapter: ${err.message}. Falling back to default memory adapter.`);
     }
   }
 
@@ -46,7 +47,12 @@ export class RedisIoAdapter extends IoAdapter {
     const server = super.createIOServer(port, options) as Server;
     if (this.adapterConstructor) {
       server.adapter(this.adapterConstructor);
+<<<<<<< Updated upstream
+=======
+      this.logger.log('Socket.io server is using Redis Adapter');
+>>>>>>> Stashed changes
     }
     return server;
   }
 }
+
