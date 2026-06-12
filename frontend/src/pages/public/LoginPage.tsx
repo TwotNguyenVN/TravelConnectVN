@@ -5,6 +5,7 @@ import { Input } from '../../components/common/Input/Input';
 import { Card } from '../../components/common/Card/Card';
 import { supabase } from '../../utils/supabase';
 import { useAuth } from '../../contexts/AuthContext';
+import { useToast } from '../../contexts/ToastContext';
 import './Auth.css';
 
 export const LoginPage: React.FC = () => {
@@ -14,6 +15,7 @@ export const LoginPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
   const { user, roles } = useAuth();
+  const { toast } = useToast();
 
   // Redirect if already logged in and roles are loaded
   React.useEffect(() => {
@@ -55,14 +57,19 @@ export const LoginPage: React.FC = () => {
         const userRoles = roleData ? roleData.map((r: any) => r.role_code) : [];
         
         if (userRoles.includes('SYSTEM_ADMIN')) {
+          toast.success('Đăng nhập thành công! Chào mừng Quản trị viên.');
           navigate('/admin');
         } else if (userRoles.includes('CONTENT_MODERATOR')) {
+          toast.success('Đăng nhập thành công!');
           navigate('/content');
         } else if (userRoles.includes('SUPPORT_STAFF')) {
+          toast.success('Đăng nhập thành công!');
           navigate('/support');
         } else if (userRoles.includes('ACCOUNTANT')) {
+          toast.success('Đăng nhập thành công!');
           navigate('/accountant');
         } else {
+          toast.success('Đăng nhập thành công!');
           navigate('/');
         }
       } else {

@@ -452,7 +452,7 @@ export const HomePage: React.FC = () => {
                   <img 
                     src={guide.coverUrl || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
                     alt={guide.name} 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
                   />
                   {/* Avatar Overlay */}
                   <div style={{ 
@@ -567,7 +567,7 @@ export const HomePage: React.FC = () => {
                 <img 
                   src={post.coverUrl || 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=600&q=80'} 
                   alt={post.title} 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
                 
                 {/* Badge Overlay */}

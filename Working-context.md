@@ -164,3 +164,12 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - **Lựa chọn 1:** Nếu vướng víu, có thể yêu cầu ẩn/xóa icon này đi.
   - **Lựa chọn 2:** Mặc kệ nó. Khi nào tối ưu hóa tốc độ load trang và refactor code sang chuẩn React Query, dữ liệu sẽ tự động xuất hiện.
   - Vui lòng xem và yêu cầu lựa chọn để tiến hành bước tiếp theo.
+
+### 2026-06-08 (UX Hardening & Demo Preparation)
+- **Hoàn thiện UX trải nghiệm người dùng trên 10 màn hình MVP lõi:**
+  - `LoginPage` / `RegisterPage`: Bổ sung Loading Indicator và Toasts chuẩn hóa (`sonner`) cho các luồng xác thực auth.
+  - `TourDetailPage` / `CompanionDetailPage`: Tích hợp chặt chẽ Login Guards ngay tại các nút gọi hành động chính ("Gửi yêu cầu"). Chuyển hướng Guest đến form đăng nhập kèm thông báo Toast hợp lý.
+  - `TourBookingPage`: Thiết lập Toast success `"Đã gửi yêu cầu tham gia tour"` ngay sau khi tạo request thành công trước khi forward sang VNPAY.
+  - `GuideRequestsPage` / `CompanionManagementPage`: Thêm lớp bảo mật UX thông qua `window.confirm` cho các hành động mang tính phá hủy/không thể hoàn tác ("Từ chối" yêu cầu).
+  - `ReportModal` / `AdminReportManagementPage`: Thêm loading overlay trên Report Form và dùng `window.prompt` bắt buộc nhập lý do cho Admin khi giải quyết khiếu nại.
+- **Regression Test Validation:** Toàn bộ các luồng chức năng MVP (Đăng ký, Đăng nhập, Duyệt hồ sơ, Đặt Tour, Thanh toán, Tìm bạn đồng hành, Khiếu nại) đều đã được kiểm tra (Verified) và hoạt động mượt mà E2E thông qua backend integration script (`test_regression.ts`). Không có lỗi phát sinh sau quá trình hardening.
