@@ -34,6 +34,8 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - [x] Bổ sung caching bằng `cache-manager`
   - [x] Tích hợp với Frontend (React) trên `HomePage.tsx`
   - [x] Thêm API track hành vi người dùng "VIEW", "BOOK", "FAVORITE"
+- [x] Integrate Gemini AI API properly for Trip Planner.
+- [x] Create separate Wallet Page for user (`/user/wallet`) with VNPAY deposit and instant withdrawal.
 
 - [x] Đa ngôn ngữ (i18n)
   - [x] Thiết lập `i18next` ở React
@@ -55,7 +57,9 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 
 ## 📝 Latest Execution Notes
 
-- **2026-06-13:** Hoàn thiện tính năng Hybrid Geocoding cho Google Maps Link:
+### Latest Execution Notes (Jun 2026)
+- **User Wallet**: Added `user_wallets` and `wallet_transactions` tables. Implemented VNPAY integration for deposits and instant deductions for withdrawals. Created `/user/wallet` with a premium UI and transaction history.
+- **AI Chat & Companion**: Hoàn thiện tính năng Hybrid Geocoding cho Google Maps Link:
   - Cập nhật `TourFormPage.tsx` tự động giải mã URL `query=` qua API Nominatim khi dán link mới.
   - Cập nhật `TourMap.tsx` để Fallback giải mã tọa độ cho các link cũ khi mở bản đồ, chống đè điểm (overlapping) nếu trùng tọa độ nhưng khác số thứ tự.
   - Sửa lỗi đè tọa độ khi các địa điểm vô tình bị lưu trùng link tìm kiếm.

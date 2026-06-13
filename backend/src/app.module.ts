@@ -47,6 +47,7 @@ import { MetricsModule } from './metrics/metrics.module';
 import { FinanceModule } from './finance/finance.module';
 import { AiModerationModule } from './ai-moderation/ai-moderation.module';
 import { SupportModule } from './support/support.module';
+import { WalletModule } from './wallet/wallet.module';
 
 @Module({
   imports: [
@@ -142,6 +143,7 @@ import { SupportModule } from './support/support.module';
     AiModerationModule,
     FinanceModule,
     SupportModule,
+    WalletModule,
   ],
   controllers: [AppController],
   providers: [

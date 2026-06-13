@@ -105,15 +105,24 @@
   position: relative;
   aspect-ratio: 16 / 9;
   width: 100%;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .tc-companion-manage-card__image img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
 .tc-companion-manage-card__no-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   background: var(--tc-bg-subtle);
