@@ -74,13 +74,22 @@ cp frontend/.env.example frontend/.env
 ```
 *(Trong file `.env` của backend, chú ý điền đầy đủ `DATABASE_URL`, `REDIS_HOST`, `SUPABASE_URL`, `SUPABASE_KEY`)*
 
-### 2. Khởi chạy bằng Docker Compose (Đề xuất)
-Phương pháp này giúp bạn chạy toàn bộ dự án (Redis cục bộ, Backend, Frontend) trong các Container độc lập mà không cần cài đặt lẻ tẻ môi trường Node.js.
+### 2. Khởi chạy bằng Docker Compose (Dành cho thành viên team)
+Phương pháp này giúp chạy toàn bộ dự án (Redis, Backend, Frontend) trong các Container mà không cần cài đặt Node.js.
 
+**⚠️ Chuẩn bị quan trọng trước khi chạy:**
+Đảm bảo các cổng **3000** (Backend), **8080** (Frontend), và **6379** (Redis) không bị phần mềm khác chiếm dụng. Nếu đang bị chiếm, dùng lệnh sau trên Terminal (Mac/Linux) để dọn dẹp:
+```bash
+kill -9 $(lsof -t -i:3000) $(lsof -t -i:8080) $(lsof -t -i:6379)
+```
+
+**Khởi chạy dự án:**
 Chỉ với 1 lệnh duy nhất tại thư mục gốc:
 ```bash
 docker-compose up -d --build
 ```
+> ⏳ **Thời gian chờ:** Quá trình tải library và build Docker lần đầu sẽ mất khoảng **1 đến 2 phút** (tùy tốc độ mạng). Hãy kiên nhẫn chờ đến khi terminal báo `Started` cho tất cả container.
+
 - **Frontend:** http://localhost:8080
 - **Backend API:** http://localhost:3000
 - **Swagger Docs:** http://localhost:3000/api/docs
@@ -92,7 +101,23 @@ docker-compose up -d --build
 docker-compose down
 ```
 
-### 3. Khởi chạy Thủ công (Môi trường Dev)
+### 3. Khởi chạy Thủ công (Chạy Local - Nhanh hơn cho Dev dùng Mac)
+Nếu bạn muốn sử dụng môi trường thật (Native) để CPU nhẹ hơn và Hot Reload nhanh hơn, hãy chạy Local.
+
+**⚠️ Chuẩn bị quan trọng trước khi chạy:**
+Đảm bảo các cổng **3000**, **5173** (Frontend Vite), và **6379** không bị chiếm dụng. Lệnh dọn dẹp port:
+```bash
+kill -9 $(lsof -t -i:3000) $(lsof -t -i:5173) $(lsof -t -i:6379)
+```
+
+Đảm bảo **Redis** đã được bật trên máy thật:
+```bash
+# Cài đặt và bật trên Mac:
+brew install redis
+brew services start redis
+```
+
+**Khởi chạy dự án:**
 ```bash
 # Terminal 1: Backend
 cd backend
