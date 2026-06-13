@@ -364,7 +364,8 @@ export class ToursService implements OnApplicationBootstrap {
         if (!nextAvailableSchedule) {
           if (
             t.tour_schedules.length === 0 &&
-            (t.start_date === null || t.start_date >= new Date())
+            t.start_date !== null &&
+            t.start_date >= new Date()
           ) {
             return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
@@ -630,6 +631,7 @@ export class ToursService implements OnApplicationBootstrap {
   }
 
   async getFeaturedTours() {
+    console.log('[DEBUG] getFeaturedTours is called!');
     // 1. Lấy tất cả tour đang hoạt động để lọc theo logic 'còn chỗ'
     const tours = await this.prisma.tours.findMany({
       where: {
@@ -697,7 +699,8 @@ export class ToursService implements OnApplicationBootstrap {
           // thì kiểm tra ngày start_date chính của tour (cho phép fallback)
           if (
             t.tour_schedules.length === 0 &&
-            (t.start_date === null || t.start_date >= new Date())
+            t.start_date !== null &&
+            t.start_date >= new Date()
           ) {
             return this.formatTourData(t as unknown as TourWithIncludes, null);
           }
@@ -956,14 +959,9 @@ export class ToursService implements OnApplicationBootstrap {
       throw new NotFoundException('Không tìm thấy hồ sơ hướng dẫn viên');
     }
 
-    // AI Auto-Moderation check
-    const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
-    const aiResult = await this.aiModeration.analyzeContent(
-      contentToAnalyze,
-      'TOUR_DESCRIPTION',
-    );
-    const visibilityStatus = aiResult.isFlagged ? 'hidden' : 'visible';
-    const businessStatus = aiResult.isFlagged ? 'draft' : 'published';
+    // Xác định trạng thái dựa trên input
+    const visibilityStatus = data.visibilityStatus || 'visible';
+    const businessStatus = data.businessStatus || 'draft';
 
     // Validate max days/nights
     if (
@@ -1047,21 +1045,6 @@ export class ToursService implements OnApplicationBootstrap {
           visibility_status: visibilityStatus,
         },
       });
-
-      // Nếu AI Flagged, tự động tạo Report
-      if (aiResult.isFlagged) {
-        await tx.reports.create({
-          data: {
-            reporter_user_id: userId, // Tạm dùng userId của chính người tạo vì AI báo cáo
-            target_type: 'TOUR',
-            tour_id: tour.id,
-            guide_profile_id: guideProfile.id,
-            reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
-            description: aiResult.reason,
-            status: 'open',
-          },
-        });
-      }
 
       // 2.2 Tạo lịch trình (Itinerary)
       if (data.itinerary && Array.isArray(data.itinerary)) {
@@ -1176,6 +1159,40 @@ export class ToursService implements OnApplicationBootstrap {
       return tour;
     });
     await this.invalidateCache();
+
+    // Run AI Auto-Moderation check in the background to avoid blocking the HTTP response
+    const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
+    this.aiModeration
+      .analyzeContent(contentToAnalyze, 'TOUR_DESCRIPTION')
+      .then(async (aiResult) => {
+        if (aiResult.isFlagged) {
+          // Update tour status and create report asynchronously
+          await this.prisma.$transaction(async (tx) => {
+            await tx.tours.update({
+              where: { id: result.id },
+              data: {
+                business_status: 'draft',
+                visibility_status: 'hidden',
+              },
+            });
+            await tx.reports.create({
+              data: {
+                reporter_user_id: userId,
+                target_type: 'TOUR',
+                tour_id: result.id,
+                guide_profile_id: guideProfile.id,
+                reason: 'Hệ thống tự động phát hiện vi phạm (AI Flagged)',
+                description: aiResult.reason,
+                status: 'open',
+              },
+            });
+          });
+        }
+      })
+      .catch((err) => {
+        console.error('Background AI Moderation failed:', err);
+      });
+
     return result;
   }
 
@@ -1666,13 +1683,15 @@ export class ToursService implements OnApplicationBootstrap {
       );
     }
 
-    // Kiểm tra xem ngày khởi hành có ở trong quá khứ không
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const scheduleDate = new Date(data.startDate);
-    if (scheduleDate < now) {
+    // Kiểm tra xem ngày khởi hành có ở trong quá khứ hoặc hôm nay không
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // So sánh chuỗi ngày (VD: "2026-06-13" <= "2026-06-13")
+    // data.startDate có dạng "YYYY-MM-DD"
+    if (data.startDate.split('T')[0] <= todayString) {
       throw new BadRequestException(
-        'Không thể tạo lịch khởi hành cho thời gian trong quá khứ',
+        'Vui lòng chọn ngày khởi hành từ ngày mai trở đi (không được mở tour trong ngày hôm nay)',
       );
     }
 

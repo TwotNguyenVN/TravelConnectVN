@@ -456,6 +456,67 @@
   font-weight: 500;
 }
 
+/* Timeline Effects */
+.timeline-start {
+  width: calc(100% + 15px) !important;
+  max-width: none !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: none !important;
+  margin-right: -15px !important; 
+  z-index: 2;
+  position: relative;
+}
+
+.timeline-middle {
+  width: calc(100% + 30px) !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  margin-left: -15px !important;
+  margin-right: -15px !important;
+  z-index: 1;
+  position: relative;
+}
+
+.timeline-end {
+  width: calc(100% + 15px) !important;
+  max-width: none !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-left: none !important;
+  margin-left: -15px !important;
+  z-index: 2;
+  position: relative;
+}
+
+.timeline-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.start-indicator {
+  background-color: var(--tc-primary);
+  margin-bottom: 4px;
+}
+
+.end-indicator {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  background-color: #64748b;
+  z-index: 10;
+}
+
 /* Status Icons on the Top-Right Corner of Daily Cells */
 .tc-day-expired-icon {
   position: absolute;

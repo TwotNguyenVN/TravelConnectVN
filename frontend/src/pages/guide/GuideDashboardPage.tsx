@@ -78,7 +78,8 @@ async function fetchData() {
     const total = 8; // 8 items to check
 
     if (personalData && personalData.fullName) score++; else missing.push('Họ và tên');
-    if (personalData && personalData.avatarUrl) score++; else missing.push('Ảnh đại diện');
+    const hasAvatar = (personalData && personalData.avatarUrl) || (profile && profile.avatarUrl);
+    if (hasAvatar) score++; else missing.push('Ảnh đại diện');
     if (personalData && personalData.phone) score++; else missing.push('Số điện thoại');
     
     if (profile && profile.bio && profile.bio.length > 20) score++; else missing.push('Giới thiệu bản thân (tối thiểu 20 ký tự)');
