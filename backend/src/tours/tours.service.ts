@@ -323,7 +323,6 @@ export class ToursService implements OnApplicationBootstrap {
       create: {
         user_id: guideUserId,
         balance: netRevenue,
-        status: 'active',
       },
     });
 
@@ -331,7 +330,7 @@ export class ToursService implements OnApplicationBootstrap {
     await tx.wallet_transactions.create({
       data: {
         wallet_id: wallet.id,
-        type: 'guide_income',
+        transaction_type: 'guide_income',
         amount: netRevenue,
         status: 'completed',
         description: 'Thu nhập từ việc dẫn tour',
