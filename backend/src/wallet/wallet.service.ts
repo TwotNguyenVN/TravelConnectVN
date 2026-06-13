@@ -70,7 +70,9 @@ export class WalletService {
     const tmnCode = process.env.VNP_TMNCODE;
     const secretKey = process.env.VNP_HASHSECRET;
     let vnpUrl = process.env.VNP_URL;
-    const returnUrl = process.env.FRONTEND_URL + '/user/wallet/vnpay-return'; // Frontend return URL
+    const returnUrl = process.env.VNP_RETURN_URL 
+      ? process.env.VNP_RETURN_URL.replace('/user/payments/vnpay-return', '/user/wallet/vnpay-return')
+      : 'http://localhost:5173/user/wallet/vnpay-return';
 
     const date = new Date();
     const createDate =
