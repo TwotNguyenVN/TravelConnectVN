@@ -55,6 +55,12 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 
 ## 📝 Latest Execution Notes
 
+- **2026-06-13:** Hoàn thiện tính năng Hybrid Geocoding cho Google Maps Link:
+  - Cập nhật `TourFormPage.tsx` tự động giải mã URL `query=` qua API Nominatim khi dán link mới.
+  - Cập nhật `TourMap.tsx` để Fallback giải mã tọa độ cho các link cũ khi mở bản đồ, chống đè điểm (overlapping) nếu trùng tọa độ nhưng khác số thứ tự.
+  - Sửa lỗi đè tọa độ khi các địa điểm vô tình bị lưu trùng link tìm kiếm.
+  - Đã thực hiện Pull Request tự động lên `develop`.
+
 - **07/06/2026:** Hoàn thành triển khai Phase Performance & Security:
   - Bổ sung Index vào `schema.prisma` cho các bảng heavy `public_users`, `tour_requests`, `payment_transactions` để tối ưu truy vấn.
   - Kiểm toán cấu hình bảo mật `ThrottlerModule` và `ValidationPipe` đã được thiết lập nghiêm ngặt từ trước, đáp ứng chuẩn Enterprise.
@@ -172,17 +178,29 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - `TourBookingPage`: Thiết lập Toast success `"Đã gửi yêu cầu tham gia tour"` ngay sau khi tạo request thành công trước khi forward sang VNPAY.
   - `GuideRequestsPage` / `CompanionManagementPage`: Thêm lớp bảo mật UX thông qua `window.confirm` cho các hành động mang tính phá hủy/không thể hoàn tác ("Từ chối" yêu cầu).
   - `ReportModal` / `AdminReportManagementPage`: Thêm loading overlay trên Report Form và dùng `window.prompt` bắt buộc nhập lý do cho Admin khi giải quyết khiếu nại.
-- **Regression Test Validation:** Toàn bộ các luồng chức năng MVP (Đăng ký, Đăng nhập, Duyệt hồ sơ, Đặt Tour, Thanh toán, Tìm bạn đồng hành, Khiếu nại) đều đã được kiểm tra (Verified) và hoạt động mượt mà E2E thông qua backend integration script (`test_regression.ts`). Không có lỗi phát sinh sau quá trình hardening. 
- # # #   2 0 2 6 - 0 6 - 1 2   ( B a c k e n d   D e b u g   &   H o t f i x )  
- -   * * S �a   l �i   B a c k e n d   b �  C r a s h   d o   R e d i s   ( E A D D R I N U S E   &   S o c k e t C l o s e d U n e x p e c t e d l y E r r o r ) : * *  
-     -   T � m   v �   k i l l   t i �n   t r � n h   Z o m b i e   a n g   c h i �m   g i �  c �n g   3 0 0 0 .  
-     -   C �u   h � n h   l �i   t o � n   b �  U p s t a s h   R e d i s   c o n n e c t i o n   t r o n g   \  p p . m o d u l e . t s \ ,   \  e d i s - i o . a d a p t e r . t s \ ,   \ s o c k e t / r e d i s . a d a p t e r . t s \   �  s �  d �n g   U R L   s c h e m e   \  e d i s s : / / \   c �   T L S   v �   p a s s w o r d .  
-     -   G i �i   q u y �t   m e r g e   c o n f l i c t s   v �i   n h � n h   \ d e v e l o p \   v �   t �o   P R   \ # 1 0 0 \   t h � n h   c � n g   q u a   G i t H u b   C L I .  
-     -   S �a   l �i   C I :   F i x   P r i s m a   S c h e m a   \ 	 o u r _ i m a g e s \   ( c h u y �n   t �  1 - t o - 1   t h � n h   1 - t o - m a n y )   v �   c �p   n h �t   T y p e S c r i p t   b i n d i n g s   t r o n g   a p p . m o d u l e ,   r e c o m m e n d a t i o n s . s e r v i c e ,   t o u r - r e q u e s t s . s e r v i c e .  
+- **Regression Test Validation:** Toàn bộ các luồng chức năng MVP (Đăng ký, Đăng nhập, Duyệt hồ sơ, Đặt Tour, Thanh toán, Tìm bạn đồng hành, Khiếu nại) đều đã được kiểm tra (Verified) và hoạt động mượt mà E2E thông qua backend integration script (`test_regression.ts`). Không có lỗi phát sinh sau quá trình hardening.
+ 
+ # # #   2 0 2 6 - 0 6 - 1 2   ( B a c k e n d   D e b u g   &   H o t f i x ) 
+ 
+ -   * * S �a   l �i   B a c k e n d   b �  C r a s h   d o   R e d i s   ( E A D D R I N U S E   &   S o c k e t C l o s e d U n e x p e c t e d l y E r r o r ) : * * 
+ 
+     -   T � m   v �   k i l l   t i �n   t r � n h   Z o m b i e   a n g   c h i �m   g i �  c �n g   3 0 0 0 . 
+ 
+     -   C �u   h � n h   l �i   t o � n   b �  U p s t a s h   R e d i s   c o n n e c t i o n   t r o n g   \  p p . m o d u l e . t s \ ,   \ 
+ e d i s - i o . a d a p t e r . t s \ ,   \ s o c k e t / r e d i s . a d a p t e r . t s \   �  s �  d �n g   U R L   s c h e m e   \ 
+ e d i s s : / / \   c �   T L S   v �   p a s s w o r d . 
+ 
+     -   G i �i   q u y �t   m e r g e   c o n f l i c t s   v �i   n h � n h   \ d e v e l o p \   v �   t �o   P R   \ # 1 0 0 \   t h � n h   c � n g   q u a   G i t H u b   C L I . 
+ 
+     -   S �a   l �i   C I :   F i x   P r i s m a   S c h e m a   \ 	 o u r _ i m a g e s \   ( c h u y �n   t �  1 - t o - 1   t h � n h   1 - t o - m a n y )   v �   c �p   n h �t   T y p e S c r i p t   b i n d i n g s   t r o n g   a p p . m o d u l e ,   r e c o m m e n d a t i o n s . s e r v i c e ,   t o u r - r e q u e s t s . s e r v i c e . 
+ 
      -   S �a   l �i   D o c k e r   B u i l d   C I :   C o p y   \ p r i s m a \   v �   \ p r i s m a . c o n f i g . t s \   t r ��c   k h i   c h �y   \ 
- p m   c i \   t r o n g   D o c k e r f i l e .  
-     -   S �a   l �i   P l a y w r i g h t   C I :   L o �i   b �  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b �  l �i   c �a   c �t   \ e m a i l \   t r o n g   b �n g   \  u t h . i d e n t i t i e s \   �  \ s c h e m a . p r i s m a \   �  c �   t h �  c h �y   M i g r a t i o n .  
-     -   S �a   l �i   P l a y w r i g h t   C I   ( t i �p ) :   L o �i   b �  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b �  l �i   c �a   c �t   \ c o n f i r m e d _ a t \   t r o n g   b �n g   \  u t h . u s e r s \   �  \ s c h e m a . p r i s m a \   �  c �   t h �  c h �y   M i g r a t i o n .  
+ p m   c i \   t r o n g   D o c k e r f i l e . 
+ 
+     -   S �a   l �i   P l a y w r i g h t   C I :   L o �i   b �  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b �  l �i   c �a   c �t   \ e m a i l \   t r o n g   b �n g   \  u t h . i d e n t i t i e s \   �  \ s c h e m a . p r i s m a \   �  c �   t h �  c h �y   M i g r a t i o n . 
+ 
+     -   S �a   l �i   P l a y w r i g h t   C I   ( t i �p ) :   L o �i   b �  \ @ d e f a u l t ( d b g e n e r a t e d ( . . . ) ) \   b �  l �i   c �a   c �t   \ c o n f i r m e d _ a t \   t r o n g   b �n g   \  u t h . u s e r s \   �  \ s c h e m a . p r i s m a \   �  c �   t h �  c h �y   M i g r a t i o n . 
+ 
  
 ### 2026-06-13 (Bug Fixes)
 - **Sửa lỗi lọc Tour Nổi Bật và Gợi Ý:** Cập nhật logic trong `tours.service.ts` và `recommendations.service.ts` để loại bỏ triệt để các tour có `start_date` bằng null khỏi màn hình trang chủ.
