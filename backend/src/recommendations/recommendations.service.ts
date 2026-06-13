@@ -135,10 +135,9 @@ export class RecommendationsService {
           if (!nextAvailableSchedule) {
             const isMainDateFuture =
               tour.start_date && tour.start_date >= new Date();
-            const isMainDateNull = tour.start_date === null;
 
-            // Nếu cả ngày chính cũng không hợp lệ, loại bỏ tour
-            if (!isMainDateFuture && !isMainDateNull) {
+            // Nếu ngày chính không hợp lệ (hoặc chưa có), loại bỏ tour
+            if (!isMainDateFuture) {
               return null;
             }
           }
