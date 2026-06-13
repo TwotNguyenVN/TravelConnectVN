@@ -105,11 +105,14 @@
 
 .tc-tour-manage-card__image {
   position: relative;
-  aspect-ratio: 16 / 9;
   width: 100%;
+  padding-top: 56.25%; /* 16:9 Aspect Ratio */
 }
 
 .tc-tour-manage-card__image img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;

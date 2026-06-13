@@ -149,6 +149,12 @@
   background: white;
 }
 
+.header-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
 .header-name-row {
   display: flex;
   align-items: center;

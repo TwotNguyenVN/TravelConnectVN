@@ -3,6 +3,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import TourFormPage from './TourFormPage';
 import { TourSchedulesTab } from './tabs/TourSchedulesTab';
 import { TourReviewsTab } from './tabs/TourReviewsTab';
+import { TourMapTab } from './tabs/TourMapTab';
 import './TourManagementPage.css';
 
 const TourManagementPage: React.FC = () => {
@@ -10,9 +11,9 @@ const TourManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialTab = queryParams.get('tab') as 'details' | 'schedules' | 'reviews' | null;
+  const initialTab = queryParams.get('tab') as 'details' | 'schedules' | 'reviews' | 'map' | null;
   
-  const [activeTab, setActiveTab] = useState<'details' | 'schedules' | 'reviews'>(initialTab || 'details');
+  const [activeTab, setActiveTab] = useState<'details' | 'schedules' | 'reviews' | 'map'>(initialTab || 'details');
   
   useEffect(() => {
     if (initialTab && initialTab !== activeTab) {
@@ -53,6 +54,12 @@ const TourManagementPage: React.FC = () => {
           >
             Đánh Giá
           </button>
+          <button 
+            className={`tc-manage-tab ${activeTab === 'map' ? 'active' : ''}`}
+            onClick={() => setActiveTab('map')}
+          >
+            Bản đồ
+          </button>
         </nav>
       </div>
 
@@ -60,6 +67,7 @@ const TourManagementPage: React.FC = () => {
         {activeTab === 'details' && <TourFormPage />}
         {activeTab === 'schedules' && <TourSchedulesTab tourId={id} />}
         {activeTab === 'reviews' && <TourReviewsTab tourId={id} />}
+        {activeTab === 'map' && <TourMapTab tourId={id} />}
       </div>
     </div>
   );
