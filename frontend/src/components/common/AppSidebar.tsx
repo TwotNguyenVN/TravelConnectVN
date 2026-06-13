@@ -43,6 +43,9 @@ export const AppSidebar: React.FC = () => {
           <NavLink to="/user/messages" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
             💬 Tin nhắn
           </NavLink>
+          <NavLink to="/user/wallet" className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}>
+            💳 Ví của tôi
+          </NavLink>
         </nav>
       </div>
 

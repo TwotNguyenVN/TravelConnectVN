@@ -67,10 +67,20 @@ export const NotificationPopover: React.FC<NotificationPopoverProps> = ({ onClos
     }
 
     // Basic routing logic based on entity type (can be expanded based on app routes)
-    if (notification.entity_type === 'tour_request' || notification.entity_type === 'booking') {
-      navigate('/user/bookings');
-    } else if (notification.entity_type === 'companion_request') {
-      navigate('/user/companion-requests');
+    const entityType = notification.entity_type?.toUpperCase() || '';
+    
+    if (entityType === 'TOUR_REQUEST' || entityType === 'BOOKING') {
+      if (notification.title?.toLowerCase().includes('mới')) {
+        navigate('/guide/tour-requests');
+      } else {
+        navigate('/user/bookings');
+      }
+    } else if (entityType === 'COMPANION_REQUEST') {
+      if (notification.title?.toLowerCase().includes('mới')) {
+        navigate('/user/companion-posts');
+      } else {
+        navigate('/user/companion-requests');
+      }
     } else {
       // Default action, maybe just close
     }

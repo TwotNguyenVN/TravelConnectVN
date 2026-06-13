@@ -499,7 +499,7 @@ create table if not exists public.payment_transactions (
     user_id uuid not null references public.users(id) on delete restrict,
     amount numeric(12,2) not null check (amount >= 0),
     currency_code char(3) not null default 'VND',
-    payment_method text not null check (payment_method in ('sandbox', 'vnpay', 'momo', 'bank_transfer', 'cash')),
+    payment_method text not null check (payment_method in ('sandbox', 'vnpay', 'momo', 'bank_transfer', 'cash', 'wallet')),
     status text not null default 'pending'
         check (status in ('pending', 'processing', 'paid', 'failed', 'expired', 'refunded', 'cancelled')),
     transaction_code text not null unique,
