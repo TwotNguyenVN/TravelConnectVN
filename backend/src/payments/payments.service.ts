@@ -325,12 +325,14 @@ export class PaymentsService {
               paid_at: isSuccess ? new Date() : undefined,
             },
           }),
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           ...(isSuccess
             ? [
                 this.prisma.tour_requests.update({
                   where: { id: transaction.tour_request_id },
                   data: { status: targetStatus },
                 }),
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 ...walletUpdates,
               ]
             : []),

@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, UseGuards, Req, Query, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Query,
+  Headers,
+} from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { AuthGuard } from '../common/guards/auth.guard';
 import { Request } from 'express';
@@ -36,26 +45,47 @@ export class WalletController {
   @Post('deposit')
   async deposit(@Req() req: AuthenticatedRequest, @Body() dto: DepositDto) {
     const ipAddr =
-      req.headers['x-forwarded-for'] ||
-      req.socket.remoteAddress ||
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (req.headers['x-forwarded-for'] as string) ||
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      (req.socket?.remoteAddress as string) ||
       '127.0.0.1';
-    
+
     // Instead of completing deposit instantly, return VNPay URL
-    const result = await this.walletService.createDepositUrl(req.user.id, dto, ipAddr as string);
-    return { success: true, message: 'Đang chuyển hướng đến VNPAY', data: result };
+    const result = await this.walletService.createDepositUrl(
+      req.user.id,
+      dto,
+      ipAddr,
+    );
+    return {
+      success: true,
+      message: 'Đang chuyển hướng đến VNPAY',
+      data: result,
+    };
   }
 
   @UseGuards(AuthGuard)
   @Post('withdraw')
   async withdraw(@Req() req: AuthenticatedRequest, @Body() dto: WithdrawDto) {
     const result = await this.walletService.withdraw(req.user.id, dto);
-    return { success: true, message: 'Rút tiền thành công, tiền đã bị trừ', data: result };
+    return {
+      success: true,
+      message: 'Rút tiền thành công, tiền đã bị trừ',
+      data: result,
+    };
   }
 
   @UseGuards(AuthGuard)
   @Post('pay-booking')
-  async payBooking(@Req() req: AuthenticatedRequest, @Body() body: { tourRequestId: string, paymentType: string }) {
-    return await this.walletService.payForBooking(req.user.id, body.tourRequestId, body.paymentType);
+  async payBooking(
+    @Req() req: AuthenticatedRequest,
+    @Body() body: { tourRequestId: string; paymentType: string },
+  ) {
+    return await this.walletService.payForBooking(
+      req.user.id,
+      body.tourRequestId,
+      body.paymentType,
+    );
   }
 
   // IPN Listener (Không dùng Auth Guard)

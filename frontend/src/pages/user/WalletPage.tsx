@@ -59,7 +59,7 @@ const WalletPage: React.FC = () => {
       setActionLoading(true);
       const res: any = await walletService.deposit(val, description || 'Nạp tiền vào ví');
       if (res && res.paymentUrl) {
-        window.location.href = res.paymentUrl;
+        window.location.assign(res.paymentUrl);
       } else {
         toast.success('Nạp tiền thành công!');
         setShowDeposit(false);

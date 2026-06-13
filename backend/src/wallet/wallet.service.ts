@@ -48,7 +48,8 @@ export class WalletService {
   }
 
   async createDepositUrl(userId: string, dto: DepositDto, ipAddr: string) {
-    if (dto.amount <= 0) throw new BadRequestException('Số tiền nạp phải lớn hơn 0');
+    if (dto.amount <= 0)
+      throw new BadRequestException('Số tiền nạp phải lớn hơn 0');
 
     const wallet = await this.getWallet(userId);
 
@@ -70,8 +71,11 @@ export class WalletService {
     const tmnCode = process.env.VNP_TMNCODE;
     const secretKey = process.env.VNP_HASHSECRET;
     let vnpUrl = process.env.VNP_URL;
-    const returnUrl = process.env.VNP_RETURN_URL 
-      ? process.env.VNP_RETURN_URL.replace('/user/payments/vnpay-return', '/user/wallet/vnpay-return')
+    const returnUrl = process.env.VNP_RETURN_URL
+      ? process.env.VNP_RETURN_URL.replace(
+          '/user/payments/vnpay-return',
+          '/user/wallet/vnpay-return',
+        )
       : 'http://localhost:5173/user/wallet/vnpay-return';
 
     const date = new Date();
@@ -153,7 +157,10 @@ export class WalletService {
           return { RspCode: '04', Message: 'Invalid amount' };
         }
 
-        if (transaction.status === 'completed' || transaction.status === 'failed') {
+        if (
+          transaction.status === 'completed' ||
+          transaction.status === 'failed'
+        ) {
           return { RspCode: '02', Message: 'Order already confirmed' };
         }
 
@@ -186,7 +193,8 @@ export class WalletService {
   }
 
   async withdraw(userId: string, dto: WithdrawDto) {
-    if (dto.amount <= 0) throw new BadRequestException('Số tiền rút phải lớn hơn 0');
+    if (dto.amount <= 0)
+      throw new BadRequestException('Số tiền rút phải lớn hơn 0');
 
     const wallet = await this.getWallet(userId);
 
@@ -219,7 +227,11 @@ export class WalletService {
     });
   }
 
-  async payForBooking(userId: string, tourRequestId: string, paymentType: string) {
+  async payForBooking(
+    userId: string,
+    tourRequestId: string,
+    paymentType: string,
+  ) {
     return this.prisma.$transaction(async (tx) => {
       // 1. Lấy thông tin Tour Request
       const tourRequest = await tx.tour_requests.findUnique({
@@ -228,7 +240,9 @@ export class WalletService {
       });
 
       if (!tourRequest || tourRequest.user_id !== userId) {
-        throw new BadRequestException('Yêu cầu đặt tour không tồn tại hoặc không hợp lệ');
+        throw new BadRequestException(
+          'Yêu cầu đặt tour không tồn tại hoặc không hợp lệ',
+        );
       }
 
       // 2. Tính toán số tiền
@@ -276,7 +290,8 @@ export class WalletService {
       });
 
       // 5. Cập nhật tour_requests
-      const targetStatus = paymentType === 'deposit' ? 'partially_paid' : 'paid';
+      const targetStatus =
+        paymentType === 'deposit' ? 'partially_paid' : 'paid';
       await tx.tour_requests.update({
         where: { id: tourRequestId },
         data: { status: targetStatus },
@@ -303,7 +318,12 @@ export class WalletService {
         },
       });
 
-      return { success: true, message: 'Thanh toán thành công qua ví', walletTransaction, wallet: updatedWallet };
+      return {
+        success: true,
+        message: 'Thanh toán thành công qua ví',
+        walletTransaction,
+        wallet: updatedWallet,
+      };
     });
   }
 }
