@@ -13,7 +13,7 @@ describe('WalletController', () => {
       providers: [
         { provide: WalletService, useValue: {} },
         { provide: SupabaseService, useValue: {} },
-        { provide: PrismaService, useValue: {} }
+        { provide: PrismaService, useValue: {} },
       ],
     }).compile();
 

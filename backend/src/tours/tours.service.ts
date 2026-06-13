@@ -249,7 +249,10 @@ export class ToursService implements OnApplicationBootstrap {
               data: { status: 'completed' },
             });
 
-            if (targetStatus === 'completed' && schedule.tours.guide_profiles?.user_id) {
+            if (
+              targetStatus === 'completed' &&
+              schedule.tours.guide_profiles?.user_id
+            ) {
               await this.processScheduleCompletion(
                 tx,
                 schedule.id,
@@ -270,7 +273,7 @@ export class ToursService implements OnApplicationBootstrap {
   }
 
   private async processScheduleCompletion(
-    tx: any,
+    tx: Prisma.TransactionClient,
     scheduleId: string,
     guideUserId: string,
     price: number,
@@ -296,7 +299,7 @@ export class ToursService implements OnApplicationBootstrap {
     if (participantCount === 0) return;
 
     const grossRevenue = participantCount * price;
-    const systemFee = grossRevenue * 0.10;
+    const systemFee = grossRevenue * 0.1;
     const netRevenue = grossRevenue - systemFee;
 
     // Insert guide_incomes
