@@ -370,7 +370,7 @@ export const HomePage: React.FC = () => {
             gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', 
             gap: 'var(--tc-spacing-5)'
           }}>
-            {recommendedTours.map((tour: any) => (
+            {recommendedTours.slice(0, 4).map((tour: any) => (
               <TourCard 
                 key={tour.id} 
                 tour={tour} 

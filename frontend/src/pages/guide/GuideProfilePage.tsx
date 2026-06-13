@@ -539,6 +539,21 @@ const GuideProfilePage: React.FC = () => {
             </p>
           </div>
           <div className="header-buttons">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => window.location.reload()}
+            >
+              Hủy thay đổi
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              isLoading={saving}
+              onClick={(e: any) => handleSave(e)}
+            >
+              Lưu hồ sơ
+            </Button>
             <input
               type="file"
               ref={coverInputRef}

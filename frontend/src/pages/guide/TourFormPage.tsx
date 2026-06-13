@@ -512,7 +512,7 @@ async function fetchTourDetail() {
             currentItem.lng = geo.lng;
             toast.success(`Tự động tìm thấy vị trí cho "${searchQuery.substring(0, 30)}${searchQuery.length > 30 ? '...' : ''}"`);
           } else {
-            toast.warning(`Không tìm thấy tọa độ tự động. Bạn vẫn có thể lưu nhưng bản đồ sẽ tự động tìm kiếm khi hiển thị.`);
+            toast.info(`Đã lưu liên kết bản đồ. Vị trí sẽ tự động hiển thị trên bản đồ chuyến đi.`);
           }
         }
       }

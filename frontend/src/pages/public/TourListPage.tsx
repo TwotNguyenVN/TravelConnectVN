@@ -16,7 +16,7 @@ export const TourListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState({
     page: 1,
-    limit: 10,
+    limit: 6,
     sortBy: 'newest',
     province: searchParams.get('province') || '',
     categoryId: '',
@@ -24,6 +24,7 @@ export const TourListPage: React.FC = () => {
     maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : 100000000,
     startDate: searchParams.get('startDate') || ''
   });
+  const [totalPages, setTotalPages] = useState(1);
 
   const [categories, setCategories] = useState<{ id: string, name: string }[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -72,7 +73,7 @@ export const TourListPage: React.FC = () => {
     setMaxPrice(100000000);
     setFilters({
       page: 1,
-      limit: 10,
+      limit: 6,
       sortBy: sortBy,
       province: '',
       categoryId: '',
@@ -122,6 +123,7 @@ export const TourListPage: React.FC = () => {
       if (response.success && response.data) {
         // Tours are in response.data.data due to pagination structure
         setTours(response.data.data || []);
+        setTotalPages(response.data.totalPages || 1);
       } else {
         setError('Không tìm thấy dữ liệu tour.');
       }
@@ -344,13 +346,38 @@ export const TourListPage: React.FC = () => {
           </div>
 
           {/* Pagination */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--tc-spacing-8)', gap: 'var(--tc-spacing-2)' }}>
-            <Button variant="outline" size="small" disabled>Trước</Button>
-            <Button variant="primary" size="small">1</Button>
-            <Button variant="outline" size="small">2</Button>
-            <Button variant="outline" size="small">3</Button>
-            <Button variant="outline" size="small">Sau</Button>
-          </div>
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 'var(--tc-spacing-8)', gap: 'var(--tc-spacing-2)' }}>
+              <Button 
+                variant="outline" 
+                size="small" 
+                disabled={filters.page === 1}
+                onClick={() => setFilters({ ...filters, page: filters.page - 1 })}
+              >
+                Trước
+              </Button>
+              
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                <Button 
+                  key={page}
+                  variant={filters.page === page ? "primary" : "outline"} 
+                  size="small"
+                  onClick={() => setFilters({ ...filters, page })}
+                >
+                  {page}
+                </Button>
+              ))}
+
+              <Button 
+                variant="outline" 
+                size="small" 
+                disabled={filters.page === totalPages}
+                onClick={() => setFilters({ ...filters, page: filters.page + 1 })}
+              >
+                Sau
+              </Button>
+            </div>
+          )}
         </main>
       </div>
     </div>

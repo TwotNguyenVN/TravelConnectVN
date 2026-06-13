@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Badge, Button, LoadingBlock, ReviewModal } from '../../components/common';
+import { Card, Badge, Button, LoadingBlock, ReviewModal, Modal } from '../../components/common';
 import { useToast } from '../../contexts/ToastContext';
 import tourRequestService from '../../services/tourRequestService';
 import { companionService } from '../../services/companionService';
@@ -47,6 +47,10 @@ export const BookingManagementPage: React.FC = () => {
     type: 'tour' | 'guide' | 'companion';
     activity: NormalizedActivity | null;
   }>({ isOpen: false, type: 'tour', activity: null });
+  const [cancelModal, setCancelModal] = useState<{
+    isOpen: boolean;
+    activity: NormalizedActivity | null;
+  }>({ isOpen: false, activity: null });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -165,30 +169,24 @@ export const BookingManagementPage: React.FC = () => {
   };
 
   async function handleCancelTour(activity: NormalizedActivity) {
+    setCancelModal({ isOpen: true, activity });
+  };
+
+  async function confirmCancelTour() {
+    if (!cancelModal.activity) return;
+    const activity = cancelModal.activity;
     const hasPaid = activity.amountPaid && activity.amountPaid > 0;
-    let confirmMsg = 'Bạn có chắc chắn muốn hủy yêu cầu đặt tour này?';
     
-    if (hasPaid) {
-      confirmMsg = `Bạn đã thanh toán ${activity.amountPaid?.toLocaleString()}đ cho tour này.
-
-Theo chính sách hoàn tiền:
-- Hủy trước ngày khởi hành 3 ngày: Hoàn 100% số tiền đã trả.
-- Hủy trước ngày khởi hành 1-2 ngày: Hoàn 50% số tiền đã trả.
-- Hủy trong ngày khởi hành: Không hoàn tiền.
-
-Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc chắn muốn hủy đặt tour?`;
-    }
-
-    if (window.confirm(confirmMsg)) {
-      try {
-        const response = await tourRequestService.cancelRequest(activity.originalId, 'Người dùng hủy từ trang quản lý');
-        if (response.success) {
-          toast.success(hasPaid ? 'Đã hủy đặt tour và gửi yêu cầu hoàn tiền thành công!' : 'Đã hủy đặt tour thành công.');
-          fetchData();
-        }
-      } catch (error) {
-        toast.error('Có lỗi xảy ra khi hủy đặt tour');
+    try {
+      const response = await tourRequestService.cancelRequest(activity.originalId, 'Người dùng hủy từ trang quản lý');
+      if (response.success) {
+        toast.success(hasPaid ? 'Đã hủy đặt tour và gửi yêu cầu hoàn tiền thành công!' : 'Đã hủy đặt tour thành công.');
+        fetchData();
       }
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi hủy đặt tour');
+    } finally {
+      setCancelModal({ isOpen: false, activity: null });
     }
   };
 
@@ -448,6 +446,58 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
                         </div>
                       </div>
                     )}
+
+                    <div className="tc-booking-quick-actions">
+                      {activity.type === 'tour' ? (
+                        <>
+                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && (
+                            <Button 
+                              variant="outline" 
+                              onClick={() => navigate(`/tours/${activity.entityId}/map`)}
+                              className="tc-btn-quick tc-btn-map"
+                            >
+                              🗺️ Bản đồ lịch trình
+                            </Button>
+                          )}
+                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && activity.guideUserId && (
+                            <Button 
+                              variant="outline" 
+                              onClick={() => handleOpenDirectChat(activity.guideUserId)}
+                              className="tc-btn-quick tc-btn-chat"
+                            >
+                              💬 Nhắn tin hướng dẫn viên
+                            </Button>
+                          )}
+                          <Button variant="outline" className="tc-btn-quick" onClick={() => navigate(`/tours/${activity.entityId}`)}>
+                            Xem chi tiết tour
+                          </Button>
+                        </>
+                      ) : (
+                        <>
+                          {activity.status === 'approved' && (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => handleOpenDirectChat(activity.guideId)}
+                                className="tc-btn-quick tc-btn-chat"
+                              >
+                                💬 Nhắn tin chủ bài
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                onClick={() => handleOpenGroupChat(activity.entityId)}
+                                className="tc-btn-quick tc-btn-chat"
+                              >
+                                👥 Nhóm chat chuyến đi
+                              </Button>
+                            </>
+                          )}
+                          <Button variant="outline" className="tc-btn-quick" onClick={() => navigate(`/companions/${activity.entityId}`)}>
+                            Xem bài viết
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   <div className="tc-booking-payment">
@@ -508,32 +558,6 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
                             </>
                           )}
 
-                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && (
-                            <Button 
-                              variant="outline" 
-                              fullWidth 
-                              onClick={() => navigate(`/tours/${activity.entityId}/map`)}
-                              className="tc-btn-map"
-                            >
-                              🗺️ Bản đồ lịch trình
-                            </Button>
-                          )}
-
-                          {['approved', 'payment_pending', 'paid', 'completed'].includes(activity.status) && activity.guideUserId && (
-                            <Button 
-                              variant="outline" 
-                              fullWidth 
-                              onClick={() => handleOpenDirectChat(activity.guideUserId)}
-                              className="tc-btn-chat"
-                            >
-                              💬 Nhắn tin hướng dẫn viên
-                            </Button>
-                          )}
-
-                          <Button variant="outline" fullWidth onClick={() => navigate(`/tours/${activity.entityId}`)}>
-                            Xem chi tiết tour
-                          </Button>
-
                           {(activity.status === 'completed' || activity.status === 'finished') && (
                             <div className="tc-review-container">
                               <span className="tc-review-prompt">Chuyến đi đã kết thúc, hãy chia sẻ cảm nhận của bạn!</span>
@@ -588,31 +612,6 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
                               Hủy yêu cầu
                             </Button>
                           )}
-                          
-                          {activity.status === 'approved' && (
-                            <div className="tc-chat-actions" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                              <Button 
-                                variant="primary" 
-                                fullWidth 
-                                onClick={() => handleOpenDirectChat(activity.guideId)}
-                                className="tc-btn-chat"
-                              >
-                                💬 Nhắn tin chủ bài
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                fullWidth 
-                                onClick={() => handleOpenGroupChat(activity.entityId)}
-                                className="tc-btn-chat"
-                              >
-                                👥 Nhóm chat chuyến đi
-                              </Button>
-                            </div>
-                          )}
-
-                          <Button variant="outline" fullWidth onClick={() => navigate(`/companions/${activity.entityId}`)}>
-                            Xem bài viết
-                          </Button>
                           
                           {(activity.status === 'completed' || activity.status === 'finished') && (
                             <div className="tc-companion-completed-container" style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
@@ -700,6 +699,49 @@ Hệ thống sẽ ghi nhận và hoàn tiền tự động. Bạn có chắc ch�
           onSuccess={handleReviewSuccess}
         />
       )}
+
+      <Modal
+        isOpen={cancelModal.isOpen}
+        onClose={() => setCancelModal({ isOpen: false, activity: null })}
+        title="Xác nhận hủy đặt tour"
+        footer={
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+            <Button variant="outline" onClick={() => setCancelModal({ isOpen: false, activity: null })}>
+              Hủy
+            </Button>
+            <Button variant="danger" onClick={confirmCancelTour}>
+              Đồng ý hủy tour
+            </Button>
+          </div>
+        }
+      >
+        {cancelModal.activity && (
+          <div style={{ padding: 'var(--tc-spacing-2) 0' }}>
+            <p style={{ marginBottom: 'var(--tc-spacing-4)' }}>
+              Bạn có chắc chắn muốn hủy yêu cầu đặt tour <strong>{cancelModal.activity.title}</strong>?
+            </p>
+            
+            {cancelModal.activity.amountPaid && cancelModal.activity.amountPaid > 0 ? (
+              <div style={{ background: 'var(--tc-bg-surface)', padding: 'var(--tc-spacing-4)', borderRadius: 'var(--tc-radius-md)', border: '1px solid var(--tc-border)' }}>
+                <p style={{ fontWeight: 600, color: 'var(--tc-primary)', marginBottom: 'var(--tc-spacing-3)' }}>
+                  Bạn đã thanh toán {cancelModal.activity.amountPaid.toLocaleString()}đ cho tour này.
+                </p>
+                <div style={{ fontSize: 'var(--tc-font-size-sm)', color: 'var(--tc-text-secondary)', lineHeight: 1.6 }}>
+                  <p style={{ fontWeight: 600, marginBottom: 'var(--tc-spacing-2)', color: 'var(--tc-text-primary)' }}>Theo chính sách hoàn tiền:</p>
+                  <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <li>Hủy trước ngày khởi hành 3 ngày: Hoàn 100% số tiền đã trả.</li>
+                    <li>Hủy trước ngày khởi hành 1-2 ngày: Hoàn 50% số tiền đã trả.</li>
+                    <li>Hủy trong ngày khởi hành: Không hoàn tiền.</li>
+                  </ul>
+                  <p style={{ marginTop: 'var(--tc-spacing-3)', fontStyle: 'italic' }}>
+                    Hệ thống sẽ tự động ghi nhận và xử lý hoàn tiền dựa trên thời điểm bạn hủy.
+                  </p>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
