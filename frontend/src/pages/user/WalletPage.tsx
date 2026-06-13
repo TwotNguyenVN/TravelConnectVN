@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useToast } from '../../contexts/ToastContext';
-import walletService, { Wallet, WalletTransaction } from '../../services/walletService';
+import walletService, { type Wallet, type WalletTransaction } from '../../services/walletService';
 import './WalletPage.css';
 
 const formatCurrency = (amount: number) => {
