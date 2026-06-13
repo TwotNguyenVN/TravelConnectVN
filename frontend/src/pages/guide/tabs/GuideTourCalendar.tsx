@@ -9,6 +9,9 @@ interface Schedule {
   max_participants: number;
   current_participants?: number;
   status: string;
+  tourTitle?: string;
+  numDays?: number;
+  timelinePosition?: 'single' | 'start' | 'middle' | 'end';
 }
 
 interface GuideTourCalendarProps {
@@ -110,7 +113,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         dateObj, 
         isOtherMonth: true,
         schedules: [],
-        isPast: dateObj < today 
+        isPast: dateObj <= today 
       });
     }
     
@@ -121,10 +124,37 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
       
       const daySchedules = schedules.filter(s => {
         const sDate = new Date(s.start_date);
-        return formatDateLocal(sDate) === dateString;
+        sDate.setHours(0,0,0,0);
+        const eDate = new Date(sDate);
+        const durationDays = s.numDays || 1;
+        eDate.setDate(eDate.getDate() + durationDays - 1);
+        
+        return dateObj >= sDate && dateObj <= eDate;
+      }).map(s => {
+        const sDate = new Date(s.start_date);
+        sDate.setHours(0,0,0,0);
+        const eDate = new Date(sDate);
+        const durationDays = s.numDays || 1;
+        eDate.setDate(eDate.getDate() + durationDays - 1);
+
+        let timelinePosition: 'single' | 'start' | 'middle' | 'end' = 'single';
+        if (durationDays > 1) {
+          if (formatDateLocal(dateObj) === formatDateLocal(sDate)) {
+            timelinePosition = 'start';
+          } else if (formatDateLocal(dateObj) === formatDateLocal(eDate)) {
+            timelinePosition = 'end';
+          } else {
+            timelinePosition = 'middle';
+          }
+        }
+
+        return {
+          ...s,
+          timelinePosition
+        };
       });
       
-      const isPast = dateObj < today;
+      const isPast = dateObj <= today;
 
       days.push({
         day: d,
@@ -145,7 +175,7 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
         dateObj, 
         isOtherMonth: true,
         schedules: [],
-        isPast: dateObj < today 
+        isPast: dateObj <= today 
       });
       nextMonthDay++;
     }
@@ -328,18 +358,28 @@ const GuideTourCalendar: React.FC<GuideTourCalendarProps> = ({ schedules, onDate
                       <div className="tc-day-schedules-list">
                         {dayData.schedules.map((sch: any) => {
                           const computedStatus = getScheduleStatus(sch);
+                          const timelineClass = sch.timelinePosition ? `timeline-${sch.timelinePosition}` : 'timeline-single';
+                          
                           return (
                             <div 
                               key={sch.id} 
-                              className={`tc-calendar-schedule-pill status-${computedStatus}`}
+                              className={`tc-calendar-schedule-pill status-${computedStatus} ${timelineClass}`}
                               title={sch.tourTitle || "Lịch khởi hành"}
                             >
-                              <div className="pill-text-container">
-                                {sch.tourTitle && <span className="pill-tour-title">{sch.tourTitle}</span>}
-                                <div className="pill-details">
-                                  <span className="pill-price">💵 {formatPrice(sch.price)}</span>
-                                  <span className="pill-slots">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                              <div className="pill-text-container" style={{ position: 'relative' }}>
+                                <div style={{ visibility: sch.timelinePosition === 'middle' || sch.timelinePosition === 'end' ? 'hidden' : 'visible' }}>
+                                  {(sch.timelinePosition === 'start' || sch.timelinePosition === 'middle' || sch.timelinePosition === 'end') && (
+                                    <span className="timeline-indicator start-indicator">Bắt đầu</span>
+                                  )}
+                                  {sch.tourTitle && <span className="pill-tour-title">{sch.tourTitle}</span>}
+                                  <div className="pill-details">
+                                    <span className="pill-price">💵 {formatPrice(sch.price)}</span>
+                                    <span className="pill-slots">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                                  </div>
                                 </div>
+                                {sch.timelinePosition === 'end' && (
+                                  <span className="timeline-indicator end-indicator">Kết thúc</span>
+                                )}
                               </div>
                             </div>
                           );

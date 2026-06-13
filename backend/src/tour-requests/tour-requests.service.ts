@@ -120,7 +120,7 @@ export class TourRequestsService {
         user_id: userId,
         participant_count: participantCount,
         note,
-        status: 'pending',
+        status: 'approved',
         price_at_booking: priceAtBooking,
       },
       include: {
@@ -134,8 +134,18 @@ export class TourRequestsService {
       'tour_request.created',
       'TOUR_REQUEST',
       request.id,
-      { tour_title: tour.title },
+      { tour_title: tour.title, auto_approved: true },
     );
+
+    // 7. Thông báo cho Guide
+    await this.notificationsService.create({
+      user_id: tour.guide_profiles.user_id,
+      title: 'Khách hàng mới đặt tour',
+      content: `Một khách hàng vừa đặt tour "${tour.title}". Hệ thống đã tự động duyệt thành công và khách đang tiến hành thanh toán.`,
+      type: 'tour_request',
+      entity_type: 'TOUR_REQUEST',
+      entity_id: request.id,
+    });
 
     return request;
   }

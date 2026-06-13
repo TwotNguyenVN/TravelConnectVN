@@ -18,6 +18,7 @@ interface CombinedSchedule {
   tourId: string;
   tourTitle: string;
   tourCover?: string;
+  numDays?: number;
 }
 
 interface TourOption {
@@ -92,6 +93,7 @@ const GuideSchedulesPage: React.FC = () => {
                   tourId: t.id,
                   tourTitle: t.title,
                   tourCover: t.cover || (tourDetail.tour_images?.[0]?.image_url) || t.cover,
+                  numDays: tourDetail.num_days || t.num_days || 1,
                 };
               });
               return tourSchedules;
@@ -126,12 +128,19 @@ function formatDateLocal(date: Date) {
 
   // --- View schedule detail handler (existing) ---
   function handleDateClick(date: Date, _schedule?: any) {
-    const dateString = formatDateLocal(date);
+    const dateObj = new Date(date);
+    dateObj.setHours(0, 0, 0, 0);
+
     const daySchedules = schedules.filter(s => {
       const sDate = new Date(s.start_date);
-      const sDateString = formatDateLocal(sDate);
-      return sDateString === dateString;
+      sDate.setHours(0, 0, 0, 0);
+      const eDate = new Date(sDate);
+      const durationDays = s.numDays || 1;
+      eDate.setDate(eDate.getDate() + durationDays - 1);
+      
+      return dateObj >= sDate && dateObj <= eDate;
     });
+
     setSelectedDate(date);
     setSelectedSchedules(daySchedules);
     setIsViewModalOpen(true);
@@ -341,14 +350,44 @@ function formatDateLocal(date: Date) {
                 const dateString = formatDateLocal(day);
                 const daySchedules = schedules.filter(s => {
                   const sDate = new Date(s.start_date);
-                  const sDateString = formatDateLocal(sDate);
-                  return sDateString === dateString;
+                  sDate.setHours(0,0,0,0);
+                  const eDate = new Date(sDate);
+                  const durationDays = s.numDays || 1;
+                  eDate.setDate(eDate.getDate() + durationDays - 1);
+                  const dObj = new Date(day);
+                  dObj.setHours(0,0,0,0);
+                  
+                  return dObj >= sDate && dObj <= eDate;
+                }).map(s => {
+                  const sDate = new Date(s.start_date);
+                  sDate.setHours(0,0,0,0);
+                  const eDate = new Date(sDate);
+                  const durationDays = s.numDays || 1;
+                  eDate.setDate(eDate.getDate() + durationDays - 1);
+                  const dObj = new Date(day);
+                  dObj.setHours(0,0,0,0);
+
+                  let timelinePosition = 'single';
+                  if (durationDays > 1) {
+                    if (formatDateLocal(dObj) === formatDateLocal(sDate)) {
+                      timelinePosition = 'start';
+                    } else if (formatDateLocal(dObj) === formatDateLocal(eDate)) {
+                      timelinePosition = 'end';
+                    } else {
+                      timelinePosition = 'middle';
+                    }
+                  }
+
+                  return {
+                    ...s,
+                    timelinePosition
+                  };
                 });
 
                 const isToday = new Date().toDateString() === day.toDateString();
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
-                const isFuture = day >= today;
+                const isFuture = day > today;
 
                 return (
                   <div key={idx} className={`weekly-day-column ${isToday ? 'is-today' : ''}`}>
@@ -371,31 +410,40 @@ function formatDateLocal(date: Date) {
                         daySchedules.map(sch => {
                           const fillPercent = Math.min(100, Math.round(((sch.current_participants || 0) / sch.max_participants) * 100));
                           const computedStatus = getScheduleStatus(sch);
+                          const timelineClass = `timeline-${sch.timelinePosition}`;
                           return (
                             <div
                               key={sch.id}
-                              className={`weekly-schedule-card status-${computedStatus}`}
+                              className={`weekly-schedule-card status-${computedStatus} ${timelineClass}`}
                               onClick={() => handleDateClick(day)}
-                              title={`${sch.tourTitle} - Click để xem chi tiết`}
+                              style={{ position: 'relative' }}
                             >
-                              {sch.tourCover && (
-                                <div className="weekly-sch-image">
-                                  <img src={sch.tourCover} alt={sch.tourTitle} />
-                                  <span className={`status-badge status-${computedStatus}`}>
-                                    {getStatusLabel(computedStatus)}
-                                  </span>
-                                </div>
-                              )}
-                              <div className="weekly-sch-body">
-                                <div className="weekly-sch-title" title={sch.tourTitle}>{sch.tourTitle}</div>
-                                <div className="weekly-sch-info">
-                                  <span className="sch-price">💵 {sch.price.toLocaleString('vi-VN')} đ</span>
-                                  <span className="sch-capacity">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
-                                </div>
-                                <div className="sch-progress-bar-container">
-                                  <div className="sch-progress-bar" style={{ width: `${fillPercent}%` }}></div>
+                              <div style={{ visibility: sch.timelinePosition === 'middle' || sch.timelinePosition === 'end' ? 'hidden' : 'visible' }}>
+                                {sch.tourCover && (
+                                  <div className="weekly-sch-image">
+                                    {(sch.timelinePosition === 'start' || sch.timelinePosition === 'middle' || sch.timelinePosition === 'end') && (
+                                      <span className="timeline-indicator start-indicator-weekly">Bắt đầu</span>
+                                    )}
+                                    <img src={sch.tourCover} alt={sch.tourTitle} />
+                                    <span className={`status-badge status-${computedStatus}`}>
+                                      {getStatusLabel(computedStatus)}
+                                    </span>
+                                  </div>
+                                )}
+                                <div className="weekly-sch-body">
+                                  <div className="weekly-sch-title" title={sch.tourTitle}>{sch.tourTitle}</div>
+                                  <div className="weekly-sch-info">
+                                    <span className="sch-price">💵 {sch.price.toLocaleString('vi-VN')} đ</span>
+                                    <span className="sch-capacity">👥 {sch.current_participants || 0}/{sch.max_participants}</span>
+                                  </div>
+                                  <div className="sch-progress-bar-container">
+                                    <div className="sch-progress-bar" style={{ width: `${fillPercent}%` }}></div>
+                                  </div>
                                 </div>
                               </div>
+                              {sch.timelinePosition === 'end' && (
+                                <span className="timeline-indicator end-indicator-weekly">Kết thúc</span>
+                              )}
                             </div>
                           );
                         })

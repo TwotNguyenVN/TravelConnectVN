@@ -68,6 +68,21 @@ export const RegisterPage: React.FC = () => {
     }
   };
 
+  async function handleGoogleRegister() {
+    setErrorMsg(null);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/onboarding?role=${selectedRole}`,
+        },
+      });
+      if (error) throw error;
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Lỗi đăng ký bằng Google. Vui lòng thử lại.');
+    }
+  };
+
   return (
     <div className="tc-role-page">
       <div className="tc-role-banner">
@@ -161,6 +176,37 @@ export const RegisterPage: React.FC = () => {
               Đăng ký ngay
             </Button>
           </form>
+          
+          <div className="tc-auth-divider" style={{ margin: '35px 0' }}>
+            <span style={{ fontSize: '15px', color: '#999', background: '#fff', padding: '0 15px' }}>Hoặc đăng ký bằng</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleGoogleRegister}
+            className="tc-auth-google-btn"
+            style={{ 
+              height: '56px', 
+              borderRadius: '15px', 
+              border: '1px solid #ddd', 
+              fontSize: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              width: '100%',
+              background: '#fff',
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            <img 
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
+              alt="Google" 
+              style={{ width: '22px' }}
+            />
+            Tiếp tục với Google
+          </button>
           
           <div className="tc-auth-footer" style={{ marginTop: '40px', paddingTop: '30px' }}>
             <p style={{ fontSize: '17px' }}>
