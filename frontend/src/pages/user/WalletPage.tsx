@@ -33,8 +33,8 @@ const WalletPage: React.FC = () => {
         walletService.getMyWallet(),
         walletService.getTransactions()
       ]);
-      setWallet(walletRes.data);
-      setTransactions(txRes.data);
+      setWallet(walletRes);
+      setTransactions(txRes);
     } catch (error) {
       console.error(error);
       toast.error('Không thể tải dữ liệu ví');
@@ -55,11 +55,15 @@ const WalletPage: React.FC = () => {
     }
     try {
       setActionLoading(true);
-      await walletService.deposit(val, description || 'Nạp tiền vào ví');
-      toast.success('Nạp tiền thành công!');
-      setShowDeposit(false);
-      resetForm();
-      fetchData();
+      const res: any = await walletService.deposit(val, description || 'Nạp tiền vào ví');
+      if (res && res.paymentUrl) {
+        window.location.href = res.paymentUrl;
+      } else {
+        toast.success('Nạp tiền thành công!');
+        setShowDeposit(false);
+        resetForm();
+        fetchData();
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Lỗi khi nạp tiền');
     } finally {
