@@ -131,6 +131,25 @@ cd frontend
 npm install
 npm run dev
 ```
+
+### 4. Khởi chạy Hybrid (Cách tốt nhất dành cho máy Windows)
+Vì máy tính Windows không hỗ trợ cài trực tiếp Redis, bạn có thể kết hợp sức mạnh của cả Docker và Local để đạt tốc độ code nhanh nhất:
+
+**Bước 1:** Chỉ dùng Docker để chạy mỗi mình Redis
+```bash
+docker-compose up -d redis
+```
+
+**Bước 2:** Chạy Backend và Frontend ở Local như bình thường
+Mở 2 terminal khác nhau và gõ:
+```bash
+# Terminal 1: Backend
+cd backend && npm run start:dev
+
+# Terminal 2: Frontend
+cd frontend && npm run dev
+```
+Cổng 6379 của Redis trong Docker sẽ tự động thông ra ngoài Windows, giúp Backend của bạn vẫn kết nối được mượt mà như đang chạy Native!
 ---
 
 ## 💳 Thông tin Thanh toán Thử nghiệm (VNPAY Sandbox)
