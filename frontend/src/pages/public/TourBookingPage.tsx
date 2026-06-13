@@ -183,7 +183,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
       }
 
       const tourRequestId = requestRes.data.id;
-      toast.success("Đã gửi yêu cầu tham gia tour. Vui lòng chờ hướng dẫn viên duyệt.");
+      toast.success("Khởi tạo đơn đặt tour thành công. Đang tiến hành thanh toán...");
 
       if (paymentMethod === 'wallet') {
         // Thanh toán qua ví
