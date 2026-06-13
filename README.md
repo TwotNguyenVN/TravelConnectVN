@@ -106,8 +106,21 @@ cd frontend
 npm install
 npm run dev
 ```
+---
+
+## 💳 Thông tin Thanh toán Thử nghiệm (VNPAY Sandbox)
+
+Khi thực hiện thử nghiệm luồng đặt tour và thực hiện thanh toán qua cổng VNPAY trong môi trường phát triển, vui lòng sử dụng thông tin thẻ thử nghiệm chính thức dưới đây (Tuyệt đối không dùng thẻ ngân hàng thật):
+
+*   **Cổng thanh toán demo:** [VNPAY Sandbox Demo](https://sandbox.vnpayment.vn/apis/vnpay-demo/)
+*   **Tên Ngân hàng chọn khi thanh toán:** `NCB` (Ngân hàng Quốc Dân)
+*   **Số thẻ:** `9704198526191432198`
+*   **Tên chủ thẻ (không dấu):** `NGUYEN VAN A`
+*   **Ngày phát hành:** `07/15` (Tháng 7 năm 2015)
+*   **Mã OTP xác thực giao dịch:** `123456`
 
 ---
+
 
 ## 📖 Tài liệu Dành cho Dev & Vận hành
 * [Sổ tay Vận hành Backoffice (USER_MANUAL.md)](./docs/USER_MANUAL.md) - Hướng dẫn chi tiết cho Kế toán, CSKH, Kiểm duyệt viên.

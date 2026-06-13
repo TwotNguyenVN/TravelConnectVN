@@ -45,7 +45,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
     }
   };
 
-  function handleDateClick(date: Date, schedule: any) {
+  function handleDateClick(date: Date, schedule?: any) {
     if (schedule) {
       navigate(`/guide/tours/${tourId}/schedules/${schedule.id}`);
       return;
@@ -112,7 +112,10 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
   if (loading) return <div>Đang tải lịch...</div>;
   if (!tour) return <div>Không tìm thấy dữ liệu</div>;
 
-  const schedules = tour.tour_schedules || [];
+  const schedules = (tour.tour_schedules || []).map((s: any) => ({
+    ...s,
+    numDays: tour.num_days || tour.numDays || 1
+  }));
 
   return (
     <div className="tc-tour-schedules-tab">
@@ -125,6 +128,7 @@ export const TourSchedulesTab: React.FC<TourSchedulesTabProps> = ({ tourId }) =>
         <GuideTourCalendar 
           schedules={schedules} 
           onDateClick={handleDateClick} 
+          onCreateSchedule={handleDateClick}
         />
       </div>
 

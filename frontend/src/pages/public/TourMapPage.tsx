@@ -53,7 +53,7 @@ export const TourMapPage: React.FC = () => {
           setTour(response.data);
           
           // Filter locations with coordinates
-          const validLocations = response.data.itinerary?.filter((loc: any) => loc.lat && loc.lng) || [];
+          const validLocations = response.data.destinations?.filter((loc: any) => loc.lat && loc.lng) || [];
           if (validLocations.length > 0) {
             setMapCenter([validLocations[0].lat, validLocations[0].lng]);
             setMapZoom(14);
@@ -101,7 +101,7 @@ export const TourMapPage: React.FC = () => {
     );
   }
 
-  const validLocations = tour.itinerary?.filter((loc: any) => loc.lat && loc.lng) || [];
+  const validLocations = tour.destinations?.filter((loc: any) => loc.lat && loc.lng) || [];
   const polylinePositions = validLocations.map((loc: any) => [loc.lat, loc.lng]);
 
   return (
@@ -132,17 +132,17 @@ export const TourMapPage: React.FC = () => {
             <p>{validLocations.length} địa điểm trên bản đồ</p>
           </div>
           <div className="location-list">
-            {tour.itinerary?.map((loc: any, index: number) => (
+            {tour.destinations?.map((loc: any, index: number) => (
               <div 
                 key={index} 
-                className={`location-item ${selectedLocation?.day === loc.day ? 'active' : ''} ${!(loc.lat && loc.lng) ? 'no-coords' : ''}`}
+                className={`location-item ${selectedLocation?.id === loc.id ? 'active' : ''} ${!(loc.lat && loc.lng) ? 'no-coords' : ''}`}
                 onClick={() => handleLocationClick(loc)}
               >
-                <div className="location-number">{loc.day}</div>
+                <div className="location-number">{loc.sequenceNo || index + 1}</div>
                 <div className="location-info">
-                  <h3>{loc.title}</h3>
+                  <h3>{loc.name}</h3>
                   <p className="location-address">{loc.address || 'Đang cập nhật địa chỉ...'}</p>
-                  {loc.detail && <p className="location-detail">{loc.detail}</p>}
+                  {loc.description && <p className="location-detail">{loc.description}</p>}
                   {!(loc.lat && loc.lng) && <span className="no-map-badge">Chưa có vị trí bản đồ</span>}
                 </div>
               </div>
@@ -175,9 +175,9 @@ export const TourMapPage: React.FC = () => {
                 >
                   <Popup>
                     <div className="map-popup">
-                      <h3>{loc.title}</h3>
+                      <h3>{loc.name}</h3>
                       <p>{loc.address}</p>
-                      {loc.detail && <p className="popup-detail">{loc.detail}</p>}
+                      {loc.description && <p className="popup-detail">{loc.description}</p>}
                     </div>
                   </Popup>
                 </Marker>

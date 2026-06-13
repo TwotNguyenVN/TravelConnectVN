@@ -350,6 +350,71 @@
   opacity: 0.85;
 }
 
+/* Weekly Timeline Effects */
+.weekly-schedule-card.timeline-start {
+  width: calc(100% + 15px) !important;
+  max-width: none !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-right: none !important;
+  margin-right: -15px !important;
+  z-index: 2;
+  position: relative;
+}
+
+.weekly-schedule-card.timeline-middle {
+  width: calc(100% + 30px) !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  margin-left: -15px !important;
+  margin-right: -15px !important;
+  z-index: 1;
+  position: relative;
+}
+
+.weekly-schedule-card.timeline-end {
+  width: calc(100% + 15px) !important;
+  max-width: none !important;
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  border-left: none !important;
+  margin-left: -15px !important;
+  z-index: 2;
+  position: relative;
+}
+
+.timeline-indicator {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 10;
+}
+
+.start-indicator-weekly {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background-color: var(--tc-primary);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.end-indicator-weekly {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #64748b;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
 .weekly-sch-image {
   position: relative;
   width: 100%;

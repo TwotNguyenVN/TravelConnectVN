@@ -631,7 +631,7 @@ export class ToursService implements OnApplicationBootstrap {
   }
 
   async getFeaturedTours() {
-    console.log("[DEBUG] getFeaturedTours is called!");
+    console.log('[DEBUG] getFeaturedTours is called!');
     // 1. Lấy tất cả tour đang hoạt động để lọc theo logic 'còn chỗ'
     const tours = await this.prisma.tours.findMany({
       where: {
@@ -960,8 +960,8 @@ export class ToursService implements OnApplicationBootstrap {
     }
 
     // Xác định trạng thái dựa trên input
-    let visibilityStatus = data.visibilityStatus || 'visible';
-    let businessStatus = data.businessStatus || 'draft';
+    const visibilityStatus = data.visibilityStatus || 'visible';
+    const businessStatus = data.businessStatus || 'draft';
 
     // Validate max days/nights
     if (
@@ -1045,7 +1045,6 @@ export class ToursService implements OnApplicationBootstrap {
           visibility_status: visibilityStatus,
         },
       });
-
 
       // 2.2 Tạo lịch trình (Itinerary)
       if (data.itinerary && Array.isArray(data.itinerary)) {
@@ -1163,7 +1162,8 @@ export class ToursService implements OnApplicationBootstrap {
 
     // Run AI Auto-Moderation check in the background to avoid blocking the HTTP response
     const contentToAnalyze = `${data.title} ${data.description || ''} ${data.meetAddress || ''}`;
-    this.aiModeration.analyzeContent(contentToAnalyze, 'TOUR_DESCRIPTION')
+    this.aiModeration
+      .analyzeContent(contentToAnalyze, 'TOUR_DESCRIPTION')
       .then(async (aiResult) => {
         if (aiResult.isFlagged) {
           // Update tour status and create report asynchronously
@@ -1683,13 +1683,15 @@ export class ToursService implements OnApplicationBootstrap {
       );
     }
 
-    // Kiểm tra xem ngày khởi hành có ở trong quá khứ không
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const scheduleDate = new Date(data.startDate);
-    if (scheduleDate < now) {
+    // Kiểm tra xem ngày khởi hành có ở trong quá khứ hoặc hôm nay không
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    // So sánh chuỗi ngày (VD: "2026-06-13" <= "2026-06-13")
+    // data.startDate có dạng "YYYY-MM-DD"
+    if (data.startDate.split('T')[0] <= todayString) {
       throw new BadRequestException(
-        'Không thể tạo lịch khởi hành cho thời gian trong quá khứ',
+        'Vui lòng chọn ngày khởi hành từ ngày mai trở đi (không được mở tour trong ngày hôm nay)',
       );
     }
 
