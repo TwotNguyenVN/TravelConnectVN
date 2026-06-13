@@ -197,7 +197,11 @@ export class ToursService implements OnApplicationBootstrap {
           },
         },
         include: {
-          tours: true,
+          tours: {
+            include: {
+              guide_profiles: true,
+            },
+          },
         },
       });
 
@@ -231,19 +235,29 @@ export class ToursService implements OnApplicationBootstrap {
           console.log(
             `Auto-completing schedule ${schedule.id} for Tour "${schedule.tours.title}" (ended on ${endDate.toLocaleDateString()}) with status ${targetStatus}`,
           );
-          await this.prisma.$transaction([
-            this.prisma.tour_schedules.update({
+
+          await this.prisma.$transaction(async (tx) => {
+            await tx.tour_schedules.update({
               where: { id: schedule.id },
               data: { status: targetStatus },
-            }),
-            this.prisma.tour_requests.updateMany({
+            });
+            await tx.tour_requests.updateMany({
               where: {
                 schedule_id: schedule.id,
                 status: { in: ['paid', 'approved'] },
               },
               data: { status: 'completed' },
-            }),
-          ]);
+            });
+
+            if (targetStatus === 'completed' && schedule.tours.guide_profiles?.user_id) {
+              await this.processScheduleCompletion(
+                tx,
+                schedule.id,
+                schedule.tours.guide_profiles.user_id,
+                Number(schedule.price),
+              );
+            }
+          });
         }
       }
       console.log('=== Automated Tour Completion Check Finished ===');
@@ -253,6 +267,73 @@ export class ToursService implements OnApplicationBootstrap {
         error instanceof Error ? error.message : String(error),
       );
     }
+  }
+
+  private async processScheduleCompletion(
+    tx: any,
+    scheduleId: string,
+    guideUserId: string,
+    price: number,
+  ) {
+    // Check if guide_incomes already exists
+    const existingIncome = await tx.guide_incomes.findUnique({
+      where: { schedule_id: scheduleId },
+    });
+    if (existingIncome) return;
+
+    // Get total participants
+    const bookingsSum = await tx.tour_requests.aggregate({
+      where: {
+        schedule_id: scheduleId,
+        status: { in: ['paid', 'approved'] },
+      },
+      _sum: {
+        participant_count: true,
+      },
+    });
+
+    const participantCount = bookingsSum._sum.participant_count || 0;
+    if (participantCount === 0) return;
+
+    const grossRevenue = participantCount * price;
+    const systemFee = grossRevenue * 0.10;
+    const netRevenue = grossRevenue - systemFee;
+
+    // Insert guide_incomes
+    await tx.guide_incomes.create({
+      data: {
+        guide_id: guideUserId,
+        schedule_id: scheduleId,
+        total_participants: participantCount,
+        gross_revenue: grossRevenue,
+        system_fee: systemFee,
+        net_revenue: netRevenue,
+      },
+    });
+
+    // Add Net revenue to Guide's wallet
+    const wallet = await tx.user_wallets.upsert({
+      where: { user_id: guideUserId },
+      update: {
+        balance: { increment: netRevenue },
+      },
+      create: {
+        user_id: guideUserId,
+        balance: netRevenue,
+        status: 'active',
+      },
+    });
+
+    // Create wallet transaction history
+    await tx.wallet_transactions.create({
+      data: {
+        wallet_id: wallet.id,
+        type: 'guide_income',
+        amount: netRevenue,
+        status: 'completed',
+        description: 'Thu nhập từ việc dẫn tour',
+      },
+    });
   }
 
   // ==========================================
@@ -1771,14 +1852,23 @@ export class ToursService implements OnApplicationBootstrap {
 
     // 3. Nếu trạng thái là 'completed', cập nhật tất cả các yêu cầu liên quan
     if (data.status === 'completed') {
-      await this.prisma.tour_requests.updateMany({
-        where: {
-          schedule_id: scheduleId,
-          status: { in: ['paid', 'approved'] },
-        },
-        data: {
-          status: 'completed',
-        },
+      await this.prisma.$transaction(async (tx) => {
+        await tx.tour_requests.updateMany({
+          where: {
+            schedule_id: scheduleId,
+            status: { in: ['paid', 'approved'] },
+          },
+          data: {
+            status: 'completed',
+          },
+        });
+
+        await this.processScheduleCompletion(
+          tx,
+          scheduleId,
+          userId,
+          Number(updatedSchedule.price),
+        );
       });
     } else if (data.status === 'cancelled') {
       // Deduct 20 points if guide cancels within 24 hours of start date

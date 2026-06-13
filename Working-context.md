@@ -58,6 +58,11 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 ## 📝 Latest Execution Notes
 
 ### Latest Execution Notes (Jun 2026)
+- **2026-06-14:** Hoàn thành triển khai `guide_incomes` và tự động cộng tiền vào ví HDV (Wallet Auto-Payout):
+  - Thiết lập bảng `guide_incomes` kèm RLS Policies qua Supabase Migration.
+  - Sửa đổi `autoCompleteTours` và `updateTourSchedule` trong `tours.service.ts` để tự động tính doanh thu (Gross, Fee, Net) và cộng Net Revenue vào `user_wallets` khi trạng thái lịch trình chuyển sang `completed`.
+  - Pass 100% tests cho Backend. Chức năng rút tiền (withdraw) đã được kế thừa từ thiết lập Ví.
+
 - **User Wallet**: Added `user_wallets` and `wallet_transactions` tables. Implemented VNPAY integration for deposits and instant deductions for withdrawals. Created `/user/wallet` with a premium UI and transaction history.
 - **AI Chat & Companion**: Hoàn thiện tính năng Hybrid Geocoding cho Google Maps Link:
   - Cập nhật `TourFormPage.tsx` tự động giải mã URL `query=` qua API Nominatim khi dán link mới.
