@@ -209,3 +209,8 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 ### 2026-06-13 (Bug Fixes)
 - **Sửa lỗi lọc Tour Nổi Bật và Gợi Ý:** Cập nhật logic trong `tours.service.ts` và `recommendations.service.ts` để loại bỏ triệt để các tour có `start_date` bằng null khỏi màn hình trang chủ.
 - **Sửa lỗi màn hình Chat:** Khôi phục giao diện màn hình chat cũ, đảm bảo các tính năng như emoji, hiển thị trạng thái hoạt động chính xác.
+
+### 2026-06-13 (Wallet & Payment Integration)
+- **Cập nhật luồng đặt Tour:** Tích hợp phương thức thanh toán bằng "Ví Hệ Thống" bên cạnh "VNPAY" tại trang đặt tour (`TourBookingPage.tsx`).
+- **Ghi nhận lịch sử giao dịch:** Cập nhật `vnpayIpn` trong `payments.service.ts` để ghi nhận các giao dịch qua VNPAY vào `wallet_transactions` và cộng dồn `total_spent` của ví mà không trừ số dư.
+- **Giao diện quản lý Ví:** Thêm Modal hiển thị thông tin chi tiết từng giao dịch trong `WalletPage.tsx` khi người dùng nhấn vào các hàng.

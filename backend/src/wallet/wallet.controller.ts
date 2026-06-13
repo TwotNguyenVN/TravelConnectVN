@@ -52,6 +52,12 @@ export class WalletController {
     return { success: true, message: 'Rút tiền thành công, tiền đã bị trừ', data: result };
   }
 
+  @UseGuards(AuthGuard)
+  @Post('pay-booking')
+  async payBooking(@Req() req: AuthenticatedRequest, @Body() body: { tourRequestId: string, paymentType: string }) {
+    return await this.walletService.payForBooking(req.user.id, body.tourRequestId, body.paymentType);
+  }
+
   // IPN Listener (Không dùng Auth Guard)
   @Get('vnpay-ipn')
   async vnpayIpn(@Query() query: Record<string, string>) {

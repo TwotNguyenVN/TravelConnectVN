@@ -218,4 +218,92 @@ export class WalletService {
       return { transaction, wallet: updatedWallet };
     });
   }
+
+  async payForBooking(userId: string, tourRequestId: string, paymentType: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Lấy thông tin Tour Request
+      const tourRequest = await tx.tour_requests.findUnique({
+        where: { id: tourRequestId },
+        include: { tours: true },
+      });
+
+      if (!tourRequest || tourRequest.user_id !== userId) {
+        throw new BadRequestException('Yêu cầu đặt tour không tồn tại hoặc không hợp lệ');
+      }
+
+      // 2. Tính toán số tiền
+      let price = Number(tourRequest.tours.price);
+      if (tourRequest.price_at_booking) {
+        price = Number(tourRequest.price_at_booking);
+      } else if (tourRequest.schedule_id) {
+        const schedule = await tx.tour_schedules.findUnique({
+          where: { id: tourRequest.schedule_id },
+        });
+        if (schedule) price = Number(schedule.price);
+      }
+
+      let amount = price * tourRequest.participant_count;
+      if (paymentType === 'deposit') {
+        amount = amount * 0.5;
+      }
+
+      // 3. Lấy ví người dùng
+      const wallet = await tx.user_wallets.findUnique({
+        where: { user_id: userId },
+      });
+
+      if (!wallet) {
+        throw new BadRequestException('Không tìm thấy ví người dùng');
+      }
+
+      if (Number(wallet.balance) < amount) {
+        throw new BadRequestException('Số dư trong ví không đủ để thanh toán');
+      }
+
+      // 4. Tạo payment_transactions
+      const paymentTransactionId = crypto.randomUUID();
+      await tx.payment_transactions.create({
+        data: {
+          id: paymentTransactionId,
+          tour_request_id: tourRequestId,
+          user_id: userId,
+          amount: amount,
+          payment_method: 'wallet',
+          status: 'paid',
+          transaction_code: paymentTransactionId,
+          paid_at: new Date(),
+        },
+      });
+
+      // 5. Cập nhật tour_requests
+      const targetStatus = paymentType === 'deposit' ? 'partially_paid' : 'paid';
+      await tx.tour_requests.update({
+        where: { id: tourRequestId },
+        data: { status: targetStatus },
+      });
+
+      // 6. Ghi nhận giao dịch ví (wallet_transactions)
+      const walletTransaction = await tx.wallet_transactions.create({
+        data: {
+          wallet_id: wallet.id,
+          transaction_type: 'payment',
+          amount: -amount,
+          status: 'completed',
+          description: `Thanh toán tour ${tourRequest.tours.title} - Mã yêu cầu: ${tourRequestId.split('-')[0]}`,
+        },
+      });
+
+      // 7. Cập nhật số dư và tổng chi tiêu
+      const updatedWallet = await tx.user_wallets.update({
+        where: { id: wallet.id },
+        data: {
+          balance: { decrement: amount },
+          total_spent: { increment: amount },
+          updated_at: new Date(),
+        },
+      });
+
+      return { success: true, message: 'Thanh toán thành công qua ví', walletTransaction, wallet: updatedWallet };
+    });
+  }
 }

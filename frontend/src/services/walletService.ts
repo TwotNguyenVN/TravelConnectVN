@@ -32,9 +32,14 @@ const walletService = {
     return response.data;
   },
 
-  withdraw: async (amount: number, description?: string) => {
-    const response = await api.post('/wallet/withdraw', { amount, description });
-    return response.data;
+  withdraw: async (amount: number, bankId: string, accountName: string, accountNumber: string) => {
+    const res = await api.post('/wallet/withdraw', { amount, bankId, accountName, accountNumber });
+    return res.data;
+  },
+
+  async payForBooking(tourRequestId: string, paymentType: string) {
+    const res = await api.post('/wallet/pay-booking', { tourRequestId, paymentType });
+    return res.data;
   }
 };
 

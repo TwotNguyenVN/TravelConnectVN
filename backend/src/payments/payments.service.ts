@@ -288,6 +288,34 @@ export class PaymentsService {
           }
         }
 
+        let walletUpdates: any[] = [];
+        if (isSuccess && transaction.user_id) {
+          const userWallet = await this.prisma.user_wallets.findUnique({
+            where: { user_id: transaction.user_id },
+          });
+
+          if (userWallet) {
+            walletUpdates = [
+              this.prisma.wallet_transactions.create({
+                data: {
+                  wallet_id: userWallet.id,
+                  transaction_type: 'payment',
+                  amount: -transactionAmount,
+                  status: 'completed',
+                  description: `Thanh toán qua VNPAY cho yêu cầu đặt tour: ${transaction.tour_request_id.split('-')[0]}`,
+                },
+              }),
+              this.prisma.user_wallets.update({
+                where: { id: userWallet.id },
+                data: {
+                  total_spent: { increment: transactionAmount },
+                  updated_at: new Date(),
+                },
+              }),
+            ];
+          }
+        }
+
         // Cập nhật Database (Dùng transaction của Prisma để đảm bảo đồng bộ)
         await this.prisma.$transaction([
           this.prisma.payment_transactions.update({
@@ -303,6 +331,7 @@ export class PaymentsService {
                   where: { id: transaction.tour_request_id },
                   data: { status: targetStatus },
                 }),
+                ...walletUpdates,
               ]
             : []),
         ]);

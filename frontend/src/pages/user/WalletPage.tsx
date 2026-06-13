@@ -22,6 +22,8 @@ const WalletPage: React.FC = () => {
 
   const [showDeposit, setShowDeposit] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
+  const [selectedTx, setSelectedTx] = useState<WalletTransaction | null>(null);
+
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
@@ -165,7 +167,7 @@ const WalletPage: React.FC = () => {
                 {transactions.map(tx => {
                   const details = getTxDetails(tx);
                   return (
-                    <tr key={tx.id}>
+                    <tr key={tx.id} onClick={() => setSelectedTx(tx)} style={{ cursor: 'pointer' }} className="tx-row-clickable">
                       <td>
                         <div className="tx-type">
                           <div className={`tx-icon ${details.colorClass}`}>
@@ -228,6 +230,49 @@ const WalletPage: React.FC = () => {
                 {actionLoading ? 'Đang xử lý...' : 'Xác nhận Nạp Tiền'}
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction Details Modal */}
+      {selectedTx && (
+        <div className="wallet-modal-overlay">
+          <div className="wallet-modal">
+            <div className="modal-header">
+              <h3>Chi tiết giao dịch</h3>
+              <button className="btn-close" onClick={() => setSelectedTx(null)}><i className="fa-solid fa-xmark"></i></button>
+            </div>
+            <div className="tx-details-content" style={{ display: 'flex', flexDirection: 'column', gap: '15px', padding: '15px 0' }}>
+              <div className="detail-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Mã giao dịch:</span>
+                <span className="value" style={{ fontWeight: 500 }}>{selectedTx.id}</span>
+              </div>
+              <div className="detail-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Thời gian:</span>
+                <span className="value" style={{ fontWeight: 500 }}>{formatDate(selectedTx.created_at)}</span>
+              </div>
+              <div className="detail-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Số tiền:</span>
+                <span className={`value ${selectedTx.amount > 0 ? 'amount-positive' : 'amount-negative'}`} style={{ fontWeight: 'bold' }}>
+                  {selectedTx.amount > 0 ? '+' : ''}{formatCurrency(selectedTx.amount)}
+                </span>
+              </div>
+              <div className="detail-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Trạng thái:</span>
+                <span className={`value tx-status status-${selectedTx.status}`}>
+                  {selectedTx.status === 'completed' ? 'Thành công' : selectedTx.status === 'pending' ? 'Chờ duyệt' : 'Thất bại'}
+                </span>
+              </div>
+              <div className="detail-row" style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Loại giao dịch:</span>
+                <span className="value" style={{ fontWeight: 500 }}>{getTxDetails(selectedTx).label}</span>
+              </div>
+              <div className="detail-row" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <span className="label" style={{ color: 'var(--tc-text-secondary)' }}>Nội dung:</span>
+                <span className="value" style={{ padding: '10px', backgroundColor: '#f9f9f9', borderRadius: '8px', lineHeight: 1.5 }}>{selectedTx.description}</span>
+              </div>
+            </div>
+            <button className="btn-submit" onClick={() => setSelectedTx(null)}>Đóng</button>
           </div>
         </div>
       )}
