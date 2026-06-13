@@ -32,8 +32,8 @@ const walletService = {
     return response.data;
   },
 
-  withdraw: async (amount: number, bankId: string, accountName: string, accountNumber: string) => {
-    const res = await api.post('/wallet/withdraw', { amount, bankId, accountName, accountNumber });
+  withdraw: async (amount: number, description?: string) => {
+    const res = await api.post('/wallet/withdraw', { amount, description });
     return res.data;
   },
 

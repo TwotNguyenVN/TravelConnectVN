@@ -33,7 +33,7 @@ const TourBookingPage: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [paymentType, setPaymentType] = useState<'full' | 'deposit'>('full');
   const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'vnpay'>('vnpay');
-  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Contact Info State
@@ -79,13 +79,6 @@ const TourBookingPage: React.FC = () => {
     window.scrollTo(0, 0);
   }, [id, scheduleId]);
 
-  useEffect(() => {
-    if (currentStep === 1.6) {
-      walletService.getMyWallet().then(res => {
-        if (res.success && res.data) setWalletBalance(res.data.balance);
-      }).catch(err => console.log('Error fetching wallet:', err));
-    }
-  }, [currentStep]);
 
   // Adjust passengers array when count changes
   useEffect(() => {
@@ -149,10 +142,6 @@ const TourBookingPage: React.FC = () => {
     setShowConfirmModal(false);
     
     const amountToPay = paymentType === 'deposit' ? calculateTotal() * 0.5 : calculateTotal();
-    if (paymentMethod === 'wallet' && walletBalance !== null && walletBalance < amountToPay) {
-      toast.error('Số dư ví không đủ để thanh toán. Vui lòng nạp thêm tiền hoặc chọn VNPAY.');
-      return;
-    }
 
     let popup: Window | null = null;
     try {
@@ -492,9 +481,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
                   <span className="tc-option-tag primary">Ví Hệ Thống</span>
                   <h3 className="tc-option-name">Thanh toán bằng ví</h3>
                 </div>
-                <div className="tc-option-amount">
-                  Số dư: {walletBalance !== null ? walletBalance.toLocaleString() + ' đ' : 'Đang tải...'}
-                </div>
+                <div className="tc-option-amount">Thanh toán tức thì</div>
                 <p className="tc-option-desc">Thanh toán nhanh chóng không cần chuyển hướng.</p>
                 <div className="tc-option-check"></div>
               </div>
