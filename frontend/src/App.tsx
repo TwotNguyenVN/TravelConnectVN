@@ -7,7 +7,7 @@ import { MiniChatProvider } from './contexts/MiniChatContext';
 import { MiniChatContainer } from './components/chat/MiniChatContainer';
 import { MaintenanceWrapper } from './routes/MaintenanceWrapper';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { HelmetProvider } from 'react-helmet-async';
 import { Toaster } from 'sonner';
 import './App.css';
@@ -39,7 +39,7 @@ function App() {
             </SocketProvider>
           </ToastProvider>
         </AuthProvider>
-        <ReactQueryDevtools initialIsOpen={false} />
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
       </QueryClientProvider>
     </HelmetProvider>
   );

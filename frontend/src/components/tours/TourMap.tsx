@@ -130,65 +130,112 @@ const ResetViewControl = ({ onReset }: { onReset: () => void }) => {
 
 export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] }) => {
   const [shouldFit, setShouldFit] = useState(true);
+  const [resolvedPoints, setResolvedPoints] = useState<any[]>([]);
+  const [isResolving, setIsResolving] = useState(false);
 
-  // Helper to process a list of points
-  const processPointList = useCallback((list: MapPoint[]) => {
-    return list.map(p => {
-      let lat = p.lat !== null && p.lat !== undefined ? Number(p.lat) : null;
-      let lng = p.lng !== null && p.lng !== undefined ? Number(p.lng) : null;
-      
-      if ((lat === null || isNaN(lat)) && p.googleMapsLink) {
-        const extracted = extractLatLngFromUrl(p.googleMapsLink);
-        if (extracted) {
-          lat = extracted.lat;
-          lng = extracted.lng;
-        }
-      }
-      
-      return {
-        ...p,
-        lat,
-        lng,
-        displayTitle: p.title || p.name || 'Điểm đến',
-        displayNumber: p.sequenceNo || p.day || 0
-      };
-    }).filter(p => p.lat !== null && p.lat !== undefined && !isNaN(p.lat) && p.lng !== null && p.lng !== undefined && !isNaN(p.lng)) as any[];
-  }, []);
-
-  // Process points and extract coordinates
-  const processedPoints = useMemo(() => {
-    const mainList = processPointList(points);
-    const fallbackList = processPointList(fallbackPoints);
+  // Process points and extract coordinates asynchronously
+  useEffect(() => {
+    let isMounted = true;
     
-    // If we have very few points in mainList compared to points.length, 
-    // it means coordinate extraction failed for many points.
-    // In this case, we merge with fallback list to show as many points as possible.
-    if (mainList.length < points.length && fallbackList.length > 0) {
-      // Use a Map to keep unique coordinates to avoid exact overlapping markers
+    const resolvePointsAsync = async () => {
+      setIsResolving(true);
       const uniquePoints = new Map();
       
-      // Add fallback points first (they are usually accurate)
-      fallbackList.forEach(p => {
-        const key = `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
-        uniquePoints.set(key, p);
-      });
+      // Merge fallback and main points. Fallback first so main overrides them.
+      const allPoints = [...fallbackPoints, ...points];
       
-      // Add main points (they might override fallback if they match coordinates)
-      mainList.forEach(p => {
-        const key = `${p.lat.toFixed(6)},${p.lng.toFixed(6)}`;
-        uniquePoints.set(key, p);
-      });
-      
-      return Array.from(uniquePoints.values()).sort((a, b) => a.displayNumber - b.displayNumber);
-    }
-    
-    return mainList;
-  }, [points, fallbackPoints, processPointList]);
+      const fetchFromNominatim = async (query: string) => {
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`);
+          const data = await response.json();
+          if (data && data.length > 0) return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
+        } catch (e) { console.error("Nominatim error:", e); }
+        return null;
+      };
+
+      let hasCalledNominatim = false;
+
+      for (const p of allPoints) {
+        let lat = p.lat !== null && p.lat !== undefined ? Number(p.lat) : null;
+        let lng = p.lng !== null && p.lng !== undefined ? Number(p.lng) : null;
+        
+        if ((lat === null || isNaN(lat)) && p.googleMapsLink) {
+          const extracted = extractLatLngFromUrl(p.googleMapsLink);
+          if (extracted) {
+            lat = extracted.lat;
+            lng = extracted.lng;
+          } else {
+            // Check for query parameter
+            const queryMatch = p.googleMapsLink.match(/[?&](query|q)=([^&]+)/);
+            let searchQuery = "";
+            if (queryMatch) {
+              searchQuery = decodeURIComponent(queryMatch[2].replace(/\+/g, ' '));
+            } else if (p.googleMapsLink.includes('maps.app.goo.gl') || p.googleMapsLink.includes('goo.gl')) {
+              searchQuery = `${p.title || p.name || ''} ${p.address || ''}`.trim();
+            }
+
+            if (searchQuery) {
+              if (hasCalledNominatim) {
+                // Wait 1.1s before next call to respect Nominatim rate limit (1 req/sec)
+                await new Promise(r => setTimeout(r, 1100));
+              }
+              const geo = await fetchFromNominatim(searchQuery);
+              hasCalledNominatim = true;
+              
+              if (geo) {
+                lat = geo.lat;
+                lng = geo.lng;
+              }
+            }
+          }
+        }
+        
+        if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+          const displayNumber = p.sequenceNo || p.day || 0;
+          
+          let finalLat = lat;
+          let finalLng = lng;
+          let key = `${finalLat.toFixed(6)},${finalLng.toFixed(6)}`;
+          
+          const existing = uniquePoints.get(key);
+          // If a point already exists here and it's a DIFFERENT point (different displayNumber)
+          // we add a tiny offset so they don't hide each other.
+          // If it's the SAME point, we let it overwrite (e.g. main point overwrites fallback point)
+          if (existing && existing.displayNumber !== displayNumber) {
+            while (uniquePoints.has(key)) {
+              finalLat -= 0.0002; // shift slightly down
+              finalLng += 0.0002; // shift slightly right
+              key = `${finalLat.toFixed(6)},${finalLng.toFixed(6)}`;
+            }
+          }
+
+          const processedP = {
+            ...p,
+            lat: finalLat,
+            lng: finalLng,
+            displayTitle: p.title || p.name || 'Điểm đến',
+            displayNumber
+          };
+          
+          uniquePoints.set(key, processedP);
+        }
+      }
+
+      if (isMounted) {
+        setResolvedPoints(Array.from(uniquePoints.values()).sort((a: any, b: any) => a.displayNumber - b.displayNumber));
+        setIsResolving(false);
+      }
+    };
+
+    resolvePointsAsync();
+
+    return () => { isMounted = false; };
+  }, [points, fallbackPoints]);
 
   const bounds = useMemo(() => {
-    if (processedPoints.length === 0) return null;
-    return L.latLngBounds(processedPoints.map(p => [p.lat, p.lng]));
-  }, [processedPoints]);
+    if (resolvedPoints.length === 0) return null;
+    return L.latLngBounds(resolvedPoints.map(p => [p.lat, p.lng]));
+  }, [resolvedPoints]);
 
   const handleReset = useCallback(() => {
     setShouldFit(true);
@@ -197,14 +244,25 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
 
   // Initial fit
   useEffect(() => {
-    if (processedPoints.length > 0) {
+    if (resolvedPoints.length > 0) {
       setShouldFit(true);
       const timer = setTimeout(() => setShouldFit(false), 2000);
       return () => clearTimeout(timer);
     }
-  }, [processedPoints.length]);
+  }, [resolvedPoints.length]);
 
-  if (processedPoints.length === 0) {
+  if (isResolving) {
+    return (
+      <div className="tc-map-placeholder">
+        <div className="tc-map-empty-state">
+          <div className="tc-spinner"></div>
+          <p>Đang tải tọa độ bản đồ...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (resolvedPoints.length === 0) {
     return (
       <div className="tc-map-placeholder">
         <div className="tc-map-empty-state">
@@ -228,7 +286,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
   return (
     <div className="tc-tour-map-wrapper">
       <MapContainer 
-        center={[processedPoints[0].lat, processedPoints[0].lng]} 
+        center={[resolvedPoints[0].lat, resolvedPoints[0].lng]} 
         zoom={13} 
         style={{ height: '500px', width: '100%', borderRadius: '16px', zIndex: 1 }}
         scrollWheelZoom={true}
@@ -241,7 +299,7 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
         <MapController bounds={bounds} shouldFit={shouldFit} />
         <ResetViewControl onReset={handleReset} />
 
-        {processedPoints.map((point, index) => (
+        {resolvedPoints.map((point, index) => (
           <Marker 
             key={`${point.displayNumber}-${index}`} 
             position={[point.lat, point.lng]} 
@@ -261,9 +319,9 @@ export const TourMap: React.FC<TourMapProps> = ({ points, fallbackPoints = [] })
           </Marker>
         ))}
 
-        {processedPoints.length > 1 && (
+        {resolvedPoints.length > 1 && (
           <Polyline 
-            positions={processedPoints.map(p => [p.lat, p.lng])} 
+            positions={resolvedPoints.map(p => [p.lat, p.lng])} 
             color="#004a99" 
             weight={5} 
             opacity={0.8}

@@ -260,7 +260,7 @@ describe('ToursService', () => {
 
     it("should create tour schedule when date is in the future and doesn't exist", async () => {
       const tomorrow = new Date();
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setDate(tomorrow.getDate() + 2);
 
       mockPrismaService.tour_schedules.findFirst.mockResolvedValue(null);
       mockPrismaService.tour_schedules.create.mockImplementation(

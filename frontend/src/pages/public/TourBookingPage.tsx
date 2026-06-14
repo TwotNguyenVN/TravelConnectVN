@@ -3,6 +3,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { tourService } from '../../services/tourService';
 import tourRequestService from '../../services/tourRequestService';
 import { paymentService } from '../../services/paymentService';
+import walletService from '../../services/walletService';
 import { useAuth } from '../../contexts/AuthContext';
 import { useToast } from '../../contexts/ToastContext';
 import './TourBookingPage.css';
@@ -29,8 +30,10 @@ const TourBookingPage: React.FC = () => {
   const [schedule, setSchedule] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentStep, setCurrentStep] = useState<number>(1); // Changed from union to number to avoid OXC issues
+  const [currentStep, setCurrentStep] = useState<number>(1);
   const [paymentType, setPaymentType] = useState<'full' | 'deposit'>('full');
+  const [paymentMethod, setPaymentMethod] = useState<'wallet' | 'vnpay'>('vnpay');
+
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Contact Info State
@@ -75,6 +78,7 @@ const TourBookingPage: React.FC = () => {
     fetchTour();
     window.scrollTo(0, 0);
   }, [id, scheduleId]);
+
 
   // Adjust passengers array when count changes
   useEffect(() => {
@@ -136,6 +140,9 @@ const TourBookingPage: React.FC = () => {
 
   async function proceedToPayment() {
     setShowConfirmModal(false);
+    
+    const amountToPay = paymentType === 'deposit' ? calculateTotal() * 0.5 : calculateTotal();
+
     let popup: Window | null = null;
     try {
       setIsSubmitting(true);
@@ -146,20 +153,21 @@ const TourBookingPage: React.FC = () => {
 - Danh sách khách (${participantCount} người):
 ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? 'Nam' : p.gender === 'female' ? 'Nữ' : 'Khác'}) - NS: ${p.birthDate ? new Date(p.birthDate).toLocaleDateString('vi-VN') : ''} ${p.phone ? '- SĐT: ' + p.phone : ''}`).join('\n')}`;
 
-      // --- SỬA LỖI MỞ TAB MỚI: Mở popup NGAY LẬP TỨC (đồng bộ) để trình duyệt không chặn ---
-      const width = 800;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      
-      popup = window.open(
-        '', // Mở trang trống trước
-        'vnpay_popup',
-        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
-      );
+      if (paymentMethod === 'vnpay') {
+        const width = 800;
+        const height = 600;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
+        
+        popup = window.open(
+          '', // Mở trang trống trước
+          'vnpay_popup',
+          `width=${width},height=${height},left=${left},top=${top},scrollbars=yes`
+        );
 
-      if (popup) {
-        popup.document.write('<div style="font-family: sans-serif; text-align: center; margin-top: 20%;"><h2>Đang kết nối an toàn với VNPAY...</h2><p>Vui lòng không đóng cửa sổ này.</p></div>');
+        if (popup) {
+          popup.document.write('<div style="font-family: sans-serif; text-align: center; margin-top: 20%;"><h2>Đang kết nối an toàn với VNPAY...</h2><p>Vui lòng không đóng cửa sổ này.</p></div>');
+        }
       }
 
       // 1. Create Tour Request
@@ -175,7 +183,20 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
       }
 
       const tourRequestId = requestRes.data.id;
-      toast.success("Đã gửi yêu cầu tham gia tour. Vui lòng chờ hướng dẫn viên duyệt.");
+      toast.success("Khởi tạo đơn đặt tour thành công. Đang tiến hành thanh toán...");
+
+      if (paymentMethod === 'wallet') {
+        // Thanh toán qua ví
+        const payRes = await walletService.payForBooking(tourRequestId, paymentType);
+        if (payRes.success) {
+          toast.success('Thanh toán thành công qua Ví Hệ Thống!');
+          setCurrentStep(3);
+          setIsSubmitting(false);
+          return;
+        } else {
+          throw new Error('Thanh toán qua ví thất bại');
+        }
+      }
 
       // 2. Generate Payment URL (VNPAY)
       toast.info("Đang chuyển hướng đến cổng thanh toán...");
@@ -421,7 +442,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
             <h2 className="tc-selection-title">Chọn hình thức thanh toán</h2>
             <p className="tc-selection-subtitle">Vui lòng chọn hình thức thanh toán phù hợp với bạn</p>
             <div className="tc-payment-options">
-              <div className={`tc-payment-option-card ${paymentType === 'deposit' ? 'selected' : ''}`} onClick={() => { setPaymentType('deposit'); setShowConfirmModal(true); }}>
+              <div className={`tc-payment-option-card ${paymentType === 'deposit' ? 'selected' : ''}`} onClick={() => { setPaymentType('deposit'); setCurrentStep(1.6); window.scrollTo(0,0); }}>
                 <div className="tc-option-header">
                   <span className="tc-option-tag">Cọc trước</span>
                   <h3 className="tc-option-name">Thanh toán trước 50%</h3>
@@ -432,7 +453,7 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
                 </p>
                 <div className="tc-option-check"></div>
               </div>
-              <div className={`tc-payment-option-card ${paymentType === 'full' ? 'selected' : ''}`} onClick={() => { setPaymentType('full'); setShowConfirmModal(true); }}>
+              <div className={`tc-payment-option-card ${paymentType === 'full' ? 'selected' : ''}`} onClick={() => { setPaymentType('full'); setCurrentStep(1.6); window.scrollTo(0,0); }}>
                 <div className="tc-option-header">
                   <span className="tc-option-tag primary">Phổ biến</span>
                   <h3 className="tc-option-name">Thanh toán 100%</h3>
@@ -450,13 +471,44 @@ ${passengers.map((p, i) => `  ${i + 1}. ${p.fullName} (${p.gender === 'male' ? '
           </div>
         )}
 
+        {currentStep === 1.6 && (
+          <div className="tc-payment-selection">
+            <h2 className="tc-selection-title">Chọn phương thức thanh toán</h2>
+            <p className="tc-selection-subtitle">Chọn nguồn tiền để thanh toán cho giao dịch này</p>
+            <div className="tc-payment-options">
+              <div className={`tc-payment-option-card ${paymentMethod === 'wallet' ? 'selected' : ''}`} onClick={() => { setPaymentMethod('wallet'); setShowConfirmModal(true); }}>
+                <div className="tc-option-header">
+                  <span className="tc-option-tag primary">Ví Hệ Thống</span>
+                  <h3 className="tc-option-name">Thanh toán bằng ví</h3>
+                </div>
+                <div className="tc-option-amount">Thanh toán tức thì</div>
+                <p className="tc-option-desc">Thanh toán nhanh chóng không cần chuyển hướng.</p>
+                <div className="tc-option-check"></div>
+              </div>
+              <div className={`tc-payment-option-card ${paymentMethod === 'vnpay' ? 'selected' : ''}`} onClick={() => { setPaymentMethod('vnpay'); setShowConfirmModal(true); }}>
+                <div className="tc-option-header">
+                  <span className="tc-option-tag">VNPAY</span>
+                  <h3 className="tc-option-name">Cổng thanh toán VNPAY</h3>
+                </div>
+                <div className="tc-option-amount">Miễn phí giao dịch</div>
+                <p className="tc-option-desc">Hỗ trợ thanh toán qua thẻ ATM, Visa, MasterCard và QR Code.</p>
+                <div className="tc-option-check"></div>
+              </div>
+            </div>
+            <button className="tc-btn-back" onClick={() => setCurrentStep(1.5)}>
+              ← Quay lại chọn mức thanh toán
+            </button>
+          </div>
+        )}
+
         {showConfirmModal && (
           <div className="tc-modal-overlay">
             <div className="tc-confirm-modal">
               <div className="tc-modal-icon">⚠️</div>
               <h3>Xác nhận lựa chọn</h3>
-              <p> Bạn đã chọn hình thức: <strong>{paymentType === 'deposit' ? 'Thanh toán trước 50%' : 'Thanh toán 100%'}</strong></p>
-              <p className="tc-modal-amount">Số tiền cần thanh toán ngay: <span>{(paymentType === 'deposit' ? calculateTotal() * 0.5 : calculateTotal()).toLocaleString()} đ</span></p>
+              <p> Hình thức: <strong>{paymentType === 'deposit' ? 'Thanh toán trước 50%' : 'Thanh toán 100%'}</strong></p>
+              <p> Phương thức: <strong>{paymentMethod === 'wallet' ? 'Ví Hệ Thống' : 'VNPAY'}</strong></p>
+              <p className="tc-modal-amount">Số tiền thanh toán ngay: <span>{(paymentType === 'deposit' ? calculateTotal() * 0.5 : calculateTotal()).toLocaleString()} đ</span></p>
               <div className="tc-modal-actions">
                 <button className="tc-btn-cancel" onClick={() => setShowConfirmModal(false)}>Hủy bỏ</button>
                 <button className="tc-btn-confirm" onClick={proceedToPayment}>Xác nhận & Thanh toán</button>

@@ -81,8 +81,10 @@ const SupportAnalyticsPage = lazy(() => import('../pages/admin/SupportAnalyticsP
 const ChatPage = lazy(() => import('../pages/chat/ChatPage'));
 const AiChatPage = lazy(() => import('../pages/user/AiChatPage'));
 const VnpayReturnPage = lazy(() => import('../pages/user/VnpayReturnPage').then(m => ({ default: m.VnpayReturnPage })));
+const WalletVnpayReturnPage = lazy(() => import('../pages/user/WalletVnpayReturnPage').then(m => ({ default: m.WalletVnpayReturnPage })));
 const TourBookingPage = lazy(() => import('../pages/public/TourBookingPage'));
 const BookingManagementPage = lazy(() => import('../pages/user/BookingManagementPage').then(m => ({ default: m.BookingManagementPage })));
+const WalletPage = lazy(() => import('../pages/user/WalletPage'));
 import { AuthGuard } from './AuthGuard';
 import { RoleGuard } from './RoleGuard';
 import { MaintenancePage } from '../pages/public/MaintenancePage';
@@ -138,6 +140,8 @@ export const router = createBrowserRouter([
       {path: 'bookings', element: <BookingManagementPage /> },
       { path: 'payments/vnpay-return', element: <VnpayReturnPage /> },
       { path: 'guide-verification', element: <GuideVerificationPage /> },
+      { path: 'wallet', element: <WalletPage /> },
+      { path: 'wallet/vnpay-return', element: <WalletVnpayReturnPage /> },
     ],
 
 

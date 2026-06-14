@@ -494,15 +494,25 @@ async function fetchTourDetail() {
         currentItem.lat = coords.lat;
         currentItem.lng = coords.lng;
         toast.success(`Đã lấy được tọa độ cho ${currentItem.name || "địa điểm"}`);
-      } else if (value.includes('maps.app.goo.gl') || value.includes('goo.gl')) {
-        // Fallback to Nominatim for short links
-        const query = `${currentItem.name} ${currentItem.address}`;
-        if (currentItem.name || currentItem.address) {
-          const geo = await fetchFromNominatim(query);
+      } else {
+        // Extract search query from link if available
+        let searchQuery = "";
+        const queryMatch = value.match(/[?&](query|q)=([^&]+)/);
+        if (queryMatch) {
+          searchQuery = decodeURIComponent(queryMatch[2].replace(/\+/g, ' '));
+        } else if (value.includes('maps.app.goo.gl') || value.includes('goo.gl')) {
+          // Fallback to Nominatim for short links using destination name/address
+          searchQuery = `${currentItem.name} ${currentItem.address}`.trim();
+        }
+
+        if (searchQuery) {
+          const geo = await fetchFromNominatim(searchQuery);
           if (geo) {
             currentItem.lat = geo.lat;
             currentItem.lng = geo.lng;
-            toast.success(`Tự động tìm thấy vị trí cho ${currentItem.name || "địa điểm"}`);
+            toast.success(`Tự động tìm thấy vị trí cho "${searchQuery.substring(0, 30)}${searchQuery.length > 30 ? '...' : ''}"`);
+          } else {
+            toast.info(`Đã lưu liên kết bản đồ. Vị trí sẽ tự động hiển thị trên bản đồ chuyến đi.`);
           }
         }
       }
