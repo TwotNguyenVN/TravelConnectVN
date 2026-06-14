@@ -15,6 +15,7 @@ interface CompanionPost {
     avatar_url?: string;
   };
   created_at: string;
+  images?: any;
 }
 
 export const AdminCompanionManagementPage: React.FC = () => {
@@ -84,6 +85,19 @@ export const AdminCompanionManagementPage: React.FC = () => {
     visible: { label: 'Đang hiển thị', color: '#059669', bg: '#ecfdf5' },
     hidden: { label: 'Đã ẩn', color: '#e11d48', bg: '#fff1f2' },
     flagged: { label: 'Cảnh báo', color: '#d97706', bg: '#fffbeb' },
+  };
+
+  function getPostImage(images: any) {
+    if (!images) return '/default-tour.jpg';
+    try {
+      const imgs = typeof images === 'string' ? JSON.parse(images) : images;
+      if (Array.isArray(imgs) && imgs.length > 0) {
+        return typeof imgs[0] === 'string' ? imgs[0] : (imgs[0].image_url || imgs[0].imageUrl || imgs[0].url || '/default-tour.jpg');
+      }
+    } catch (e) {
+      return '/default-tour.jpg';
+    }
+    return '/default-tour.jpg';
   };
 
   return (
@@ -172,16 +186,29 @@ export const AdminCompanionManagementPage: React.FC = () => {
                 <React.Fragment key={post.id}>
                   <tr style={{ borderBottom: '1px solid #f1f5f9', transition: 'all 0.2s ease' }} className="admin-table-row">
                     <td style={{ padding: 'var(--tc-spacing-5)' }}>
-                      <div>
-                        <div style={{ fontWeight: 700, color: '#1e293b', fontSize: 'var(--tc-font-size-sm)' }}>{post.title}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>📍 {post.destination}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--tc-spacing-4)' }}>
+                        <img 
+                          src={getPostImage(post.images)} 
+                          alt="" 
+                          style={{ width: '48px', height: '48px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #e2e8f0' }}
+                        />
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#1e293b', fontSize: 'var(--tc-font-size-sm)' }}>{post.title}</div>
+                          <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>📍 {post.destination}</div>
+                        </div>
                       </div>
                     </td>
                     <td style={{ padding: 'var(--tc-spacing-5)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px' }}>
-                          {post.users?.avatar_url ? <img src={post.users.avatar_url} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : 'U'}
-                        </div>
+                        {post.users?.avatar_url ? (
+                          <img 
+                            src={post.users.avatar_url} 
+                            alt="avatar" 
+                            style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>👤</div>
+                        )}
                         <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>{post.users?.full_name}</span>
                       </div>
                     </td>

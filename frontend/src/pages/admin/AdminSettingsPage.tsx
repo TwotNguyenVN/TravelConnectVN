@@ -57,7 +57,7 @@ export default function AdminSettingsPage() {
     try {
       setLoadingCats(true);
       const res = await adminApi.getCategories(type);
-      setCategories(res);
+      setCategories(Array.isArray(res) ? res : res.data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -96,44 +96,88 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Cấu hình Hệ thống (Global Settings)</h1>
+    <div style={{ padding: 'var(--tc-spacing-6)', maxWidth: '1200px', margin: '0 auto' }}>
+      {/* Header */}
+      <div style={{ marginBottom: 'var(--tc-spacing-8)' }}>
+        <h1 style={{ margin: 0, fontSize: 'var(--tc-font-size-2xl)', fontWeight: 800, color: '#1e293b' }}>
+          Cấu hình Hệ thống (Global Settings)
+        </h1>
+        <p style={{ color: '#64748b', fontSize: 'var(--tc-font-size-sm)', marginTop: '4px' }}>
+          Quản lý các thông số vận hành và danh mục hệ thống
+        </p>
+      </div>
 
       {/* Global Config Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-8">
-        <h2 className="text-lg font-semibold mb-4 border-b pb-2">Thông số Vận hành</h2>
-        <div className="flex items-end gap-4">
-          <div className="flex-1 max-w-xs">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+      <section style={{
+        backgroundColor: 'white',
+        padding: 'var(--tc-spacing-6)',
+        borderRadius: 'var(--tc-radius-xl)',
+        border: '1px solid var(--tc-border)',
+        boxShadow: 'var(--tc-shadow-sm)',
+        marginBottom: 'var(--tc-spacing-8)'
+      }}>
+        <h2 style={{ fontSize: 'var(--tc-font-size-lg)', fontWeight: 700, color: '#1e293b', marginBottom: 'var(--tc-spacing-4)', borderBottom: '1px solid var(--tc-border)', paddingBottom: 'var(--tc-spacing-2)' }}>
+          Thông số Vận hành
+        </h2>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 'var(--tc-spacing-4)' }}>
+          <div style={{ flex: 1, maxWidth: '300px' }}>
+            <label style={{ display: 'block', fontSize: 'var(--tc-font-size-sm)', fontWeight: 600, color: '#475569', marginBottom: '8px' }}>
               Tỷ lệ hoa hồng / Phí nền tảng (%)
             </label>
             <input
               type="number"
               value={commissionRate}
               onChange={(e) => setCommissionRate(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
+              style={{
+                width: '100%',
+                padding: '10px 14px',
+                borderRadius: 'var(--tc-radius-lg)',
+                border: '1px solid var(--tc-border)',
+                fontSize: 'var(--tc-font-size-sm)',
+                outline: 'none',
+                transition: 'border-color 0.2s',
+              }}
               min="0" max="100"
             />
           </div>
           <button
             onClick={saveCommissionRate}
             disabled={loadingConfig}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            style={{
+              padding: '10px 20px',
+              backgroundColor: 'var(--tc-primary)',
+              color: 'white',
+              border: 'none',
+              borderRadius: 'var(--tc-radius-lg)',
+              cursor: loadingConfig ? 'not-allowed' : 'pointer',
+              fontWeight: 600,
+              fontSize: 'var(--tc-font-size-sm)',
+              opacity: loadingConfig ? 0.7 : 1,
+              transition: 'background-color 0.2s'
+            }}
           >
             {loadingConfig ? 'Đang lưu...' : 'Lưu thông số'}
           </button>
         </div>
-        <p className="text-sm text-gray-500 mt-2">
+        <p style={{ fontSize: 'var(--tc-font-size-sm)', color: '#64748b', marginTop: 'var(--tc-spacing-3)' }}>
           Phí này sẽ được áp dụng làm tỷ lệ chiết khấu cho mọi đơn đặt tour thành công trên hệ thống.
         </p>
       </section>
 
       {/* Categories Dictionary Section */}
-      <section className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <h2 className="text-lg font-semibold mb-4 border-b pb-2">Quản lý Danh mục (Dictionaries)</h2>
+      <section style={{
+        backgroundColor: 'white',
+        padding: 'var(--tc-spacing-6)',
+        borderRadius: 'var(--tc-radius-xl)',
+        border: '1px solid var(--tc-border)',
+        boxShadow: 'var(--tc-shadow-sm)'
+      }}>
+        <h2 style={{ fontSize: 'var(--tc-font-size-lg)', fontWeight: 700, color: '#1e293b', marginBottom: 'var(--tc-spacing-4)', borderBottom: '1px solid var(--tc-border)', paddingBottom: 'var(--tc-spacing-2)' }}>
+          Quản lý Danh mục (Dictionaries)
+        </h2>
         
         {/* Tabs */}
-        <div className="flex gap-2 border-b mb-4">
+        <div style={{ display: 'flex', gap: 'var(--tc-spacing-2)', borderBottom: '1px solid var(--tc-border)', marginBottom: 'var(--tc-spacing-6)' }}>
           {[
             { id: 'provinces', label: 'Tỉnh / Thành phố' },
             { id: 'languages', label: 'Ngôn ngữ' },
@@ -143,7 +187,18 @@ export default function AdminSettingsPage() {
             <button
               key={tab.id}
               onClick={() => { setActiveTab(tab.id as any); setShowForm(false); }}
-              className={`px-4 py-2 -mb-px border-b-2 font-medium ${activeTab === tab.id ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              style={{
+                padding: '12px 20px',
+                border: 'none',
+                borderBottom: activeTab === tab.id ? '2px solid var(--tc-primary)' : '2px solid transparent',
+                backgroundColor: 'transparent',
+                color: activeTab === tab.id ? 'var(--tc-primary)' : '#64748b',
+                fontWeight: activeTab === tab.id ? 700 : 500,
+                fontSize: 'var(--tc-font-size-sm)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                marginBottom: '-1px'
+              }}
             >
               {tab.label}
             </button>
@@ -151,88 +206,176 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Action Bar */}
-        <div className="mb-4">
+        <div style={{ marginBottom: 'var(--tc-spacing-4)', display: 'flex', justifyContent: 'flex-end' }}>
           <button
             onClick={() => { setShowForm(true); setEditingId(null); setFormData({ name: '', description: '' }); }}
-            className="px-3 py-1.5 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium"
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: 'var(--tc-radius-md)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: 'var(--tc-font-size-sm)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}
           >
-            + Thêm mới
+            <span>+</span> Thêm bản ghi mới
           </button>
         </div>
 
         {/* Form Modal/Inline */}
         {showForm && (
-          <div className="mb-6 p-4 border border-blue-100 bg-blue-50 rounded-md">
-            <h3 className="font-semibold mb-3">{editingId ? 'Sửa thông tin' : 'Thêm bản ghi mới'}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+          <div style={{
+            marginBottom: 'var(--tc-spacing-6)',
+            padding: 'var(--tc-spacing-5)',
+            border: '1px solid #bfdbfe',
+            backgroundColor: '#eff6ff',
+            borderRadius: 'var(--tc-radius-lg)'
+          }}>
+            <h3 style={{ fontSize: 'var(--tc-font-size-base)', fontWeight: 700, color: '#1e3a8a', marginBottom: 'var(--tc-spacing-4)' }}>
+              {editingId ? 'Sửa thông tin danh mục' : 'Thêm danh mục mới'}
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--tc-spacing-4)', marginBottom: 'var(--tc-spacing-4)' }}>
               <div>
-                <label className="block text-sm text-gray-600 mb-1">Tên danh mục *</label>
+                <label style={{ display: 'block', fontSize: 'var(--tc-font-size-sm)', fontWeight: 600, color: '#3b82f6', marginBottom: '8px' }}>Tên danh mục *</label>
                 <input 
                   type="text" 
                   value={formData.name} 
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-1.5 border rounded"
+                  style={{
+                    width: '100%',
+                    padding: '10px 14px',
+                    borderRadius: 'var(--tc-radius-md)',
+                    border: '1px solid #bfdbfe',
+                    fontSize: 'var(--tc-font-size-sm)',
+                    outline: 'none',
+                  }}
                   autoFocus
                 />
               </div>
               {activeTab === 'tour_categories' && (
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">Mô tả</label>
+                  <label style={{ display: 'block', fontSize: 'var(--tc-font-size-sm)', fontWeight: 600, color: '#3b82f6', marginBottom: '8px' }}>Mô tả</label>
                   <input 
                     type="text" 
                     value={formData.description} 
                     onChange={e => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full px-3 py-1.5 border rounded"
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--tc-radius-md)',
+                      border: '1px solid #bfdbfe',
+                      fontSize: 'var(--tc-font-size-sm)',
+                      outline: 'none',
+                    }}
                   />
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
-              <button onClick={handleSaveCategory} className="px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">Lưu lại</button>
-              <button onClick={() => setShowForm(false)} className="px-3 py-1.5 bg-gray-200 text-gray-800 rounded text-sm hover:bg-gray-300">Hủy</button>
+            <div style={{ display: 'flex', gap: 'var(--tc-spacing-3)' }}>
+              <button 
+                onClick={handleSaveCategory} 
+                style={{
+                  padding: '8px 20px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--tc-radius-md)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 'var(--tc-font-size-sm)'
+                }}
+              >
+                Lưu lại
+              </button>
+              <button 
+                onClick={() => setShowForm(false)} 
+                style={{
+                  padding: '8px 20px',
+                  backgroundColor: 'white',
+                  color: '#475569',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: 'var(--tc-radius-md)',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 'var(--tc-font-size-sm)'
+                }}
+              >
+                Hủy
+              </button>
             </div>
           </div>
         )}
 
         {/* Data Table */}
         {loadingCats ? (
-          <div className="py-8 text-center text-gray-500">Đang tải dữ liệu...</div>
+          <div style={{ padding: 'var(--tc-spacing-10)', textAlign: 'center', color: '#64748b' }}>Đang tải dữ liệu...</div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+          <div style={{ 
+            borderRadius: 'var(--tc-radius-lg)', 
+            border: '1px solid var(--tc-border)', 
+            overflow: 'hidden'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
-                <tr className="bg-gray-50 text-left border-b border-gray-200">
-                  <th className="p-3 text-sm font-medium text-gray-600 w-16">ID</th>
-                  <th className="p-3 text-sm font-medium text-gray-600">Tên</th>
-                  {activeTab === 'tour_categories' && <th className="p-3 text-sm font-medium text-gray-600">Mô tả</th>}
-                  <th className="p-3 text-sm font-medium text-gray-600 w-32 text-right">Thao tác</th>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid var(--tc-border)' }}>
+                  <th style={{ padding: 'var(--tc-spacing-4)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em', width: '80px' }}>ID</th>
+                  <th style={{ padding: 'var(--tc-spacing-4)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em' }}>Tên</th>
+                  {activeTab === 'tour_categories' && <th style={{ padding: 'var(--tc-spacing-4)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em' }}>Mô tả</th>}
+                  <th style={{ padding: 'var(--tc-spacing-4)', fontSize: '11px', textTransform: 'uppercase', color: '#64748b', fontWeight: 700, letterSpacing: '0.05em', width: '120px', textAlign: 'right' }}>Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {categories.map(cat => (
-                  <tr key={cat.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="p-3 text-sm text-gray-500">{cat.id}</td>
-                    <td className="p-3 text-sm font-medium text-gray-800">{cat.name}</td>
-                    {activeTab === 'tour_categories' && <td className="p-3 text-sm text-gray-600">{cat.description}</td>}
-                    <td className="p-3 text-sm text-right flex justify-end gap-2">
-                      <button 
-                        onClick={() => { setEditingId(cat.id); setFormData({ name: cat.name, description: cat.description || '' }); setShowForm(true); }}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Sửa
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(cat.id)}
-                        className="text-red-600 hover:underline"
-                      >
-                        Xóa
-                      </button>
+                  <tr key={cat.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: 'var(--tc-spacing-4)', fontSize: 'var(--tc-font-size-sm)', color: '#64748b' }}>{cat.id}</td>
+                    <td style={{ padding: 'var(--tc-spacing-4)', fontSize: 'var(--tc-font-size-sm)', fontWeight: 600, color: '#1e293b' }}>{cat.name}</td>
+                    {activeTab === 'tour_categories' && <td style={{ padding: 'var(--tc-spacing-4)', fontSize: 'var(--tc-font-size-sm)', color: '#475569' }}>{cat.description}</td>}
+                    <td style={{ padding: 'var(--tc-spacing-4)', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                        <button 
+                          onClick={() => { setEditingId(cat.id); setFormData({ name: cat.name, description: cat.description || '' }); setShowForm(true); }}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#eff6ff',
+                            color: '#3b82f6',
+                            border: '1px solid #bfdbfe',
+                            borderRadius: 'var(--tc-radius-md)',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 600
+                          }}
+                        >
+                          Sửa
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(cat.id)}
+                          style={{
+                            padding: '6px 12px',
+                            backgroundColor: '#fef2f2',
+                            color: '#ef4444',
+                            border: '1px solid #fecaca',
+                            borderRadius: 'var(--tc-radius-md)',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: 600
+                          }}
+                        >
+                          Xóa
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
                 {categories.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="p-4 text-center text-gray-500">Chưa có dữ liệu.</td>
+                    <td colSpan={activeTab === 'tour_categories' ? 4 : 3} style={{ padding: 'var(--tc-spacing-8)', textAlign: 'center', color: '#94a3b8' }}>
+                      Chưa có dữ liệu.
+                    </td>
                   </tr>
                 )}
               </tbody>
