@@ -219,3 +219,10 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 - **Cập nhật luồng đặt Tour:** Tích hợp phương thức thanh toán bằng "Ví Hệ Thống" bên cạnh "VNPAY" tại trang đặt tour (`TourBookingPage.tsx`).
 - **Ghi nhận lịch sử giao dịch:** Cập nhật `vnpayIpn` trong `payments.service.ts` để ghi nhận các giao dịch qua VNPAY vào `wallet_transactions` và cộng dồn `total_spent` của ví mà không trừ số dư.
 - **Giao diện quản lý Ví:** Thêm Modal hiển thị thông tin chi tiết từng giao dịch trong `WalletPage.tsx` khi người dùng nhấn vào các hàng.
+
+### 2026-06-14 (Admin UI & Wallet Stats)
+- **Thống kê ví Admin:** Thêm API `getWalletStats` vào `admin.service.ts` để lấy tổng số dư, tổng nạp, rút và doanh thu của hệ thống ví. Tích hợp API này vào frontend qua `admin.api.ts`.
+- **Cập nhật giao diện Admin:** Chỉnh sửa UI cho các trang `AdminSettingsPage`, `AdminCompanionManagementPage`, `AdminReportManagementPage` và `AdminTourManagementPage`.
+- **HomePage Bugfix:** Sửa lỗi hiển thị chi phí bị `NaN` trên `HomePage.tsx`.
+- **CI & Tests:** Cập nhật `ci.yml` và `e2e-tests.yml` để trỏ đúng đường dẫn.
+- **Automated PR:** Đã tạo Pull Request #114 từ nhánh `feature/user-wallet` vào `develop`.
