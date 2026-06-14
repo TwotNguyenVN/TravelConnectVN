@@ -205,3 +205,9 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
 ### 2026-06-13 (Bug Fixes)
 - **Sửa lỗi lọc Tour Nổi Bật và Gợi Ý:** Cập nhật logic trong `tours.service.ts` và `recommendations.service.ts` để loại bỏ triệt để các tour có `start_date` bằng null khỏi màn hình trang chủ.
 - **Sửa lỗi màn hình Chat:** Khôi phục giao diện màn hình chat cũ, đảm bảo các tính năng như emoji, hiển thị trạng thái hoạt động chính xác.
+
+### 2026-06-14 (Bug Fixes)
+- **Sửa lỗi thanh toán đợt 2 (Số tiền còn lại) qua VNPay**:
+  - Đồng bộ hóa trạng thái thanh toán từ `'partially_paid'` thành `'payment_pending'` trong `payments.service.ts` và `admin.service.ts` để đảm bảo tương thích với DB Check Constraints (tránh vi phạm ràng buộc dữ liệu gây rollback) và Frontend (hiển thị đúng badge và nút "Thanh toán tiếp").
+  - Cập nhật logic `createPaymentUrl` trong `payments.service.ts` để tự động cập nhật các giao dịch `pending` cũ sang `cancelled` và cấp UUID mới làm `vnp_TxnRef` cho giao dịch thanh toán mới, khắc phục triệt để lỗi trùng mã giao dịch VNPay (mã lỗi `01`).
+

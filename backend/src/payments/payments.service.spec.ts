@@ -21,6 +21,7 @@ describe('PaymentsService', () => {
       findUnique: jest.fn(),
       create: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn(),
     },
     $transaction: jest.fn((promises) => Promise.all(promises)),
   };

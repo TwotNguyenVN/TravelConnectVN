@@ -102,41 +102,30 @@ export class PaymentsService {
         amount = Math.floor(totalAmount * 0.5);
       }
 
-      // Kiểm tra xem đã có giao dịch pending cho yêu cầu này chưa
-      const existingTransaction =
-        await this.prisma.payment_transactions.findFirst({
-          where: {
-            tour_request_id: tourRequestId,
-            user_id: userId,
-            status: 'pending',
-          },
-        });
+      // Hủy giao dịch pending cũ nếu có để tránh trùng lặp vnp_TxnRef trên VNPay
+      await this.prisma.payment_transactions.updateMany({
+        where: {
+          tour_request_id: tourRequestId,
+          user_id: userId,
+          status: 'pending',
+        },
+        data: {
+          status: 'cancelled',
+        },
+      });
 
-      let transactionId: string;
-
-      if (existingTransaction) {
-        transactionId = existingTransaction.id;
-        // Cập nhật lại số tiền nếu người dùng thay đổi loại thanh toán (Full <-> Deposit)
-        if (Number(existingTransaction.amount) !== amount) {
-          await this.prisma.payment_transactions.update({
-            where: { id: transactionId },
-            data: { amount: amount },
-          });
-        }
-      } else {
-        transactionId = crypto.randomUUID();
-        await this.prisma.payment_transactions.create({
-          data: {
-            id: transactionId,
-            tour_request_id: tourRequestId,
-            user_id: userId,
-            amount: amount,
-            payment_method: 'vnpay',
-            status: 'pending',
-            transaction_code: transactionId, // Dùng làm vnp_TxnRef
-          },
-        });
-      }
+      const transactionId = crypto.randomUUID();
+      await this.prisma.payment_transactions.create({
+        data: {
+          id: transactionId,
+          tour_request_id: tourRequestId,
+          user_id: userId,
+          amount: amount,
+          payment_method: 'vnpay',
+          status: 'pending',
+          transaction_code: transactionId, // Dùng làm vnp_TxnRef
+        },
+      });
 
       // Tạo tham số VNPAY
       const tmnCode = process.env.VNP_TMNCODE;
@@ -284,7 +273,7 @@ export class PaymentsService {
           if (totalPaid >= totalAmount) {
             targetStatus = 'paid';
           } else if (totalPaid > 0) {
-            targetStatus = 'partially_paid';
+            targetStatus = 'payment_pending';
           }
         }
 

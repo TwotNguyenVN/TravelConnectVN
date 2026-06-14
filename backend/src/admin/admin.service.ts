@@ -811,7 +811,7 @@ export class AdminService {
           if (totalPaid >= totalAmount) {
             targetStatus = 'paid';
           } else if (totalPaid > 0) {
-            targetStatus = 'partially_paid';
+            targetStatus = 'payment_pending';
           }
 
           await tx.tour_requests.update({
