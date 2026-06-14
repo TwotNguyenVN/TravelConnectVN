@@ -2,9 +2,9 @@ name: Playwright Tests
 
 on:
   push:
-    branches: [ main, develop, "feature/**" ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop, "feature/**" ]
+    branches: [main, develop]
 
 jobs:
   test:
@@ -30,56 +30,56 @@ jobs:
           - 6379:6379
 
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
-        
-    - name: Install dependencies (Backend)
-      working-directory: ./backend
-      run: npm ci
+      - uses: actions/checkout@v4
 
-    - name: Setup Prisma
-      working-directory: ./backend
-      env:
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
-        DIRECT_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
-      run: |
-        npx prisma db execute --stdin <<< "CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;"
-        npx prisma generate
-        npx prisma migrate dev --name init
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-    - name: Start Backend server
-      working-directory: ./backend
-      env:
-        DATABASE_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
-        DIRECT_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
-        JWT_SECRET: test_secret_key
-        REDIS_HOST: localhost
-        REDIS_PORT: 6379
-      run: npm run start &
-      
-    - name: Install dependencies (Frontend)
-      working-directory: ./frontend
-      run: npm ci
-      
-    - name: Install Playwright Browsers
-      working-directory: ./frontend
-      run: npx playwright install --with-deps
-      
-    - name: Run Playwright tests
-      working-directory: ./frontend
-      env:
-        CI: true
-        VITE_SUPABASE_URL: "https://mock-supabase.co"
-        VITE_SUPABASE_ANON_KEY: "mock-anon-key"
-      run: npx playwright test
-      
-    - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
-      with:
-        name: playwright-report
-        path: frontend/playwright-report/
-        retention-days: 30
+      - name: Install dependencies (Backend)
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Setup Prisma
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
+          DIRECT_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
+        run: |
+          npx prisma db execute --stdin <<< "CREATE EXTENSION IF NOT EXISTS pg_trgm SCHEMA public;"
+          npx prisma generate
+          npx prisma migrate dev --name init
+
+      - name: Start Backend server
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
+          DIRECT_URL: postgresql://postgres:password@localhost:5432/travelconnect_test?schema=public
+          JWT_SECRET: test_secret_key
+          REDIS_HOST: localhost
+          REDIS_PORT: 6379
+        run: npm run start &
+
+      - name: Install dependencies (Frontend)
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Install Playwright Browsers
+        working-directory: ./frontend
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright tests
+        working-directory: ./frontend
+        env:
+          CI: true
+          VITE_SUPABASE_URL: "https://mock-supabase.co"
+          VITE_SUPABASE_ANON_KEY: "mock-anon-key"
+        run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 30

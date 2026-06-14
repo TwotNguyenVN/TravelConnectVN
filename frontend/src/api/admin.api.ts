@@ -88,7 +88,7 @@ export const adminApi = {
   getAnomalyAlerts: () => api.get('/admin/anomaly/alerts'),
 
   // Phase 7: Report Heatmap
-  getReportHeatmapData: () => api.get('/reports/heatmap'),
+  getReportHeatmapData: () => api.get('/admin/reports/heatmap'),
 
   // Phase 8: FAQ & Quick Responses
   getFaqItems: () => api.get('/support/faq'),

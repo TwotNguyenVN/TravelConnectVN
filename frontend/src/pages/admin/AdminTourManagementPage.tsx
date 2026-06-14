@@ -16,6 +16,7 @@ interface Tour {
   guide_profiles: {
     users: {
       full_name: string;
+      avatar_url?: string;
     };
   };
 }
@@ -99,7 +100,7 @@ export const AdminTourManagementPage: React.FC = () => {
     try {
       const imgs = typeof images === 'string' ? JSON.parse(images) : images;
       if (Array.isArray(imgs) && imgs.length > 0) {
-        return typeof imgs[0] === 'string' ? imgs[0] : imgs[0].imageUrl;
+        return typeof imgs[0] === 'string' ? imgs[0] : (imgs[0].image_url || imgs[0].imageUrl || '/default-tour.jpg');
       }
     } catch (e) {
       return '/default-tour.jpg';
@@ -241,7 +242,15 @@ export const AdminTourManagementPage: React.FC = () => {
                   </td>
                   <td style={{ padding: 'var(--tc-spacing-5)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>👤</div>
+                      {tour.guide_profiles?.users?.avatar_url ? (
+                        <img 
+                          src={tour.guide_profiles.users.avatar_url} 
+                          alt="avatar" 
+                          style={{ width: '28px', height: '28px', borderRadius: '50%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>👤</div>
+                      )}
                       <span style={{ fontSize: 'var(--tc-font-size-sm)', fontWeight: 500 }}>{tour.guide_profiles?.users?.full_name}</span>
                     </div>
                   </td>

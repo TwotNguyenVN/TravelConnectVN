@@ -23,7 +23,7 @@ export const AdminReportManagementPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await adminApi.getReports({ take: 50 });
-      setReports(response.data.items);
+      setReports(response.data?.items || response.data || []);
     } catch (error) {
       toast.error('Không thể tải danh sách báo cáo');
     } finally {

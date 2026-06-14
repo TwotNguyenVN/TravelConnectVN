@@ -577,9 +577,13 @@ export class AdminService {
         include: {
           guide_profiles: {
             include: {
-              users: { select: { full_name: true } },
+              users: { select: { full_name: true, avatar_url: true } },
             },
           },
+          tour_images: {
+            take: 1,
+            orderBy: { sort_order: 'asc' }
+          }
         },
         orderBy: { created_at: 'desc' },
       }),
@@ -608,7 +612,7 @@ export class AdminService {
         skip,
         take,
         include: {
-          users: { select: { full_name: true } },
+          users: { select: { full_name: true, avatar_url: true } },
         },
         orderBy: { created_at: 'desc' },
       }),
