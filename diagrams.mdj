@@ -1,0 +1,3172 @@
+{
+  "_type": "Project",
+  "_id": "AAAAAAFF+h6SjaM2Hec=",
+  "name": "Library Systems",
+  "ownedElements": [
+    {
+      "_type": "UMLModel",
+      "_id": "AAAAAAFF+qBWK6M3Z8Y=",
+      "_parent": {
+        "$ref": "AAAAAAFF+h6SjaM2Hec="
+      },
+      "name": "Model",
+      "ownedElements": [
+        {
+          "_type": "UMLActor",
+          "_id": "AAAAAAGUAct_ActorDocGia=",
+          "_parent": {
+            "$ref": "AAAAAAFF+qBWK6M3Z8Y="
+          },
+          "name": "Đọc Giả"
+        },
+        {
+          "_type": "UMLActivity",
+          "_id": "AAAAAAGUAct_ActivityBookBorrow=",
+          "_parent": {
+            "$ref": "AAAAAAFF+qBWK6M3Z8Y="
+          },
+          "name": "ActivityBookBorrowing",
+          "ownedElements": [
+            {
+              "_type": "UMLActivityDiagram",
+              "_id": "AAAAAAGUAct_ActivityDiagram1=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "ActivityDiagram_MuonSach",
+              "ownedViews": [
+                {
+                  "_type": "UMLActivityPartitionView",
+                  "_id": "AAAAAAGUAct_ViewLaneDocGia=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_LaneDocGia="
+                  },
+                  "left": 80,
+                  "top": 50,
+                  "width": 260,
+                  "height": 1380
+                },
+                {
+                  "_type": "UMLActivityPartitionView",
+                  "_id": "AAAAAAGUAct_ViewLaneThuThu=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_LaneThuThu="
+                  },
+                  "left": 340,
+                  "top": 50,
+                  "width": 260,
+                  "height": 1380
+                },
+                {
+                  "_type": "UMLActivityPartitionView",
+                  "_id": "AAAAAAGUAct_ViewLaneHeThong=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_LaneHeThong="
+                  },
+                  "left": 600,
+                  "top": 50,
+                  "width": 320,
+                  "height": 1380
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewInitial=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeInitial="
+                  },
+                  "left": 200,
+                  "top": 100,
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewYcMuonSach=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeYcMuonSach="
+                  },
+                  "left": 130,
+                  "top": 160,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewYcCungCapTTDG=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeYcCungCapTTDG="
+                  },
+                  "left": 390,
+                  "top": 160,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewCungCapTTDG=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeCungCapTTDG="
+                  },
+                  "left": 130,
+                  "top": 240,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewTiepNhanTTDG=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeTiepNhanTTDG="
+                  },
+                  "left": 390,
+                  "top": 240,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewKiemTraTTDG=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeKiemTraTTDG="
+                  },
+                  "left": 670,
+                  "top": 240,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewDecDGValid=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeDecDGValid="
+                  },
+                  "left": 740,
+                  "top": 320,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewTbKhongDuocMuon=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeTbKhongDuocMuon="
+                  },
+                  "left": 130,
+                  "top": 320,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewFinal1=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeFinal1="
+                  },
+                  "left": 40,
+                  "top": 330,
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewYcCungCapTTSM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeYcCungCapTTSM="
+                  },
+                  "left": 390,
+                  "top": 400,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewDecTTSM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeDecTTSM="
+                  },
+                  "left": 450,
+                  "top": 480,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewCungCapTTSM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeCungCapTTSM="
+                  },
+                  "left": 130,
+                  "top": 480,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewDecReaderAct=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+                  },
+                  "left": 190,
+                  "top": 560,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewFinal2=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeFinal2="
+                  },
+                  "left": 40,
+                  "top": 570,
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewChonSach=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeChonSach="
+                  },
+                  "left": 390,
+                  "top": 560,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewKiemTraSachMuon=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeKiemTraSachMuon="
+                  },
+                  "left": 670,
+                  "top": 560,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewDecBookAvail=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeDecBookAvail="
+                  },
+                  "left": 740,
+                  "top": 640,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewTbHetSach=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeTbHetSach="
+                  },
+                  "left": 390,
+                  "top": 640,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewKiemTraSLMuon=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeKiemTraSLMuon="
+                  },
+                  "left": 670,
+                  "top": 720,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewDecQntyLimit=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeDecQntyLimit="
+                  },
+                  "left": 740,
+                  "top": 800,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewHuyCuonVuaChon=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeHuyCuonVuaChon="
+                  },
+                  "left": 670,
+                  "top": 880,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewMergeQnty=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeMergeQnty="
+                  },
+                  "left": 740,
+                  "top": 960,
+                  "width": 40,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewLapPhieuMuon=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeLapPhieuMuon="
+                  },
+                  "left": 670,
+                  "top": 1040,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewFork=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeFork="
+                  },
+                  "left": 630,
+                  "top": 1110,
+                  "width": 260,
+                  "height": 8
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewLuuPM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeLuuPM="
+                  },
+                  "left": 630,
+                  "top": 1150,
+                  "width": 70,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewLuuCTPM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeLuuCTPM="
+                  },
+                  "left": 720,
+                  "top": 1150,
+                  "width": 80,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewCapNhatSM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeCapNhatSM="
+                  },
+                  "left": 810,
+                  "top": 1150,
+                  "width": 80,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewJoin=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeJoin="
+                  },
+                  "left": 630,
+                  "top": 1220,
+                  "width": 260,
+                  "height": 8
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewInPM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeInPM="
+                  },
+                  "left": 670,
+                  "top": 1260,
+                  "width": 180,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewGiaoSach=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeGiaoSach="
+                  },
+                  "left": 390,
+                  "top": 1260,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLActionView",
+                  "_id": "AAAAAAGUAct_ViewNhanSachPM=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeNhanSachPM="
+                  },
+                  "left": 130,
+                  "top": 1260,
+                  "width": 160,
+                  "height": 40
+                },
+                {
+                  "_type": "UMLControlNodeView",
+                  "_id": "AAAAAAGUAct_ViewFinal3=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_NodeFinal3="
+                  },
+                  "left": 200,
+                  "top": 1340,
+                  "width": 20,
+                  "height": 20
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e1=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge1="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewInitial="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewYcMuonSach="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 210,
+                      "y": 120
+                    },
+                    {
+                      "x": 210,
+                      "y": 160
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e2=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge2="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewYcMuonSach="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewYcCungCapTTDG="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 290,
+                      "y": 180
+                    },
+                    {
+                      "x": 390,
+                      "y": 180
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e3=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge3="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewYcCungCapTTDG="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewCungCapTTDG="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 470,
+                      "y": 200
+                    },
+                    {
+                      "x": 470,
+                      "y": 220
+                    },
+                    {
+                      "x": 210,
+                      "y": 220
+                    },
+                    {
+                      "x": 210,
+                      "y": 240
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e4=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge4="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewCungCapTTDG="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewTiepNhanTTDG="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 290,
+                      "y": 260
+                    },
+                    {
+                      "x": 390,
+                      "y": 260
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e5=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge5="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewTiepNhanTTDG="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraTTDG="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 550,
+                      "y": 260
+                    },
+                    {
+                      "x": 670,
+                      "y": 260
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e6=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge6="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraTTDG="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecDGValid="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 280
+                    },
+                    {
+                      "x": 760,
+                      "y": 320
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e7=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge7="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecDGValid="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewTbKhongDuocMuon="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 740,
+                      "y": 340
+                    },
+                    {
+                      "x": 290,
+                      "y": 340
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e8=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge8="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewTbKhongDuocMuon="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewFinal1="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 130,
+                      "y": 340
+                    },
+                    {
+                      "x": 60,
+                      "y": 340
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e9=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge9="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecDGValid="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewYcCungCapTTSM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 360
+                    },
+                    {
+                      "x": 760,
+                      "y": 380
+                    },
+                    {
+                      "x": 470,
+                      "y": 380
+                    },
+                    {
+                      "x": 470,
+                      "y": 400
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e10=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge10="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewYcCungCapTTSM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecTTSM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 470,
+                      "y": 440
+                    },
+                    {
+                      "x": 470,
+                      "y": 480
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e11=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge11="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecTTSM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewCungCapTTSM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 450,
+                      "y": 500
+                    },
+                    {
+                      "x": 290,
+                      "y": 500
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e12=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge12="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewCungCapTTSM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecReaderAct="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 210,
+                      "y": 520
+                    },
+                    {
+                      "x": 210,
+                      "y": 560
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e13=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge13="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecReaderAct="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewFinal2="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 190,
+                      "y": 580
+                    },
+                    {
+                      "x": 60,
+                      "y": 580
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e14=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge14="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecReaderAct="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewChonSach="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 230,
+                      "y": 580
+                    },
+                    {
+                      "x": 390,
+                      "y": 580
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e15=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge15="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewChonSach="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraSachMuon="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 550,
+                      "y": 580
+                    },
+                    {
+                      "x": 670,
+                      "y": 580
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e16=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge16="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraSachMuon="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecBookAvail="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 600
+                    },
+                    {
+                      "x": 760,
+                      "y": 640
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e17=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge17="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecBookAvail="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewTbHetSach="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 740,
+                      "y": 660
+                    },
+                    {
+                      "x": 550,
+                      "y": 660
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e18=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge18="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewTbHetSach="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecReaderAct="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 390,
+                      "y": 660
+                    },
+                    {
+                      "x": 330,
+                      "y": 660
+                    },
+                    {
+                      "x": 330,
+                      "y": 600
+                    },
+                    {
+                      "x": 210,
+                      "y": 600
+                    },
+                    {
+                      "x": 210,
+                      "y": 580
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e19=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge19="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecBookAvail="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraSLMuon="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 680
+                    },
+                    {
+                      "x": 760,
+                      "y": 720
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e20=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge20="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewKiemTraSLMuon="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewDecQntyLimit="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 760
+                    },
+                    {
+                      "x": 760,
+                      "y": 800
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e21=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge21="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecQntyLimit="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewHuyCuonVuaChon="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 740,
+                      "y": 820
+                    },
+                    {
+                      "x": 630,
+                      "y": 820
+                    },
+                    {
+                      "x": 630,
+                      "y": 900
+                    },
+                    {
+                      "x": 670,
+                      "y": 900
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e22=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge22="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewHuyCuonVuaChon="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewMergeQnty="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 920
+                    },
+                    {
+                      "x": 760,
+                      "y": 960
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e23=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge23="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewDecQntyLimit="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewMergeQnty="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 780,
+                      "y": 820
+                    },
+                    {
+                      "x": 860,
+                      "y": 820
+                    },
+                    {
+                      "x": 860,
+                      "y": 980
+                    },
+                    {
+                      "x": 780,
+                      "y": 980
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e24=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge24="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewMergeQnty="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewLapPhieuMuon="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 1000
+                    },
+                    {
+                      "x": 760,
+                      "y": 1040
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e25=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge25="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewLapPhieuMuon="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewFork="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 1080
+                    },
+                    {
+                      "x": 760,
+                      "y": 1110
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e26=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge26="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewFork="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewLuuPM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 665,
+                      "y": 1118
+                    },
+                    {
+                      "x": 665,
+                      "y": 1150
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e27=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge27="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewFork="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewLuuCTPM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 1118
+                    },
+                    {
+                      "x": 760,
+                      "y": 1150
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e28=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge28="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewFork="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewCapNhatSM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 850,
+                      "y": 1118
+                    },
+                    {
+                      "x": 850,
+                      "y": 1150
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e29=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge29="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewLuuPM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewJoin="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 665,
+                      "y": 1190
+                    },
+                    {
+                      "x": 665,
+                      "y": 1220
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e30=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge30="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewLuuCTPM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewJoin="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 1190
+                    },
+                    {
+                      "x": 760,
+                      "y": 1220
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e31=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge31="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewCapNhatSM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewJoin="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 850,
+                      "y": 1190
+                    },
+                    {
+                      "x": 850,
+                      "y": 1220
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e32=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge32="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewJoin="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewInPM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 760,
+                      "y": 1228
+                    },
+                    {
+                      "x": 760,
+                      "y": 1260
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e33=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge33="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewInPM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewGiaoSach="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 670,
+                      "y": 1280
+                    },
+                    {
+                      "x": 550,
+                      "y": 1280
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e34=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge34="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewGiaoSach="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewNhanSachPM="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 390,
+                      "y": 1280
+                    },
+                    {
+                      "x": 290,
+                      "y": 1280
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLControlFlowView",
+                  "_id": "AAAAAAGUAct_ViewEdge_e35=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUAct_ActivityDiagram1="
+                  },
+                  "model": {
+                    "$ref": "AAAAAAGUAct_Edge35="
+                  },
+                  "tailView": {
+                    "$ref": "AAAAAAGUAct_ViewNhanSachPM="
+                  },
+                  "headView": {
+                    "$ref": "AAAAAAGUAct_ViewFinal3="
+                  },
+                  "lineStyle": 2,
+                  "points": [
+                    {
+                      "x": 210,
+                      "y": 1300
+                    },
+                    {
+                      "x": 210,
+                      "y": 1340
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "nodes": [
+            {
+              "_type": "UMLInitialNode",
+              "_id": "AAAAAAGUAct_NodeInitial=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Start"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeYcMuonSach=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Yêu cầu mượn sách"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeYcCungCapTTDG=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Yêu cầu cung cấp TT ĐG"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeCungCapTTDG=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Cung cấp TT ĐG"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeTiepNhanTTDG=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Tiếp nhận TT ĐG"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeKiemTraTTDG=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Kiểm tra thông tin ĐG"
+            },
+            {
+              "_type": "UMLDecisionNode",
+              "_id": "AAAAAAGUAct_NodeDecDGValid=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "ĐG hợp lệ?"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeTbKhongDuocMuon=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Thông báo không được mượn"
+            },
+            {
+              "_type": "UMLActivityFinalNode",
+              "_id": "AAAAAAGUAct_NodeFinal1=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "End 1"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeYcCungCapTTSM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Yêu cầu cung cấp TT SM"
+            },
+            {
+              "_type": "UMLDecisionNode",
+              "_id": "AAAAAAGUAct_NodeDecTTSM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Đang có TT SM?"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeCungCapTTSM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Cung cấp TT SM"
+            },
+            {
+              "_type": "UMLDecisionNode",
+              "_id": "AAAAAAGUAct_NodeDecReaderAct=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Lựa chọn ĐG"
+            },
+            {
+              "_type": "UMLActivityFinalNode",
+              "_id": "AAAAAAGUAct_NodeFinal2=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "End 2"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeChonSach=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Chọn sách"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeKiemTraSachMuon=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Kiểm tra sách mượn"
+            },
+            {
+              "_type": "UMLDecisionNode",
+              "_id": "AAAAAAGUAct_NodeDecBookAvail=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Còn sách?"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeTbHetSach=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Thông báo hết sách"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeKiemTraSLMuon=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Kiểm tra số lượng mượn"
+            },
+            {
+              "_type": "UMLDecisionNode",
+              "_id": "AAAAAAGUAct_NodeDecQntyLimit=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Vượt quá 3 cuốn?"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeHuyCuonVuaChon=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Huỷ cuốn vừa chọn"
+            },
+            {
+              "_type": "UMLMergeNode",
+              "_id": "AAAAAAGUAct_NodeMergeQnty=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Merge Qnty"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeLapPhieuMuon=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Lập phiếu mượn"
+            },
+            {
+              "_type": "UMLForkNode",
+              "_id": "AAAAAAGUAct_NodeFork=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Fork"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeLuuPM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Lưu PM"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeLuuCTPM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Lưu CTPM"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeCapNhatSM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Cập nhật SM"
+            },
+            {
+              "_type": "UMLJoinNode",
+              "_id": "AAAAAAGUAct_NodeJoin=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Join"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeInPM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "In PM"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeGiaoSach=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Giao sách"
+            },
+            {
+              "_type": "UMLAction",
+              "_id": "AAAAAAGUAct_NodeNhanSachPM=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "Nhận sách & PM"
+            },
+            {
+              "_type": "UMLActivityFinalNode",
+              "_id": "AAAAAAGUAct_NodeFinal3=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "End 3"
+            }
+          ],
+          "edges": [
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge1=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeInitial="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeYcMuonSach="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge2=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeYcMuonSach="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeYcCungCapTTDG="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge3=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeYcCungCapTTDG="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeCungCapTTDG="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge4=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeCungCapTTDG="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeTiepNhanTTDG="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge5=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeTiepNhanTTDG="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraTTDG="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge6=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraTTDG="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecDGValid="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge7=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecDGValid="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeTbKhongDuocMuon="
+              },
+              "guard": "Không hợp lệ",
+              "name": "Không hợp lệ"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge8=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeTbKhongDuocMuon="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeFinal1="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge9=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecDGValid="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeYcCungCapTTSM="
+              },
+              "guard": "Hợp lệ",
+              "name": "Hợp lệ"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge10=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeYcCungCapTTSM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecTTSM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge11=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecTTSM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeCungCapTTSM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge12=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeCungCapTTSM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge13=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeFinal2="
+              },
+              "guard": "Huỷ mượn",
+              "name": "Huỷ mượn"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge14=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeChonSach="
+              },
+              "guard": "Chọn sách",
+              "name": "Chọn sách"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge15=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeChonSach="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraSachMuon="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge16=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraSachMuon="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecBookAvail="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge17=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecBookAvail="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeTbHetSach="
+              },
+              "guard": "Hết sách",
+              "name": "Hết sách"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge18=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeTbHetSach="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge19=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecBookAvail="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraSLMuon="
+              },
+              "guard": "Còn sách",
+              "name": "Còn sách"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge20=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeKiemTraSLMuon="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeDecQntyLimit="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge21=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecQntyLimit="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeHuyCuonVuaChon="
+              },
+              "guard": "Vượt 3 cuốn",
+              "name": "Vượt 3 cuốn"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge22=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeHuyCuonVuaChon="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeMergeQnty="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge23=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeDecQntyLimit="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeMergeQnty="
+              },
+              "guard": "<= 3 cuốn",
+              "name": "<= 3 cuốn"
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge24=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeMergeQnty="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeLapPhieuMuon="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge25=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeLapPhieuMuon="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeFork="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge26=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeFork="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeLuuPM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge27=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeFork="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeLuuCTPM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge28=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeFork="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeCapNhatSM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge29=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeLuuPM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeJoin="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge30=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeLuuCTPM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeJoin="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge31=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeCapNhatSM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeJoin="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge32=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeJoin="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeInPM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge33=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeInPM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeGiaoSach="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge34=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeGiaoSach="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeNhanSachPM="
+              },
+              "guard": "",
+              "name": ""
+            },
+            {
+              "_type": "UMLControlFlow",
+              "_id": "AAAAAAGUAct_Edge35=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "source": {
+                "$ref": "AAAAAAGUAct_NodeNhanSachPM="
+              },
+              "target": {
+                "$ref": "AAAAAAGUAct_NodeFinal3="
+              },
+              "guard": "",
+              "name": ""
+            }
+          ],
+          "groups": [
+            {
+              "_type": "UMLActivityPartition",
+              "_id": "AAAAAAGUAct_LaneDocGia=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "ĐỘC GIẢ",
+              "nodes": [
+                {
+                  "$ref": "AAAAAAGUAct_NodeInitial="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeYcMuonSach="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeCungCapTTDG="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeTbKhongDuocMuon="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeFinal1="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeCungCapTTSM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeDecReaderAct="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeFinal2="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeNhanSachPM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeFinal3="
+                }
+              ]
+            },
+            {
+              "_type": "UMLActivityPartition",
+              "_id": "AAAAAAGUAct_LaneThuThu=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "THỦ THƯ",
+              "nodes": [
+                {
+                  "$ref": "AAAAAAGUAct_NodeYcCungCapTTDG="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeTiepNhanTTDG="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeYcCungCapTTSM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeDecTTSM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeChonSach="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeTbHetSach="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeGiaoSach="
+                }
+              ]
+            },
+            {
+              "_type": "UMLActivityPartition",
+              "_id": "AAAAAAGUAct_LaneHeThong=",
+              "_parent": {
+                "$ref": "AAAAAAGUAct_ActivityBookBorrow="
+              },
+              "name": "HỆ THỐNG",
+              "nodes": [
+                {
+                  "$ref": "AAAAAAGUAct_NodeKiemTraTTDG="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeDecDGValid="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeKiemTraSachMuon="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeDecBookAvail="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeKiemTraSLMuon="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeDecQntyLimit="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeHuyCuonVuaChon="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeMergeQnty="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeLapPhieuMuon="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeFork="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeLuuPM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeLuuCTPM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeCapNhatSM="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeJoin="
+                },
+                {
+                  "$ref": "AAAAAAGUAct_NodeInPM="
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "_type": "UMLCollaboration",
+          "_id": "AAAAAAGUSeq_Collaboration=",
+          "_parent": {
+            "$ref": "AAAAAAFF+qBWK6M3Z8Y="
+          },
+          "name": "CollaborationLogin",
+          "ownedElements": [
+            {
+              "_type": "UMLInteraction",
+              "_id": "AAAAAAGUSeq_Interaction=",
+              "_parent": {
+                "$ref": "AAAAAAGUSeq_Collaboration="
+              },
+              "name": "Interaction1",
+              "ownedElements": [
+                {
+                  "_type": "UMLSequenceDiagram",
+                  "_id": "AAAAAAGUSeq_SequenceDiagram1=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "SequenceDiagram_DangNhap",
+                  "ownedViews": [
+                    {
+                      "_type": "UMLSeqLifelineView",
+                      "_id": "AAAAAAGUSeq_ViewLineDocGia=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_LineDocGia="
+                      },
+                      "left": 100,
+                      "top": 40,
+                      "width": 80,
+                      "height": 520
+                    },
+                    {
+                      "_type": "UMLSeqLifelineView",
+                      "_id": "AAAAAAGUSeq_ViewLineMainScreen=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_LineMainScreen="
+                      },
+                      "left": 240,
+                      "top": 40,
+                      "width": 120,
+                      "height": 520
+                    },
+                    {
+                      "_type": "UMLSeqLifelineView",
+                      "_id": "AAAAAAGUSeq_ViewLineLoginScreen=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                      },
+                      "left": 420,
+                      "top": 40,
+                      "width": 140,
+                      "height": 520
+                    },
+                    {
+                      "_type": "UMLSeqLifelineView",
+                      "_id": "AAAAAAGUSeq_ViewLineController=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_LineController="
+                      },
+                      "left": 640,
+                      "top": 40,
+                      "width": 80,
+                      "height": 520
+                    },
+                    {
+                      "_type": "UMLSeqLifelineView",
+                      "_id": "AAAAAAGUSeq_ViewLineDatabase=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_LineDatabase="
+                      },
+                      "left": 800,
+                      "top": 40,
+                      "width": 80,
+                      "height": 520
+                    },
+                    {
+                      "_type": "UMLCombinedFragmentView",
+                      "_id": "AAAAAAGUSeq_ViewFragLoop=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_FragLoop="
+                      },
+                      "left": 40,
+                      "top": 195,
+                      "width": 880,
+                      "height": 350
+                    },
+                    {
+                      "_type": "UMLCombinedFragmentView",
+                      "_id": "AAAAAAGUSeq_ViewFragAlt=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_FragAlt="
+                      },
+                      "left": 55,
+                      "top": 310,
+                      "width": 760,
+                      "height": 215
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_1=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg1="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDocGia="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineMainScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 140,
+                          "y": 120
+                        },
+                        {
+                          "x": 300,
+                          "y": 120
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_2=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg2="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineMainScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 300,
+                          "y": 140
+                        },
+                        {
+                          "x": 490,
+                          "y": 140
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_3=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg3="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDocGia="
+                      },
+                      "points": [
+                        {
+                          "x": 490,
+                          "y": 160
+                        },
+                        {
+                          "x": 140,
+                          "y": 160
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_4=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg4="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDocGia="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 140,
+                          "y": 220
+                        },
+                        {
+                          "x": 490,
+                          "y": 220
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_5=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg5="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineController="
+                      },
+                      "points": [
+                        {
+                          "x": 490,
+                          "y": 250
+                        },
+                        {
+                          "x": 680,
+                          "y": 250
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_6=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg6="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineController="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDatabase="
+                      },
+                      "points": [
+                        {
+                          "x": 680,
+                          "y": 270
+                        },
+                        {
+                          "x": 840,
+                          "y": 270
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_7=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg7="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDatabase="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineController="
+                      },
+                      "points": [
+                        {
+                          "x": 840,
+                          "y": 300
+                        },
+                        {
+                          "x": 680,
+                          "y": 300
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_8=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg8="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineController="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 680,
+                          "y": 350
+                        },
+                        {
+                          "x": 490,
+                          "y": 350
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_9=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg9="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDocGia="
+                      },
+                      "points": [
+                        {
+                          "x": 490,
+                          "y": 380
+                        },
+                        {
+                          "x": 140,
+                          "y": 380
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_10=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg10="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineController="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 680,
+                          "y": 440
+                        },
+                        {
+                          "x": 490,
+                          "y": 440
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_11=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg11="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineLoginScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineMainScreen="
+                      },
+                      "points": [
+                        {
+                          "x": 490,
+                          "y": 470
+                        },
+                        {
+                          "x": 300,
+                          "y": 470
+                        }
+                      ]
+                    },
+                    {
+                      "_type": "UMLSeqMessageView",
+                      "_id": "AAAAAAGUSeq_ViewMsg_12=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_SequenceDiagram1="
+                      },
+                      "model": {
+                        "$ref": "AAAAAAGUSeq_Msg12="
+                      },
+                      "tailView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineMainScreen="
+                      },
+                      "headView": {
+                        "$ref": "AAAAAAGUSeq_ViewLineDocGia="
+                      },
+                      "points": [
+                        {
+                          "x": 300,
+                          "y": 500
+                        },
+                        {
+                          "x": 140,
+                          "y": 500
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "participants": [
+                {
+                  "_type": "UMLLifeline",
+                  "_id": "AAAAAAGUSeq_LineDocGia=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Đọc Giả",
+                  "represent": {
+                    "$ref": "AAAAAAGUAct_ActorDocGia="
+                  },
+                  "isMultiInstance": false
+                },
+                {
+                  "_type": "UMLLifeline",
+                  "_id": "AAAAAAGUSeq_LineMainScreen=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Màn hình chính",
+                  "isMultiInstance": false
+                },
+                {
+                  "_type": "UMLLifeline",
+                  "_id": "AAAAAAGUSeq_LineLoginScreen=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Màn hình đăng nhập",
+                  "isMultiInstance": false
+                },
+                {
+                  "_type": "UMLLifeline",
+                  "_id": "AAAAAAGUSeq_LineController=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Xử lý",
+                  "isMultiInstance": false
+                },
+                {
+                  "_type": "UMLLifeline",
+                  "_id": "AAAAAAGUSeq_LineDatabase=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "CSDL",
+                  "isMultiInstance": false
+                }
+              ],
+              "messages": [
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg1=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Chọn chức năng ĐN",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineDocGia="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineMainScreen="
+                  },
+                  "messageSort": "synchCall",
+                  "messageNumber": "1"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg2=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Mở trang đăng nhập",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineMainScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "messageSort": "synchCall",
+                  "messageNumber": "2"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg3=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Hiển thị màn hình đăng nhập",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineDocGia="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "3"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg4=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Nhập thông tin ND",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineDocGia="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "messageSort": "synchCall",
+                  "messageNumber": "4"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg5=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Kiểm tra thông tin",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineController="
+                  },
+                  "messageSort": "synchCall",
+                  "messageNumber": "5"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg6=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Kiểm tra dl ND",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineController="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineDatabase="
+                  },
+                  "messageSort": "synchCall",
+                  "messageNumber": "6"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg7=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Kết quả kiểm tra ND",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineDatabase="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineController="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "7"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg8=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Thông báo lỗi đăng nhập",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineController="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "8"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg9=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Hiển thị thông báo",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineDocGia="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "9"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg10=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Thông báo đăng nhập thành công",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineController="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "10"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg11=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Hiển thị màn hình chính HT",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineLoginScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineMainScreen="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "11"
+                },
+                {
+                  "_type": "UMLMessage",
+                  "_id": "AAAAAAGUSeq_Msg12=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Hiển thị thông báo ĐN thành công",
+                  "source": {
+                    "$ref": "AAAAAAGUSeq_LineMainScreen="
+                  },
+                  "target": {
+                    "$ref": "AAAAAAGUSeq_LineDocGia="
+                  },
+                  "messageSort": "reply",
+                  "messageNumber": "12"
+                }
+              ],
+              "fragments": [
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "AAAAAAGUSeq_FragLoop=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "Đăng nhập",
+                  "interactionOperator": "loop",
+                  "operands": [
+                    {
+                      "_type": "UMLInteractionOperand",
+                      "_id": "AAAAAAGUSeq_OperandLoop=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_FragLoop="
+                      },
+                      "name": "operand",
+                      "guard": "Đăng nhập"
+                    }
+                  ]
+                },
+                {
+                  "_type": "UMLCombinedFragment",
+                  "_id": "AAAAAAGUSeq_FragAlt=",
+                  "_parent": {
+                    "$ref": "AAAAAAGUSeq_Interaction="
+                  },
+                  "name": "CombinedFragment1",
+                  "interactionOperator": "alt",
+                  "operands": [
+                    {
+                      "_type": "UMLInteractionOperand",
+                      "_id": "AAAAAAGUSeq_OperandFail=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_FragAlt="
+                      },
+                      "name": "Đăng nhập thất bại",
+                      "guard": "Đăng nhập thất bại"
+                    },
+                    {
+                      "_type": "UMLInteractionOperand",
+                      "_id": "AAAAAAGUSeq_OperandSuccess=",
+                      "_parent": {
+                        "$ref": "AAAAAAGUSeq_FragAlt="
+                      },
+                      "name": "Đăng nhập thành công",
+                      "guard": "Đăng nhập thành công"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
