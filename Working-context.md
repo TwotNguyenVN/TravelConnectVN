@@ -211,3 +211,9 @@ Dự án **TravelConnect VN** là nền tảng kết nối khách du lịch vớ
   - Đồng bộ hóa trạng thái thanh toán từ `'partially_paid'` thành `'payment_pending'` trong `payments.service.ts` và `admin.service.ts` để đảm bảo tương thích với DB Check Constraints (tránh vi phạm ràng buộc dữ liệu gây rollback) và Frontend (hiển thị đúng badge và nút "Thanh toán tiếp").
   - Cập nhật logic `createPaymentUrl` trong `payments.service.ts` để tự động cập nhật các giao dịch `pending` cũ sang `cancelled` và cấp UUID mới làm `vnp_TxnRef` cho giao dịch thanh toán mới, khắc phục triệt để lỗi trùng mã giao dịch VNPay (mã lỗi `01`).
 
+### 2026-06-15 (UML Diagrams)
+- **Vẽ Activity Diagram & Sequence Diagram cho dự án**:
+  - Dựa trên hình ảnh tham khảo, xây dựng tệp tin mã nguồn StarUML (`diagrams.mdj`) hoàn chỉnh chứa Activity Diagram của quy trình mượn sách và Sequence Diagram của quy trình đăng nhập với đầy đủ các đối tượng, phân vùng (swimlanes), logic điều hướng (Fork/Join, Decisions) và các luồng phản hồi (Combined Fragments).
+  - Lưu tệp mã nguồn vào vị trí chính thức trong dự án và thực hiện commit, push lên repository từ xa.
+
+
