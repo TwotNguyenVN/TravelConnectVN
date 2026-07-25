@@ -1,0 +1,3 @@
+*-lock.json linguist-generated=true
+database/schema/*.sql linguist-generated=true
+frontend/public/**/*.png linguist-generated=true
