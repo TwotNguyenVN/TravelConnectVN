@@ -32,18 +32,18 @@ Hệ thống được thiết kế nguyên khối (Monolith) nhưng áp dụng n
 - **Hệ Thống Chat Thời Gian Thực:** Giao tiếp trực tiếp giữa Khách và HDV qua WebSockets, hỗ trợ gửi ảnh/file.
 - **Đa Ngôn Ngữ (i18n):** Hỗ trợ toàn diện Tiếng Việt và Tiếng Anh để mở rộng tệp khách hàng quốc tế.
 - **Xử Lý Khiếu Nại Công Bằng:** Chức năng Report/Dispute với sự tham gia của Support Staff làm trọng tài.
-- **Thanh Toán Điện Tử:** Tích hợp Payment Gateway (VNPAY/Momo) tự động hóa dòng tiền.
+- **Thanh Toán Điện Tử:** Tích hợp VNPAY (ký HMAC-SHA512, xác thực IPN phía server, đối soát số tiền).
 
 ---
 
 ## 🛠️ Tech Stack (Công nghệ sử dụng)
 
 ### Frontend (Khách hàng & Hướng dẫn viên)
-- **Framework:** React 18 với Vite (Nhanh, nhẹ, hỗ trợ HMR tốt).
+- **Framework:** React 19 với Vite (Nhanh, nhẹ, hỗ trợ HMR tốt).
 - **Ngôn ngữ:** TypeScript.
-- **Styling:** Tailwind CSS + Radix UI / Shadcn (Giao diện hiện đại, Accessibility cao).
+- **Styling:** CSS thuần theo module, icon dùng lucide-react.
 - **Quản lý trạng thái:** Zustand / React Query.
-- **Bản đồ:** React Leaflet / Mapbox.
+- **Bản đồ:** React Leaflet.
 
 ### Backend & API
 - **Framework:** NestJS (Node.js).
